@@ -24,8 +24,19 @@
     "engines": {
         "vscode": "0.10.x"
     },
-    "contributes": {},
-    "scripts": {},
-    "dependencies": {},
-    "devDependencies": {}
+    "contributes": {
+        "languages": [{
+            "id": "bsl",
+            "extensions": [ ".bsl", ".os" ],
+            "aliases": [ "1C", "BSL" ]
+        }],
+        "grammars": [{
+            "language": "bsl",
+            "scopeName": "source.bsl",
+            "path": "./1c.tmLanguage"
+        }]
+    },
+    "activationEvents": [
+        "onLanguage:bsl"
+    ],
 }
