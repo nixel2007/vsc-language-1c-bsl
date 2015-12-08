@@ -1,0 +1,31 @@
+{
+    "name": "language-1c-bsl",
+    "displayName": "Language 1C (BSL)",
+    "description": "Syntax highlighting for 1C:Enterpise 8.",
+    "icon": "images/xDDIcon.jpg",
+    "version": "1.0.0",
+    "publisher": "xDrivenDevelopment",
+    "galleryBanner": {
+        "color": "#0000FF",
+        "theme": "dark"
+    },
+    "license": "LICENSE.md",
+    "bugs": {
+        "url": "https://github.com/xDrivenDevelopment/vsc-language-1c-bsl/issues"
+    },
+    "homepage": "https://github.com/xDrivenDevelopment/vsc-language-1c-bsl/blob/master/README.md",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/xDrivenDevelopment/vsc-language-1c-bsl.git"
+    },
+    "categories": [
+        "Languages"
+    ],
+    "engines": {
+        "vscode": "0.10.x"
+    },
+    "contributes": {},
+    "scripts": {},
+    "dependencies": {},
+    "devDependencies": {}
+}
