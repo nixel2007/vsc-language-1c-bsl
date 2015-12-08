@@ -6,8 +6,7 @@
 
 Сотрудничество крайне приветствуется. Разработка грамматик ведется в родительском репозитории [xDrivenDevelopment/1c-syntax](https://github.com/xDrivenDevelopment/1c-syntax).
 
-Лицензия
-========
+###Лицензия
 
 [MIT](https://github.com/xDrivenDevelopment/vsc-language-1c-bsl/blob/master/LICENSE.md)
 
@@ -17,8 +16,7 @@ Adds syntax highlighting to \*.bsl и \*.os files in VSC.
 
 Contributions are greatly appreciated. Development is carried in a parent repository [xDrivenDevelopment/1c-syntax](https://github.com/xDrivenDevelopment/1c-syntax)
 
-License
-=======
+###License
 
 [MIT](https://github.com/xDrivenDevelopment/vsc-language-1c-bsl/blob/master/LICENSE.md)
 
