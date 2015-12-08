@@ -33,10 +33,7 @@
         "grammars": [{
             "language": "bsl",
             "scopeName": "source.bsl",
-            "path": "./1c.tmLanguage"
+            "path": "./syntaxes/s1c.tmLanguage"
         }]
-    },
-    "activationEvents": [
-        "onLanguage:bsl"
-    ]
+    }
 }
