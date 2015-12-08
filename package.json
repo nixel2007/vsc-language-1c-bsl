@@ -33,7 +33,7 @@
         "grammars": [{
             "language": "bsl",
             "scopeName": "source.bsl",
-            "path": "./syntaxes/s1c.tmLanguage"
+            "path": "./syntaxes/1c.tmLanguage"
         }]
     }
 }
