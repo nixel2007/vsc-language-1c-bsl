@@ -8,7 +8,7 @@
 
 ###Установка
 
-[Wiki](https://github.com/xDrivenDevelopment/vsc-language-1c-bsl/wiki/Installation)
+[Wiki](https://github.com/xDrivenDevelopment/vsc-language-1c-bsl/wiki/%D0%A3%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0-%D0%BF%D0%B0%D0%BA%D0%B5%D1%82%D0%B0)
 
 ###Лицензия
 
@@ -22,7 +22,7 @@ Contributions are greatly appreciated. Development is carried in a parent reposi
 
 ###Installation
 
-[Wiki](#)
+[Wiki](https://github.com/xDrivenDevelopment/vsc-language-1c-bsl/wiki/Installation)
 
 ###License
 
