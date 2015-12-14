@@ -204,7 +204,7 @@
       </dict>
       <dict>
         <key>name</key>
-        <string>meta.preprocessor.bsl</string>
+        <string>keyword.other.preprocessor.bsl</string>
         <key>match</key>
         <string>(?i:#(Если|ИначеЕсли|Иначе|КонецЕсли).*(Тогда)?)</string>
       </dict>
