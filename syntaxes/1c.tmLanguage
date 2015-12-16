@@ -38,7 +38,7 @@
         <array>
           <dict>
             <key>match</key>
-            <string/>
+            <string>\"\"</string>
           </dict>
           <dict>
             <key>name</key>
@@ -50,7 +50,7 @@
         <key>comment</key>
         <string>Proc and function defenition</string>
         <key>begin</key>
-        <string>(?i:(Процедура|Функция)\s+([a-zа-я0-9_]+)\s*\()</string>
+        <string>(?i:(Процедура|Procedure|Функция|Function)\s+([a-zа-я0-9_]+)\s*\()</string>
         <key>beginCaptures</key>
         <dict>
           <key>1</key>
@@ -65,7 +65,7 @@
           </dict>
         </dict>
         <key>end</key>
-        <string>(?i:\)\s+(Экспорт)?)</string>
+        <string>(?i:\)\s+(Экспорт|Export)?)</string>
         <key>endCaptures</key>
         <dict>
           <key>1</key>
@@ -84,7 +84,7 @@
             <key>name</key>
             <string>storage.modifier.bsl</string>
             <key>match</key>
-            <string>(?i:\bЗнач\b)</string>
+            <string>(?i:\b(Знач|Val)\b)</string>
           </dict>
           <dict>
             <key>name</key>
@@ -110,7 +110,7 @@
         <key>name</key>
         <string>constant.language.bsl</string>
         <key>match</key>
-        <string>(?i:\b(Неопределено|Истина|Ложь|NULL)\b)</string>
+        <string>(?i:\b(Неопределено|Undefined|Истина|True|Ложь|False|NULL)\b)</string>
       </dict>
       <dict>
         <key>name</key>
@@ -128,43 +128,43 @@
         <key>name</key>
         <string>storage.type.bsl</string>
         <key>match</key>
-        <string>(?i:\b(КонецПроцедуры|КонецФункции)\b)</string>
+        <string>(?i:\b(КонецПроцедуры|EndProcedure|КонецФункции|EndFunction)\b)</string>
       </dict>
       <dict>
         <key>name</key>
         <string>keyword.control.import.bsl</string>
         <key>match</key>
-        <string>\#Использовать\b</string>
+        <string>\#(Использовать|Use)\b</string>
       </dict>
       <dict>
         <key>name</key>
         <string>keyword.control.bsl</string>
         <key>match</key>
-        <string>(?i:\b(Прервать|Продолжить|Возврат)\b)</string>
+        <string>(?i:\b(Прервать|Break|Продолжить|Continue|Возврат|Return)\b)</string>
       </dict>
       <dict>
         <key>name</key>
         <string>keyword.control.conditional.bsl</string>
         <key>match</key>
-        <string>(?i:\b(Если|Иначе|ИначеЕсли|Тогда|КонецЕсли)\b)</string>
+        <string>(?i:\b(Если|If|Иначе|Else|ИначеЕсли|ElsIf|Тогда|Then|КонецЕсли|EndIf)\b)</string>
       </dict>
       <dict>
         <key>name</key>
         <string>keyword.control.exception.bsl</string>
         <key>match</key>
-        <string>(?i:\b(Попытка|Исключение|КонецПопытки|ВызватьИсключение)\b)</string>
+        <string>(?i:\b(Попытка|Try|Исключение|Except|КонецПопытки|EndTry|ВызватьИсключение|Raise)\b)</string>
       </dict>
       <dict>
         <key>name</key>
         <string>keyword.control.repeat.bsl</string>
         <key>match</key>
-        <string>(?i:\b(Пока|Для (Каждого)?|Из|По|Цикл|КонецЦикла)\b)</string>
+        <string>(?i:\b(Пока|While|(Для|For) (Каждого|Each)?|Из|In|По|To|Цикл|Do|КонецЦикла|EndDo)\b)</string>
       </dict>
       <dict>
         <key>name</key>
         <string>keyword.operator.logical.bsl</string>
         <key>match</key>
-        <string>(?i:\b(НЕ|И|ИЛИ)\b)</string>
+        <string>(?i:\b(НЕ|NOT|И|AND|ИЛИ|OR)\b)</string>
       </dict>
       <dict>
         <key>name</key>
@@ -188,7 +188,7 @@
         <key>name</key>
         <string>keyword.operator.bsl</string>
         <key>match</key>
-        <string>(,|;|\?)|(?i:(\b(Перем|Новый)\b))</string>
+        <string>(,|;|\?)|(?i:(\b(Перем|Var|Новый|New)\b))</string>
       </dict>
       <dict>
         <key>name</key>
@@ -200,13 +200,13 @@
         <key>name</key>
         <string>storage.modifier.bsl</string>
         <key>match</key>
-        <string>(?i:&amp;(НаКлиенте|НаСервере|НаСервереБезКонтекста|НаКлиентеНаСервереБезКонтекста|НаКлиентеНаСервере))</string>
+        <string>(?i:&amp;(НаКлиенте|AtClient|НаСервере|AtServer|НаСервереБезКонтекста|AtServerNoContext|НаКлиентеНаСервереБезКонтекста|AtClientAtServerNoContext|НаКлиентеНаСервере|AtClientAtServer))</string>
       </dict>
       <dict>
         <key>name</key>
         <string>keyword.other.preprocessor.bsl</string>
         <key>match</key>
-        <string>(?i:#(Если|ИначеЕсли|Иначе|КонецЕсли).*(Тогда)?)</string>
+        <string>(?i:#(Если|If|ИначеЕсли|ElsIf|Иначе|Else|КонецЕсли|EndIf).*(Тогда|Then)?)</string>
       </dict>
     </array>
   </dict>
