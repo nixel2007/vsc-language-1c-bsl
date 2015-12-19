@@ -50,7 +50,7 @@
         <key>comment</key>
         <string>Proc and function defenition</string>
         <key>begin</key>
-        <string>(?i:(Процедура|Procedure|Функция|Function)\s+([a-zа-я0-9_]+)\s*\()</string>
+        <string>(?i:(?&lt;=[^\wа-ё]|^)(Процедура|Procedure|Функция|Function)\s+([a-zа-я0-9_]+)\s*\()</string>
         <key>beginCaptures</key>
         <dict>
           <key>1</key>
@@ -65,7 +65,7 @@
           </dict>
         </dict>
         <key>end</key>
-        <string>(?i:\)\s+(Экспорт|Export)?)</string>
+        <string>(?i:\)\s+((Экспорт|Export)(?=[^\wа-ё]|$))?)</string>
         <key>endCaptures</key>
         <dict>
           <key>1</key>
@@ -84,19 +84,19 @@
             <key>name</key>
             <string>storage.modifier.bsl</string>
             <key>match</key>
-            <string>(?i:\b(Знач|Val)\b)</string>
+            <string>(?i:(?&lt;=[^\wа-ё]|^)(Знач|Val)(?=[^\wа-ё]|$))</string>
           </dict>
           <dict>
             <key>name</key>
             <string>invalid.illegal.bsl</string>
             <key>match</key>
-            <string>\b((?&lt;==)(?i)[a-zа-я0-9_]*)\b</string>
+            <string>(?&lt;=[^\wа-ё]|^)((?&lt;==)(?i)[a-zа-я0-9_]*)(?=[^\wа-ё]|$)</string>
           </dict>
           <dict>
             <key>name</key>
             <string>invalid.illegal.bsl</string>
             <key>match</key>
-            <string>\b((?&lt;== )(?i)[a-zа-я0-9_]*)\b</string>
+            <string>(?&lt;=[^\wа-ё]|^)((?&lt;== )(?i)[a-zа-я0-9_]*)(?=[^\wа-ё]|$)</string>
           </dict>
           <dict>
             <key>name</key>
@@ -110,7 +110,7 @@
         <key>comment</key>
         <string>Define of variable</string>
         <key>begin</key>
-        <string>(?i:(Перем|Var)\s+[a-zа-я0-9_]+\s*)</string>
+        <string>(?i:(?&lt;=[^\wа-ё]|^)(Перем|Var)\s+[a-zа-я0-9_]+\s*)</string>
         <key>beginCaptures</key>
         <dict>
           <key>1</key>
@@ -134,13 +134,13 @@
         <key>name</key>
         <string>constant.language.bsl</string>
         <key>match</key>
-        <string>(?i:\b(Неопределено|Undefined|Истина|True|Ложь|False|NULL)\b)</string>
+        <string>(?i:(?&lt;=[^\wа-ё]|^)(Неопределено|Undefined|Истина|True|Ложь|False|NULL)(?=[^\wа-ё]|$))</string>
       </dict>
       <dict>
         <key>name</key>
         <string>constant.numeric.bsl</string>
         <key>match</key>
-        <string>\b((\h{8}-(\h{4}-){3}\h{12})|\d+\.?\d*)\b</string>
+        <string>\b((\h{8}-(\h{4}-){3}\h{12})|\d+\.?\d*)(?=[^\wа-ё]|$)</string>
       </dict>
       <dict>
         <key>name</key>
@@ -152,43 +152,43 @@
         <key>name</key>
         <string>storage.type.bsl</string>
         <key>match</key>
-        <string>(?i:\b(КонецПроцедуры|EndProcedure|КонецФункции|EndFunction)\b)</string>
+        <string>(?i:(?&lt;=[^\wа-ё]|^)(КонецПроцедуры|EndProcedure|КонецФункции|EndFunction)(?=[^\wа-ё]|$))</string>
       </dict>
       <dict>
         <key>name</key>
         <string>keyword.control.import.bsl</string>
         <key>match</key>
-        <string>\#(Использовать|Use)\b</string>
+        <string>\#(Использовать|Use)(?=[^\wа-ё]|$)</string>
       </dict>
       <dict>
         <key>name</key>
         <string>keyword.control.bsl</string>
         <key>match</key>
-        <string>(?i:\b(Прервать|Break|Продолжить|Continue|Возврат|Return)\b)</string>
+        <string>(?i:(?&lt;=[^\wа-ё]|^)(Прервать|Break|Продолжить|Continue|Возврат|Return)(?=[^\wа-ё]|$))</string>
       </dict>
       <dict>
         <key>name</key>
         <string>keyword.control.conditional.bsl</string>
         <key>match</key>
-        <string>(?i:\b(Если|If|Иначе|Else|ИначеЕсли|ElsIf|Тогда|Then|КонецЕсли|EndIf)\b)</string>
+        <string>(?i:(?&lt;=[^\wа-ё]|^)(Если|If|Иначе|Else|ИначеЕсли|ElsIf|Тогда|Then|КонецЕсли|EndIf)(?=[^\wа-ё]|$))</string>
       </dict>
       <dict>
         <key>name</key>
         <string>keyword.control.exception.bsl</string>
         <key>match</key>
-        <string>(?i:\b(Попытка|Try|Исключение|Except|КонецПопытки|EndTry|ВызватьИсключение|Raise)\b)</string>
+        <string>(?i:(?&lt;=[^\wа-ё]|^)(Попытка|Try|Исключение|Except|КонецПопытки|EndTry|ВызватьИсключение|Raise)(?=[^\wа-ё]|$))</string>
       </dict>
       <dict>
         <key>name</key>
         <string>keyword.control.repeat.bsl</string>
         <key>match</key>
-        <string>(?i:\b(Пока|While|(Для|For) (Каждого|Each)?|Из|In|По|To|Цикл|Do|КонецЦикла|EndDo)\b)</string>
+        <string>(?i:(?&lt;=[^\wа-ё]|^)(Пока|While|(Для|For) (Каждого|Each)?|Из|In|По|To|Цикл|Do|КонецЦикла|EndDo)(?=[^\wа-ё]|$))</string>
       </dict>
       <dict>
         <key>name</key>
         <string>keyword.operator.logical.bsl</string>
         <key>match</key>
-        <string>(?i:\b(НЕ|NOT|И|AND|ИЛИ|OR)\b)</string>
+        <string>(?i:(?&lt;=[^\wа-ё]|^)(НЕ|NOT|И|AND|ИЛИ|OR)(?=[^\wа-ё]|$))</string>
       </dict>
       <dict>
         <key>name</key>
@@ -220,7 +220,7 @@
         <key>comment</key>
         <string>Functions w/o brackets</string>
         <key>match</key>
-        <string>(?i:\b(Новый|New)\b)</string>
+        <string>(?i:(?&lt;=[^\wа-ё]|^)(Новый|New)(?=[^\wа-ё]|$))</string>
       </dict>
       <dict>
         <key>name</key>
