@@ -1,7 +1,7 @@
 {
     "name": "language-1c-bsl",
     "displayName": "Language 1C (BSL)",
-    "description": "Syntax highlighting for 1C:Enterpise 8.",
+    "description": "Syntax highlighting for 1C:Enterprise 8.",
     "icon": "images/xDDIcon.png",
     "version": "1.0.4",
     "publisher": "xDrivenDevelopment",
