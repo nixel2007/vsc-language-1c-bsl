@@ -50,7 +50,7 @@
         <key>comment</key>
         <string>Proc and function defenition</string>
         <key>begin</key>
-        <string>(?i:(?&lt;=[^\wа-ё]|^)(Процедура|Procedure|Функция|Function)\s+([a-zа-я0-9_]+)\s*\()</string>
+        <string>(?i:(?&lt;=[^\wа-яё]|^)(Процедура|Procedure|Функция|Function)\s+([a-zа-яё0-9_]+)\s*\()</string>
         <key>beginCaptures</key>
         <dict>
           <key>1</key>
@@ -65,7 +65,7 @@
           </dict>
         </dict>
         <key>end</key>
-        <string>(?i:\)\s+((Экспорт|Export)(?=[^\wа-ё]|$))?)</string>
+        <string>(?i:\)\s+((Экспорт|Export)(?=[^\wа-яё]|$))?)</string>
         <key>endCaptures</key>
         <dict>
           <key>1</key>
@@ -84,25 +84,25 @@
             <key>name</key>
             <string>storage.modifier.bsl</string>
             <key>match</key>
-            <string>(?i:(?&lt;=[^\wа-ё]|^)(Знач|Val)(?=[^\wа-ё]|$))</string>
+            <string>(?i:(?&lt;=[^\wа-яё]|^)(Знач|Val)(?=[^\wа-яё]|$))</string>
           </dict>
           <dict>
             <key>name</key>
             <string>invalid.illegal.bsl</string>
             <key>match</key>
-            <string>(?&lt;=[^\wа-ё]|^)((?&lt;==)(?i)[a-zа-я0-9_]*)(?=[^\wа-ё]|$)</string>
+            <string>(?&lt;=[^\wа-яё]|^)((?&lt;==)(?i)[a-zа-яё0-9_]+)(?=[^\wа-яё]|$)</string>
           </dict>
           <dict>
             <key>name</key>
             <string>invalid.illegal.bsl</string>
             <key>match</key>
-            <string>(?&lt;=[^\wа-ё]|^)((?&lt;== )(?i)[a-zа-я0-9_]*)(?=[^\wа-ё]|$)</string>
+            <string>(?&lt;=[^\wа-яё]|^)((?&lt;==\s)\s*(?i)[a-zа-яё0-9_]+)(?=[^\wа-яё]|$)</string>
           </dict>
           <dict>
             <key>name</key>
             <string>variable.parameter.bsl</string>
             <key>match</key>
-            <string>(?i:[a-zа-я0-9_]+)</string>
+            <string>(?i:[a-zа-яё0-9_]+)</string>
           </dict>
         </array>
       </dict>
@@ -110,7 +110,7 @@
         <key>comment</key>
         <string>Define of variable</string>
         <key>begin</key>
-        <string>(?i:(?&lt;=[^\wа-ё]|^)(Перем|Var)\s+[a-zа-я0-9_]+\s*)</string>
+        <string>(?i:(?&lt;=[^\wа-яё]|^)(Перем|Var)\s+[a-zа-яё0-9_]+\s*)</string>
         <key>beginCaptures</key>
         <dict>
           <key>1</key>
@@ -134,13 +134,13 @@
         <key>name</key>
         <string>constant.language.bsl</string>
         <key>match</key>
-        <string>(?i:(?&lt;=[^\wа-ё]|^)(Неопределено|Undefined|Истина|True|Ложь|False|NULL)(?=[^\wа-ё]|$))</string>
+        <string>(?i:(?&lt;=[^\wа-яё]|^)(Неопределено|Undefined|Истина|True|Ложь|False|NULL)(?=[^\wа-яё]|$))</string>
       </dict>
       <dict>
         <key>name</key>
         <string>constant.numeric.bsl</string>
         <key>match</key>
-        <string>\b((\h{8}-(\h{4}-){3}\h{12})|\d+\.?\d*)(?=[^\wа-ё]|$)</string>
+        <string>\b((\h{8}-(\h{4}-){3}\h{12})|\d+\.?\d*)\b</string>
       </dict>
       <dict>
         <key>name</key>
@@ -152,43 +152,43 @@
         <key>name</key>
         <string>storage.type.bsl</string>
         <key>match</key>
-        <string>(?i:(?&lt;=[^\wа-ё]|^)(КонецПроцедуры|EndProcedure|КонецФункции|EndFunction)(?=[^\wа-ё]|$))</string>
+        <string>(?i:(?&lt;=[^\wа-яё]|^)(КонецПроцедуры|EndProcedure|КонецФункции|EndFunction)(?=[^\wа-яё]|$))</string>
       </dict>
       <dict>
         <key>name</key>
         <string>keyword.control.import.bsl</string>
         <key>match</key>
-        <string>\#(Использовать|Use)(?=[^\wа-ё]|$)</string>
+        <string>\#(Использовать|Use)(?=[^\wа-яё]|$)</string>
       </dict>
       <dict>
         <key>name</key>
         <string>keyword.control.bsl</string>
         <key>match</key>
-        <string>(?i:(?&lt;=[^\wа-ё]|^)(Прервать|Break|Продолжить|Continue|Возврат|Return)(?=[^\wа-ё]|$))</string>
+        <string>(?i:(?&lt;=[^\wа-яё]|^)(Прервать|Break|Продолжить|Continue|Возврат|Return)(?=[^\wа-яё]|$))</string>
       </dict>
       <dict>
         <key>name</key>
         <string>keyword.control.conditional.bsl</string>
         <key>match</key>
-        <string>(?i:(?&lt;=[^\wа-ё]|^)(Если|If|Иначе|Else|ИначеЕсли|ElsIf|Тогда|Then|КонецЕсли|EndIf)(?=[^\wа-ё]|$))</string>
+        <string>(?i:(?&lt;=[^\wа-яё]|^)(Если|If|Иначе|Else|ИначеЕсли|ElsIf|Тогда|Then|КонецЕсли|EndIf)(?=[^\wа-яё]|$))</string>
       </dict>
       <dict>
         <key>name</key>
         <string>keyword.control.exception.bsl</string>
         <key>match</key>
-        <string>(?i:(?&lt;=[^\wа-ё]|^)(Попытка|Try|Исключение|Except|КонецПопытки|EndTry|ВызватьИсключение|Raise)(?=[^\wа-ё]|$))</string>
+        <string>(?i:(?&lt;=[^\wа-яё]|^)(Попытка|Try|Исключение|Except|КонецПопытки|EndTry|ВызватьИсключение|Raise)(?=[^\wа-яё]|$))</string>
       </dict>
       <dict>
         <key>name</key>
         <string>keyword.control.repeat.bsl</string>
         <key>match</key>
-        <string>(?i:(?&lt;=[^\wа-ё]|^)(Пока|While|(Для|For) (Каждого|Each)?|Из|In|По|To|Цикл|Do|КонецЦикла|EndDo)(?=[^\wа-ё]|$))</string>
+        <string>(?i:(?&lt;=[^\wа-яё]|^)(Пока|While|(Для|For) (Каждого|Each)?|Из|In|По|To|Цикл|Do|КонецЦикла|EndDo)(?=[^\wа-яё]|$))</string>
       </dict>
       <dict>
         <key>name</key>
         <string>keyword.operator.logical.bsl</string>
         <key>match</key>
-        <string>(?i:(?&lt;=[^\wа-ё]|^)(НЕ|NOT|И|AND|ИЛИ|OR)(?=[^\wа-ё]|$))</string>
+        <string>(?i:(?&lt;=[^\wа-яё]|^)(НЕ|NOT|И|AND|ИЛИ|OR)(?=[^\wа-яё]|$))</string>
       </dict>
       <dict>
         <key>name</key>
@@ -220,7 +220,7 @@
         <key>comment</key>
         <string>Functions w/o brackets</string>
         <key>match</key>
-        <string>(?i:(?&lt;=[^\wа-ё]|^)(Новый|New)(?=[^\wа-ё]|$))</string>
+        <string>(?i:(?&lt;=[^\wа-яё]|^)(Новый|New)(?=[^\wа-яё]|$))</string>
       </dict>
       <dict>
         <key>name</key>
@@ -228,13 +228,13 @@
         <key>comment</key>
         <string>Functions w/ brackets</string>
         <key>match</key>
-        <string>(^|\s)(?i:(ACos|ACos|ASin|ASin|ATan|ATan|Cos|Cos|Exp|Exp|Log|Log|Log10|Log10|Pow|Pow|Sin|Sin|Sqrt|Sqrt|Tan|Tan|Булево|Boolean|ВРег|Upper|Вычислить|Eval|Выполнить|Execute|Год|Year|Дата|Date|День|Day|ДеньГода|DayOfYear|ДеньНедели|WeekDay|ДобавитьМесяц|AddMonth|ИнформацияОбОшибке|ErrorInfo|КодСимвола|CharCode|КонецГода|EndOfYear|КонецДня|EndOfDay|КонецКвартала|EndOfQuarter|КонецМесяца|EndOfMonth|КонецМинуты|EndOfMinute|КонецНедели|EndOfWeek|КонецЧаса|EndOfHour|Лев|Left|Макс|Max|Месяц|Month|Мин|Min|Минута|Minute|Найти|Find|НачалоГода|BegOfYear|НачалоДня|BegOfDay|НачалоКвартала|BegOfQuarter|НачалоМесяца|BegOfMonth|НачалоМинуты|BegOfMinute|НачалоНедели|BegOfWeek|НачалоЧаса|BegOfHour|НеделяГода|WeekOfYear|НРег|Lower|Окр|Round|ОписаниеОшибки|ErrorDescription|Прав|Right|ПустаяСтрока|IsBlankString|Секунда|Second|Символ|Char|СокрЛ|TrimL|СокрЛП|TrimAll|СокрП|TrimR|Сред|Mid|СтрДлина|StrLen|СтрЗаменить|StrReplace|Строка|String|СтрПолучитьСтроку|StrGetLine|СтрЧислоВхождений|StrOccurrenceCount|СтрЧислоСтрок|StrLineCount|ТекущаяДата|CurrentDate|Тип|Type|ТипЗнч|TypeOf|ТРег|Title|Формат|Format|Цел|Int|Час|Hour|Число|Number))\s*(?=\()</string>
+        <string>(^|\s)(?i:(ACos|ACos|ASin|ASin|ATan|ATan|Cos|Cos|Exp|Exp|Log|Log|Log10|Log10|Pow|Pow|Sin|Sin|Sqrt|Sqrt|Tan|Tan|Булево|Boolean|ВРег|Upper|Вычислить|Eval|Выполнить|Execute|Год|Year|Дата|Date|День|Day|ДеньГода|DayOfYear|ДеньНедели|WeekDay|ДобавитьМесяц|AddMonth|ИнформацияОбОшибке|ErrorInfo|КодСимвола|CharCode|КонецГода|EndOfYear|КонецДня|EndOfDay|КонецКвартала|EndOfQuarter|КонецМесяца|EndOfMonth|КонецМинуты|EndOfMinute|КонецНедели|EndOfWeek|КонецЧаса|EndOfHour|Лев|Left|Макс|Max|Месяц|Month|Мин|Min|Минута|Minute|Найти|Find|НачалоГода|BegOfYear|НачалоДня|BegOfDay|НачалоКвартала|BegOfQuarter|НачалоМесяца|BegOfMonth|НачалоМинуты|BegOfMinute|НачалоНедели|BegOfWeek|НачалоЧаса|BegOfHour|НеделяГода|WeekOfYear|НРег|Lower|Окр|Round|ОписаниеОшибки|ErrorDescription|Прав|Right|ПустаяСтрока|IsBlankString|Секунда|Second|Символ|Char|СокрЛ|TrimL|СокрЛП|TrimAll|СокрП|TrimR|Сред|Mid|СтрДлина|StrLen|СтрЗаканчиваетсяНа|StrEndsWith|СтрЗаменить|StrReplace|СтрНайти|StrFind|СтрНачинаетсяС|StrStartWith|Строка|String|СтрПолучитьСтроку|StrGetLine|СтрРазделить|StrSplit|СтрСоединить|StrConcat|СтрСравнить|StrCompare|СтрЧислоВхождений|StrOccurrenceCount|СтрЧислоСтрок|StrLineCount|СтрШаблон|StrTemplate|ТекущаяДата|CurrentDate|Тип|Type|ТипЗнч|TypeOf|ТРег|Title|Формат|Format|Цел|Int|Час|Hour|Число|Number))\s*(?=\()</string>
       </dict>
       <dict>
         <key>name</key>
         <string>storage.modifier.bsl</string>
         <key>match</key>
-        <string>(?i:&amp;(НаКлиенте|AtClient|НаСервере|AtServer|НаСервереБезКонтекста|AtServerNoContext|НаКлиентеНаСервереБезКонтекста|AtClientAtServerNoContext|НаКлиентеНаСервере|AtClientAtServer))</string>
+        <string>(?i:&amp;(НаКлиенте((НаСервере(БезКонтекста)?)?)|AtClient((AtServer(NoContext)?)?)|НаСервере(БезКонтекста)?|AtServer(NoContext)?))</string>
       </dict>
       <dict>
         <key>name</key>
