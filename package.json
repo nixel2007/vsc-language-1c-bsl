@@ -28,7 +28,8 @@
         "languages": [{
             "id": "bsl",
             "extensions": [ ".bsl", ".os" ],
-            "aliases": [ "1C (BSL)", "BSL" ]
+            "aliases": [ "1C (BSL)", "BSL" ],
+            "configuration": "./bsl.configuration.json"
         }],
         "grammars": [{
             "language": "bsl",
