@@ -19,17 +19,11 @@
         <key>name</key>
         <string>comment.line.double-slash.bsl</string>
         <key>match</key>
-        <string>(//.*\n)</string>
+        <string>(//.*$)</string>
       </dict>
       <dict>
         <key>name</key>
         <string>string.quoted.double.bsl</string>
-        <key>match</key>
-        <string>("[^"]*")</string>
-      </dict>
-      <dict>
-        <key>name</key>
-        <string>string.interpolated.bsl</string>
         <key>begin</key>
         <string>\"</string>
         <key>end</key>
