@@ -24,6 +24,10 @@
     "engines": {
         "vscode": "0.10.x"
     },
+    "main": "./extension",
+    "activationEvents": [
+        "onCommand:extension.addpipe"
+    ],
     "contributes": {
         "languages": [{
             "id": "bsl",
@@ -35,6 +39,11 @@
             "language": "bsl",
             "scopeName": "source.bsl",
             "path": "./syntaxes/1c.tmLanguage"
+        }],
+        "keybindings": [{
+            "key": "enter",
+            "command": "extension.addpipe",
+            "when": "editorTextFocus && editorLangId == 'bsl'"
         }]
     }
 }
