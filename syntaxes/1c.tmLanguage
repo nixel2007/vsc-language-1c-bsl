@@ -31,12 +31,16 @@
         <key>patterns</key>
         <array>
           <dict>
+            <key>name</key>
+            <string>constant.character.escape.bsl</string>
             <key>match</key>
             <string>\"\"</string>
           </dict>
           <dict>
             <key>name</key>
-            <string>constant.character.escape.bsl</string>
+            <string>comment.line.double-slash.bsl</string>
+            <key>match</key>
+            <string>(//.*$)</string>
           </dict>
         </array>
       </dict>
