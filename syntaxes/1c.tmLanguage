@@ -40,7 +40,7 @@
             <key>name</key>
             <string>comment.line.double-slash.bsl</string>
             <key>match</key>
-            <string>(//.*$)</string>
+            <string>(^\s*//.*$)</string>
           </dict>
         </array>
       </dict>
