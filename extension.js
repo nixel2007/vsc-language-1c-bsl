@@ -1,6 +1,6 @@
 var vscode = require('vscode');
 
-var BSLDocumentSymbolProvider = require('documentSymbolProvider');
+var BSLDocumentSymbolProvider = require('./documentSymbolProvider');
 
 function activate(context) {
     var disposable = vscode.commands.registerCommand('extension.addpipe', function () {
@@ -25,7 +25,7 @@ function activate(context) {
     });
     context.subscriptions.push(disposable);
     
-    disposable = vscode.languages.registerDocumentSymbolProvider("bsl", BSLDocumentSymbolProvider);
+    disposable = vscode.languages.registerDocumentSymbolProvider("bsl", BSLDocumentSymbolProvider.default());
     context.subscriptions.push(disposable);
 }
 exports.activate = activate;
