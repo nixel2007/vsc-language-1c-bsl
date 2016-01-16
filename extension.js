@@ -27,5 +27,9 @@ function activate(context) {
     
     disposable = vscode.languages.registerDocumentSymbolProvider("bsl", new providers.DocumentSymbolProvider());
     context.subscriptions.push(disposable);
+    
+    disposable = vscode.languages.registerDefinitionProvider("bsl", new providers.DefinitionProvider());
+    context.subscriptions.push(disposable);
+
 }
 exports.activate = activate;
