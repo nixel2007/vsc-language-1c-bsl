@@ -50,5 +50,6 @@ var BSLDocumentSymbolProvider = (function () {
 	};
 	return BSLDocumentSymbolProvider;
 })();
-exports.default = BSLDocumentSymbolProvider;
+
+exports.DocumentSymbolProvider = BSLDocumentSymbolProvider;
 //# sourceMappingURL=goOutline.js.map
