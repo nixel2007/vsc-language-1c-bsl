@@ -13,15 +13,15 @@ var BSLDocumentSymbolProvider = (function () {
 			var symbols = [];
 			var text = document.getText();
 			var KindToCodeKind = {
-				"variable" : /(перем|var)\s+([a-zа-яё_][a-zа-яё_0-9]*)/ig,
-				"function" : /(процедура|функция|procedure|function)\s+([a-zа-яё_][a-zа-яё_0-9]*)\s*\(/ig
+				"variable" : /(^|\s)(перем|var)\s+([a-zа-яё_][a-zа-яё_0-9]*)/ig,
+				"function" : /(^|\s)(процедура|функция|procedure|function)\s+([a-zа-яё_][a-zа-яё_0-9]*)\s*\(/ig
 			};
 			var ArrayKind = ["variable", "function"];
 			ArrayKind.forEach(function (Kind) {
 				var valueMatch = KindToCodeKind[Kind];
 				var match = null;
 				while (match = valueMatch.exec(text)) {
-					var word = match[2];
+					var word = match[3];
 					var indexWord = text.indexOf(match[0]) + match[0].indexOf(word);
 					var lineWord = 0;
 					var characterWord = indexWord;
