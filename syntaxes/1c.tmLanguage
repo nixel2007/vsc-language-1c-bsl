@@ -144,7 +144,7 @@
         <key>name</key>
         <string>constant.other.date.bsl</string>
         <key>match</key>
-        <string>\'.+\'</string>
+        <string>\'((\d{6})|(\d{12}))\'</string>
       </dict>
       <dict>
         <key>name</key>
