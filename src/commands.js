@@ -10,13 +10,22 @@ function addPipe() {
         while ((ArrStrings = Regex.exec(textline)) != null) {
             var stringmatsh = ArrStrings[3];
         }
+        var textLineAt = editor.document.lineAt(position._line).text;
+        var RegexSpace = /(\s*).*$/;
+        var IndentText = "";
+        var ArrSpace;
+        if (ArrSpace = RegexSpace.exec(textLineAt)) {
+            if (ArrSpace[1] != undefined) {
+                IndentText = ArrSpace[1];
+            }
+        };
         if (stringmatsh != undefined) {
             editor.edit(function (editBuilder) {
-                editBuilder.insert(new vscode.Position(position.line, position.character), '\n|');
+                editBuilder.insert(new vscode.Position(position.line, position.character), '\n' + IndentText + '|');
             });
         } else {
             editor.edit(function (editBuilder) {
-                editBuilder.insert(new vscode.Position(position.line, position.character), '\n');
+                editBuilder.insert(new vscode.Position(position.line, position.character), '\n' + IndentText);
             });
         }
     }
