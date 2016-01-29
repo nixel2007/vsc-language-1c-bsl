@@ -4,11 +4,12 @@ var bslProviders = require('./providers');
 
 function activate(context) {
 
-
     context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider("bsl", new bslProviders.DocumentSymbolProvider()));
 
     context.subscriptions.push(vscode.languages.registerDefinitionProvider("bsl", new bslProviders.DefinitionProvider()));
     
+    context.subscriptions.push(vscode.languages.registerCompletionItemProvider("bsl", new bslProviders.CompletionItemProvider(), '.', '='));
+
     vscode.languages.setLanguageConfiguration("bsl", {
        
         indentationRules: {
