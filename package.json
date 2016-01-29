@@ -39,11 +39,6 @@
             "language": "bsl",
             "scopeName": "source.bsl",
             "path": "./syntaxes/1c.tmLanguage"
-        }],
-        "keybindings": [{
-            "key": "enter",
-            "command": "extension.addpipe",
-            "when": "editorTextFocus && !suggestWidgetVisible && editorLangId == 'bsl'"
         }]
     }
 }
