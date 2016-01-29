@@ -129,16 +129,16 @@ var BSLCompletionItemProvider = (function () {
       }
       return proposal;
     };
-    for (var name in bslGlobals.globalvariablesRu) {
-      if (bslGlobals.globalvariablesRu.hasOwnProperty(name)) {
+    for (var name in bslGlobals.globalvariables) {
+      if (bslGlobals.globalvariables.hasOwnProperty(name)) {
         added[name] = true;
-        result.push(createNewProposal(vscode.CompletionItemKind.Variable, name, bslGlobals.globalvariablesRu[name]));
+        result.push(createNewProposal(vscode.CompletionItemKind.Variable, name, bslGlobals.globalvariables[name]));
       }
     }
-    for (var name in bslGlobals.globalfunctionsRu) {
-      if (bslGlobals.globalfunctionsRu.hasOwnProperty(name)) {
+    for (var name in bslGlobals.globalfunctions) {
+      if (bslGlobals.globalfunctions.hasOwnProperty(name)) {
         added[name] = true;
-        result.push(createNewProposal(vscode.CompletionItemKind.Function, name, bslGlobals.globalfunctionsRu[name]));
+        result.push(createNewProposal(vscode.CompletionItemKind.Function, name, bslGlobals.globalfunctions[name]));
       }
     }
     for (var name in bslGlobals.keywords) {
