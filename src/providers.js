@@ -1,4 +1,5 @@
 var vscode = require('vscode');
+var bslGlobals = require('./bslGlobals');
 
 var BSLDocumentSymbolProvider = (function () {
 	function BSLDocumentSymbolProvider() {
@@ -108,9 +109,80 @@ var BSLDefinitionProvider = (function () {
 	return BSLDefinitionProvider;
 })();
 
+var BSLCompletionItemProvider = (function () {
+  function BSLCompletionItemProvider() {
+    this.triggerCharacters = ['.', '='];
+  }
+  BSLCompletionItemProvider.prototype.provideCompletionItems = function (document, position, token) {
+    var result = [];
+    var added = {};
+    var createNewProposal = function (kind, name, entry) {
+      var proposal = new vscode.CompletionItem(name);
+      proposal.kind = kind;
+      if (entry) {
+        if (entry.description) {
+          proposal.documentation = entry.description;
+        }
+        if (entry.signature) {
+          proposal.detail = entry.signature;
+        }
+      }
+      return proposal;
+    };
+    for (var name in bslGlobals.globalvariablesRu) {
+      if (bslGlobals.globalvariablesRu.hasOwnProperty(name)) {
+        added[name] = true;
+        result.push(createNewProposal(vscode.CompletionItemKind.Variable, name, bslGlobals.globalvariablesRu[name]));
+      }
+    }
+    for (var name in bslGlobals.globalfunctionsRu) {
+      if (bslGlobals.globalfunctionsRu.hasOwnProperty(name)) {
+        added[name] = true;
+        result.push(createNewProposal(vscode.CompletionItemKind.Function, name, bslGlobals.globalfunctionsRu[name]));
+      }
+    }
+    for (var name in bslGlobals.keywords) {
+        if (bslGlobals.keywords.hasOwnProperty(name)) {
+            added[name] = true;
+            result.push(createNewProposal(vscode.CompletionItemKind.Keyword, name, bslGlobals.keywords[name]));
+        }
+    }
+    var text = document.getText();
+    var variableMatch = /(^|\s)(перем|var)\s+([a-zа-яё_][a-zа-яё_0-9]*)/ig;
+    var match = null;
+    while (match = variableMatch.exec(text)) {
+      var word = match[3];
+      if (!added[word]) {
+        added[word] = true;
+        result.push(createNewProposal(vscode.CompletionItemKind.Variable, word, null));
+      }
+    }
+    var functionMatch = /(^|\s)(процедура|функция|procedure|function)\s+([a-zа-яё_][a-zа-яё_0-9]*)\s*\(/ig;
+    var match = null;
+    while (match = functionMatch.exec(text)) {
+      var word = match[3];
+      if (!added[word]) {
+        added[word] = true;
+        result.push(createNewProposal(vscode.CompletionItemKind.Function, word, null));
+      }
+    }
+
+    for (var S = text.split(/[^а-яёА-ЯЁ_a-zA-Z]+/), _ = 0; _ < S.length; _++) {
+      var word = S[_].trim();
+      if (!added[word] && word.length > 5) {
+        added[word] = true;
+        result.push(createNewProposal(vscode.CompletionItemKind.Text, word, null));
+      }
+    }
+    return Promise.resolve(result);
+  };
+  return BSLCompletionItemProvider;
+})(vscode.CompletionItem);
+
 Object.defineProperty(exports, "__esModule", {
 	value : true
 });
 
 exports.DocumentSymbolProvider = BSLDocumentSymbolProvider;
 exports.DefinitionProvider = BSLDefinitionProvider;
+exports.CompletionItemProvider = BSLCompletionItemProvider;
