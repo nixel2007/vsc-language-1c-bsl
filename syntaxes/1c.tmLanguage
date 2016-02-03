@@ -448,6 +448,35 @@
         <key>match</key>
         <string>(?i:#(Если|If|ИначеЕсли|ElsIf|Иначе|Else|КонецЕсли|EndIf).*(Тогда|Then)?)</string>
       </dict>
+      <dict>
+        <key>comment</key>
+        <string>Region start</string>
+        <key>begin</key>
+        <string>(?i)(#(Область|Region))(\s+([\wа-яё]+))?</string>
+        <key>beginCaptures</key>
+        <dict>
+          <key>1</key>
+          <dict>
+            <key>name</key>
+            <string>keyword.other.section.bsl</string>
+          </dict>
+          <key>4</key>
+          <dict>
+            <key>name</key>
+            <string>entity.name.section.bsl</string>
+          </dict>
+        </dict>
+        <key>end</key>
+        <string>$</string>
+      </dict>
+      <dict>
+        <key>comment</key>
+        <string>Region end</string>
+        <key>name</key>
+        <string>keyword.other.preprocessor.bsl</string>
+        <key>match</key>
+        <string>(?i)#(КонецОбласти|EndRegion)</string>
+      </dict>
     </array>
   </dict>
 </plist>
