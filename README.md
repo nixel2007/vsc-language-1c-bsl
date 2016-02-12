@@ -39,5 +39,6 @@ Contributions are greatly appreciated. Development is carried in a parent reposi
 
 [MIT](https://github.com/xDrivenDevelopment/vsc-language-1c-bsl/blob/master/LICENSE.md)
 
-![default](https://cloud.githubusercontent.com/assets/1132840/11668822/413854ac-9e0a-11e5-8071-df16e922b873.PNG)
+![bsl-vsc](https://cloud.githubusercontent.com/assets/1132840/13007621/9e730984-d1a2-11e5-8ff5-8f7945421184.PNG)
 
+![query-vsc](https://cloud.githubusercontent.com/assets/1132840/13007618/9e6f578a-d1a2-11e5-9e30-7d48a269450d.PNG)
