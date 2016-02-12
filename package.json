@@ -26,19 +26,32 @@
     },
     "main": "./src/extension",
     "activationEvents": [
-        "onLanguage:bsl"
+        "onLanguage:bsl",
+        "onLanguage:sdbl"
     ],
     "contributes": {
-        "languages": [{
-            "id": "bsl",
-            "extensions": [ ".bsl", ".os" ],
-            "aliases": [ "1C (BSL)", "BSL" ],
-            "configuration": "./bsl.configuration.json"
-        }],
-        "grammars": [{
-            "language": "bsl",
-            "scopeName": "source.bsl",
-            "path": "./syntaxes/1c.tmLanguage"
-        }]
+        "languages": [
+            {
+                "id": "bsl",
+                "extensions": [ ".bsl", ".os" ],
+                "aliases": [ "1C (BSL)", "BSL" ]
+            },
+            {
+                "id": "sdbl",
+                "aliases": [ "1C (Query)", "SDBL" ]
+            }
+        ],
+        "grammars": [
+            {
+                "language": "bsl",
+                "scopeName": "source.bsl",
+                "path": "./syntaxes/1c.tmLanguage"
+            },
+            {
+                "language": "sdbl",
+                "scopeName": "source.sdbl",
+                "path": "./syntaxes/1c-query.tmLanguage"
+            }
+        ]
     }
 }

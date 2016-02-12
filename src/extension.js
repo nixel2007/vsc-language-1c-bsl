@@ -33,6 +33,14 @@ function activate(context) {
 
   });
 
+  vscode.languages.setLanguageConfiguration("sdbl", {
+
+    comments: {
+      lineComment: '//'
+    }
+
+  });
+  
   context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(function (textEditor) {
     applyConfigToTextEditor(textEditor);
   }));
