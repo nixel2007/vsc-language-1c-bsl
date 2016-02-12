@@ -473,7 +473,7 @@
         <key>comment</key>
         <string>Region end</string>
         <key>name</key>
-        <string>keyword.other.preprocessor.bsl</string>
+        <string>keyword.other.section.bsl</string>
         <key>match</key>
         <string>(?i)#(КонецОбласти|EndRegion)</string>
       </dict>
