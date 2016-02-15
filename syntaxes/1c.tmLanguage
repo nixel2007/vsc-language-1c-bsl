@@ -31,6 +31,10 @@
         <key>patterns</key>
         <array>
           <dict>
+            <key>include</key>
+            <string>#query</string>
+          </dict>
+          <dict>
             <key>name</key>
             <string>constant.character.escape.bsl</string>
             <key>match</key>
@@ -478,5 +482,30 @@
         <string>(?i)#(КонецОбласти|EndRegion)</string>
       </dict>
     </array>
+    <key>repository</key>
+    <dict>
+      <key>query</key>
+      <dict>
+        <key>begin</key>
+        <string>(?i)(Выбрать|Select(\s+Разрешенные|Allowed)?(\s+Различные|Distinct)?(\s+Первые|Top)?)</string>
+        <key>beginCaptures</key>
+        <dict>
+          <key>1</key>
+          <dict>
+            <key>name</key>
+            <string>keyword.control.sdbl</string>
+          </dict>
+        </dict>
+        <key>end</key>
+        <string>(?=\")</string>
+        <key>patterns</key>
+        <array>
+          <dict>
+            <key>include</key>
+            <string>source.sdbl</string>
+          </dict>
+        </array>
+      </dict>
+    </dict>
   </dict>
 </plist>
