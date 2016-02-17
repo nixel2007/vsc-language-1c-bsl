@@ -497,9 +497,21 @@
           </dict>
         </dict>
         <key>end</key>
-        <string>(?=\")</string>
+        <string>(?=\"[^\"])</string>
         <key>patterns</key>
         <array>
+          <dict>
+            <key>name</key>
+            <string>comment.line.double-slash.sdbl</string>
+            <key>match</key>
+            <string>(//((\"\")|[^\"])*)</string>
+          </dict>
+          <dict>
+            <key>name</key>
+            <string>string.quoted.double.sdbl</string>
+            <key>match</key>
+            <string>\"\"[^"]*\"\"</string>
+          </dict>
           <dict>
             <key>include</key>
             <string>source.sdbl</string>
