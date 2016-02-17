@@ -16,7 +16,13 @@
         <key>name</key>
         <string>comment.line.double-slash.sdbl</string>
         <key>match</key>
-        <string>(//.*$)</string>
+        <string>(^\s*//.*$)</string>
+      </dict>
+      <dict>
+        <key>name</key>
+        <string>comment.line.double-slash.sdbl</string>
+        <key>match</key>
+        <string>(//.*)</string>
       </dict>
       <dict>
         <key>name</key>
