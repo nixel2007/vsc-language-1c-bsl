@@ -34,7 +34,7 @@ var BSLDocumentSymbolProvider = (function () {
 							characterWord = indexWord - pos - 1;
 							endWord = characterWord + word.length;
 						}
-						pos = text.indexOf("\n", pos + 2);
+						pos = text.indexOf("\n", pos + 1);
 					}
 					var symbolInfo = new vscode.SymbolInformation(word, _this.goKindToCodeKind[Kind], new vscode.Range(new vscode.Position(lineWord, characterWord), new vscode.Position(lineWord, endWord)), undefined);
 					symbols.push(symbolInfo);
@@ -101,7 +101,7 @@ var BSLDefinitionProvider = (function () {
 					characterWord = indexWord - pos - 1;
 					endWord = characterWord + word.length;
 				}
-				pos = text.indexOf("\n", pos + 2);
+				pos = text.indexOf("\n", pos + 1);
 			}
 			return new vscode.Location(document.uri, new vscode.Range(new vscode.Position(lineWord, characterWord), new vscode.Position(lineWord, endWord)));
 		}
