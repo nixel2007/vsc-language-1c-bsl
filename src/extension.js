@@ -41,6 +41,8 @@ function activate(context) {
 
   });
   
+  context.subscriptions.push(new bslProviders.LintProvider(context));
+  
   context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(function (textEditor) {
     applyConfigToTextEditor(textEditor);
   }));

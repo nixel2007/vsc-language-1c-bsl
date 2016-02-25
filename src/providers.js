@@ -1,3 +1,7 @@
+'use strict';
+
+var cp = require('child_process');
+var path = require('path');
 var vscode = require('vscode');
 var bslGlobals = require('./bslGlobals');
 
@@ -179,6 +183,67 @@ var BSLCompletionItemProvider = (function () {
   return BSLCompletionItemProvider;
 })(vscode.CompletionItem);
 
+var BSLLintProvider = (function (_super) {
+  function LintProvider(context) {
+    this.context = context;
+    this.initialize();
+  }
+  LintProvider.prototype.initialize = function () {
+    var _this = this;
+    this.diagnosticCollection = vscode.languages.createDiagnosticCollection("bsl");
+    var disposable = vscode.workspace.onDidSaveTextDocument(function (e) {
+      if (vscode.window.activeTextEditor._documentData._languageId !== "bsl") {
+        return;
+      }
+      _this.lintDocument(vscode.window.activeTextEditor._documentData, vscode.window.activeTextEditor._documentData.getText().split(/\r?\n/g));
+    });
+    this.context.subscriptions.push(disposable);
+  };
+  LintProvider.prototype.lintDocument = function (document, documentLines) {
+    var _this = this;
+    return new Promise(function (resolve, reject) {
+      var filename = document._uri._fsPath;
+      var args = ['-encoding=utf-8', '-check'];
+      args.push(filename);
+      var options = {
+        cwd: path.dirname(filename),
+        env: process.env
+      };
+      var result = "";
+      var phpcs = cp.spawn("oscript", args, options);
+      phpcs.stderr.on("data", function (buffer) {
+        result += buffer.toString();
+      });
+      phpcs.stdout.on("data", function (buffer) {
+        result += buffer.toString();
+      });
+      phpcs.on("close", function (code) {
+        try {
+          result = result.trim();
+          var lines = result.split(/\r?\n/);
+          var regex = /^\{Модуль\s+(.*)\s\/\s.*:\s+(\d+)\s+\/\s+(.*)\}/;
+          var vscodeDiagnosticArray = [];
+          for (var line in lines) {
+            var match = null;
+            match = lines[line].match(regex);
+            if (match!=undefined) {
+              var range = new vscode.Range(new vscode.Position(match[2]-1, 0), new vscode.Position(+match[2]-1, vscode.window.activeTextEditor._documentData._lines[match[2]-1].length));
+              var vscodeDiagnostic = new vscode.Diagnostic(range, match[3], vscode.DiagnosticSeverity.Error);
+               vscodeDiagnosticArray.push(vscodeDiagnostic);
+            }
+          }
+          _this.diagnosticCollection.set(document._uri, vscodeDiagnosticArray);
+          resolve();
+        }
+        catch (e) {
+          reject(e);
+        }
+      });
+    });
+  };
+  return LintProvider;
+})();
+
 Object.defineProperty(exports, "__esModule", {
 	value : true
 });
@@ -186,3 +251,4 @@ Object.defineProperty(exports, "__esModule", {
 exports.DocumentSymbolProvider = BSLDocumentSymbolProvider;
 exports.DefinitionProvider = BSLDefinitionProvider;
 exports.CompletionItemProvider = BSLCompletionItemProvider;
+exports.LintProvider = BSLLintProvider;
