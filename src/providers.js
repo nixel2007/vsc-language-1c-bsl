@@ -194,13 +194,23 @@ var BSLLintProvider = (function (_super) {
     var disposable = vscode.workspace.onDidSaveTextDocument(function (e) {
       _this.lintDocument(vscode.window.activeTextEditor._documentData, vscode.window.activeTextEditor._documentData.getText().split(/\r?\n/g));
     });
-    _this.lintDocument(vscode.window.activeTextEditor._documentData, vscode.window.activeTextEditor._documentData.getText().split(/\r?\n/g));
+    if (vscode.window.activeTextEditor !== undefined) {
+      _this.lintDocument(vscode.window.activeTextEditor._documentData, vscode.window.activeTextEditor._documentData.getText().split(/\r?\n/g));
+    };
     this.context.subscriptions.push(disposable);
   };
   LintProvider.prototype.lintDocument = function (document, documentLines) {
     var _this = this;
     return new Promise(function (resolve, reject) {
+      var linterEnabled = vscode.workspace.getConfiguration("language-1c-bsl").get("enableOneScriptLinter");
+      if (!linterEnabled) {
+          return;
+      }
       var filename = document._uri._fsPath;
+      var lintBSLFiles = vscode.workspace.getConfiguration("language-1c-bsl").get("lintBSLFiles");
+      if (filename.endsWith(".bsl") && !lintBSLFiles) {
+          return;
+      }
       var args = ['-encoding=utf-8', '-check'];
       args.push(filename);
       var options = {
