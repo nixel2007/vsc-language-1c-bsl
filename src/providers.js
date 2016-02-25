@@ -192,11 +192,9 @@ var BSLLintProvider = (function (_super) {
     var _this = this;
     this.diagnosticCollection = vscode.languages.createDiagnosticCollection("bsl");
     var disposable = vscode.workspace.onDidSaveTextDocument(function (e) {
-      if (vscode.window.activeTextEditor._documentData._languageId !== "bsl") {
-        return;
-      }
       _this.lintDocument(vscode.window.activeTextEditor._documentData, vscode.window.activeTextEditor._documentData.getText().split(/\r?\n/g));
     });
+    _this.lintDocument(vscode.window.activeTextEditor._documentData, vscode.window.activeTextEditor._documentData.getText().split(/\r?\n/g));
     this.context.subscriptions.push(disposable);
   };
   LintProvider.prototype.lintDocument = function (document, documentLines) {
