@@ -202,7 +202,10 @@ var BSLLintProvider = (function (_super) {
       if (vscode.window.activeTextEditor._documentData !== null && vscode.window.activeTextEditor._documentData._languageId == "bsl") {
         _this.lintDocument(vscode.window.activeTextEditor._documentData, vscode.window.activeTextEditor._documentData.getText().split(/\r?\n/g));
       };
-    })); 
+    }));
+    if (vscode.window.activeTextEditor._documentData !== null && vscode.window.activeTextEditor._documentData._languageId == "bsl") {
+      _this.lintDocument(vscode.window.activeTextEditor._documentData, vscode.window.activeTextEditor._documentData.getText().split(/\r?\n/g));
+    };
   };
   LintProvider.prototype.lintDocument = function (document, documentLines) {
     var _this = this;
