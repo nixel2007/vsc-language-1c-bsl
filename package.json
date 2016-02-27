@@ -53,5 +53,17 @@
                 "path": "./syntaxes/1c-query.tmLanguage"
             }
         ]
+    },
+    "configuration": {
+        "type": "object",
+        "title": "Intelens language",
+        "properties": {
+        "languagebsl.language": {
+            "type": "string",
+            "default": "",
+            "description": "Specify the language to autocomplite."
+        }
+        }
     }
+	
 }
