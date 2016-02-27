@@ -42,6 +42,11 @@
                     "description": "Enable this if you want to check `*.bsl` files via OneScriptLint",
                     "type": "boolean",
                     "default": false                        
+                },
+                "language-1c-bsl.languageAutocomplite": {
+                    "description": "Autocomplite language en/ru",
+                    "type": "string",
+                    "default": "ru"                  
                 }
             }
         },
@@ -68,17 +73,6 @@
                 "path": "./syntaxes/1c-query.tmLanguage"
             }
         ]
-    },
-    "configuration": {
-        "type": "object",
-        "title": "Intelens language",
-        "properties": {
-        "languagebsl.language": {
-            "type": "string",
-            "default": "",
-            "description": "Specify the language to autocomplite."
-        }
-        }
     }
 	
 }

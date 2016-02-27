@@ -4,9 +4,8 @@ var cp = require('child_process');
 var path = require('path');
 var vscode = require('vscode');
 var bslGlobals = require('./bslGlobals');
-var configuration = vscode.workspace.getConfiguration('languagebsl');
-var autocomplitlanguage = configuration.get("language");
-console.log(autocomplitlanguage);
+var configuration = vscode.workspace.getConfiguration('language-1c-bsl');
+var autocomplitlanguage = configuration.get("languageAutocomplite");
 if (!autocomplitlanguage){
     autocomplitlanguage = "ru";
 }
