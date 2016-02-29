@@ -30,6 +30,21 @@
         "onLanguage:sdbl"
     ],
     "contributes": {
+        "configuration": {
+            "title": "Language 1C (BSL) configuration",
+            "properties": {
+                "language-1c-bsl.enableOneScriptLinter": {
+                    "description": "Lint files through `OneScript -check` command",
+                    "type": "boolean",
+                    "default": true                  
+                },
+                "language-1c-bsl.lintBSLFiles": {
+                    "description": "Enable this if you want to check `*.bsl` files via OneScriptLint",
+                    "type": "boolean",
+                    "default": false                        
+                }
+            }
+        },
         "languages": [
             {
                 "id": "bsl",

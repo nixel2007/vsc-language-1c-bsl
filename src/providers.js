@@ -1,3 +1,5 @@
+var cp = require('child_process');
+var path = require('path');
 var vscode = require('vscode');
 var bslGlobals = require('./bslGlobals');
 
@@ -39,7 +41,7 @@ var BSLDocumentSymbolProvider = (function () {
 					var symbolInfo = new vscode.SymbolInformation(word, _this.goKindToCodeKind[Kind], new vscode.Range(new vscode.Position(lineWord, characterWord), new vscode.Position(lineWord, endWord)), undefined);
 					symbols.push(symbolInfo);
 				}
-			})
+			});
 
 			try {
 				return resolve(symbols);
@@ -63,7 +65,7 @@ var BSLDefinitionProvider = (function () {
 		var offset = RangeWord.end.character;
 
 		var typeOf = null;
-		while (typeOf == null) {
+		while (typeOf === null) {
 			if (offset == document.lineAt(line).text.length) {
 				line++;
 				offset = 1;
@@ -75,7 +77,7 @@ var BSLDefinitionProvider = (function () {
 					if (lastOne == "(") {
 						typeOf = "function";
 					} else {
-						typeOf = "variable"
+						typeOf = "variable";
 					}
 				}
 		}
@@ -179,6 +181,100 @@ var BSLCompletionItemProvider = (function () {
   return BSLCompletionItemProvider;
 })(vscode.CompletionItem);
 
+var BSLLintProvider = (function (_super) {
+  function LintProvider(context) {
+    this.context = context;
+    if (!this._statusBarItem) {
+      this._statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
+      this._statusBarItem.command = "workbench.action.showErrorsWarnings";
+    }
+    this.initialize();
+  }
+  LintProvider.prototype.initialize = function () {
+    var _this = this;
+    this.diagnosticCollection = vscode.languages.createDiagnosticCollection("bsl");
+    this.context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(function (e) {
+      if (vscode.window.activeTextEditor._documentData._languageId !== "bsl") {
+        _this._statusBarItem.hide();
+        return;
+      }
+      _this.lintDocument(vscode.window.activeTextEditor._documentData, vscode.window.activeTextEditor._documentData.getText().split(/\r?\n/g), true);
+    }));
+    this.context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(function (textEditor) {
+      if (vscode.window.activeTextEditor._documentData !== null && vscode.window.activeTextEditor._documentData._languageId == "bsl") {
+        _this.lintDocument(vscode.window.activeTextEditor._documentData, vscode.window.activeTextEditor._documentData.getText().split(/\r?\n/g));
+      } else {
+        _this._statusBarItem.hide();
+        return;
+      }
+    }));
+    if (vscode.window.activeTextEditor !== null && vscode.window.activeTextEditor._documentData !== null && vscode.window.activeTextEditor._documentData._languageId == "bsl") {
+      _this.lintDocument(vscode.window.activeTextEditor._documentData, vscode.window.activeTextEditor._documentData.getText().split(/\r?\n/g));
+    }
+  };
+  LintProvider.prototype.lintDocument = function (document, documentLines, onDidSave) {
+    if (onDidSave === undefined) {
+        onDidSave = false;
+    };
+    var _this = this;
+    return new Promise(function (resolve, reject) {
+      var linterEnabled = vscode.workspace.getConfiguration("language-1c-bsl").get("enableOneScriptLinter");
+      if (!linterEnabled) {
+          return;
+      }
+      var filename = document._uri._fsPath;
+      var lintBSLFiles = vscode.workspace.getConfiguration("language-1c-bsl").get("lintBSLFiles");
+      if (filename.endsWith(".bsl") && !lintBSLFiles) {
+          return;
+      }
+      var args = ['-encoding=utf-8', '-check'];
+      args.push(filename);
+      var options = {
+        cwd: path.dirname(filename),
+        env: process.env
+      };
+      var result = "";
+      var phpcs = cp.spawn("oscript", args, options);
+      phpcs.stderr.on("data", function (buffer) {
+        result += buffer.toString();
+      });
+      phpcs.stdout.on("data", function (buffer) {
+        result += buffer.toString();
+      });
+      phpcs.on("close", function (code) {
+        try {
+          result = result.trim();
+          var lines = result.split(/\r?\n/);
+          var regex = /^\{Модуль\s+(.*)\s\/\s.*:\s+(\d+)\s+\/\s+(.*)\}/;
+          var vscodeDiagnosticArray = [];
+          for (var line in lines) {
+            var match = null;
+            match = lines[line].match(regex);
+            if (match!==null) {
+              var range = new vscode.Range(new vscode.Position(match[2]-1, 0), new vscode.Position(+match[2]-1, vscode.window.activeTextEditor._documentData._lines[match[2]-1].length));
+              var vscodeDiagnostic = new vscode.Diagnostic(range, match[3], vscode.DiagnosticSeverity.Error);
+               vscodeDiagnosticArray.push(vscodeDiagnostic);
+            }
+          }
+          _this.diagnosticCollection.set(document._uri, vscodeDiagnosticArray);
+          if (vscode.workspace.rootPath === undefined) {
+            _this._statusBarItem.text = vscodeDiagnosticArray.length === 0 ? "$(check) No Error":"$(alert) "+ vscodeDiagnosticArray.length+" Errors";
+            _this._statusBarItem.show();
+          }
+          resolve();
+          if (onDidSave && vscodeDiagnosticArray.length > 0){
+            vscode.commands.executeCommand("workbench.action.showErrorsWarnings");
+          }
+        }
+        catch (e) {
+          reject(e);
+        }
+      });
+    });
+  };
+  return LintProvider;
+})();
+
 Object.defineProperty(exports, "__esModule", {
 	value : true
 });
@@ -186,3 +282,4 @@ Object.defineProperty(exports, "__esModule", {
 exports.DocumentSymbolProvider = BSLDocumentSymbolProvider;
 exports.DefinitionProvider = BSLDefinitionProvider;
 exports.CompletionItemProvider = BSLCompletionItemProvider;
+exports.LintProvider = BSLLintProvider;
