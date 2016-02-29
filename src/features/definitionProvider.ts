@@ -22,9 +22,11 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
             }
             let module = "";
             if (wordAtPosition.indexOf(".") > 0) {
-                let dotArray: Array<string> = wordAtPosition.split(".");
-                wordAtPosition = dotArray.pop();
-                module = dotArray.join(".");
+                if (path.extname(document.fileName) !== ".os") { // Для oscript не можем гаранитировать полное совпадение модулей.  
+                    let dotArray: Array<string> = wordAtPosition.split(".");
+                    wordAtPosition = dotArray.pop();
+                    module = dotArray.join(".");
+                }
             }
             let d: Array<any> = self._global.query(filename, wordAtPosition, module, false, false);
             let source = document.getText();
@@ -32,8 +34,8 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
             if (!d) {
                 d = local;
             } else {
-                for (var index = 0; index < local.length; index++) {
-                    var element = local[index];
+                for (let index = 0; index < local.length; index++) {
+                    let element = local[index];
                     element["filename"] = document.fileName;
                     d.push(element);
                 }
@@ -51,7 +53,6 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                     }
                     added[element.name] = true;
                     let moduleDescription = (module && module.length > 0) ? module + "." : "";
-                    //let label = 
                     let result = {
                         "path": self.canonicalizeForWindows(element.filename),
                         "line": element.line,
@@ -61,7 +62,7 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                     bucket.push(result);
                 }
                 if (bucket.length === 1) {
-                    var location: vscode.Location = new vscode.Location(vscode.Uri.file(bucket[0].path),
+                    let location: vscode.Location = new vscode.Location(vscode.Uri.file(bucket[0].path),
                         new vscode.Position(bucket[0].line, 3));
                     return resolve(location);
                 } else if (bucket.length === 0) {
