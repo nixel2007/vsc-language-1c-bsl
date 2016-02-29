@@ -55,8 +55,8 @@
                     "type": "boolean",
                     "default": false                        
                 },
-                "language-1c-bsl.languageAutocomplite": {
-                    "description": "Autocomplite language en/ru",
+                "language-1c-bsl.languageAutocomplete": {
+                    "description": "Autocomplete language en/ru",
                     "type": "string",
                     "default": "ru"                  
                 }

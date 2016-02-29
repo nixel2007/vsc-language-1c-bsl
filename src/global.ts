@@ -266,13 +266,13 @@ export class Global {
 
     constructor(exec: string) {
         let configuration = vscode.workspace.getConfiguration('language-1c-bsl');
-        let autocompletlanguage: string = configuration.get("languageAutocomplete");
-        if (!autocompletlanguage) {
-            autocompletlanguage = "ru";
+        let autocompleteLanguage: any = configuration.get("languageAutocomplete");
+        if (!autocompleteLanguage) {
+            autocompleteLanguage = "ru";
         }
-        this.globalfunctions = bslglobals.globalfunctions()[autocompletlanguage];
-        this.globalvariables = bslglobals.globalvariables()[autocompletlanguage];
-        this.keywords = bslglobals.keywords()[autocompletlanguage];
+        this.globalfunctions = bslglobals.globalfunctions()[autocompleteLanguage];
+        this.globalvariables = bslglobals.globalvariables()[autocompleteLanguage];
+        this.keywords = bslglobals.keywords()[autocompleteLanguage];
     }
 }
 
