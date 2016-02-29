@@ -1,5 +1,3 @@
-//'use strict';
-
 var cp = require('child_process');
 var path = require('path');
 var vscode = require('vscode');
