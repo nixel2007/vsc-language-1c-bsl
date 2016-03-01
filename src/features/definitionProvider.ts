@@ -19,7 +19,7 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
             let query = {
                 "filename": filename,
                 "word": wordAtPosition
-            }
+            };
             let module = "";
             if (wordAtPosition.indexOf(".") > 0) {
                 if (path.extname(document.fileName) !== ".os") { // Для oscript не можем гаранитировать полное совпадение модулей.  
@@ -41,14 +41,14 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                 }
             }
             _.unique(d);
-            if (d.length === 0){
+            if (d.length === 0) {
                 d = self._global.query(filename, word, "", false, false);
             }
-            if (d){
+            if (d) {
                 let bucket = new Array<any>();
                 for (let index = 0; index < d.length; index++) {
                     let element = d[index];
-                    if (added[element.name] === true){
+                    if (added[element.name] === true) {
                         continue;
                     }
                     added[element.name] = true;
@@ -88,16 +88,15 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                 Promise.resolve(null);
             }
         }
-        )
+        );
     }
     private canonicalizeForWindows(filename: string): string {
 		// convert backslashes to forward slashes on Windows
 		// otherwise go-find-references returns no matches
-		//if (/^[a-z]:\\/.test(filename))
+		// if (/^[a-z]:\\/.test(filename))
             return filename;
-			//return filename.replace(/\//g, '\\');
-            //return filename.replace(/\\/g, '/');
-            
-		//return filename;
-	}
+			// return filename.replace(/\//g, '\\');
+            // return filename.replace(/\\/g, '/');
+		// return filename;
+    }
 }

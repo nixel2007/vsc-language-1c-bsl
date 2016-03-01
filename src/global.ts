@@ -2,12 +2,12 @@ import * as fs from "fs";
 import * as path from "path";
 
 import * as bslglobals from "./features/bslGlobals";
-//import keyword from "./features/bslGlobals";
+// import keyword from "./features/bslGlobals";
 
-var exec = require("child-process-promise").exec;
-var iconv = require("iconv-lite");
-var loki = require("lokijs");
-var Parser = require("onec-syntaxparser");
+let exec = require("child-process-promise").exec;
+let iconv = require("iconv-lite");
+let loki = require("lokijs");
+let Parser = require("onec-syntaxparser");
 
 import * as vscode from "vscode";
 
@@ -21,8 +21,10 @@ export class Global {
     globalvariables: any;
     keywords: any;
 
-    getCacheLocal(filename: string, word: string, source, update: boolean = false){
-        let querystring = {"name": {"$regex": new RegExp("^" + word + ".*", "i")}};
+    getCacheLocal(filename: string, word: string, source, update: boolean = false, allToEnd: boolean = true, fromFirst: boolean = true) {
+        let suffix = allToEnd  ? "" : "$";
+        let prefix = fromFirst ? "^" : "";
+        let querystring = {"name": {"$regex": new RegExp(prefix + word + suffix, "i")}};
         let entries = new Parser().parse(source).getMethodsTable().find(querystring);
         return entries;
     }
@@ -45,37 +47,36 @@ export class Global {
         let failed = new Array();
         let rootPath = vscode.workspace.rootPath;
         let replaced = this.getReplaceMetadata();
-        for (var i = 0; i < files.length; ++i) {
+        for (let i = 0; i < files.length; ++i) {
             let fullpath: string = decodeURIComponent(files[i].toString());
             if (fullpath.startsWith("file:")) {
                 fullpath = fullpath.substr(8);
             }
-            
             let moduleArray: Array<string> = fullpath.substr(rootPath.length + 1).split("/");
             if (isbsl) {
-                var module: string = "";
-                var test = false;
+                let module: string = "";
+                let test = false;
                 if (moduleArray.length > 1) {
                     if (moduleArray[0].startsWith("CommonModules")) {
                         module = moduleArray[1];
                         test = false;
-                        //console.log("modurl:"+module);
+                        // console.log("modurl:"+module);
                     } else if (moduleArray.length > 3 && replaced[moduleArray[0]] !== undefined) {
                         moduleArray[0] = replaced[moduleArray[0]];
-                        module = moduleArray[0]+"."+moduleArray[1];
+                        module = moduleArray[0] + "." + moduleArray[1];
                         test = false;
-                        //module = "Справ"
+                        // module = "Справ"
                     }
                 }
-                if (!test){
+                if (!test) {
                     failed.push(moduleArray[0]);
                 }
             };
-            var source = fs.readFileSync(fullpath, 'utf-8');
-            var entries = new Parser().parse(source).getMethodsTable().find();
-            var count = 0;
+            let source = fs.readFileSync(fullpath, "utf-8");
+            let entries = new Parser().parse(source).getMethodsTable().find();
+            let count = 0;
             let added = {};
-            for (let y = 0; y < entries.length; ++y){
+            for (let y = 0; y < entries.length; ++y) {
                 let item = entries[y];
                 this.updateReferenceCalls(item._method.Calls, item, fullpath, added);
                 if (!item.isexport) {
@@ -86,17 +87,17 @@ export class Global {
                     "name" : item.name, // 'Имя процедуры/функции'
                     "isproc" : item.isproc, // 'Процедура = false, Функция = true
                     "line" : item.line, // начало
-                    "endline" : item.endline, // конец процедуры
+                    "endline" : item._method.EndLine, // конец процедуры
                     "context" : item.context, // 'Контекст компиляции модуля'
                     "_method" : item._method,
                     "filename" : fullpath,
                     "module" : module,
                     "description": item.description
-                }
+                };
                 ++count;
                 this.db.insert(newItem);
             }
-            if (count > 0){
+            if (count > 0) {
                 // console.log("added "+ fullpath + " count "+ count + " module " + module);    
             }
         }
@@ -116,7 +117,7 @@ export class Global {
 
             let self = this;
             // console.log(path.extname(filename));
-            if (path.extname(filename) === ".os"){
+            if (path.extname(filename) === ".os") {
                 let files = vscode.workspace.findFiles("**/*.os", "", 1000);
                 files.then((value) => {
                     this.addtocachefiles(value, false);
@@ -141,9 +142,9 @@ export class Global {
             }
         }
     };
-    
-    queryref(word: string): any{
-        let querystring = {"call": {"$regex": new RegExp(word + "$", "i")}};
+
+    queryref(word: string): any {
+        let querystring = {"call": {"$regex": new RegExp("." + word + "$", "i")}};
         let search = this.dbcalls.chain().find(querystring).simplesort("name").data();
         return search;
     }
@@ -158,11 +159,11 @@ export class Global {
             if (added[value] === true) {
                 continue;
             };
-            if (value.startsWith(".")){
+            if (value.startsWith(".")) {
                 continue;
             }
             added[value] = true;
-            //console.log(file + ":" + value);
+            // console.log(file + ":" + value);
             let newItem = {
                     "call" : value,
                     "filename": file,
@@ -176,11 +177,11 @@ export class Global {
         }
     }
 
-    querydef(filename: string, module: string, all: boolean = true, lazy: boolean = false): any{
+    querydef(filename: string, module: string, all: boolean = true, lazy: boolean = false): any {
         // Проверяем локальный кэш. 
         // Проверяем глобальный кэш на модули. 
         // console.log(filename);
-        if (!this.cache){
+        if (!this.cache) {
             this.updateCache(filename);
             return new Array();
         } else {
@@ -192,16 +193,15 @@ export class Global {
         }
     }
 
-    query(filename: string, word: string, module: string, all: boolean = true, lazy: boolean = false): any{
+    query(filename: string, word: string, module: string, all: boolean = true, lazy: boolean = false): any {
         if (!this.cache) {
             this.updateCache(filename);
             return new Array();
         } else {
             let prefix = lazy ? "" : "^";
             let suffix = all  ? "" : "$";
-            
             let querystring = {"name": {"$regex": new RegExp(prefix + word + suffix, "i")}};
-            if (module && module.length > 0){
+            if (module && module.length > 0) {
                 /*querystring = {
                     "name" : {
                         "$regex": new RegExp("^" + word + "", "i")
@@ -215,8 +215,8 @@ export class Global {
             let moduleRegexp = new RegExp("^" + module, "i");
             // console.log(querystring);
             function filterByModule(obj) {
-                if (module && module.length > 0){
-                    if (moduleRegexp.exec(obj.module) !=null){
+                if (module && module.length > 0) {
+                    if (moduleRegexp.exec(obj.module) != null) {
                         return true;
                     } else {
                         return false;
@@ -228,8 +228,7 @@ export class Global {
             // console.log(search);
             return search;
         }
-        
-        //return new Array();
+        // return new Array();
     }
 
     fullNameRecursor(word: string, document: vscode.TextDocument, range: vscode.Range, left: boolean) {
@@ -254,18 +253,18 @@ export class Global {
             }
             let newWord = document.getWordRangeAtPosition(newPosition);
             if (newWord) {
-                return this.fullNameRecursor(result, document, newWord, left)
+                return this.fullNameRecursor(result, document, newWord, left);
             }
             return result;
         } else {
             result = word;
             return result;
         }
-        //return word;
+        // return word;
     }
 
     constructor(exec: string) {
-        let configuration = vscode.workspace.getConfiguration('language-1c-bsl');
+        let configuration = vscode.workspace.getConfiguration("language-1c-bsl");
         let autocompleteLanguage: any = configuration.get("languageAutocomplete");
         if (!autocompleteLanguage) {
             autocompleteLanguage = "ru";

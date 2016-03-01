@@ -18,31 +18,31 @@ function toCompletionItemKind(kind: vscode.SymbolKind): vscode.CompletionItemKin
 
 export default class GlobalCompletionItemProvider extends AbstractProvider implements vscode.CompletionItemProvider {
     added: Object;
-    private getRegExp(word: string): RegExp{
+    private getRegExp(word: string): RegExp {
         let wordMatch = new RegExp(".*", "i");
         if (word.length > 0) {
             wordMatch = new RegExp(word, "i");
         }
         return wordMatch;
     }
-    
-    private getAllWords(word: string, source: string, completions: vscode.CompletionItem[]): vscode.CompletionItem[]{
+
+    private getAllWords(word: string, source: string, completions: vscode.CompletionItem[]): vscode.CompletionItem[] {
         let wordMatch = this.getRegExp(word);
         for (let S = source.split(/[^а-яёА-ЯЁ_a-zA-Z]+/), _ = 0; _ < S.length; _++) {
         let sourceWord: string = S[_].trim();
-        if (!this.added[word] && word.length > 5 && wordMatch.exec(word) != null) {
+        if (!this.added[sourceWord.toLowerCase()] && sourceWord.length > 5 && wordMatch.exec(sourceWord) != null) {
             if (sourceWord === word) {
                 continue;
             }
-            this.added[word] = true;
-            let completion = new vscode.CompletionItem(word);
+            this.added[sourceWord.toLowerCase()] = true;
+            let completion = new vscode.CompletionItem(sourceWord);
             completion.kind = vscode.CompletionItemKind.Text;
             completions.push(completion);
         }
         }
         return completions;
     }
-    
+
     private getGlobals(word: string): vscode.CompletionItem[] {
         let completions: Array<vscode.CompletionItem> = new Array<vscode.CompletionItem>();
         let wordMatch = this.getRegExp(word);
@@ -133,7 +133,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                             }
                         }
                 }
-                //Получим все общие модули, у которых не заканчивается на точку.    
+                // Получим все общие модули, у которых не заканчивается на точку.    
                 queryResult = this._global.querydef(document.fileName, wordAtPosition, false, false);
                     for (let index = 0; index < queryResult.length; index++) {
                         let element = queryResult[index];
@@ -148,7 +148,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
         return result;
     }
 
-    provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken) : Thenable<vscode.CompletionItem[]> {
+    provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Thenable<vscode.CompletionItem[]> {
 
         let word = document.getText(document.getWordRangeAtPosition(position)).split(/\r?\n/)[0];
         let self = this;
@@ -159,7 +159,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
             let bucket = new Array<vscode.CompletionItem>();
             let word = document.getText(document.getWordRangeAtPosition(position)).split(/\r?\n/)[0];
             bucket = self.getDotComplection(document, position);
-            if (bucket.length > 0){
+            if (bucket.length > 0) {
                 return resolve(bucket);
             }
             bucket = this.getGlobals(word);
@@ -170,15 +170,19 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                     item.documentation = value.description;
                     item.kind = vscode.CompletionItemKind.Function;
                     bucket.push(item);
+                    self.added[value.name.toLowerCase()] = true;
                 }
             });
             result = self._global.querydef(document.fileName, word);
             result.forEach(function (value, index, array) {
                 let moduleDescription = (value.module && value.module.length > 0) ? module + "." : "";
-                let item = new vscode.CompletionItem(moduleDescription + value.name);
-                item.documentation = value.description;
-                item.kind = vscode.CompletionItemKind.File;
-                bucket.push(item);
+                if (self.added[(moduleDescription + value.name).toLowerCase()] !== true) {
+                    let item = new vscode.CompletionItem(moduleDescription + value.name);
+                    item.documentation = value.description;
+                    item.kind = vscode.CompletionItemKind.File;
+                    bucket.push(item);
+                    self.added[(moduleDescription + value.name).toLowerCase()] = true;
+                }
             });
             bucket = self.getAllWords(word, document.getText(), bucket);
             return resolve(bucket);
