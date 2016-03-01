@@ -48,7 +48,7 @@
                 "language-1c-bsl.enableOneScriptLinter": {
                     "description": "Lint files through `OneScript -check` command",
                     "type": "boolean",
-                    "default": true                  
+                    "default": true
                 },
                 "language-1c-bsl.lintBSLFiles": {
                     "description": "Enable this if you want to check `*.bsl` files via OneScriptLint",

@@ -1,5 +1,3 @@
-'use strict';
-
 var cp = require('child_process');
 var path = require('path');
 var vscode = require('vscode');
@@ -48,7 +46,7 @@ var BSLDocumentSymbolProvider = (function () {
 					var symbolInfo = new vscode.SymbolInformation(word, _this.goKindToCodeKind[Kind], new vscode.Range(new vscode.Position(lineWord, characterWord), new vscode.Position(lineWord, endWord)), undefined);
 					symbols.push(symbolInfo);
 				}
-			})
+			});
 
 			try {
 				return resolve(symbols);
@@ -72,7 +70,7 @@ var BSLDefinitionProvider = (function () {
 		var offset = RangeWord.end.character;
 
 		var typeOf = null;
-		while (typeOf == null) {
+		while (typeOf === null) {
 			if (offset == document.lineAt(line).text.length) {
 				line++;
 				offset = 1;
@@ -84,7 +82,7 @@ var BSLDefinitionProvider = (function () {
 					if (lastOne == "(") {
 						typeOf = "function";
 					} else {
-						typeOf = "variable"
+						typeOf = "variable";
 					}
 				}
 		}
@@ -207,28 +205,38 @@ var BSLCompletionItemProvider = (function () {
 var BSLLintProvider = (function (_super) {
   function LintProvider(context) {
     this.context = context;
+    if (!this._statusBarItem) {
+      this._statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
+      this._statusBarItem.command = "workbench.action.showErrorsWarnings";
+    }
     this.initialize();
   }
   LintProvider.prototype.initialize = function () {
     var _this = this;
     this.diagnosticCollection = vscode.languages.createDiagnosticCollection("bsl");
-    var disposable = vscode.workspace.onDidSaveTextDocument(function (e) {
+    this.context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(function (e) {
       if (vscode.window.activeTextEditor._documentData._languageId !== "bsl") {
+        _this._statusBarItem.hide();
         return;
       }
-      _this.lintDocument(vscode.window.activeTextEditor._documentData, vscode.window.activeTextEditor._documentData.getText().split(/\r?\n/g));
-    });
-    this.context.subscriptions.push(disposable);
+      _this.lintDocument(vscode.window.activeTextEditor._documentData, vscode.window.activeTextEditor._documentData.getText().split(/\r?\n/g), true);
+    }));
     this.context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(function (textEditor) {
       if (vscode.window.activeTextEditor._documentData !== null && vscode.window.activeTextEditor._documentData._languageId == "bsl") {
         _this.lintDocument(vscode.window.activeTextEditor._documentData, vscode.window.activeTextEditor._documentData.getText().split(/\r?\n/g));
-      };
+      } else {
+        _this._statusBarItem.hide();
+        return;
+      }
     }));
-    if (vscode.window.activeTextEditor._documentData !== null && vscode.window.activeTextEditor._documentData._languageId == "bsl") {
+    if (vscode.window.activeTextEditor !== null && vscode.window.activeTextEditor._documentData !== null && vscode.window.activeTextEditor._documentData._languageId == "bsl") {
       _this.lintDocument(vscode.window.activeTextEditor._documentData, vscode.window.activeTextEditor._documentData.getText().split(/\r?\n/g));
-    };
+    }
   };
-  LintProvider.prototype.lintDocument = function (document, documentLines) {
+  LintProvider.prototype.lintDocument = function (document, documentLines, onDidSave) {
+    if (onDidSave === undefined) {
+        onDidSave = false;
+    };
     var _this = this;
     return new Promise(function (resolve, reject) {
       var linterEnabled = vscode.workspace.getConfiguration("language-1c-bsl").get("enableOneScriptLinter");
@@ -263,14 +271,21 @@ var BSLLintProvider = (function (_super) {
           for (var line in lines) {
             var match = null;
             match = lines[line].match(regex);
-            if (match!=undefined) {
+            if (match!==null) {
               var range = new vscode.Range(new vscode.Position(match[2]-1, 0), new vscode.Position(+match[2]-1, vscode.window.activeTextEditor._documentData._lines[match[2]-1].length));
               var vscodeDiagnostic = new vscode.Diagnostic(range, match[3], vscode.DiagnosticSeverity.Error);
                vscodeDiagnosticArray.push(vscodeDiagnostic);
             }
           }
           _this.diagnosticCollection.set(document._uri, vscodeDiagnosticArray);
+          if (vscode.workspace.rootPath === undefined) {
+            _this._statusBarItem.text = vscodeDiagnosticArray.length === 0 ? "$(check) No Error":"$(alert) "+ vscodeDiagnosticArray.length+" Errors";
+            _this._statusBarItem.show();
+          }
           resolve();
+          if (onDidSave && vscodeDiagnosticArray.length > 0){
+            vscode.commands.executeCommand("workbench.action.showErrorsWarnings");
+          }
         }
         catch (e) {
           reject(e);
