@@ -71,7 +71,7 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
                 let bucket = new Array<any>();
                 for (let index = 0; index < d.length; index++) {
                     let element = d[index];
-                    let result = {"path": self.canonicalizeForWindows(element.filename),
+                    let result = {"path": element.filename,
                         "line": element.line,
                         "description": element.name,
                         "label": element.filename
@@ -88,7 +88,4 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
             resolve(results);
         });
     }
-    private canonicalizeForWindows(filename: string): string {
-            return filename;
-        }
 }

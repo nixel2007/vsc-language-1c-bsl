@@ -50,7 +50,7 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                     added[element.name] = true;
                     let moduleDescription = (module && module.length > 0) ? module + "." : "";
                     let result = {
-                        "path": self.canonicalizeForWindows(element.filename),
+                        "path": element.filename,
                         "line": element.line,
                         "description": element.description,
                         "label": moduleDescription + element.name
@@ -85,8 +85,5 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
             }
         }
         );
-    }
-    private canonicalizeForWindows(filename: string): string {
-        return filename;
     }
 }
