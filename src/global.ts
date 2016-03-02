@@ -53,8 +53,8 @@ export class Global {
                 fullpath = fullpath.substr(8);
             }
             let moduleArray: Array<string> = fullpath.substr(rootPath.length + 1).split("/");
+            let module: string = "";
             if (isbsl) {
-                let module: string = "";
                 let test = false;
                 if (moduleArray.length > 1) {
                     if (moduleArray[0].startsWith("CommonModules")) {
@@ -83,27 +83,22 @@ export class Global {
                     continue;
                 };
                 item["filename"] = fullpath;
-                let newItem = {
-                    "name" : item.name, // 'Имя процедуры/функции'
-                    "isproc" : item.isproc, // 'Процедура = false, Функция = true
-                    "line" : item.line, // начало
-                    "endline" : item._method.EndLine, // конец процедуры
-                    "context" : item.context, // 'Контекст компиляции модуля'
-                    "_method" : item._method,
-                    "filename" : fullpath,
-                    "module" : module,
+                let newItem: MethodValue = {
+                    "name": String(item.name),
+                    "isproc": Boolean(item.isproc),
+                    "line": item.line,
+                    "endline": item.endline,
+                    "context": item.context,
+                    "_method": item._method,
+                    "filename": fullpath,
+                    "module": module,
                     "description": item.description
                 };
                 ++count;
                 this.db.insert(newItem);
             }
-            if (count > 0) {
-                // console.log("added "+ fullpath + " count "+ count + " module " + module);    
-            }
         }
-        let _ = require("underscore");
-        console.log(_.unique(failed));
-        vscode.window.showInformationMessage("Обновлен список процедур.");
+        vscode.window.setStatusBarMessage("Обновлен список процедур.", 3000);
     }
 
     updateCache(filename: string = ""): any {
@@ -164,15 +159,15 @@ export class Global {
             }
             added[value] = true;
             // console.log(file + ":" + value);
-            let newItem = {
-                    "call" : value,
-                    "filename": file,
-                    "name" : method.name, // 'Имя процедуры/функции'
-                    "isproc" : method.isproc, // 'Процедура = false, Функция = true
-                    "line" : method.line, // начало
-                    "endline" : method.endline, // конец процедуры
-                    "context" : method.context // 'Контекст компиляции модуля'
-                };
+            let newItem: MethodValue = {
+                "name": String(method.name),
+                "filename": file,
+                "isproc": Boolean(method.isproc),
+                "line": method.line,
+                "endline": method.endline
+            };
+            newItem.call = value;
+            newItem.context = method.context;
             self.dbcalls.insert(newItem);
         }
     }
@@ -273,6 +268,25 @@ export class Global {
         this.globalvariables = bslglobals.globalvariables()[autocompleteLanguage];
         this.keywords = bslglobals.keywords()[autocompleteLanguage];
     }
+}
+
+interface MethodValue {
+    // 'Имя процедуры/функции'
+    name: string;
+    // 'Процедура = false, Функция = true
+    isproc: boolean;
+    // начало
+    line: number;
+    // конец процедуры
+    endline: number;
+
+    filename: string;
+    // контекст НаСервере, НаКлиенте, НаСервереБезКонтекста
+    context?: string;
+    module?: string;
+    description?: string;
+    call?: string;
+    _method?: {};
 }
 
 /// <reference path="node.d.ts" />

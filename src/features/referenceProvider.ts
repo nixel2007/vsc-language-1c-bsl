@@ -38,7 +38,7 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
                             let line = element.line;
                             let colStr = 7;
                             let foundInProc = false;
-                            for (let indexLine = line; index <= element._method.EndLine; indexLine++) {
+                            for (let indexLine = line; indexLine <= element._method.EndLine; indexLine++) {
                                 let curLine = lines[indexLine];
                                 if (wordAllReg.exec(curLine) !== null) {
                                     foundInProc = true;

@@ -4,7 +4,7 @@ import * as vscode from "vscode";
 import * as path from "path";
 import * as cp from "child_process";
 
-import { BSL_MODE, showBslStatus } from "./bslStatus";
+import { BSL_MODE, showBslStatus, hideBslStatus } from "./bslStatus";
 
 
 import ChildProcess = cp.ChildProcess;
@@ -78,19 +78,14 @@ export default class BslLintProvider {
                     }
                 }
                 this.diagnosticCollection.set(textDocument.uri, vscodeDiagnosticArray);
-                if (vscode.workspace.rootPath === undefined) {
-                    // showBslStatus(vscodeDiagnosticArray.length === 0 ? "$(check) No Error":"$(alert) "+ vscodeDiagnosticArray.length+" Errors", 
-                    // )
-                    // _this._statusBarItem.text = vscodeDiagnosticArray.length === 0 ? "$(check) No Error":"$(alert) "+ vscodeDiagnosticArray.length+" Errors";
-                    // _this._statusBarItem.show();
-                }
-            }
-            /*resolve();
-            if (onDidSave && vscodeDiagnosticArray.length > 0){
-                vscode.commands.executeCommand("workbench.action.showErrorsWarnings");
-              }
-            }*/
-            catch (e) {
+                if (vscodeDiagnosticArray.length !== 0 ) {
+                    showBslStatus(vscodeDiagnosticArray.length + " Errors", "bsl.lint", vscodeDiagnosticArray[0].message);
+                    vscode.commands.registerCommand("bsl.lint", () => {
+                        vscode.commands.executeCommand("workbench.action.showErrorsWarnings");
+                        hideBslStatus();
+                    });
+                };
+            } catch (e) {
                 console.error(e);
             }
         });
