@@ -66,6 +66,9 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(function (textEditor: vscode.TextEditor) {
         applyConfigToTextEditor(textEditor);
     }));
+    if (vscode.window.activeTextEditor) {
+        applyConfigToTextEditor(vscode.window.activeTextEditor);
+    }
 }
 
 function applyConfigToTextEditor(textEditor: vscode.TextEditor): any {
