@@ -15,11 +15,7 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
             wordAtPosition = self._global.fullNameRecursor(wordAtPosition, document, document.getWordRangeAtPosition(position), false);
             wordAtPosition = self._global.fullNameRecursor(wordAtPosition, document, document.getWordRangeAtPosition(position), true);
             console.log("DefinitionProvider for:" + wordAtPosition);
-            // let offset = byteOffsetAt(document, position);
-            let query = {
-                "filename": filename,
-                "word": wordAtPosition
-            };
+
             let module = "";
             if (wordAtPosition.indexOf(".") > 0) {
                 if (path.extname(document.fileName) !== ".os") { // Для oscript не можем гаранитировать полное совпадение модулей.  
@@ -91,12 +87,6 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
         );
     }
     private canonicalizeForWindows(filename: string): string {
-		// convert backslashes to forward slashes on Windows
-		// otherwise go-find-references returns no matches
-		// if (/^[a-z]:\\/.test(filename))
-            return filename;
-			// return filename.replace(/\//g, '\\');
-            // return filename.replace(/\\/g, '/');
-		// return filename;
+        return filename;
     }
 }

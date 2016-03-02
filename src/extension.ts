@@ -6,8 +6,7 @@ import CompletionItemProvider from "./features/completionItemProvider";
 import DefinitionProvider from "./features/definitionProvider";
 import DocumentSymbolProvider from "./features/documentSymbolProvider";
 import ReferenceProvider from "./features/referenceProvider";
-import GlobalCommandProvider from "./features/commandProvider";
-import { showHideStatus } from "./features/bslStatus";
+import { showHideStatus, BSL_MODE } from "./features/bslStatus";
 import BslLintProvider from "./features/bsllintProvider";
 
 let diagnosticCollection: vscode.DiagnosticCollection;
@@ -28,8 +27,6 @@ export function activate(context: vscode.ExtensionContext) {
     let linter = new BslLintProvider();
     linter.activate(context.subscriptions);
 
-    let commands = new GlobalCommandProvider(global);
-    // commands.registerCommands(context);
     context.subscriptions.push(vscode.commands.registerCommand("bsl.update", () => {
         let filename = vscode.window.activeTextEditor.document.fileName;
         global.updateCache(filename);
@@ -69,9 +66,6 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(function (textEditor: vscode.TextEditor) {
         applyConfigToTextEditor(textEditor);
     }));
-
-    // context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider(['bsl', 'bsl'], new DocumentSymbolProvider(global)));
-	// context.subscriptions.push(vscode.languages.registerReferenceProvider(['bsl', 'bsl'], new ReferenceProvider(global)));
 }
 
 function applyConfigToTextEditor(textEditor: vscode.TextEditor): any {
@@ -79,23 +73,22 @@ function applyConfigToTextEditor(textEditor: vscode.TextEditor): any {
     if (!textEditor) {
         return ;
     };
-    let  newOptions = {
+    let  newOptions: vscode.TextEditorOptions = {
         "insertSpaces" : false,
         "tabSize" : 4
     };
 
-    let defaultOptions = {
-        "insertSpaces" : vscode.workspace.getConfiguration("editor").get("insertSpaces"),
-        "tabSize" : vscode.workspace.getConfiguration("editor").get("tabSize")
+    let defaultOptions: vscode.TextEditorOptions = {
+        "insertSpaces" : Boolean(vscode.workspace.getConfiguration("editor").get("insertSpaces")),
+        "tabSize" : Number(vscode.workspace.getConfiguration("editor").get("tabSize"))
     };
 
-    if (textEditor.document.languageId === "bsl") {
+    if (vscode.languages.match(BSL_MODE, textEditor.document)) {
         if (textEditor.options.insertSpaces === defaultOptions.insertSpaces
-            && (textEditor.options.tabSize === defaultOptions.tabSize || defaultOptions.tabSize === "auto")) {
+            && (textEditor.options.tabSize === defaultOptions.tabSize || defaultOptions.tabSize > 0)) {
                 textEditor.options = newOptions;
         } else if (textEditor.options.insertSpaces === newOptions.insertSpaces && textEditor.options.tabSize === newOptions.tabSize) {
-            // textEditor.options.insertSpaces = defaultOptions.insertSpaces;
-            // textEditor.options.tabSize = vscode.workspace.getConfiguration("editor").get("tabSize");
+            textEditor.options = defaultOptions;
         }
     }
 }

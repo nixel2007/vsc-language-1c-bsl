@@ -17,14 +17,3 @@ export default class AbstractProvider {
         }
     }
 }
-
-export class AbstractProviderCommand {
-    protected _global: Global;
-    protected _disposable: Disposable[];
-    protected _title: string;
-
-    constructor(title: string, global: Global) {
-        this._global = global;
-        this._title = title;
-    }
-}

@@ -60,12 +60,10 @@ export class Global {
                     if (moduleArray[0].startsWith("CommonModules")) {
                         module = moduleArray[1];
                         test = false;
-                        // console.log("modurl:"+module);
                     } else if (moduleArray.length > 3 && replaced[moduleArray[0]] !== undefined) {
                         moduleArray[0] = replaced[moduleArray[0]];
                         module = moduleArray[0] + "." + moduleArray[1];
                         test = false;
-                        // module = "Справ"
                     }
                 }
                 if (!test) {
@@ -111,7 +109,6 @@ export class Global {
             this.dbcalls = this.cache.addCollection("Calls");
 
             let self = this;
-            // console.log(path.extname(filename));
             if (path.extname(filename) === ".os") {
                 let files = vscode.workspace.findFiles("**/*.os", "", 1000);
                 files.then((value) => {
@@ -133,7 +130,6 @@ export class Global {
                     console.log(reason);
                 }
                 );
-                // var over = vscode.workspace.findFiles("")
             }
         }
     };
@@ -158,7 +154,6 @@ export class Global {
                 continue;
             }
             added[value.call] = true;
-            // console.log(file + ":" + value);
             let newItem: MethodValue = {
                 "name": String(method.name),
                 "filename": file,
@@ -198,18 +193,9 @@ export class Global {
             let suffix = all  ? "" : "$";
             let querystring = {"name": {"$regex": new RegExp(prefix + word + suffix, "i")}};
             if (module && module.length > 0) {
-                /*querystring = {
-                    "name" : {
-                        "$regex": new RegExp("^" + word + "", "i")
-                    },
-                    "module" : {
-                        "$regex": new RegExp("^" + module + "", "i")
-                    }
-                };*/
                 querystring["module"] = {"$regex": new RegExp("^" + module + "", "i")};
             }
             let moduleRegexp = new RegExp("^" + module, "i");
-            // console.log(querystring);
             function filterByModule(obj) {
                 if (module && module.length > 0) {
                     if (moduleRegexp.exec(obj.module) != null) {
@@ -221,10 +207,8 @@ export class Global {
                 return true;
             }
             let search = this.db.chain().find(querystring).where(filterByModule).simplesort("name").data();
-            // console.log(search);
             return search;
         }
-        // return new Array();
     }
 
     fullNameRecursor(word: string, document: vscode.TextDocument, range: vscode.Range, left: boolean) {
@@ -256,7 +240,6 @@ export class Global {
             result = word;
             return result;
         }
-        // return word;
     }
 
     constructor(exec: string) {
