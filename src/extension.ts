@@ -85,7 +85,7 @@ function applyConfigToTextEditor(textEditor: vscode.TextEditor): any {
 
     if (vscode.languages.match(BSL_MODE, textEditor.document)) {
         if (textEditor.options.insertSpaces === defaultOptions.insertSpaces
-            && (textEditor.options.tabSize === defaultOptions.tabSize || defaultOptions.tabSize > 0)) {
+            && (textEditor.options.tabSize === defaultOptions.tabSize)) {
                 textEditor.options = newOptions;
         } else if (textEditor.options.insertSpaces === newOptions.insertSpaces && textEditor.options.tabSize === newOptions.tabSize) {
             textEditor.options = defaultOptions;
