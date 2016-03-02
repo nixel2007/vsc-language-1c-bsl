@@ -14,6 +14,7 @@ export default class BslLintProvider {
     private static args: Array<string> = ["-encoding=utf-8", "-check"];
     private command: vscode.Disposable;
     private diagnosticCollection: vscode.DiagnosticCollection;
+    private statusBarItem: vscode.StatusBarItem; 
 
     public activate(subscriptions: vscode.Disposable[]) {
         this.diagnosticCollection = vscode.languages.createDiagnosticCollection();
@@ -23,11 +24,21 @@ export default class BslLintProvider {
         }, null, subscriptions);
         vscode.workspace.onDidSaveTextDocument(this.doBsllint, this);
         vscode.workspace.textDocuments.forEach(this.doBsllint, this);
+        if (!this.statusBarItem) {
+            let self = this;
+            this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
+            this.statusBarItem.command = "bsl.lint";
+            vscode.commands.registerCommand("bsl.lint", () => {
+                        vscode.commands.executeCommand("workbench.action.showErrorsWarnings");
+                        self.statusBarItem.hide();
+            });
+        }
     }
 
     public dispose(): void {
         this.diagnosticCollection.clear();
         this.diagnosticCollection.dispose();
+        this.statusBarItem.hide();
     }
 
     public doBsllint(textDocument: vscode.TextDocument) {
@@ -79,11 +90,10 @@ export default class BslLintProvider {
                 }
                 this.diagnosticCollection.set(textDocument.uri, vscodeDiagnosticArray);
                 if (vscodeDiagnosticArray.length !== 0 ) {
-                    showBslStatus(vscodeDiagnosticArray.length + " Errors", "bsl.lint", vscodeDiagnosticArray[0].message);
-                    vscode.commands.registerCommand("bsl.lint", () => {
-                        vscode.commands.executeCommand("workbench.action.showErrorsWarnings");
-                        hideBslStatus();
-                    });
+                    this.statusBarItem.text = vscodeDiagnosticArray.length === 0 ? "$(check) No Error" : "$(alert) " +  vscodeDiagnosticArray.length + " Errors";
+                    this.statusBarItem.show();
+                } else {
+                    this.statusBarItem.hide()
                 };
             } catch (e) {
                 console.error(e);
