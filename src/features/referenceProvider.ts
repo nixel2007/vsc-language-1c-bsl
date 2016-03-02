@@ -36,7 +36,7 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
                         if (wordReg.exec(callElement) !== null) {
                             let referenceResource = vscode.Uri.file(document.fileName);
                             let line = element.line;
-                            let colStr = 7;
+                            let colStr = 0;
                             let foundInProc = false;
                             for (let indexLine = line; indexLine <= element._method.EndLine; indexLine++) {
                                 let curLine = lines[indexLine];
@@ -76,10 +76,10 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
                         "description": element.name,
                         "label": element.filename
                     };
-                    let colStr = 7;
+                    let colStr = element.character;
                     let referenceResource = vscode.Uri.file(result.path);
                     let range = new vscode.Range(
-                                    result.line + 1, +colStr, result.line , +colStr + wordLength - 1
+                                    result.line, +colStr, result.line , +colStr + wordLength - 1
                                 );
                         results.push(new vscode.Location(referenceResource, range));
 

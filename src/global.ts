@@ -78,7 +78,7 @@ export class Global {
             let added = {};
             for (let y = 0; y < entries.length; ++y) {
                 let item = entries[y];
-                this.updateReferenceCalls(item._method.Calls, item, fullpath, added);
+                this.updateReferenceCalls(item._method.CallsPosition, item, fullpath, added);
                 if (!item.isexport) {
                     continue;
                 };
@@ -144,30 +144,31 @@ export class Global {
         return search;
     }
 
-    private updateReferenceCalls(calls: Array<string>, method: any, file: string, added: any): any {
+    private updateReferenceCalls(calls: Array<any>, method: any, file: string, added: any): any {
         if (!this.dbcalls) {
             this.dbcalls = this.cache.addCollection("Calls");
         }
         let self = this;
         for (let index = 0; index < calls.length; index++) {
             let value = calls[index];
-            if (added[value] === true) {
+            if (added[value.call] === true) {
                 continue;
             };
-            if (value.startsWith(".")) {
+            if (value.call.startsWith(".")) {
                 continue;
             }
-            added[value] = true;
+            added[value.call] = true;
             // console.log(file + ":" + value);
             let newItem: MethodValue = {
                 "name": String(method.name),
                 "filename": file,
                 "isproc": Boolean(method.isproc),
-                "line": method.line,
+                "call": value.call,
+                "context": method.context,
+                "line": value.line,
+                "character": value.character,
                 "endline": method.endline
             };
-            newItem.call = value;
-            newItem.context = method.context;
             self.dbcalls.insert(newItem);
         }
     }
@@ -286,6 +287,7 @@ interface MethodValue {
     module?: string;
     description?: string;
     call?: string;
+    character?: number;
     _method?: {};
 }
 
