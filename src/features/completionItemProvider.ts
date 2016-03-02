@@ -2,20 +2,6 @@ import * as vscode from "vscode";
 import AbstractProvider from "./abstractProvider";
 
 
-function toCompletionItemKind(kind: vscode.SymbolKind): vscode.CompletionItemKind {
-    if (kind === vscode.SymbolKind.Variable) {
-        return vscode.CompletionItemKind.Variable;
-    } else if (kind === vscode.SymbolKind.Function) {
-        return vscode.CompletionItemKind.Function;
-    } else if (kind === vscode.SymbolKind.Class) {
-        return vscode.CompletionItemKind.Class;
-    } else if (kind === vscode.SymbolKind.Enum) {
-        return vscode.CompletionItemKind.Enum;
-    } else {
-        return vscode.CompletionItemKind.Variable;
-    }
-}
-
 export default class GlobalCompletionItemProvider extends AbstractProvider implements vscode.CompletionItemProvider {
     added: Object;
     private getRegExp(word: string): RegExp {

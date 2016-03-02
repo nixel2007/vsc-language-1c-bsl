@@ -10,11 +10,36 @@ import { BSL_MODE, showBslStatus, hideBslStatus } from "./bslStatus";
 import ChildProcess = cp.ChildProcess;
 
 export default class BslLintProvider {
-    private static commandId: string = "oscript";
-    private static args: Array<string> = ["-encoding=utf-8", "-check"];
+
+    private commandId: string;
+    private args: Array<string>;
+    private linterEnabled: boolean;
+    private lintBSLFiles: boolean;
     private command: vscode.Disposable;
     private diagnosticCollection: vscode.DiagnosticCollection;
-    private statusBarItem: vscode.StatusBarItem; 
+    private statusBarItem: vscode.StatusBarItem;
+
+    private getCommandId(): string {
+        let command = "";
+        let commandConfig = vscode.workspace.getConfiguration("language-1c-bsl").get("onescriptPath");
+        if (!commandConfig || String(commandConfig).length === 0) {
+            if (process.platform === "win32") {
+                command = "oscript.exe";
+            } else if (process.platform === "linux" ) {
+                command = "mono";
+                this.args.unshift("oscript.exe");
+            }
+        } else {
+            command = String(commandConfig);
+            if (process.platform === "linux") {
+                if (String(command).startsWith("mono ")) {
+                    this.args.unshift(command.substr(5));
+                    command = "mono";
+                }
+            }
+        }
+        return command;
+    };
 
     public activate(subscriptions: vscode.Disposable[]) {
         this.diagnosticCollection = vscode.languages.createDiagnosticCollection();
@@ -33,6 +58,15 @@ export default class BslLintProvider {
                         self.statusBarItem.hide();
             });
         }
+        this.args = ["-encoding=utf-8", "-check"];
+        this.commandId = this.getCommandId();
+        let linterEnabled = vscode.workspace.getConfiguration("language-1c-bsl").get("enableOneScriptLinter");
+        if (!linterEnabled) {
+            this.linterEnabled = false;
+        } else {
+            this.linterEnabled = true;
+        }
+        this.lintBSLFiles = Boolean(vscode.workspace.getConfiguration("language-1c-bsl").get("lintBSLFiles"));
     }
 
     public dispose(): void {
@@ -45,25 +79,22 @@ export default class BslLintProvider {
         if (!vscode.languages.match(BSL_MODE, textDocument)) {
             return;
         }
-        let decoded = "";
         let diagnostics: vscode.Diagnostic[] = [];
-        let linterEnabled = vscode.workspace.getConfiguration("language-1c-bsl").get("enableOneScriptLinter");
-        if (!linterEnabled) {
+        if (!this.linterEnabled) {
             return;
         }
         let filename = textDocument.uri.fsPath;
-        let lintBSLFiles = vscode.workspace.getConfiguration("language-1c-bsl").get("lintBSLFiles");
-        if (filename.endsWith(".bsl") && !lintBSLFiles) {
+        if (filename.endsWith(".bsl") && !this.lintBSLFiles) {
             return;
         }
-        let args = ["-encoding=utf-8", "-check"];
-        args.push(filename);
+        let args = this.args.slice();
+        this.args.push(filename);
         let options = {
             cwd: path.dirname(filename),
             env: process.env
         };
         let result = "";
-        let phpcs = cp.spawn("oscript", args, options);
+        let phpcs = cp.spawn(this.commandId, args, options);
         phpcs.stderr.on("data", function (buffer) {
             result += buffer.toString();
         });
@@ -93,7 +124,7 @@ export default class BslLintProvider {
                     this.statusBarItem.text = vscodeDiagnosticArray.length === 0 ? "$(check) No Error" : "$(alert) " +  vscodeDiagnosticArray.length + " Errors";
                     this.statusBarItem.show();
                 } else {
-                    this.statusBarItem.hide()
+                    this.statusBarItem.hide();
                 };
             } catch (e) {
                 console.error(e);

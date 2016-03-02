@@ -50,7 +50,7 @@ export class Global {
         for (let i = 0; i < files.length; ++i) {
             let fullpath: string = decodeURIComponent(files[i].toString());
             if (fullpath.startsWith("file:")) {
-                fullpath = fullpath.substr(8);
+                fullpath = fullpath.substr(7);
             }
             let moduleArray: Array<string> = fullpath.substr(rootPath.length + 1).split("/");
             let module: string = "";

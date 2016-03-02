@@ -50,6 +50,10 @@
                     "type": "boolean",
                     "default": true
                 },
+                "language-1c-bsl.onescriptPath": {
+                    "description": "OneScript path to check",
+                    "type": "string"
+                },
                 "language-1c-bsl.lintBSLFiles": {
                     "description": "Enable this if you want to check `*.bsl` files via OneScriptLint",
                     "type": "boolean",

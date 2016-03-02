@@ -32,10 +32,6 @@ export function activate(context: vscode.ExtensionContext) {
         global.updateCache(filename);
     }));
 
-    diagnosticCollection = vscode.languages.createDiagnosticCollection("bsl");
-    context.subscriptions.push(diagnosticCollection);
-    vscode.window.onDidChangeActiveTextEditor(showHideStatus, null, context.subscriptions);
-
     vscode.languages.setLanguageConfiguration("bsl", {
         indentationRules: {
             decreaseIndentPattern: /^\s*(конецесли|конеццикла|конецпроцедуры|конецфункции|иначе|иначеесли|конецпопытки|исключение|endif|enddo|endprocedure|endfunction|else|elseif|endtry|except).*$/i,
