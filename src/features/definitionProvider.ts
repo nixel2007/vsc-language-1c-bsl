@@ -11,9 +11,14 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
         return new Promise((resolve, reject) => {
             let added = {};
             let filename = document.fileName;
+            let wordPosition = document.getWordRangeAtPosition(position);
             let wordAtPosition = document.getText(document.getWordRangeAtPosition(position));
-            wordAtPosition = self._global.fullNameRecursor(wordAtPosition, document, document.getWordRangeAtPosition(position), false);
-            wordAtPosition = self._global.fullNameRecursor(wordAtPosition, document, document.getWordRangeAtPosition(position), true);
+            if (!wordPosition) {
+                wordAtPosition = "";
+            } else  {
+                wordAtPosition = self._global.fullNameRecursor(wordAtPosition, document, document.getWordRangeAtPosition(position), false);
+                wordAtPosition = self._global.fullNameRecursor(wordAtPosition, document, document.getWordRangeAtPosition(position), true);
+            }
             console.log("DefinitionProvider for:" + wordAtPosition);
 
             let module = "";

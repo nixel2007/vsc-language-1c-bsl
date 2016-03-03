@@ -24,7 +24,7 @@ export default class BslLintProvider {
         let commandConfig = vscode.workspace.getConfiguration("language-1c-bsl").get("onescriptPath");
         if (!commandConfig || String(commandConfig).length === 0) {
             if (process.platform === "win32") {
-                command = "oscript.exe";
+                command = "oscript";
             } else if (process.platform === "linux" ) {
                 command = "mono";
                 this.args.unshift("oscript.exe");
@@ -88,7 +88,7 @@ export default class BslLintProvider {
             return;
         }
         let args = this.args.slice();
-        this.args.push(filename);
+        args.push(filename);
         let options = {
             cwd: path.dirname(filename),
             env: process.env
