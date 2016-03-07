@@ -67,6 +67,12 @@
                 "scopeName": "source.sdbl",
                 "path": "./syntaxes/1c-query.tmLanguage"
             }
-        ]
+        ],
+        "snippets": [
+    		{
+    			"language": "bsl",
+    			"path": "./snippets/snippets.json"
+    		}
+    	]
     }
 }
