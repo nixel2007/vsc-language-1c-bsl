@@ -40,6 +40,11 @@ export function activate(context: vscode.ExtensionContext) {
         comments: {
             lineComment: "//"
         },
+        brackets: [
+            ["{", "}"],
+            ["[", "]"],
+            ["(", ")"]
+        ],
         onEnterRules: [
             {
                 beforeText: /^\s*\|([^\"]|"[^\"]*")*$/,
@@ -56,7 +61,12 @@ export function activate(context: vscode.ExtensionContext) {
 
         comments: {
             lineComment: "//"
-        }
+        },
+        brackets: [
+            ["{", "}"],
+            ["[", "]"],
+            ["(", ")"]
+        ]
     });
 
     context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(function (textEditor: vscode.TextEditor) {
