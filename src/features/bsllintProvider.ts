@@ -23,20 +23,9 @@ export default class BslLintProvider {
         let command = "";
         let commandConfig = vscode.workspace.getConfiguration("language-1c-bsl").get("onescriptPath");
         if (!commandConfig || String(commandConfig).length === 0) {
-            if (process.platform === "win32") {
-                command = "oscript";
-            } else if (process.platform === "linux" ) {
-                command = "mono";
-                this.args.unshift("oscript.exe");
-            }
+            command = "oscript";
         } else {
             command = String(commandConfig);
-            if (process.platform === "linux") {
-                if (String(command).startsWith("mono ")) {
-                    this.args.unshift(command.substr(5));
-                    command = "mono";
-                }
-            }
         }
         return command;
     };
