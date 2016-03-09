@@ -23,7 +23,7 @@ function activate(context) {
       ["{", "}"],
       ["[", "]"],
       ["(", ")"]
-	  ],
+    ],
     onEnterRules: [
       {
         beforeText: /^\s*\|([^\"]|"[^\"]*")*$/,
