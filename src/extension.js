@@ -42,7 +42,12 @@ function activate(context) {
 
     comments: {
       lineComment: '//'
-    }
+    },
+    brackets: [
+      ["{", "}"],
+      ["[", "]"],
+      ["(", ")"]
+    ]
 
   });
   
