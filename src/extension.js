@@ -19,6 +19,11 @@ function activate(context) {
     comments: {
       lineComment: '//'
     },
+    brackets: [
+      ["{", "}"],
+      ["[", "]"],
+      ["(", ")"]
+	  ],
     onEnterRules: [
       {
         beforeText: /^\s*\|([^\"]|"[^\"]*")*$/,
