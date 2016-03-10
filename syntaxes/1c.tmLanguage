@@ -27,7 +27,7 @@
         <key>begin</key>
         <string>\"</string>
         <key>end</key>
-        <string>\"</string>
+        <string>\"(?![\"])</string>
         <key>patterns</key>
         <array>
           <dict>
@@ -112,13 +112,18 @@
         <key>comment</key>
         <string>Define of variable</string>
         <key>begin</key>
-        <string>(?i:(?&lt;=[^\wа-яё]|^)(Перем|Var)\s+[a-zа-яё0-9_]+\s*)</string>
+        <string>(?i:(?&lt;=[^\wа-яё]|^)(Перем|Var)\s+([a-zа-яё0-9_]+)\s*)</string>
         <key>beginCaptures</key>
         <dict>
           <key>1</key>
           <dict>
             <key>name</key>
             <string>storage.type.var.bsl</string>
+          </dict>
+          <key>2</key>
+          <dict>
+            <key>name</key>
+            <string>variable.bsl</string>
           </dict>
         </dict>
         <key>end</key>
@@ -500,6 +505,12 @@
         <string>(?=\"[^\"])</string>
         <key>patterns</key>
         <array>
+          <dict>
+            <key>name</key>
+            <string>comment.line.double-slash.bsl</string>
+            <key>match</key>
+            <string>(^\s*//.*$)</string>
+          </dict>
           <dict>
             <key>name</key>
             <string>comment.line.double-slash.sdbl</string>
