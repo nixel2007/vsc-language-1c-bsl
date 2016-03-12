@@ -9,7 +9,7 @@ import { BSL_MODE } from "../const";
 
 import ChildProcess = cp.ChildProcess;
 
-export default class BslLintProvider {
+export default class LintProvider {
 
     private commandId: string;
     private args: Array<string>;
