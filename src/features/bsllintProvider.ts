@@ -4,7 +4,7 @@ import * as vscode from "vscode";
 import * as path from "path";
 import * as cp from "child_process";
 
-import { BSL_MODE, showBslStatus, hideBslStatus } from "./bslStatus";
+import { BSL_MODE } from "../const";
 
 
 import ChildProcess = cp.ChildProcess;

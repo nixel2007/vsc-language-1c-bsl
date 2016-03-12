@@ -6,7 +6,7 @@ import CompletionItemProvider from "./features/completionItemProvider";
 import DefinitionProvider from "./features/definitionProvider";
 import DocumentSymbolProvider from "./features/documentSymbolProvider";
 import ReferenceProvider from "./features/referenceProvider";
-import { showHideStatus, BSL_MODE } from "./features/bslStatus";
+import { BSL_MODE } from "./const";
 import BslLintProvider from "./features/bsllintProvider";
 
 let diagnosticCollection: vscode.DiagnosticCollection;
