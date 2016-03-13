@@ -39,13 +39,7 @@ export default class LintProvider {
         vscode.workspace.onDidSaveTextDocument(this.doBsllint, this);
         vscode.workspace.textDocuments.forEach(this.doBsllint, this);
         if (!this.statusBarItem) {
-            let self = this;
             this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
-            this.statusBarItem.command = "bsl.lint";
-            vscode.commands.registerCommand("bsl.lint", () => {
-                        vscode.commands.executeCommand("workbench.action.showErrorsWarnings");
-                        self.statusBarItem.hide();
-            });
         }
         this.args = ["-encoding=utf-8", "-check"];
         this.commandId = this.getCommandId();
@@ -109,7 +103,7 @@ export default class LintProvider {
                     }
                 }
                 this.diagnosticCollection.set(textDocument.uri, vscodeDiagnosticArray);
-                if (vscodeDiagnosticArray.length !== 0 ) {
+                if (vscodeDiagnosticArray.length !== 0 && vscode.workspace.rootPath === undefined) {
                     this.statusBarItem.text = vscodeDiagnosticArray.length === 0 ? "$(check) No Error" : "$(alert) " +  vscodeDiagnosticArray.length + " Errors";
                     this.statusBarItem.show();
                 } else {
