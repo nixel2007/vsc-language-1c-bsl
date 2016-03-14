@@ -37,7 +37,6 @@ export default class LintProvider {
             this.diagnosticCollection.delete(textDocument.uri);
         }, null, subscriptions);
         vscode.workspace.onDidSaveTextDocument(this.doBsllint, this);
-        vscode.workspace.textDocuments.forEach(this.doBsllint, this);
         if (!this.statusBarItem) {
             this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
         }
@@ -50,6 +49,7 @@ export default class LintProvider {
             this.linterEnabled = true;
         }
         this.lintBSLFiles = Boolean(vscode.workspace.getConfiguration("language-1c-bsl").get("lintBSLFiles"));
+        vscode.workspace.textDocuments.forEach(this.doBsllint, this);        
     }
 
     public dispose(): void {
