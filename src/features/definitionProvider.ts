@@ -16,7 +16,6 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                 wordAtPosition = "";
             } else  {
                 wordAtPosition = self._global.fullNameRecursor(wordAtPosition, document, document.getWordRangeAtPosition(position), false);
-                wordAtPosition = self._global.fullNameRecursor(wordAtPosition, document, document.getWordRangeAtPosition(position), true);
             }
             
             let module = "";
