@@ -7,7 +7,6 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
     public provideDefinition(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Thenable<vscode.Location> {
         let word = document.getText(document.getWordRangeAtPosition(position)).split(/\r?\n/)[0];
         let self = this;
-        console.log("DefinitionProvider: " + word);
         return new Promise((resolve, reject) => {
             let added = {};
             let filename = document.fileName;
@@ -19,8 +18,7 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                 wordAtPosition = self._global.fullNameRecursor(wordAtPosition, document, document.getWordRangeAtPosition(position), false);
                 wordAtPosition = self._global.fullNameRecursor(wordAtPosition, document, document.getWordRangeAtPosition(position), true);
             }
-            console.log("DefinitionProvider for:" + wordAtPosition);
-
+            
             let module = "";
             if (wordAtPosition.indexOf(".") > 0) {
                 if (path.extname(document.fileName) !== ".os") { // Для oscript не можем гаранитировать полное совпадение модулей.  
@@ -70,7 +68,6 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                     return resolve(null);
                 }
                 return vscode.window.showQuickPick(bucket).then(value => {
-                    console.log(value);
                     try {
                         if (value) {
                             let referenceResource = vscode.Uri.file(value.path);

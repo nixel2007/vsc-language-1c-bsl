@@ -94,7 +94,6 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                 if (wordRange) {
                     let wordAtPosition = document.getText(document.getWordRangeAtPosition(basePosition));
                     wordAtPosition = this._global.fullNameRecursor(wordAtPosition, document, document.getWordRangeAtPosition(basePosition), true);
-                    console.log("dot for" + wordAtPosition);
                     let metadata = {};
                     let queryResult: Array<any> = this._global.querydef(document.fileName, wordAtPosition + "\\.");
                     for (let index = 0; index < queryResult.length; index++) {
@@ -140,7 +139,6 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
         let self = this;
         this.added = {};
 
-        console.log("CompletionItemProvider: " + word);
         return new Promise((resolve, reject) => {
             let bucket = new Array<vscode.CompletionItem>();
             let word = document.getText(document.getWordRangeAtPosition(position)).split(/\r?\n/)[0];

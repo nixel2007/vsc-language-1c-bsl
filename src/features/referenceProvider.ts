@@ -3,7 +3,6 @@ import AbstractProvider from "./abstractProvider";
 
 export default class GlobalReferenceProvider extends AbstractProvider implements vscode.ReferenceProvider {
     public provideReferences(document: vscode.TextDocument, position: vscode.Position, options: { includeDeclaration: boolean; }, token: vscode.CancellationToken): Thenable<vscode.Location[]> {
-        console.log("ReferenceProvider: ");
         return vscode.workspace.saveAll(false).then(() => {
             return this.doFindReferences(document, position, options, token);
         });
