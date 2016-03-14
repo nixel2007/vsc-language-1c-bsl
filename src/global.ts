@@ -20,6 +20,7 @@ export class Global {
     globalfunctions: any;
     globalvariables: any;
     keywords: any;
+    private cacheUpdates: boolean;
 
     getCacheLocal(filename: string, word: string, source, update: boolean = false, allToEnd: boolean = true, fromFirst: boolean = true) {
         let suffix = allToEnd  ? "" : "$";
@@ -27,6 +28,18 @@ export class Global {
         let querystring = {"name": {"$regex": new RegExp(prefix + word + suffix, "i")}};
         let entries = new Parser().parse(source).getMethodsTable().find(querystring);
         return entries;
+    }
+    
+    getRefsLocal(filename: string, source: string) {
+        let entries = new Parser().parse(source).getMethodsTable().find();
+        let count = 0;
+        let collection = this.cache.addCollection(filename);
+        for (let y = 0; y < entries.length; ++y) {
+            let added = {};
+            let item = entries[y];
+            this.updateReferenceCalls(collection, item._method.CallsPosition, item, filename, added);
+        }
+        return collection;
     }
 
     getReplaceMetadata () {
@@ -80,7 +93,7 @@ export class Global {
             let added = {};
             for (let y = 0; y < entries.length; ++y) {
                 let item = entries[y];
-                this.updateReferenceCalls(item._method.CallsPosition, item, fullpath, added);
+                this.updateReferenceCalls(this.dbcalls, item._method.CallsPosition, item, fullpath, added);
                 if (!item.isexport) {
                     continue;
                 };
@@ -105,8 +118,7 @@ export class Global {
 
     updateCache(filename: string = ""): any {
         console.log("update cache");
-        this.cache = {};
-        this.cache = new loki("gtags.json");
+        this.cacheUpdates = true;
         let rootPath = vscode.workspace.rootPath;
         if (rootPath) {
             this.db = this.cache.addCollection("ValueTable");
@@ -138,15 +150,19 @@ export class Global {
         }
     };
 
-    queryref(word: string): any {
-        let querystring = {"call": {"$regex": new RegExp("." + word + "$", "i")}};
-        let search = this.dbcalls.chain().find(querystring).simplesort("name").data();
+    queryref(word: string, collection: any, local: boolean = false ): any {
+        if (!collection){
+            return new Array();
+        }
+        let prefix = local ? "" : ".";
+        let querystring = {"call": {"$regex": new RegExp(prefix + word + "$", "i")}};
+        let search = collection.chain().find(querystring).simplesort("name").data();
         return search;
     }
 
-    private updateReferenceCalls(calls: Array<any>, method: any, file: string, added: any): any {
-        if (!this.dbcalls) {
-            this.dbcalls = this.cache.addCollection("Calls");
+    private updateReferenceCalls(collection: any, calls: Array<any>, method: any, file: string, added: any): any {
+        if (!collection) {
+            collection = this.cache.addCollection("Calls");
         }
         let self = this;
         for (let index = 0; index < calls.length; index++) {
@@ -168,7 +184,7 @@ export class Global {
                 "character": value.character,
                 "endline": method.endline
             };
-            self.dbcalls.insert(newItem);
+            collection.insert(newItem);
         }
     }
 
@@ -176,7 +192,7 @@ export class Global {
         // Проверяем локальный кэш. 
         // Проверяем глобальный кэш на модули. 
         // console.log(filename);
-        if (!this.cache) {
+        if (!this.cacheUpdates) {
             this.updateCache(filename);
             return new Array();
         } else {
@@ -189,7 +205,7 @@ export class Global {
     }
 
     query(filename: string, word: string, module: string, all: boolean = true, lazy: boolean = false): any {
-        if (!this.cache) {
+        if (!this.cacheUpdates) {
             this.updateCache(filename);
             return new Array();
         } else {
@@ -229,8 +245,13 @@ export class Global {
         if (dot.endsWith(".")) {
             let newPosition: vscode.Position;
             if (left) {
-                result = document.getText(document.getWordRangeAtPosition(newRange.start)) + "." + word;
-                newPosition = new vscode.Position(newRange.start.line, newRange.start.character - 2);
+                let leftWordRange: vscode.Range = document.getWordRangeAtPosition(newRange.start);
+                result = document.getText(leftWordRange) + "." + word;
+                if (leftWordRange.start.character > 1) {
+                    newPosition = new vscode.Position(leftWordRange.start.line, leftWordRange.start.character - 2);
+                } else {
+                    newPosition = new vscode.Position(leftWordRange.start.line, 0);
+                }
             } else {
                 result = word + "." + document.getText(document.getWordRangeAtPosition(newRange.start));
                 newPosition = new vscode.Position(newRange.end.line, newRange.end.character + 2);
@@ -255,6 +276,8 @@ export class Global {
         this.globalfunctions = bslglobals.globalfunctions()[autocompleteLanguage];
         this.globalvariables = bslglobals.globalvariables()[autocompleteLanguage];
         this.keywords = bslglobals.keywords()[autocompleteLanguage];
+        this.cache = new loki("gtags.json");
+        this.cacheUpdates = false;
     }
 }
 

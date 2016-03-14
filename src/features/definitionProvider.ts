@@ -16,7 +16,9 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                 wordAtPosition = "";
             } else  {
                 wordAtPosition = self._global.fullNameRecursor(wordAtPosition, document, document.getWordRangeAtPosition(position), false);
-                wordAtPosition = self._global.fullNameRecursor(wordAtPosition, document, document.getWordRangeAtPosition(position), true);
+                if (path.extname(document.fileName) !== ".os") { // Для oscript не можем гаранитировать полное совпадение модулей.
+                    wordAtPosition = self._global.fullNameRecursor(wordAtPosition, document, document.getWordRangeAtPosition(position), true);
+                }
             }
             
             let module = "";
@@ -56,13 +58,14 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                         "path": element.filename,
                         "line": element.line,
                         "description": element.description,
-                        "label": moduleDescription + element.name
+                        "label": moduleDescription + element.name,
+                        "isproc": element.isproc
                     };
                     bucket.push(result);
                 }
                 if (bucket.length === 1) {
                     let location: vscode.Location = new vscode.Location(vscode.Uri.file(bucket[0].path),
-                        new vscode.Position(bucket[0].line, 3));
+                        new vscode.Position(bucket[0].line, (bucket[0].isproc ? 9 : 7) + 1));
                     return resolve(location);
                 } else if (bucket.length === 0) {
                     return resolve(null);
@@ -71,7 +74,7 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                     try {
                         if (value) {
                             let referenceResource = vscode.Uri.file(value.path);
-                            let location = new vscode.Location(referenceResource, new vscode.Position(value.line, 0));
+                            let location = new vscode.Location(referenceResource, new vscode.Position(value.line, (value.isproc ? 9 : 7) + 1) );
                             return resolve(location);
                         } else {
                             return reject("value not found " + value);
