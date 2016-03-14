@@ -13,8 +13,6 @@ export default class LintProvider {
 
     private commandId: string;
     private args: Array<string>;
-    private linterEnabled: boolean;
-    private lintBSLFiles: boolean;
     private command: vscode.Disposable;
     private diagnosticCollection: vscode.DiagnosticCollection;
     private statusBarItem: vscode.StatusBarItem;
@@ -42,13 +40,6 @@ export default class LintProvider {
         }
         this.args = ["-encoding=utf-8", "-check"];
         this.commandId = this.getCommandId();
-        let linterEnabled = vscode.workspace.getConfiguration("language-1c-bsl").get("enableOneScriptLinter");
-        if (!linterEnabled) {
-            this.linterEnabled = false;
-        } else {
-            this.linterEnabled = true;
-        }
-        this.lintBSLFiles = Boolean(vscode.workspace.getConfiguration("language-1c-bsl").get("lintBSLFiles"));
         vscode.workspace.textDocuments.forEach(this.doBsllint, this);        
     }
 
@@ -62,12 +53,14 @@ export default class LintProvider {
         if (!vscode.languages.match(BSL_MODE, textDocument)) {
             return;
         }
+        let linterEnabled = Boolean(vscode.workspace.getConfiguration("language-1c-bsl").get("enableOneScriptLinter"));
+        let lintBSLFiles = Boolean(vscode.workspace.getConfiguration("language-1c-bsl").get("lintBSLFiles"));
         let diagnostics: vscode.Diagnostic[] = [];
-        if (!this.linterEnabled) {
+        if (!linterEnabled) {
             return;
         }
         let filename = textDocument.uri.fsPath;
-        if (filename.endsWith(".bsl") && !this.lintBSLFiles) {
+        if (filename.endsWith(".bsl") && !lintBSLFiles) {
             return;
         }
         let args = this.args.slice();
