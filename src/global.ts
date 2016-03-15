@@ -20,6 +20,7 @@ export class Global {
     globalfunctions: any;
     globalvariables: any;
     keywords: any;
+    private toreplaced: any;
     private cacheUpdates: boolean;
 
     getCacheLocal(filename: string, word: string, source, update: boolean = false, allToEnd: boolean = true, fromFirst: boolean = true) {
@@ -44,16 +45,50 @@ export class Global {
 
     getReplaceMetadata () {
         return {
-            "Catalogs": "Справочники",
-            "Documents": "Документы",
+            "AccountingRegisters": "РегистрыБухгалтерии",
             "AccumulationRegisters": "РегистрыНакопления",
             "BusinessProcesses": "БизнессПроцессы",
+            "CalculationRegisters": "РегистрыРасчета",
+            "Catalogs": "Справочники",
+            "Documents": "Документы",
             "DataProcessors": "Обработки",
             "Reports": "Отчеты",
             "InformationRegisters": "РегистрыСведений",
-            "ExchangePlans": "ПланыОбмена",
-            "CalculationRegisters": "РегистрыРасчета"
+            "ExchangePlans": "ПланыОбмена"
         };
+    }
+
+    getModuleForPath(fullpath: string, rootPath: string): any {
+        if (!this.toreplaced) {
+            this.toreplaced = this.getReplaceMetadata();
+        }
+
+        fullpath = decodeURIComponent(fullpath);
+        let splitsymbol = process.platform === "win32" ? "\\" : "/";
+        if (fullpath.startsWith("file:")) {
+            splitsymbol = "/";
+            if (process.platform === "win32") {
+                fullpath = fullpath.substr(8);
+            } else {
+                fullpath = fullpath.substr(7);
+            }
+        }
+        let isbsl = fullpath.endsWith(".bsl") ? true : false;
+        let moduleArray: Array<string> = fullpath.substr(rootPath.length + 1).split(splitsymbol);
+        let module: string = "";
+        if (isbsl) {
+            let test = false;
+            if (moduleArray.length > 1) {
+                if (moduleArray[0].startsWith("CommonModules")) {
+                    module = moduleArray[1];
+                } else if (moduleArray.length > 3 && this.toreplaced[moduleArray[0]] !== undefined) {
+                    moduleArray[0] = this.toreplaced[moduleArray[0]];
+                    module = moduleArray[0] + "." + moduleArray[1];
+                }
+            }
+        };
+        return {"fullpath": fullpath,
+                "module": module};
     }
 
     private addtocachefiles(files: Array<vscode.Uri>, isbsl: boolean = false): any {
@@ -61,32 +96,10 @@ export class Global {
         let rootPath = vscode.workspace.rootPath;
         let replaced = this.getReplaceMetadata();
         for (let i = 0; i < files.length; ++i) {
-            let fullpath: string = decodeURIComponent(files[i].toString());
-            if (fullpath.startsWith("file:")) {
-                if (process.platform === "win32") {
-                    fullpath = fullpath.substr(8);
-                } else {
-                    fullpath = fullpath.substr(7);
-                }
-            }
-            let moduleArray: Array<string> = fullpath.substr(rootPath.length + 1).split("/");
-            let module: string = "";
-            if (isbsl) {
-                let test = false;
-                if (moduleArray.length > 1) {
-                    if (moduleArray[0].startsWith("CommonModules")) {
-                        module = moduleArray[1];
-                        test = false;
-                    } else if (moduleArray.length > 3 && replaced[moduleArray[0]] !== undefined) {
-                        moduleArray[0] = replaced[moduleArray[0]];
-                        module = moduleArray[0] + "." + moduleArray[1];
-                        test = false;
-                    }
-                }
-                if (!test) {
-                    failed.push(moduleArray[0]);
-                }
-            };
+            let fullpath = files[i].toString();
+            let moduleObj = this.getModuleForPath(fullpath, rootPath);
+            let module = moduleObj.module;
+            fullpath = moduleObj.fullpath;
             let source = fs.readFileSync(fullpath, "utf-8");
             let entries = new Parser().parse(source).getMethodsTable().find();
             let count = 0;
@@ -151,7 +164,7 @@ export class Global {
     };
 
     queryref(word: string, collection: any, local: boolean = false ): any {
-        if (!collection){
+        if (!collection) {
             return new Array();
         }
         let prefix = local ? "" : ".";
@@ -215,7 +228,7 @@ export class Global {
             if (module && module.length > 0) {
                 querystring["module"] = {"$regex": new RegExp("^" + module + "", "i")};
             }
-            let moduleRegexp = new RegExp("^" + module, "i");
+            let moduleRegexp = new RegExp("^" + module + "$", "i");
             function filterByModule(obj) {
                 if (module && module.length > 0) {
                     if (moduleRegexp.exec(obj.module) != null) {

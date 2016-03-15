@@ -16,32 +16,24 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                 wordAtPosition = "";
             } else  {
                 wordAtPosition = self._global.fullNameRecursor(wordAtPosition, document, document.getWordRangeAtPosition(position), false);
-                if (path.extname(document.fileName) !== ".os") { // Для oscript не можем гаранитировать полное совпадение модулей.
-                    wordAtPosition = self._global.fullNameRecursor(wordAtPosition, document, document.getWordRangeAtPosition(position), true);
-                }
+                wordAtPosition = self._global.fullNameRecursor(wordAtPosition, document, document.getWordRangeAtPosition(position), true);
             }
-            
             let module = "";
             if (wordAtPosition.indexOf(".") > 0) {
-                if (path.extname(document.fileName) !== ".os") { // Для oscript не можем гаранитировать полное совпадение модулей.  
+                //if (path.extname(document.fileName) !== ".os") { // Для oscript не можем гаранитировать полное совпадение модулей.  
                     let dotArray: Array<string> = wordAtPosition.split(".");
                     wordAtPosition = dotArray.pop();
                     module = dotArray.join(".");
-                }
+                //}
             }
-            let d: Array<any> = self._global.query(filename, wordAtPosition, module, false, false);
-            let source = document.getText();
-            let local = self._global.getCacheLocal(filename, wordAtPosition, source);
-            if (!d) {
-                d = local;
+            let local: Array<any>;
+            let d: Array<any> = new Array();
+            if (module.length === 0 ) {
+                let source = document.getText();
+                d = self._global.getCacheLocal(filename, wordAtPosition, source);
             } else {
-                for (let index = 0; index < local.length; index++) {
-                    let element = local[index];
-                    element["filename"] = document.fileName;
-                    d.push(element);
-                }
+                d = self._global.query(filename, wordAtPosition, module, false, false);
             }
-            _.unique(d);
             if (d.length === 0) {
                 d = self._global.query(filename, word, "", false, false);
             }
@@ -61,6 +53,9 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                         "label": moduleDescription + element.name,
                         "isproc": element.isproc
                     };
+                    if (!result.path){
+                        result.path = filename;
+                    }
                     bucket.push(result);
                 }
                 if (bucket.length === 1) {

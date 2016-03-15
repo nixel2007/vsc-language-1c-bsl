@@ -8,7 +8,7 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
         });
     }
     
-    private addReference(searchResult: any, results: vscode.Location[], wordLength: any): any {
+    private addReference(searchResult: any, results: vscode.Location[]): any {
         if (searchResult) {
             let bucket = new Array<any>();
             for (let index = 0; index < searchResult.length; index++) {
@@ -21,7 +21,7 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
                 let colStr = element.character;
                 let referenceResource = vscode.Uri.file(result.path);
                 let range = new vscode.Range(
-                                result.line, +colStr, result.line , +colStr + wordLength - 1
+                                result.line, +colStr, result.line , +colStr + element.call.length
                             );
                     results.push(new vscode.Location(referenceResource, range));
 
@@ -48,16 +48,21 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
             
             let localRefs = self._global.getRefsLocal(filename, source);
             let d = self._global.queryref(textAtPosition, localRefs, true);
-            let res = this.addReference(d, results, wordLength);
+            let res = this.addReference(d, results);
             self._global.cache.removeCollection(filename);
             if (results.length > 0) {
-                resolve(results);
+                //resolve(results);
+            }
+            
+            let fullmodule = self._global.getModuleForPath(filename, vscode.workspace.rootPath)["module"];
+            let localsearch = false;
+            if (fullmodule.length !== 0 ) {
+                textAtPosition = fullmodule + "." + textAtPosition;
+                localsearch = true;
             }
 
-            d = self._global.queryref(textAtPosition, this._global.dbcalls);
-            // Определим это экспортная процедура или нет, если экспортная, тогда ищем глобально. 
-            // Если не экспортная, тогда ищем только в текущем модуле. 
-            res = this.addReference(d, results, wordLength);
+            d = self._global.queryref(textAtPosition, this._global.dbcalls, localsearch);
+            res = this.addReference(d, results);
             resolve(results);
         });
     }
