@@ -23,7 +23,7 @@ export function activate(context: vscode.ExtensionContext) {
     let linter = new LintProvider();
     linter.activate(context.subscriptions);
 
-    context.subscriptions.push(vscode.commands.registerCommand("bsl.update", () => {
+    context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.update", () => {
         let filename = vscode.window.activeTextEditor.document.fileName;
         global.updateCache(filename);
     }));
