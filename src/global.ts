@@ -298,9 +298,9 @@ export class Global {
 }
 
 interface MethodValue {
-    // 'Имя процедуры/функции'
+    // Имя процедуры/функции'
     name: string;
-    // 'Процедура = false, Функция = true
+    // Процедура = true, Функция = false
     isproc: boolean;
     // начало
     line: number;
