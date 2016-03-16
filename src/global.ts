@@ -250,6 +250,9 @@ export class Global {
         let newRange: vscode.Range;
         if (left) {
             plus = -1;
+            if (range.start.character === 0) {
+                return word;
+            }
             newRange = new vscode.Range(new vscode.Position(range.start.line, range.start.character + plus), new vscode.Position(range.start.line, range.start.character));
         } else {
             newRange = new vscode.Range(new vscode.Position(range.end.line, range.end.character), new vscode.Position(range.end.line, range.end.character + plus));
