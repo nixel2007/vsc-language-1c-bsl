@@ -32,14 +32,14 @@
     "activationEvents": [
         "onLanguage:bsl",
         "onLanguage:sdbl",
-        "onCommand:bsl.update"
+        "onCommand:language-1c-bsl.update"
     ],
     "contributes": {
         "commands": [
             {
-                "command": "bsl.update",
-                "title": "reference cache update for bsl",
-                "category": "bsl"
+                "command": "language-1c-bsl.update",
+                "title": "Update reference cache",
+                "category": "Language 1C (BSL)"
             }
         ],
         "configuration": {
