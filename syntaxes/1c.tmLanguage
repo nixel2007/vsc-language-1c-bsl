@@ -165,7 +165,7 @@
         <key>name</key>
         <string>keyword.control.import.bsl</string>
         <key>match</key>
-        <string>\#(Использовать|Use)(?=[^\wа-яё]|$)</string>
+        <string>(?i)#(Использовать|Use)(?=[^\wа-яё]|$)</string>
       </dict>
       <dict>
         <key>name</key>
