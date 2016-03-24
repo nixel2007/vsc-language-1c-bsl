@@ -3,7 +3,7 @@
     "displayName": "Language 1C (BSL)",
     "description": "Syntax highlighting for 1C:Enterprise 8.",
     "icon": "images/xDDIcon.png",
-    "version": "1.4.1",
+    "version": "1.4.5",
     "publisher": "xDrivenDevelopment",
     "galleryBanner": {
         "color": "#0000FF",
@@ -65,7 +65,7 @@
                     "default": "ru"
                 }, 
                 "language-1c-bsl.rootPath":{
-                    "description": "Путь по умолчанию к корню файла конфигурации (./src/cf) относительно каталога workspace для правильного autocomplite", 
+                    "description": "Путь по умолчанию к корню файла конфигурации (./src/cf) относительно каталога workspace для правильного autocomplete", 
                     "type": "string"
                 }
             }
@@ -102,7 +102,6 @@
       },
     "devDependencies": {
         "typescript": "^1.6.2",
-        "vsce": "^1.3.0",
         "vscode": "0.10.x"
     },
     "dependencies": {
