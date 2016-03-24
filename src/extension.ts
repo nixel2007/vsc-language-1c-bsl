@@ -16,10 +16,10 @@ let diagnosticCollection: vscode.DiagnosticCollection;
 export function activate(context: vscode.ExtensionContext) {
 
     const global = new Global("global");
-    context.subscriptions.push(vscode.languages.registerCompletionItemProvider(["bsl", "bsl"], new CompletionItemProvider(global), ".", "="));
-    context.subscriptions.push(vscode.languages.registerDefinitionProvider(["bsl", "bsl"], new DefinitionProvider(global)));
-    context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider(["bsl", "bsl"], new DocumentSymbolProvider(global)));
-    context.subscriptions.push(vscode.languages.registerReferenceProvider(["bsl", "bsl"], new ReferenceProvider(global)));
+    context.subscriptions.push(vscode.languages.registerCompletionItemProvider(BSL_MODE, new CompletionItemProvider(global), ".", "="));
+    context.subscriptions.push(vscode.languages.registerDefinitionProvider(BSL_MODE, new DefinitionProvider(global)));
+    context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider(BSL_MODE, new DocumentSymbolProvider(global)));
+    context.subscriptions.push(vscode.languages.registerReferenceProvider(BSL_MODE, new ReferenceProvider(global)));
     let linter = new LintProvider();
     linter.activate(context.subscriptions);
 
