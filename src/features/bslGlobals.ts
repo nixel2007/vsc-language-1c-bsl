@@ -798,11 +798,6 @@ export function globalvariables() {
     };
 }
 
-
-export function globalfunctions1 () {
-    return {};
-}
-
 export function keywords() {
     return {
         "ru": {
