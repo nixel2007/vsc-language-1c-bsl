@@ -160,12 +160,18 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
             result = self._global.querydef(document.fileName, word);
             result.forEach(function (value, index, array) {
                 let moduleDescription = (value.module && value.module.length > 0) ? value.module + "." : "";
-                if (self.added[(moduleDescription + value.name).toLowerCase()] !== true) {
-                    let item = new vscode.CompletionItem(moduleDescription + value.name);
-                    item.documentation = value.description;
+                let fullName = moduleDescription + value.name;
+                let description = value.description;
+                if (moduleDescription.length > 0) {
+                    fullName = value.module;
+                    description = fullName;
+                }
+                if (self.added[(fullName).toLowerCase()] !== true) {
+                    let item = new vscode.CompletionItem(fullName);
+                    item.documentation = description;
                     item.kind = vscode.CompletionItemKind.File;
                     bucket.push(item);
-                    self.added[(moduleDescription + value.name).toLowerCase()] = true;
+                    self.added[(fullName).toLowerCase()] = true;
                 }
             });
             bucket = self.getAllWords(word, document.getText(), bucket);
