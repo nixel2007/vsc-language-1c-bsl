@@ -45,7 +45,7 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
 
             let source = document.getText();
             let lines = (source.indexOf("\r\n") === -1) ? source.split("\n") : source.split("\r\n");
-            
+
             let localRefs = self._global.getRefsLocal(filename, source);
             let d = self._global.queryref(textAtPosition, localRefs, true);
             let res = this.addReference(d, results);
@@ -53,17 +53,18 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
             if (results.length > 0) {
                 //resolve(results);
             }
-            
-            let fullmodule = self._global.getModuleForPath(filename, vscode.workspace.rootPath)["module"];
-            let localsearch = false;
-            if (fullmodule.length !== 0 ) {
-                textAtPosition = fullmodule + "." + textAtPosition;
-                localsearch = true;
-            }
+            if (workspaceRoot) {
+                let fullmodule = self._global.getModuleForPath(filename, vscode.workspace.rootPath)["module"];
+                let localsearch = false;
+                if (fullmodule.length !== 0 ) {
+                    textAtPosition = fullmodule + "." + textAtPosition;
+                    localsearch = true;
+                }
 
-            d = self._global.queryref(textAtPosition, this._global.dbcalls, localsearch);
-            res = this.addReference(d, results);
-            resolve(results);
+                d = self._global.queryref(textAtPosition, this._global.dbcalls, localsearch);
+                res = this.addReference(d, results);
+            }
+            return resolve(results);
         });
     }
 }
