@@ -44,6 +44,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                 if (full["signature"]) {
                     completion.detail = full["signature"];
                 }
+                completion.insertText = name + "(";
                 completions.push(completion);
                 this.added[name.toLowerCase()] = true;
             }
@@ -125,6 +126,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                         let item: vscode.CompletionItem = new vscode.CompletionItem(element.name);
                         item.kind = vscode.CompletionItemKind.Function;
                         item.documentation = element.description;
+                        item.insertText = element.name + "(";                
                         result.push(item);
                     }
                 }
@@ -153,6 +155,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                     let item = new vscode.CompletionItem(value.name);
                     item.documentation = value.description;
                     item.kind = vscode.CompletionItemKind.Function;
+                    item.insertText = value.name + "(";                
                     bucket.push(item);
                     self.added[value.name.toLowerCase()] = true;
                 }
