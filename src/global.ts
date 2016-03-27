@@ -22,6 +22,7 @@ export class Global {
     keywords: any;
     private toreplaced: any;
     private cacheUpdates: boolean;
+    private pathSeparator: string;
 
     getCacheLocal(filename: string, word: string, source, update: boolean = false, allToEnd: boolean = true, fromFirst: boolean = true) {
         let suffix = allToEnd  ? "" : "$";
@@ -291,6 +292,19 @@ export class Global {
             return result;
         }
     }
+    
+    public asAbsolutePath(resource: vscode.Uri): string {
+		if (resource.scheme !== "file") {
+			return null;
+		}
+		let result = resource.fsPath;
+		// Both \ and / must be escaped in regular expressions
+		return result ? result.replace(new RegExp('\\' + this.pathSeparator, 'g'), '/') : null;
+	}
+    
+    public asUrl(filepath: string): vscode.Uri {
+		return vscode.Uri.file(filepath);
+	}
 
     constructor(exec: string) {
         let configuration = vscode.workspace.getConfiguration("language-1c-bsl");
@@ -303,6 +317,7 @@ export class Global {
         this.keywords = bslglobals.keywords()[autocompleteLanguage];
         this.cache = new loki("gtags.json");
         this.cacheUpdates = false;
+        this.pathSeparator = path.sep;
     }
 }
 

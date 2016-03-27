@@ -7,6 +7,7 @@ import CompletionItemProvider from "./features/completionItemProvider";
 import DefinitionProvider from "./features/definitionProvider";
 import LintProvider from "./features/lintProvider";
 import DocumentSymbolProvider from "./features/documentSymbolProvider";
+import GlobalworkspaseSymbolProvider from "./features/workspaceSymbolProvider";
 import ReferenceProvider from "./features/referenceProvider";
 
 let diagnosticCollection: vscode.DiagnosticCollection;
@@ -20,6 +21,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.languages.registerDefinitionProvider(BSL_MODE, new DefinitionProvider(global)));
     context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider(BSL_MODE, new DocumentSymbolProvider(global)));
     context.subscriptions.push(vscode.languages.registerReferenceProvider(BSL_MODE, new ReferenceProvider(global)));
+    context.subscriptions.push(vscode.languages.registerWorkspaceSymbolProvider(new GlobalworkspaseSymbolProvider(global)));
     let linter = new LintProvider();
     linter.activate(context.subscriptions);
 
