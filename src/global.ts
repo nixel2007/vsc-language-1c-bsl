@@ -151,7 +151,7 @@ export class Global {
             }, (reason) => {
                 console.log(reason);
             });
-            files = vscode.workspace.findFiles("**" + basePath.substr(1) + "**/*.bsl", "", 10000);
+            files = vscode.workspace.findFiles("**" + basePath.substr(1) + "**/**/*Forms*/**/*Ext*/*Form*/*.bsl", "", 10000);
             files.then((value) => {
                 this.addtocachefiles(value, true, rootPath);
             }, (reason) => {
