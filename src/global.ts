@@ -256,7 +256,7 @@ export class Global {
             if (range.start.character === 0) {
                 return word;
             }
-            newRange = new vscode.Range(new vscode.Position(range.start.line, range.start.character + plus), new vscode.Position(range.start.line, range.start.character));
+            newRange = new vscode.Range(new vscode.Position(range.start.line, range.end.character - word.length + plus), new vscode.Position(range.start.line, range.start.character));
         } else {
             newRange = new vscode.Range(new vscode.Position(range.end.line, range.end.character), new vscode.Position(range.end.line, range.end.character + plus));
         }
@@ -267,7 +267,7 @@ export class Global {
                 let leftWordRange: vscode.Range = document.getWordRangeAtPosition(newRange.start);
                 result = document.getText(leftWordRange) + "." + word;
                 if (leftWordRange.start.character > 1) {
-                    newPosition = new vscode.Position(leftWordRange.start.line, leftWordRange.start.character - 2);
+                    newPosition = new vscode.Position(leftWordRange.start.line, leftWordRange.start.character - 1);
                 } else {
                     newPosition = new vscode.Position(leftWordRange.start.line, 0);
                 }
@@ -275,9 +275,9 @@ export class Global {
                 result = word + "." + document.getText(document.getWordRangeAtPosition(newRange.start));
                 newPosition = new vscode.Position(newRange.end.line, newRange.end.character + 2);
             }
-            let newWord = document.getWordRangeAtPosition(newPosition);
-            if (newWord) {
-                return this.fullNameRecursor(result, document, newWord, left);
+            if (document.getText(new vscode.Range(new vscode.Position(newPosition.line,newPosition.character+1), newPosition)) === "."){
+                let newWord = document.getWordRangeAtPosition(newPosition);
+                return document.getText(newWord) +  "." + result;
             }
             return result;
         } else {
