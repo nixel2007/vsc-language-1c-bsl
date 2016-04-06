@@ -35,7 +35,7 @@ export default class GlobalworkspaseSymbolProvider extends AbstractProvider impl
                 continue;
             }
             added[element.name] = true;
-            let range = new vscode.Range(new vscode.Position(element.line, element.isproc ? 9 : 7), new vscode.Position(element.line, (element.isproc ? 9 : 7) + element.name.length));
+            let range = new vscode.Range(new vscode.Position(element.line, 0), new vscode.Position(element.line, 0));
             let result = new SymbolInformation(element.name, SymbolKind.Function,
                 range, this._global.asUrl(element.filename));
             bucket.push(result);
