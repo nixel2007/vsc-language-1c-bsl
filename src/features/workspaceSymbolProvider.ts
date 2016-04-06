@@ -26,15 +26,10 @@ export default class GlobalworkspaseSymbolProvider extends AbstractProvider impl
         if (!file) {
 			return Promise.resolve<SymbolInformation[]>([]);
 		}
-        let added = {}
         let d: Array<any> = this._global.query(file, search, "", true, true);
         let bucket = new Array<SymbolInformation>();
         for (let index = 0; index < d.length; index++) {
             let element = d[index];
-            if (added[element.name] === true) {
-                continue;
-            }
-            added[element.name] = true;
             let range = new vscode.Range(new vscode.Position(element.line, 0), new vscode.Position(element.line, 0));
             let result = new SymbolInformation(element.name, SymbolKind.Function,
                 range, this._global.asUrl(element.filename));
