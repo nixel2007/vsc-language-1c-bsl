@@ -123,6 +123,9 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                 queryResult = this._global.querydef(document.fileName, wordAtPosition, false, false);
                     for (let index = 0; index < queryResult.length; index++) {
                         let element = queryResult[index];
+                        if (!element._method.IsExport) {
+                            continue;
+                        }
                         let item: vscode.CompletionItem = new vscode.CompletionItem(element.name);
                         item.kind = vscode.CompletionItemKind.Function;
                         item.documentation = element.description;
