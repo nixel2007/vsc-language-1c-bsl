@@ -111,9 +111,6 @@ export class Global {
             for (let y = 0; y < entries.length; ++y) {
                 let item = entries[y];
                 this.updateReferenceCalls(this.dbcalls, item._method.CallsPosition, item, fullpath, added);
-                if (!item.isexport) {
-                    continue;
-                };
                 item["filename"] = fullpath;
                 let newItem: MethodValue = {
                     "name": String(item.name),
@@ -148,28 +145,24 @@ export class Global {
             this.dbcalls = this.cache.addCollection("Calls");
 
             let self = this;
-            if (path.extname(filename) === ".os") {
-                let files = vscode.workspace.findFiles("**" + basePath.substr(1) + "**/*.os", "", 1000);
-                files.then((value) => {
-                    this.addtocachefiles(value, false, rootPath);
-                }, (reason) => {
-                    console.log(reason);
-                });
-            } else if (path.extname(filename) === ".bsl") {
-                let files = vscode.workspace.findFiles("**" + basePath.substr(1) + "**/*CommonModules*/**/*.bsl", "", 10000);
-                files.then((value) => {
-                    this.addtocachefiles(value, true, rootPath);
-                }, (reason) => {
-                    console.log(reason);
-                });
-                files = vscode.workspace.findFiles("**" + basePath.substr(1) + "**/ManagerModule.bsl", "", 100000);
-                files.then((value) => {
-                    this.addtocachefiles(value, true, rootPath);
-                }, (reason) => {
-                    console.log(reason);
-                }
-                );
-            }
+            let files = vscode.workspace.findFiles("**" + basePath.substr(1) + "**/*.os", "", 1000);
+            files.then((value) => {
+                this.addtocachefiles(value, false, rootPath);
+            }, (reason) => {
+                console.log(reason);
+            });
+            files = vscode.workspace.findFiles("**" + basePath.substr(1) + "**/*.bsl", "", 10000);
+            files.then((value) => {
+                this.addtocachefiles(value, true, rootPath);
+            }, (reason) => {
+                console.log(reason);
+            });
+            files = vscode.workspace.findFiles("**" + basePath.substr(1) + "**/**/*Ext*/*.bsl", "", 10000);
+            files.then((value) => {
+                this.addtocachefiles(value, true, rootPath);
+            }, (reason) => {
+                console.log(reason);
+            });
         }
     };
 
