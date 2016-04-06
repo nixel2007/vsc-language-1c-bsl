@@ -8,7 +8,7 @@ import {BSL_MODE} from "../const";
 //import * as global from "../global";
 
 export default class GlobalworkspaseSymbolProvider extends AbstractProvider implements WorkspaceSymbolProvider {
-    public provideWorkspaceSymbols(search: string, token :CancellationToken): Promise<SymbolInformation[]> {
+    public provideWorkspaceSymbols(search: string, token: CancellationToken): Promise<SymbolInformation[]> {
         let uri: Uri;
 		let documents = workspace.textDocuments;
 		for (let document of documents) {
@@ -35,7 +35,7 @@ export default class GlobalworkspaseSymbolProvider extends AbstractProvider impl
                 continue;
             }
             added[element.name] = true;
-            let range = new Range(element.line - 1, element.character - 1, element.endLine - 1, element.character - 1);
+            let range = new vscode.Range(new vscode.Position(element.line, element.character), new vscode.Position(element.endLine, element.character));
             let result = new SymbolInformation(element.name, SymbolKind.Function,
                 range, this._global.asUrl(element.filename));
             bucket.push(result);
