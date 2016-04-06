@@ -72,6 +72,7 @@ export function activate(context: vscode.ExtensionContext) {
     }));
     if (vscode.window.activeTextEditor) {
         applyConfigToTextEditor(vscode.window.activeTextEditor);
+        global.updateCache(vscode.window.activeTextEditor.document.fileName);
     }
 }
 
