@@ -137,7 +137,7 @@ export class Global {
         let basePath: string = String(configuration.get("rootPath"));
         let rootPath = vscode.workspace.rootPath;
         if (!basePath) {
-            basePath = "./";
+            basePath = ".";
         }
         if (rootPath) {
             rootPath = path.join(vscode.workspace.rootPath, basePath);
