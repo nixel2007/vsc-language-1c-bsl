@@ -101,38 +101,45 @@ export class Global {
             rootPath = vscode.workspace.rootPath;
         }
         let replaced = this.getReplaceMetadata();
-        for (let i = 0; i < files.length; ++i) {
+        let filesLength = files.length;
+        for (let i = 0; i < filesLength; ++i) {
             //vscode.window.setStatusBarMessage("Обновляем список " + i + " из " + files.length, 1000);
             let fullpath = files[i].toString();
             let moduleObj = this.getModuleForPath(fullpath, rootPath);
             let module = moduleObj.module;
             fullpath = moduleObj.fullpath;
-            let source = fs.readFileSync(fullpath, "utf-8");
-            let parsesModule = new Parser().parse(source);
-            let entries = parsesModule.getMethodsTable().find();
-            let count = 0;
-            let added = {};
-            this.updateReferenceCalls(this.dbcalls, parsesModule.context.CallsPosition, "GlobalModuleText", fullpath, added);
-            for (let y = 0; y < entries.length; ++y) {
-                let item = entries[y];
-                this.updateReferenceCalls(this.dbcalls, item._method.CallsPosition, item, fullpath, added);
-                item["filename"] = fullpath;
-                let newItem: MethodValue = {
-                    "name": String(item.name),
-                    "isproc": Boolean(item.isproc),
-                    "line": item.line,
-                    "endline": item.endline,
-                    "context": item.context,
-                    "_method": item._method,
-                    "filename": fullpath,
-                    "module": module,
-                    "description": item.description
-                };
-                ++count;
-                this.db.insert(newItem);
-            }
+            fs.readFile(fullpath, "utf-8", (err, source) => {
+                if (err) {
+                    throw err;
+                }
+                let parsesModule = new Parser().parse(source);
+                let entries = parsesModule.getMethodsTable().find();
+                let count = 0;
+                let added = {};
+                this.updateReferenceCalls(this.dbcalls, parsesModule.context.CallsPosition, "GlobalModuleText", fullpath, added);
+                for (let y = 0; y < entries.length; ++y) {
+                    let item = entries[y];
+                    this.updateReferenceCalls(this.dbcalls, item._method.CallsPosition, item, fullpath, added);
+                    item["filename"] = fullpath;
+                    let newItem: MethodValue = {
+                        "name": String(item.name),
+                        "isproc": Boolean(item.isproc),
+                        "line": item.line,
+                        "endline": item.endline,
+                        "context": item.context,
+                        "_method": item._method,
+                        "filename": fullpath,
+                        "module": module,
+                        "description": item.description
+                    };
+                    ++count;
+                    this.db.insert(newItem);
+                }
+                if (i = filesLength) {
+                    vscode.window.setStatusBarMessage("Обновлен список процедур.", 3000);
+                }    
+            });            
         }
-        vscode.window.setStatusBarMessage("Обновлен список процедур.", 3000);
     }
 
     updateCache(filename: string = ""): any {
