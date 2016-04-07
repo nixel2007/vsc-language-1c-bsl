@@ -109,7 +109,7 @@
         "fs-readfile-promise": "^2.0.1",
         "iconv-lite": "^0.4.13",
         "lokijs": "^1.3.11",
-        "onec-syntaxparser": "^0.1.6",
+        "onec-syntaxparser": "^0.1.7",
         "underscore": "^1.8.3"
     }
 }

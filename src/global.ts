@@ -33,11 +33,14 @@ export class Global {
     }
 
     getRefsLocal(filename: string, source: string) {
-        let entries = new Parser().parse(source).getMethodsTable().find();
+        let parsesModule = new Parser().parse(source);
+        let entries = parsesModule.getMethodsTable().find();
         let count = 0;
         let collection = this.cache.addCollection(filename);
+        let added = {};
+        this.updateReferenceCalls(collection, parsesModule.context.CallsPosition, "GlobalModuleText", filename, added);
         for (let y = 0; y < entries.length; ++y) {
-            let added = {};
+            added = {};
             let item = entries[y];
             this.updateReferenceCalls(collection, item._method.CallsPosition, item, filename, added);
         }
@@ -105,9 +108,11 @@ export class Global {
             let module = moduleObj.module;
             fullpath = moduleObj.fullpath;
             let source = fs.readFileSync(fullpath, "utf-8");
-            let entries = new Parser().parse(source).getMethodsTable().find();
+            let parsesModule = new Parser().parse(source);
+            let entries = parsesModule.getMethodsTable().find();
             let count = 0;
             let added = {};
+            this.updateReferenceCalls(this.dbcalls, parsesModule.context.CallsPosition, "GlobalModuleText", fullpath, added);
             for (let y = 0; y < entries.length; ++y) {
                 let item = entries[y];
                 this.updateReferenceCalls(this.dbcalls, item._method.CallsPosition, item, fullpath, added);
