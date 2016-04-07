@@ -8,6 +8,8 @@ let exec = require("child-process-promise").exec;
 let iconv = require("iconv-lite");
 let loki = require("lokijs");
 let Parser = require("onec-syntaxparser");
+let FileQueue = require("filequeue");
+let fq = new FileQueue(500);
 
 import * as vscode from "vscode";
 
@@ -103,12 +105,12 @@ export class Global {
         let replaced = this.getReplaceMetadata();
         let filesLength = files.length;
         for (let i = 0; i < filesLength; ++i) {
-            //vscode.window.setStatusBarMessage("Обновляем список " + i + " из " + files.length, 1000);
+            // vscode.window.setStatusBarMessage("Обновляем список " + i + " из " + files.length, 1000);
             let fullpath = files[i].toString();
             let moduleObj = this.getModuleForPath(fullpath, rootPath);
             let module = moduleObj.module;
             fullpath = moduleObj.fullpath;
-            fs.readFile(fullpath, "utf-8", (err, source) => {
+            fq.readFile(fullpath, {encoding: "utf8"}, (err, source) => {
                 if (err) {
                     throw err;
                 }
@@ -137,8 +139,8 @@ export class Global {
                 }
                 if (i = filesLength) {
                     vscode.window.setStatusBarMessage("Обновлен список процедур.", 3000);
-                }    
-            });            
+                }
+            });
         }
     }
 
@@ -287,7 +289,7 @@ export class Global {
                 result = word + "." + document.getText(document.getWordRangeAtPosition(newRange.start));
                 newPosition = new vscode.Position(newRange.end.line, newRange.end.character + 2);
             }
-            if (document.getText(new vscode.Range(new vscode.Position(newPosition.line,newPosition.character+1), newPosition)) === "."){
+            if (document.getText(new vscode.Range(new vscode.Position(newPosition.line, newPosition.character + 1), newPosition)) === ".") {
                 let newWord = document.getWordRangeAtPosition(newPosition);
                 return document.getText(newWord) +  "." + result;
             }
@@ -297,19 +299,19 @@ export class Global {
             return result;
         }
     }
-    
+
     public asAbsolutePath(resource: vscode.Uri): string {
-		if (resource.scheme !== "file") {
-			return null;
-		}
-		let result = resource.fsPath;
-		// Both \ and / must be escaped in regular expressions
-		return result ? result.replace(new RegExp('\\' + this.pathSeparator, 'g'), '/') : null;
-	}
-    
+        if (resource.scheme !== "file") {
+            return null;
+        }
+        let result = resource.fsPath;
+        // Both \ and / must be escaped in regular expressions
+        return result ? result.replace(new RegExp("\\" + this.pathSeparator, "g"), "/") : null;
+    }
+
     public asUrl(filepath: string): vscode.Uri {
-		return vscode.Uri.file(filepath);
-	}
+        return vscode.Uri.file(filepath);
+    }
 
     constructor(exec: string) {
         let configuration = vscode.workspace.getConfiguration("language-1c-bsl");
