@@ -80,7 +80,7 @@ export class Global {
             }
         }
         let isbsl = fullpath.endsWith(".bsl") ? true : false;
-        let moduleArray: Array<string> = fullpath.substr(rootPath.length + 1).split(splitsymbol);
+        let moduleArray: Array<string> = fullpath.substr(rootPath.length + (rootPath.slice(-1) === "\\" ? 0 : 1)).split(splitsymbol);
         let module: string = "";
         if (isbsl) {
             let test = false;
@@ -151,7 +151,7 @@ export class Global {
         let basePath: string = String(configuration.get("rootPath"));
         let rootPath = vscode.workspace.rootPath;
         if (!basePath) {
-            basePath = ".";
+            basePath = "./";
         }
         if (rootPath) {
             rootPath = path.join(vscode.workspace.rootPath, basePath);
