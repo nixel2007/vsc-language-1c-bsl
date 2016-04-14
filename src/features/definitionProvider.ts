@@ -11,12 +11,12 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
             let added = {};
             let filename = document.fileName;
             let wordPosition = document.getWordRangeAtPosition(position);
-            let wordAtPosition = document.getText(document.getWordRangeAtPosition(position));
+            let wordAtPosition = document.getText(wordPosition);
             if (!wordPosition) {
                 wordAtPosition = "";
             } else  {
-                wordAtPosition = self._global.fullNameRecursor(wordAtPosition, document, document.getWordRangeAtPosition(position), false);
-                wordAtPosition = self._global.fullNameRecursor(wordAtPosition, document, document.getWordRangeAtPosition(position), true);
+                wordAtPosition = self._global.fullNameRecursor(wordAtPosition, document, wordPosition, false);
+                wordAtPosition = self._global.fullNameRecursor(wordAtPosition, document, wordPosition, true);
             }
             let module = "";
             if (wordAtPosition.indexOf(".") > 0) {
@@ -41,9 +41,12 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                 let bucket = new Array<any>();
                 for (let index = 0; index < d.length; index++) {
                     let element = d[index];
-                    if (added[element.name] === true) {
+                    if (module.length !== 0 && element._method.IsExport === false) {
                         continue;
                     }
+                    // if (added[element.name] === true) {
+                    //     continue;
+                    // }
                     added[element.name] = true;
                     let moduleDescription = (module && module.length > 0) ? module + "." : "";
                     let result = {
@@ -64,6 +67,15 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                     return resolve(location);
                 } else if (bucket.length === 0) {
                     return resolve(null);
+                } else if (bucket.length > 1) {
+                    let results: vscode.Location[] = Array<vscode.Location>();
+                    for (let index = 0; index < bucket.length; index++) {
+                        let element = bucket[index];
+                        let location: vscode.Location = new vscode.Location(vscode.Uri.file(bucket[index].path),
+                            new vscode.Position(bucket[index].line, (bucket[index].isproc ? 9 : 7) + 1));
+                        results.push(location);
+                    }
+                    return resolve(results);
                 }
                 return vscode.window.showQuickPick(bucket).then(value => {
                     try {
