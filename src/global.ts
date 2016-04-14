@@ -53,12 +53,20 @@ export class Global {
             "AccumulationRegisters": "РегистрыНакопления",
             "BusinessProcesses": "БизнессПроцессы",
             "CalculationRegisters": "РегистрыРасчета",
+            "ChartsOfAccounts": "ПланыСчетов",
+            "ChartsOfCalculationTypes": "ПланыВидовРасчета",
+            "ChartsOfCharacteristicTypes": "ПланыВидовХарактеристик",
+            "Сonstants": "Константы",
             "Catalogs": "Справочники",
-            "Documents": "Документы",
             "DataProcessors": "Обработки",
-            "Reports": "Отчеты",
+            "DocumentJournals": "ЖурналыДокументов",
+            "Documents": "Документы",
+            "Enums": "Перечисления",
+            "ExchangePlans": "ПланыОбмена",
             "InformationRegisters": "РегистрыСведений",
-            "ExchangePlans": "ПланыОбмена"
+            "Reports": "Отчеты",
+            "SettingsStorages": "ХранилищаНастроек",
+            "Tasks": "Задачи"
         };
     }
 
