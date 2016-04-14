@@ -85,7 +85,7 @@
     "description": "Инструкция Если"
   },
   "Инструкция Область": {
-    "prefix": "\\#Область",
+    "prefix": "Область",
     "body": "#Область $0\n#КонецОбласти",
     "description": "Инструкция Область"
   },
@@ -630,7 +630,7 @@
     "description": "Instruction If"
   },
   "Instruction Region": {
-    "prefix": "\\#Region",
+    "prefix": "Region",
     "body": "#Region $0\n#EndRegion",
     "description": "Instruction Region"
   },
