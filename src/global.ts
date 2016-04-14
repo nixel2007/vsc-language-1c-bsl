@@ -39,12 +39,10 @@ export class Global {
         let entries = parsesModule.getMethodsTable().find();
         let count = 0;
         let collection = this.cache.addCollection(filename);
-        let added = {};
-        this.updateReferenceCalls(collection, parsesModule.context.CallsPosition, "GlobalModuleText", filename, added);
+        this.updateReferenceCalls(collection, parsesModule.context.CallsPosition, "GlobalModuleText", filename);
         for (let y = 0; y < entries.length; ++y) {
-            added = {};
             let item = entries[y];
-            this.updateReferenceCalls(collection, item._method.CallsPosition, item, filename, added);
+            this.updateReferenceCalls(collection, item._method.CallsPosition, item, filename);
         }
         return collection;
     }
@@ -115,11 +113,10 @@ export class Global {
                 let parsesModule = new Parser().parse(source);
                 let entries = parsesModule.getMethodsTable().find();
                 let count = 0;
-                let added = {};
-                this.updateReferenceCalls(this.dbcalls, parsesModule.context.CallsPosition, "GlobalModuleText", fullpath, added);
+                this.updateReferenceCalls(this.dbcalls, parsesModule.context.CallsPosition, "GlobalModuleText", fullpath);
                 for (let y = 0; y < entries.length; ++y) {
                     let item = entries[y];
-                    this.updateReferenceCalls(this.dbcalls, item._method.CallsPosition, item, fullpath, added);
+                    this.updateReferenceCalls(this.dbcalls, item._method.CallsPosition, item, fullpath);
                     item["filename"] = fullpath;
                     let newItem: MethodValue = {
                         "name": String(item.name),
@@ -176,24 +173,19 @@ export class Global {
         let prefix = local ? "" : ".";
         let querystring = {"call": {"$regex": new RegExp(prefix + word + "$", "i")}};
         let search = collection.chain().find(querystring).simplesort("name").data();
-        this.cache.saveDatabase();
         return search;
     }
 
-    private updateReferenceCalls(collection: any, calls: Array<any>, method: any, file: string, added: any): any {
+    private updateReferenceCalls(collection: any, calls: Array<any>, method: any, file: string): any {
         if (!collection) {
             collection = this.cache.addCollection("Calls");
         }
         let self = this;
         for (let index = 0; index < calls.length; index++) {
             let value = calls[index];
-            if (added[value.call] === true) {
-                continue;
-            };
             if (value.call.startsWith(".")) {
                 continue;
             }
-            added[value.call] = true;
             let newItem: MethodValue = {
                 "name": String(method.name),
                 "filename": file,
