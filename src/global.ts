@@ -70,9 +70,8 @@ export class Global {
         }
 
         fullpath = decodeURIComponent(fullpath);
-        let splitsymbol = process.platform === "win32" ? "\\" : "/";
+        let splitsymbol = "/";
         if (fullpath.startsWith("file:")) {
-            splitsymbol = "/";
             if (process.platform === "win32") {
                 fullpath = fullpath.substr(8);
             } else {
@@ -83,13 +82,12 @@ export class Global {
         let moduleArray: Array<string> = fullpath.substr(rootPath.length + (rootPath.slice(-1) === "\\" ? 0 : 1)).split(splitsymbol);
         let module: string = "";
         if (isbsl) {
-            let test = false;
-            if (moduleArray.length > 1) {
-                if (moduleArray[0].startsWith("CommonModules")) {
-                    module = moduleArray[1];
-                } else if (moduleArray.length > 3 && this.toreplaced[moduleArray[0]] !== undefined) {
-                    moduleArray[0] = this.toreplaced[moduleArray[0]];
-                    module = moduleArray[0] + "." + moduleArray[1];
+            let hierarchy = moduleArray.length;
+            if (hierarchy > 1) {
+                if (moduleArray[hierarchy - 4].startsWith("CommonModules")) {
+                    module = moduleArray[hierarchy - 3];
+                } else if (hierarchy > 3 && this.toreplaced[moduleArray[hierarchy - 4]] !== undefined) {
+                    module = this.toreplaced[moduleArray[hierarchy - 4]] + "." + moduleArray[hierarchy - 3];
                 }
             }
         };
@@ -150,28 +148,19 @@ export class Global {
         let configuration = vscode.workspace.getConfiguration("language-1c-bsl");
         let basePath: string = String(configuration.get("rootPath"));
         let rootPath = vscode.workspace.rootPath;
-        if (!basePath) {
-            basePath = "./";
-        }
         if (rootPath) {
             rootPath = path.join(vscode.workspace.rootPath, basePath);
             this.db = this.cache.addCollection("ValueTable");
             this.dbcalls = this.cache.addCollection("Calls");
 
             let self = this;
-            let files = vscode.workspace.findFiles("**" + basePath.substr(1) + "**/*.os", "", 1000);
+            let files = vscode.workspace.findFiles(basePath !== "" ? basePath.substr(2) + "/**" : "" + "**/*.os", "", 1000);
             files.then((value) => {
                 this.addtocachefiles(value, false, rootPath);
             }, (reason) => {
                 console.log(reason);
             });
-            files = vscode.workspace.findFiles("**" + basePath.substr(1) + "**/**/*Forms*/**/*Ext*/*Form*/*.bsl", "", 10000);
-            files.then((value) => {
-                this.addtocachefiles(value, true, rootPath);
-            }, (reason) => {
-                console.log(reason);
-            });
-            files = vscode.workspace.findFiles("**" + basePath.substr(1) + "**/**/*Ext*/*.bsl", "", 10000);
+            files = vscode.workspace.findFiles(basePath !== "" ? basePath.substr(2) + "/**" : "" + "**/*.bsl", "", 10000);
             files.then((value) => {
                 this.addtocachefiles(value, true, rootPath);
             }, (reason) => {
@@ -187,6 +176,7 @@ export class Global {
         let prefix = local ? "" : ".";
         let querystring = {"call": {"$regex": new RegExp(prefix + word + "$", "i")}};
         let search = collection.chain().find(querystring).simplesort("name").data();
+        this.cache.saveDatabase();
         return search;
     }
 
