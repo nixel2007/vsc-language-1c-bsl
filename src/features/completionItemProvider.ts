@@ -42,7 +42,18 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                     completion.documentation = full["description"];
                 }
                 if (full["signature"]) {
-                    completion.detail = full["signature"];
+                    let signature_default = full["signature"].default;
+                    if (signature_default) {
+                        completion.detail = full["signature"].default.СтрокаПараметров;
+                    } else {
+                        let syn = 0;
+                        let detail = "";
+                        for (let signature_name in full["signature"]) {
+                            syn++;
+                            detail = detail + (syn === 1 ? "" : ", \n") + syn + ". " + full["signature"][signature_name].СтрокаПараметров;
+                        }
+                        completion.detail = "" + syn + " вариант" + (syn < 5 ? "a " : "ов ") + "синтаксиса: \n" + detail;
+                    }
                 }
                 completion.insertText = name + "(";
                 completions.push(completion);
