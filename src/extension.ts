@@ -93,10 +93,7 @@ export function activate(context: vscode.ExtensionContext) {
             });
         }
     }));
-    if (vscode.window.activeTextEditor) {
-        applyConfigToTextEditor(vscode.window.activeTextEditor);
-        global.updateCache(vscode.window.activeTextEditor.document.fileName);
-    }
+
     // context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(function (textEditor: vscode.TextEditor) {
     //     applyConfigToTextEditor(textEditor);
     // }));
