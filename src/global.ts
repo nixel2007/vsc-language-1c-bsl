@@ -309,8 +309,8 @@ export class Global {
         if (!autocompleteLanguage) {
             autocompleteLanguage = "ru";
         }
-        this.globalfunctions = bslglobals.globalfunctions()[autocompleteLanguage];
-        this.globalvariables = bslglobals.globalvariables()[autocompleteLanguage];
+        this.globalfunctions = bslglobals.globalfunctions();
+        this.globalvariables = bslglobals.globalvariables();
         this.keywords = bslglobals.keywords()[autocompleteLanguage];
         this.cache = new loki("gtags.json");
         this.cacheUpdates = false;
