@@ -10,6 +10,7 @@ import DocumentSymbolProvider from "./features/documentSymbolProvider";
 import WorkspaseSymbolProvider from "./features/workspaceSymbolProvider";
 import ReferenceProvider from "./features/referenceProvider";
 import SignatureHelpProvider from './features/signatureHelpProvider';
+import HoverProvider from './features/hoverProvider';
 
 let diagnosticCollection: vscode.DiagnosticCollection;
 
@@ -24,6 +25,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.languages.registerReferenceProvider(BSL_MODE, new ReferenceProvider(global)));
     context.subscriptions.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaseSymbolProvider(global)));
     context.subscriptions.push(vscode.languages.registerSignatureHelpProvider(BSL_MODE, new SignatureHelpProvider(), "(", ","));
+    context.subscriptions.push(vscode.languages.registerHoverProvider(BSL_MODE, new HoverProvider()));
 
     let linter = new LintProvider();
     linter.activate(context.subscriptions);
