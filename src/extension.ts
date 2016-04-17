@@ -41,6 +41,16 @@ export function activate(context: vscode.ExtensionContext) {
         comments: {
             lineComment: "//"
         },
+        __characterPairSupport: {
+            autoClosingPairs: [
+                { open: '{', close: '}' },
+                { open: '[', close: ']' },
+                { open: '(', close: ')' },
+                { open: '"', close: '"', notIn: ['string'] },
+                { open: '\'', close: '\'', notIn: ['string', 'comment'] },
+                { open: '`', close: '`', notIn: ['string', 'comment'] }
+            ]
+        },
         brackets: [
             ["{", "}"],
             ["[", "]"],
@@ -70,8 +80,18 @@ export function activate(context: vscode.ExtensionContext) {
         ]
     });
 
-    context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(function (textEditor: vscode.TextEditor) {
-        applyConfigToTextEditor(textEditor);
+    context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(function (textDocumentChangeEvent: vscode.TextDocumentChangeEvent) {
+        var editor = vscode.window.activeTextEditor;
+        if (textDocumentChangeEvent.contentChanges[0].text.slice(-1) === "(") {
+            var point = textDocumentChangeEvent.contentChanges[0].range.start.character + textDocumentChangeEvent.contentChanges[0].text.length;
+            var position = new vscode.Position(editor.selection.active.line, point);
+            editor.edit(function (editBuilder) {
+                editBuilder.insert(new vscode.Position(position.line, position.character), ")");
+            }).then(function () {
+                vscode.commands.executeCommand("editor.action.triggerParameterHints");
+                vscode.window.activeTextEditor.selection = new vscode.Selection(position.line, position.character, position.line, position.character);
+            });
+        }
     }));
     if (vscode.window.activeTextEditor) {
         applyConfigToTextEditor(vscode.window.activeTextEditor);
