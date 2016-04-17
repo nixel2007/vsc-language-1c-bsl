@@ -54,13 +54,18 @@ export default class LintProvider {
             return;
         }
         let linterEnabled = Boolean(vscode.workspace.getConfiguration("language-1c-bsl").get("enableOneScriptLinter"));
-        let lintBSLFiles = Boolean(vscode.workspace.getConfiguration("language-1c-bsl").get("lintBSLFiles"));
+        let otherExtensions = String(vscode.workspace.getConfiguration("language-1c-bsl").get("lintOtherExtensions"));
         let diagnostics: vscode.Diagnostic[] = [];
         if (!linterEnabled) {
             return;
         }
         let filename = textDocument.uri.fsPath;
-        if (filename.endsWith(".bsl") && !lintBSLFiles) {
+        let arrFilename = filename.split(".");
+        if (arrFilename.length == 0) {
+            return;
+        }
+        let extension = arrFilename[arrFilename.length - 1];
+        if (extension != "os" && !otherExtensions.includes(extension)) {
             return;
         }
         let args = this.args.slice();

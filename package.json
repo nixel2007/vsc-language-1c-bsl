@@ -54,10 +54,10 @@
           "description": "Full path to oscript binary. Fill this only if oscript is not in your $PATH",
           "type": "string"
         },
-        "language-1c-bsl.lintBSLFiles": {
-          "description": "Enable this if you want to check `*.bsl` files via OneScriptLint",
-          "type": "boolean",
-          "default": false
+        "language-1c-bsl.lintOtherExtensions": {
+          "description": "List of extensions (except `os`) to lint via OneScriptLint. (format - 'bsl,txt')",
+          "type": "string",
+          "default": ""
         },
         "language-1c-bsl.languageAutocomplete": {
           "description": "Autocomplete language (en/ru)",
