@@ -5,7 +5,7 @@
 
 'use strict';
 
-import {SignatureHelpProvider, SignatureHelp, SignatureInformation, CancellationToken, TextDocument, Position} from 'vscode';
+import {SignatureHelpProvider, SignatureHelp, SignatureInformation, CancellationToken, TextDocument, Position, workspace} from 'vscode';
 import bslGlobals = require('./bslGlobals');
 
 
@@ -28,7 +28,6 @@ var _A = 'A'.charCodeAt(0);
 var _Z = 'Z'.charCodeAt(0);
 var _0 = '0'.charCodeAt(0);
 var _9 = '9'.charCodeAt(0);
-var _colon = ':'.charCodeAt(0)
 
 var BOF = 0;
 
@@ -71,6 +70,25 @@ class BackwardIterator {
 
 export default class BSLSignatureHelpProvider implements SignatureHelpProvider {
 
+    protected new_globals: {};
+    constructor() {
+        this.new_globals = {};
+        let postfix = "";
+        let configuration = workspace.getConfiguration("language-1c-bsl");
+        let autocompleteLanguage: any = configuration.get("languageAutocomplete");
+        if (autocompleteLanguage === "en") {
+            postfix = "_en";
+        }
+        for (let element in bslGlobals.globalfunctions()) {
+            let new_name = postfix === "_en" ? bslGlobals.globalfunctions()[element]["name"+postfix]:bslGlobals.globalfunctions()[element].name;
+            let new_element = {};
+            new_element["name"] =  new_name;
+            new_element["description"] = bslGlobals.globalfunctions()[element].description;
+            new_element["signature"] = bslGlobals.globalfunctions()[element].signature;
+            this.new_globals[new_name.toLowerCase()] = new_element;
+        }
+    }
+
     public provideSignatureHelp(document: TextDocument, position: Position, token: CancellationToken): SignatureHelp {
         var iterator = new BackwardIterator(document, position.character - 1, position.line);
 
@@ -84,7 +102,7 @@ export default class BSLSignatureHelpProvider implements SignatureHelpProvider {
             return null;
         }
 
-        var entry = bslGlobals.globalfunctions().ru[ident];
+        var entry = this.new_globals[ident.toLowerCase()];
         if (!entry || !entry.signature) {
             return null;
         }
@@ -92,7 +110,7 @@ export default class BSLSignatureHelpProvider implements SignatureHelpProvider {
         for (let element in entry.signature) {
             // var paramsCount = entry.signature[element].Параметры
             var paramsString = entry.signature[element].СтрокаПараметров;
-            let signatureInfo = new SignatureInformation(ident + paramsString, '');
+            let signatureInfo = new SignatureInformation(entry.name + paramsString, '');
 
             var re = /([\wа-яА-Я]+)\??:\s+[а-яА-Я\w_\.]+/g;
             var match: RegExpExecArray = null;
