@@ -76,11 +76,13 @@ function applyConfigToTextEditor(textEditor) {
   };
   if (textEditor.document.languageId == "bsl") {
     if (textEditor.options.insertSpaces == defaultOptions.insertSpaces && (textEditor.options.tabSize == defaultOptions.tabSize || defaultOptions.tabSize == "auto")) {
-      textEditor.options = newOptions;
+      textEditor.options.insertSpaces = newOptions.insertSpaces;
+      textEditor.options.tabSize = newOptions.tabSize;
     }
   } else {
     if (textEditor.options.insertSpaces == newOptions.insertSpaces && textEditor.options.tabSize == newOptions.tabSize) {
-      textEditor.options = defaultOptions
+      textEditor.options.insertSpaces = defaultOptions.insertSpaces;
+      textEditor.options.tabSize = defaultOptions.tabSize;
     }
   }
 }
