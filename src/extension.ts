@@ -96,11 +96,11 @@ export function activate(context: vscode.ExtensionContext) {
         }
     }));
 
-    // context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(function (textEditor: vscode.TextEditor) {
-    //     applyConfigToTextEditor(textEditor);
-    // }));
+    context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(function (textEditor: vscode.TextEditor) {
+        applyConfigToTextEditor(textEditor);
+    }));
     if (vscode.window.activeTextEditor) {
-        // applyConfigToTextEditor(vscode.window.activeTextEditor);
+        applyConfigToTextEditor(vscode.window.activeTextEditor);
         global.updateCache(vscode.window.activeTextEditor.document.fileName);
     }
 }
@@ -123,9 +123,11 @@ function applyConfigToTextEditor(textEditor: vscode.TextEditor): any {
     if (vscode.languages.match(BSL_MODE, textEditor.document)) {
         if (textEditor.options.insertSpaces === defaultOptions.insertSpaces
             && (textEditor.options.tabSize === defaultOptions.tabSize)) {
-                textEditor.options = newOptions;
+            textEditor.options.insertSpaces = newOptions.insertSpaces;
+            textEditor.options.tabSize = newOptions.tabSize;                
         } else if (textEditor.options.insertSpaces === newOptions.insertSpaces && textEditor.options.tabSize === newOptions.tabSize) {
-            textEditor.options = defaultOptions;
+            textEditor.options.insertSpaces = defaultOptions.insertSpaces;
+            textEditor.options.tabSize = defaultOptions.tabSize;  
         }
     }
 }
