@@ -22,7 +22,7 @@
     "Languages"
   ],
   "engines": {
-    "vscode": "0.10.x"
+    "vscode": "^1.0.0"
   },
   "main": "./out/src/extension",
   "scripts": {
