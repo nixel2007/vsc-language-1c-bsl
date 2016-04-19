@@ -4,8 +4,8 @@ import AbstractProvider from "./abstractProvider";
 export default class GlobalHoverProvider extends AbstractProvider implements vscode.HoverProvider {
     public provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.Hover {
         var word = document.getText(document.getWordRangeAtPosition(position));
-        var entry = this.new_globals[word.toLowerCase()];
-        if (!entry || !entry.signature) {
+        var entry = this._global.globalfunctions[word.toLowerCase()];
+        if (!entry || !entry.description) {
             return null;
         }
         var description = [];
