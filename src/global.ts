@@ -323,7 +323,7 @@ export class Global {
             postfix = "_en";
         }
         for (let element in globalfunctions) {
-            let new_name = postfix === "_en" ? globalfunctions[element]["name"+postfix]:globalfunctions[element].name;
+            let new_name = globalfunctions[element]["name"+postfix];
             let new_element = {};
             new_element["name"] =  new_name;
             new_element["description"] = globalfunctions[element].description;
@@ -331,7 +331,7 @@ export class Global {
             this.globalfunctions[new_name.toLowerCase()] = new_element;
         }
         for (let element in globalvariables) {
-            let new_name = postfix === "_en" ? globalvariables[element]["name"+postfix]:globalvariables[element].name;
+            let new_name = globalvariables[element]["name"+postfix];
             let new_element = {};
             new_element["name"] =  new_name;
             new_element["description"] = globalvariables[element].description;
