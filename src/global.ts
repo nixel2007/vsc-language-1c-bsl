@@ -309,12 +309,34 @@ export class Global {
         if (!autocompleteLanguage) {
             autocompleteLanguage = "ru";
         }
-        this.globalfunctions = bslglobals.globalfunctions();
-        this.globalvariables = bslglobals.globalvariables();
         this.keywords = bslglobals.keywords()[autocompleteLanguage];
         this.cache = new loki("gtags.json");
         this.cacheUpdates = false;
         this.pathSeparator = path.sep;
+        
+        this.globalfunctions = {};
+        this.globalvariables = {};
+        let globalfunctions = bslglobals.globalfunctions();
+        let globalvariables = bslglobals.globalvariables();
+        let postfix = "";
+        if (autocompleteLanguage === "en") {
+            postfix = "_en";
+        }
+        for (let element in globalfunctions) {
+            let new_name = postfix === "_en" ? globalfunctions[element]["name"+postfix]:globalfunctions[element].name;
+            let new_element = {};
+            new_element["name"] =  new_name;
+            new_element["description"] = globalfunctions[element].description;
+            new_element["signature"] = globalfunctions[element].signature;
+            this.globalfunctions[new_name.toLowerCase()] = new_element;
+        }
+        for (let element in globalvariables) {
+            let new_name = postfix === "_en" ? globalvariables[element]["name"+postfix]:globalvariables[element].name;
+            let new_element = {};
+            new_element["name"] =  new_name;
+            new_element["description"] = globalvariables[element].description;
+            this.globalvariables[new_name.toLowerCase()] = new_element;
+        }
     }
 }
 

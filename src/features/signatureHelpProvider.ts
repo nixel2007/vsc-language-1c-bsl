@@ -6,6 +6,7 @@
 'use strict';
 
 import {SignatureHelpProvider, SignatureHelp, SignatureInformation, CancellationToken, TextDocument, Position, workspace} from 'vscode';
+import AbstractProvider from "./abstractProvider";
 import bslGlobals = require('./bslGlobals');
 
 
@@ -68,26 +69,7 @@ class BackwardIterator {
 }
 
 
-export default class BSLSignatureHelpProvider implements SignatureHelpProvider {
-
-    protected new_globals: {};
-    constructor() {
-        this.new_globals = {};
-        let postfix = "";
-        let configuration = workspace.getConfiguration("language-1c-bsl");
-        let autocompleteLanguage: any = configuration.get("languageAutocomplete");
-        if (autocompleteLanguage === "en") {
-            postfix = "_en";
-        }
-        for (let element in bslGlobals.globalfunctions()) {
-            let new_name = postfix === "_en" ? bslGlobals.globalfunctions()[element]["name"+postfix]:bslGlobals.globalfunctions()[element].name;
-            let new_element = {};
-            new_element["name"] =  new_name;
-            new_element["description"] = bslGlobals.globalfunctions()[element].description;
-            new_element["signature"] = bslGlobals.globalfunctions()[element].signature;
-            this.new_globals[new_name.toLowerCase()] = new_element;
-        }
-    }
+export default class GlobalSignatureHelpProvider extends AbstractProvider implements SignatureHelpProvider {
 
     public provideSignatureHelp(document: TextDocument, position: Position, token: CancellationToken): SignatureHelp {
         var iterator = new BackwardIterator(document, position.character - 1, position.line);
@@ -102,7 +84,7 @@ export default class BSLSignatureHelpProvider implements SignatureHelpProvider {
             return null;
         }
 
-        var entry = this.new_globals[ident.toLowerCase()];
+        var entry = this._global.globalfunctions[ident.toLowerCase()];
         if (!entry || !entry.signature) {
             return null;
         }
