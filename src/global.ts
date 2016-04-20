@@ -211,7 +211,6 @@ export class Global {
     querydef(filename: string, module: string, all: boolean = true, lazy: boolean = false): any {
         // Проверяем локальный кэш. 
         // Проверяем глобальный кэш на модули. 
-        // console.log(filename);
         if (!this.cacheUpdates) {
             this.updateCache(filename);
             return new Array();
@@ -306,24 +305,20 @@ export class Global {
     constructor(exec: string) {
         let configuration = vscode.workspace.getConfiguration("language-1c-bsl");
         let autocompleteLanguage: any = configuration.get("languageAutocomplete");
-        if (!autocompleteLanguage) {
-            autocompleteLanguage = "ru";
-        }
-        this.keywords = bslglobals.keywords()[autocompleteLanguage];
-        this.cache = new loki("gtags.json");
-        this.cacheUpdates = false;
-        this.pathSeparator = path.sep;
-        
-        this.globalfunctions = {};
-        this.globalvariables = {};
-        let globalfunctions = bslglobals.globalfunctions();
-        let globalvariables = bslglobals.globalvariables();
         let postfix = "";
         if (autocompleteLanguage === "en") {
             postfix = "_en";
         }
+        this.cache = new loki("gtags.json");
+        this.cacheUpdates = false;
+        this.pathSeparator = path.sep;
+        this.globalfunctions = {};
+        this.globalvariables = {};
+        let globalfunctions = bslglobals.globalfunctions();
+        let globalvariables = bslglobals.globalvariables();
+        this.keywords = bslglobals.keywords()[autocompleteLanguage];
         for (let element in globalfunctions) {
-            let new_name = globalfunctions[element]["name"+postfix];
+            let new_name = globalfunctions[element]["name" + postfix];
             let new_element = {};
             new_element["name"] =  new_name;
             new_element["description"] = globalfunctions[element].description;
@@ -331,7 +326,7 @@ export class Global {
             this.globalfunctions[new_name.toLowerCase()] = new_element;
         }
         for (let element in globalvariables) {
-            let new_name = globalvariables[element]["name"+postfix];
+            let new_name = globalvariables[element]["name" + postfix];
             let new_element = {};
             new_element["name"] =  new_name;
             new_element["description"] = globalvariables[element].description;

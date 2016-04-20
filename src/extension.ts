@@ -9,8 +9,8 @@ import LintProvider from "./features/lintProvider";
 import DocumentSymbolProvider from "./features/documentSymbolProvider";
 import WorkspaseSymbolProvider from "./features/workspaceSymbolProvider";
 import ReferenceProvider from "./features/referenceProvider";
-import SignatureHelpProvider from './features/signatureHelpProvider';
-import HoverProvider from './features/hoverProvider';
+import SignatureHelpProvider from "./features/signatureHelpProvider";
+import HoverProvider from "./features/hoverProvider";
 
 let diagnosticCollection: vscode.DiagnosticCollection;
 
@@ -45,12 +45,12 @@ export function activate(context: vscode.ExtensionContext) {
         },
         __characterPairSupport: {
             autoClosingPairs: [
-                { open: '{', close: '}' },
-                { open: '[', close: ']' },
-                { open: '(', close: ')' },
-                { open: '"', close: '"', notIn: ['string'] },
-                { open: '\'', close: '\'', notIn: ['string', 'comment'] },
-                { open: '`', close: '`', notIn: ['string', 'comment'] }
+                { open: "{", close: "}" },
+                { open: "[", close: "]" },
+                { open: "(", close: ")" },
+                { open: "\"", close: "\"", notIn: ["string"] },
+                { open: "'", close: "'", notIn: ["string", "comment"] },
+                { open: "`", close: "`", notIn: ["string", "comment"] }
             ]
         },
         brackets: [
@@ -83,10 +83,10 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(function (textDocumentChangeEvent: vscode.TextDocumentChangeEvent) {
-        var editor = vscode.window.activeTextEditor;
+        let editor = vscode.window.activeTextEditor;
         if (textDocumentChangeEvent.contentChanges[0].text.slice(-1) === "(") {
-            var point = textDocumentChangeEvent.contentChanges[0].range.start.character + textDocumentChangeEvent.contentChanges[0].text.length;
-            var position = new vscode.Position(editor.selection.active.line, point);
+            let point = textDocumentChangeEvent.contentChanges[0].range.start.character + textDocumentChangeEvent.contentChanges[0].text.length;
+            let position = new vscode.Position(editor.selection.active.line, point);
             editor.edit(function (editBuilder) {
                 editBuilder.insert(new vscode.Position(position.line, position.character), ")");
             }).then(function () {
@@ -124,10 +124,10 @@ function applyConfigToTextEditor(textEditor: vscode.TextEditor): any {
         if (textEditor.options.insertSpaces === defaultOptions.insertSpaces
             && (textEditor.options.tabSize === defaultOptions.tabSize)) {
             textEditor.options.insertSpaces = newOptions.insertSpaces;
-            textEditor.options.tabSize = newOptions.tabSize;                
+            textEditor.options.tabSize = newOptions.tabSize;
         } else if (textEditor.options.insertSpaces === newOptions.insertSpaces && textEditor.options.tabSize === newOptions.tabSize) {
             textEditor.options.insertSpaces = defaultOptions.insertSpaces;
-            textEditor.options.tabSize = defaultOptions.tabSize;  
+            textEditor.options.tabSize = defaultOptions.tabSize;
         }
     }
 }
