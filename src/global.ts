@@ -208,7 +208,7 @@ export class Global {
         }
     }
 
-    querydef(filename: string, module: string, all: boolean = true, lazy: boolean = false): any {
+    querydef(module: string, all: boolean = true, lazy: boolean = false): any {
         // Проверяем локальный кэш. 
         // Проверяем глобальный кэш на модули. 
         if (!this.cacheUpdates) {
@@ -223,7 +223,7 @@ export class Global {
         }
     }
 
-    query(filename: string, word: string, module: string, all: boolean = true, lazy: boolean = false): any {
+    query(word: string, module: string, all: boolean = true, lazy: boolean = false): any {
         if (!this.cacheUpdates) {
             this.updateCache();
             return new Array();

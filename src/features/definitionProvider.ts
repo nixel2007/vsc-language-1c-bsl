@@ -32,10 +32,10 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                 let source = document.getText();
                 d = self._global.getCacheLocal(filename, wordAtPosition, source);
             } else {
-                d = self._global.query(filename, wordAtPosition, module, false, false);
+                d = self._global.query(wordAtPosition, module, false, false);
             }
             if (d.length === 0) {
-                d = self._global.query(filename, word, "", false, false);
+                d = self._global.query(word, "", false, false);
             }
             if (d) {
                 let bucket = new Array<any>();

@@ -26,7 +26,7 @@ export default class GlobalworkspaseSymbolProvider extends AbstractProvider impl
         if (!file) {
             return Promise.resolve<SymbolInformation[]>([]);
         }
-        let d: Array<any> = this._global.query(file, search, "", true, true);
+        let d: Array<any> = this._global.query(search, "", true, true);
         let bucket = new Array<SymbolInformation>();
         for (let index = 0; index < d.length; index++) {
             let element = d[index];
