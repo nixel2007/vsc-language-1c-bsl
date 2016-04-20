@@ -147,7 +147,7 @@ export class Global {
         }
     }
 
-    updateCache(filename: string = ""): any {
+    updateCache(): any {
         console.log("update cache");
         this.cacheUpdates = true;
         let configuration = vscode.workspace.getConfiguration("language-1c-bsl");
@@ -212,7 +212,7 @@ export class Global {
         // Проверяем локальный кэш. 
         // Проверяем глобальный кэш на модули. 
         if (!this.cacheUpdates) {
-            this.updateCache(filename);
+            this.updateCache();
             return new Array();
         } else {
             let prefix = lazy ? "" : "^";
@@ -225,7 +225,7 @@ export class Global {
 
     query(filename: string, word: string, module: string, all: boolean = true, lazy: boolean = false): any {
         if (!this.cacheUpdates) {
-            this.updateCache(filename);
+            this.updateCache();
             return new Array();
         } else {
             let prefix = lazy ? "" : "^";

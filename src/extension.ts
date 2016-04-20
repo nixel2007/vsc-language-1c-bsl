@@ -32,7 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.update", () => {
         let filename = vscode.window.activeTextEditor.document.fileName;
-        global.updateCache(filename);
+        global.updateCache();
     }));
 
     vscode.languages.setLanguageConfiguration("bsl", {
@@ -101,7 +101,7 @@ export function activate(context: vscode.ExtensionContext) {
     }));
     if (vscode.window.activeTextEditor) {
         applyConfigToTextEditor(vscode.window.activeTextEditor);
-        global.updateCache(vscode.window.activeTextEditor.document.fileName);
+        global.updateCache();
     }
 }
 
