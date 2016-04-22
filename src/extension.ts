@@ -98,7 +98,22 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(function (textEditor: vscode.TextEditor) {
         applyConfigToTextEditor(textEditor);
+        if (vscode.workspace.rootPath !== undefined) {
+            for (let index = 0; index < vscode.workspace.textDocuments.length; index++) {
+                let element = vscode.workspace.textDocuments[index];
+                if (element.isDirty && element.languageId === "bsl") {
+                    global.customUpdateCache(element.getText(), element.fileName);
+                }
+            }
+        }
     }));
+
+    context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(function (document: vscode.TextDocument) {
+        if (vscode.workspace.rootPath !== undefined) {
+            global.customUpdateCache(document.getText(), document.fileName);
+        }
+    }));
+
     if (vscode.window.activeTextEditor) {
         applyConfigToTextEditor(vscode.window.activeTextEditor);
         global.updateCache();

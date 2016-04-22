@@ -17,14 +17,19 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
             } else  {
                 wordAtPosition = self._global.fullNameRecursor(wordAtPosition, document, wordPosition, false);
                 wordAtPosition = self._global.fullNameRecursor(wordAtPosition, document, wordPosition, true);
+                if (this._global.toreplaced[wordAtPosition.split(".")[0]] !== undefined) {
+                    let arrayName = wordAtPosition.split(".");
+                    arrayName.splice(0, 1, this._global.toreplaced[arrayName[0]]);
+                    wordAtPosition = arrayName.join(".");
+                }
             }
             let module = "";
             if (wordAtPosition.indexOf(".") > 0) {
-                //if (path.extname(document.fileName) !== ".os") { // Для oscript не можем гаранитировать полное совпадение модулей.  
+                // if (path.extname(document.fileName) !== ".os") { // Для oscript не можем гаранитировать полное совпадение модулей.  
                     let dotArray: Array<string> = wordAtPosition.split(".");
                     wordAtPosition = dotArray.pop();
                     module = dotArray.join(".");
-                //}
+                // }
             }
             let local: Array<any>;
             let d: Array<any> = new Array();
@@ -56,7 +61,7 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                         "label": moduleDescription + element.name,
                         "isproc": element.isproc
                     };
-                    if (!result.path){
+                    if (!result.path) {
                         result.path = filename;
                     }
                     bucket.push(result);

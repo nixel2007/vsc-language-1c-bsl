@@ -18,6 +18,9 @@ export default class GlobalworkspaseSymbolProvider extends AbstractProvider impl
             }
         }
 
+        this._global.customUpdateCache(vscode.window.activeTextEditor.document.getText(), vscode.window.activeTextEditor.document.fileName);
+
+
         if (!uri) {
             return Promise.resolve<SymbolInformation[]>([]);
         }
