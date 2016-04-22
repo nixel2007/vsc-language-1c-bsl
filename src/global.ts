@@ -66,7 +66,7 @@ export class Global {
             "InformationRegisters": "РегистрыСведений",
             "Reports": "Отчеты",
             "SettingsStorages": "ХранилищаНастроек",
-            "Tasks": "Задачи",
+            "Tasks": "Задачи"
         };
     }
 
@@ -85,7 +85,7 @@ export class Global {
         let module: string = "";
         if (isbsl) {
             let hierarchy = moduleArray.length;
-            if (hierarchy > 1) {
+            if (hierarchy > 3) {
                 if (moduleArray[hierarchy - 4].startsWith("CommonModules")) {
                     module = moduleArray[hierarchy - 3];
                 } else if (hierarchy > 3 && this.toreplaced[moduleArray[hierarchy - 4]] !== undefined) {
