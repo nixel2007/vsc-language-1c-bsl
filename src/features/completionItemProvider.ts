@@ -172,7 +172,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                 if (char === "." && position.character > 1) {
                     bucket = self.getDotComplection(document, position);
                     return resolve(bucket);
-                } else if (char !== " " && char !== "\n" && char !== "\t") {
+                } else if (char.match(/[/\()"':,.;<>~!@#$%^&*|+=\[\]{}`?-\\…\s\n\t]/) === null) {
                     let word = document.getText(document.getWordRangeAtPosition(position));
                     word = this._global.fullNameRecursor(word, document, document.getWordRangeAtPosition(position), true);
                     let result: Array<any>;
