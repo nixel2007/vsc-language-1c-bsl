@@ -7,7 +7,7 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
             return this.doFindReferences(document, position, options, token);
         });
     }
-    
+
     private addReference(searchResult: any, results: vscode.Location[]): any {
         if (searchResult) {
             let bucket = new Array<any>();
@@ -51,7 +51,7 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
             let res = this.addReference(d, results);
             self._global.cache.removeCollection(filename);
             if (results.length > 0) {
-                //resolve(results);
+                // resolve(results);
             }
             if (workspaceRoot) {
                 let fullmodule = self._global.getModuleForPath(filename, vscode.workspace.rootPath)["module"];

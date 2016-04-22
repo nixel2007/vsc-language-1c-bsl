@@ -22,7 +22,7 @@ export class Global {
     globalfunctions: any;
     globalvariables: any;
     keywords: any;
-    private toreplaced: any;
+    toreplaced: any;
     private cacheUpdates: boolean;
     private pathSeparator: string;
 
@@ -51,7 +51,7 @@ export class Global {
         return {
             "AccountingRegisters": "РегистрыБухгалтерии",
             "AccumulationRegisters": "РегистрыНакопления",
-            "BusinessProcesses": "БизнессПроцессы",
+            "BusinessProcesses": "БизнесПроцессы",
             "CalculationRegisters": "РегистрыРасчета",
             "ChartsOfAccounts": "ПланыСчетов",
             "ChartsOfCalculationTypes": "ПланыВидовРасчета",
@@ -66,15 +66,11 @@ export class Global {
             "InformationRegisters": "РегистрыСведений",
             "Reports": "Отчеты",
             "SettingsStorages": "ХранилищаНастроек",
-            "Tasks": "Задачи"
+            "Tasks": "Задачи",
         };
     }
 
     getModuleForPath(fullpath: string, rootPath: string): any {
-        if (!this.toreplaced) {
-            this.toreplaced = this.getReplaceMetadata();
-        }
-
         fullpath = decodeURIComponent(fullpath);
         let splitsymbol = "/";
         if (fullpath.startsWith("file:")) {
@@ -93,7 +89,11 @@ export class Global {
                 if (moduleArray[hierarchy - 4].startsWith("CommonModules")) {
                     module = moduleArray[hierarchy - 3];
                 } else if (hierarchy > 3 && this.toreplaced[moduleArray[hierarchy - 4]] !== undefined) {
-                    module = this.toreplaced[moduleArray[hierarchy - 4]] + "." + moduleArray[hierarchy - 3];
+                    // if (autocompleteLanguage === "en") {
+                        // module = moduleArray[hierarchy - 4] + "." + moduleArray[hierarchy - 3];
+                    // } else {
+                        module = this.toreplaced[moduleArray[hierarchy - 4]] + "." + moduleArray[hierarchy - 3];
+                    // }
                 }
             }
         };
@@ -101,12 +101,14 @@ export class Global {
                 "module": module};
     }
 
-    private addtocachefiles(files: Array<vscode.Uri>, isbsl: boolean = false, rootPath: any = null): any {
+    addtocachefiles(files: Array<vscode.Uri>, isbsl: boolean = false, rootPath: any = null): any {
         let failed = new Array();
         if (!rootPath) {
             rootPath = vscode.workspace.rootPath;
         }
-        let replaced = this.getReplaceMetadata();
+        if (!this.toreplaced) {
+            this.toreplaced = this.getReplaceMetadata();
+        }
         let filesLength = files.length;
         for (let i = 0; i < filesLength; ++i) {
             // vscode.window.setStatusBarMessage("Обновляем список " + i + " из " + files.length, 1000);
@@ -173,6 +175,36 @@ export class Global {
             });
         }
     };
+
+    customUpdateCache(source: string, filename: string) {
+        let querystring = { "filename": filename };
+        let methodArray = this.db.find({ "filename": { "$eq": filename.replace(/\\/g, "/") } });
+        for (let index = 0; index < methodArray.length; index++) {
+            let element = methodArray[index];
+            this.db.remove(element["$loki"]);
+        }
+        let parsesModule = new Parser().parse(source);
+        let entries = parsesModule.getMethodsTable().find();
+        this.updateReferenceCalls(this.dbcalls, parsesModule.context.CallsPosition, "GlobalModuleText", filename);
+        for (let y = 0; y < entries.length; ++y) {
+            let item = entries[y];
+            this.updateReferenceCalls(this.dbcalls, item._method.CallsPosition, item, filename);
+            item["filename"] = filename;
+            let newItem = {
+                "name": String(item.name),
+                "isproc": Boolean(item.isproc),
+                "line": item.line,
+                "endline": item.endline,
+                "context": item.context,
+                "_method": item._method,
+                "filename": filename,
+                "module": module,
+                "description": item.description
+            };
+            this.db.insert(newItem);
+        }
+    };
+
 
     queryref(word: string, collection: any, local: boolean = false ): any {
         if (!collection) {
