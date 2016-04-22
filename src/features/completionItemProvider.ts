@@ -107,7 +107,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                     let wordAtPosition = document.getText(document.getWordRangeAtPosition(basePosition));
                     wordAtPosition = this._global.fullNameRecursor(wordAtPosition, document, document.getWordRangeAtPosition(basePosition), true);
                     let metadata = {};
-                    let queryResult: Array<any> = this._global.querydef(document.fileName, wordAtPosition + "\\.");
+                    let queryResult: Array<any> = this._global.querydef(wordAtPosition + "\\.");
                     for (let index = 0; index < queryResult.length; index++) {
                         let element = queryResult[index];
                         if (element.module) {
@@ -131,7 +131,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                         }
                 }
                 // Получим все общие модули, у которых не заканчивается на точку.    
-                queryResult = this._global.querydef(document.fileName, wordAtPosition, false, false);
+                queryResult = this._global.querydef(wordAtPosition, false, false);
                     for (let index = 0; index < queryResult.length; index++) {
                         let element = queryResult[index];
                         if (!element._method.IsExport) {
@@ -144,7 +144,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                         let item: vscode.CompletionItem = new vscode.CompletionItem(element.name);
                         item.kind = vscode.CompletionItemKind.Function;
                         item.documentation = element.description;
-                        item.insertText = element.name + "(";                
+                        item.insertText = element.name + "(";
                         result.push(item);
                     }
                 }
@@ -173,12 +173,12 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                     let item = new vscode.CompletionItem(value.name);
                     item.documentation = value.description;
                     item.kind = vscode.CompletionItemKind.Function;
-                    item.insertText = value.name + "(";                
+                    item.insertText = value.name + "(";
                     bucket.push(item);
                     self.added[value.name.toLowerCase()] = true;
                 }
             });
-            result = self._global.querydef(document.fileName, word);
+            result = self._global.querydef(word);
             result.forEach(function (value, index, array) {
                 let moduleDescription = (value.module && value.module.length > 0) ? value.module + "." : "";
                 let fullName = moduleDescription + value.name;
