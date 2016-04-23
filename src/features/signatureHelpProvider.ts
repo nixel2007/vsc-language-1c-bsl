@@ -85,7 +85,31 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
 
         let entry = this._global.globalfunctions[ident.toLowerCase()];
         if (!entry || !entry.signature) {
-            return null;
+            let module = "";
+            if (ident.indexOf(".") > 0) {
+                let dotArray: Array<string> = ident.split(".");
+                ident = dotArray.pop();
+                module = dotArray.join(".");
+            }
+            if (module.length === 0) {
+                let source = document.getText();
+                entry = this._global.getCacheLocal(document.fileName, ident, source);
+            } else {
+                entry = this._global.query(ident, module, false, false);
+            }
+            if (entry.length === 0) {
+                entry = this._global.query(ident, "", false, false);
+            }
+            if (!entry) {
+                return null;
+            } else {
+                entry = entry[0];
+                if (entry._method.Params.length !== 0) {
+                    return this.GetSignature(entry, paramCount);
+                } else {
+                    return null;
+                }
+            }
         }
         let ret = new SignatureHelp();
         for (let element in entry.signature) {
@@ -108,6 +132,68 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
 
         }
         return ret;
+    }
+
+    private GetSignature(entry, paramCount) {
+        let description = entry.description.replace(/\/\//g, "");
+        description = description.replace(new RegExp("[ ]+", "g"), " ");
+        let retState = (new RegExp("Возвращаемое значение:\\n\\s*([\\wа-яА-Я\\.]+)", "g")).exec(description);
+        let strRetState = null;
+        if (retState) {
+            strRetState = retState[1];
+            description = description.substr(0, retState.index);
+        }
+        let paramsString = "(";
+        for (let element in entry._method.Params) {
+            let nameParam = entry._method.Params[element];
+            paramsString = (paramsString === "(" ? paramsString : paramsString + ", ") + nameParam;
+            let re = new RegExp("Параметры:(.|\\n)*\\n\\s*" + nameParam + "\\s*-\\s*([<\\wа-яА-Я\\.>]+)", "g");
+            let match: RegExpExecArray = null;
+            if ((match = re.exec(description)) !== null) {
+                paramsString = paramsString + ": " + match[2];
+            }
+        }
+        paramsString = paramsString + ")";
+        if (strRetState) {
+            paramsString = paramsString + ": " + strRetState;
+        }
+
+        let ret = new SignatureHelp();
+        let signatureInfo = new SignatureInformation(entry.name + paramsString, "");
+
+        let re = /([\wа-яА-Я]+)(:\s+[<а-яА-Я\w_\.>]+)?/g;
+        let match: RegExpExecArray = null;
+        while ((match = re.exec(paramsString)) !== null) {
+            let documentationParam = this.GetDocParam(description, match[1]);
+            signatureInfo.parameters.push({ label: match[0] + (documentationParam.optional ? "?" : ""), documentation: documentationParam.descriptionParam });
+        }
+
+        if (entry._method.Params.length - 1 < paramCount) {
+                return null;
+            }
+
+        ret.signatures.push(signatureInfo);
+        // ret.activeSignature = 0;
+        ret.activeParameter = Math.min(paramCount, signatureInfo.parameters.length - 1);
+
+        return ret;
+    }
+
+    private GetDocParam(description: string, param) {
+        let optional = false;
+        let descriptionParam = "";
+        let re = new RegExp("Параметры:(.|\\n)*\\n\\s*" + param + "\\s*-\\s*([<\\wа-яА-Я\\.>]+)\\s*-?\\s*((.|\\n)*)", "g");
+        let match: RegExpExecArray = null;
+        if ((match = re.exec(description)) !== null) {
+            descriptionParam = match[3];
+            let cast = (new RegExp("\\n\\s?[<\\wа-яА-Я\\.>]+ - ", "g")).exec(descriptionParam);
+            if (cast) {
+                descriptionParam = descriptionParam.substr(0, cast.index);
+
+            }
+        }
+        let documentationParam = { optional: optional, descriptionParam: descriptionParam };
+        return documentationParam;
     }
 
     private readArguments(iterator: BackwardIterator): number {
