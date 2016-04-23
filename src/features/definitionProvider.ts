@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import AbstractProvider from "./abstractProvider";
 let path = require("path");
-let _ = require("underscore");
 
 export default class GlobalDefinitionProvider extends AbstractProvider implements vscode.DefinitionProvider {
     public provideDefinition(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Thenable<vscode.Location> {
