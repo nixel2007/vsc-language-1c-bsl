@@ -177,13 +177,19 @@ export class Global {
     };
 
     customUpdateCache(source: string, filename: string) {
-        let querystring = { "filename": filename };
-        let methodArray = this.db.find({ "filename": { "$eq": filename.replace(/\\/g, "/") } });
+        let configuration = vscode.workspace.getConfiguration("language-1c-bsl");
+        let basePath: string = String(configuration.get("rootPath"));
+        let rootPath = path.join(vscode.workspace.rootPath, basePath);
+        let fullpath = filename.replace(/\\/g, "/");
+        let methodArray = this.db.find({ "filename": { "$eq": fullpath } });
         for (let index = 0; index < methodArray.length; index++) {
             let element = methodArray[index];
             this.db.remove(element["$loki"]);
         }
         let parsesModule = new Parser().parse(source);
+        let moduleObj = this.getModuleForPath(fullpath, rootPath);
+        let module = moduleObj.module;
+        fullpath = moduleObj.fullpath;
         let entries = parsesModule.getMethodsTable().find();
         this.updateReferenceCalls(this.dbcalls, parsesModule.context.CallsPosition, "GlobalModuleText", filename);
         for (let y = 0; y < entries.length; ++y) {
@@ -197,7 +203,7 @@ export class Global {
                 "endline": item.endline,
                 "context": item.context,
                 "_method": item._method,
-                "filename": filename.replace(/\\/g, "/"),
+                "filename": fullpath,
                 "module": module,
                 "description": item.description
             };
