@@ -197,7 +197,7 @@ export class Global {
                 "endline": item.endline,
                 "context": item.context,
                 "_method": item._method,
-                "filename": filename,
+                "filename": filename.replace(/\\/g, "/"),
                 "module": module,
                 "description": item.description
             };
