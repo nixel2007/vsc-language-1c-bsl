@@ -3,34 +3,33 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-'use strict';
-
-import {SignatureHelpProvider, SignatureHelp, SignatureInformation, CancellationToken, TextDocument, Position, workspace} from 'vscode';
+import {SignatureHelpProvider, SignatureHelp, SignatureInformation, CancellationToken, TextDocument, Position, workspace} from "vscode";
 import AbstractProvider from "./abstractProvider";
-import bslGlobals = require('./bslGlobals');
+import bslGlobals = require("./bslGlobals");
 
 
-var _NL = '\n'.charCodeAt(0);
-var _TAB = '\t'.charCodeAt(0);
-var _WSB = ' '.charCodeAt(0);
-var _LBracket = '['.charCodeAt(0);
-var _RBracket = ']'.charCodeAt(0);
-var _LCurly = '{'.charCodeAt(0);
-var _RCurly = '}'.charCodeAt(0);
-var _LParent = '('.charCodeAt(0);
-var _RParent = ')'.charCodeAt(0);
-var _Comma = ','.charCodeAt(0);
-var _Quote = '\''.charCodeAt(0);
-var _DQuote = '"'.charCodeAt(0);
-var _USC = '_'.charCodeAt(0);
-var _a = 'a'.charCodeAt(0);
-var _z = 'z'.charCodeAt(0);
-var _A = 'A'.charCodeAt(0);
-var _Z = 'Z'.charCodeAt(0);
-var _0 = '0'.charCodeAt(0);
-var _9 = '9'.charCodeAt(0);
+let _NL = "\n".charCodeAt(0);
+let _TAB = "\t".charCodeAt(0);
+let _WSB = " ".charCodeAt(0);
+let _LBracket = "[".charCodeAt(0);
+let _RBracket = "]".charCodeAt(0);
+let _LCurly = "{".charCodeAt(0);
+let _RCurly = "}".charCodeAt(0);
+let _LParent = "(".charCodeAt(0);
+let _RParent = ")".charCodeAt(0);
+let _Comma = ",".charCodeAt(0);
+let _Quote = "'".charCodeAt(0);
+let _DQuote = "\"".charCodeAt(0);
+let _USC = "_".charCodeAt(0);
+let _a = "a".charCodeAt(0);
+let _z = "z".charCodeAt(0);
+let _A = "A".charCodeAt(0);
+let _Z = "Z".charCodeAt(0);
+let _0 = "0".charCodeAt(0);
+let _9 = "9".charCodeAt(0);
+let _Dot = ".".charCodeAt(0);
 
-var BOF = 0;
+let BOF = 0;
 
 
 class BackwardIterator {
@@ -61,7 +60,7 @@ class BackwardIterator {
             this.lineNumber = -1;
             return BOF;
         }
-        var ch = this.line.charCodeAt(this.offset);
+        let ch = this.line.charCodeAt(this.offset);
         this.offset--;
         return ch;
     }
@@ -72,35 +71,35 @@ class BackwardIterator {
 export default class GlobalSignatureHelpProvider extends AbstractProvider implements SignatureHelpProvider {
 
     public provideSignatureHelp(document: TextDocument, position: Position, token: CancellationToken): SignatureHelp {
-        var iterator = new BackwardIterator(document, position.character - 1, position.line);
+        let iterator = new BackwardIterator(document, position.character - 1, position.line);
 
-        var paramCount = this.readArguments(iterator);
+        let paramCount = this.readArguments(iterator);
         if (paramCount < 0) {
             return null;
         }
 
-        var ident = this.readIdent(iterator);
+        let ident = this.readIdent(iterator);
         if (!ident) {
             return null;
         }
 
-        var entry = this._global.globalfunctions[ident.toLowerCase()];
+        let entry = this._global.globalfunctions[ident.toLowerCase()];
         if (!entry || !entry.signature) {
             return null;
         }
         let ret = new SignatureHelp();
         for (let element in entry.signature) {
             // var paramsCount = entry.signature[element].Параметры
-            var paramsString = entry.signature[element].СтрокаПараметров;
-            let signatureInfo = new SignatureInformation(entry.name + paramsString, '');
+            let paramsString = entry.signature[element].СтрокаПараметров;
+            let signatureInfo = new SignatureInformation(entry.name + paramsString, "");
 
-            var re = /([\wа-яА-Я]+)\??:\s+[а-яА-Я\w_\.]+/g;
-            var match: RegExpExecArray = null;
+            let re = /([\wа-яА-Я]+)\??:\s+[а-яА-Я\w_\.]+/g;
+            let match: RegExpExecArray = null;
             while ((match = re.exec(paramsString)) !== null) {
                 signatureInfo.parameters.push({ label: match[0], documentation: entry.signature[element].Параметры[match[1]] });
             }
 
-            if (signatureInfo.parameters.length - 1 < paramCount){
+            if (signatureInfo.parameters.length - 1 < paramCount) {
                 continue;
             }
             ret.signatures.push(signatureInfo);
@@ -112,12 +111,12 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
     }
 
     private readArguments(iterator: BackwardIterator): number {
-        var parentNesting = 0;
-        var bracketNesting = 0;
-        var curlyNesting = 0;
-        var paramCount = 0;
+        let parentNesting = 0;
+        let bracketNesting = 0;
+        let curlyNesting = 0;
+        let paramCount = 0;
         while (iterator.hasNext()) {
-            var ch = iterator.next();
+            let ch = iterator.next();
             switch (ch) {
                 case _LParent:
                     parentNesting--;
@@ -151,6 +150,7 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
             ch >= _a && ch <= _z || // a-z
             ch >= _A && ch <= _Z || // A-Z
             ch >= _0 && ch <= _9 || // 0/9
+            ch === _Dot ||
             ch >= 0x80 && ch <= 0xFFFF) { // nonascii
 
             return true;
@@ -159,10 +159,10 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
     }
 
     private readIdent(iterator: BackwardIterator): string {
-        var identStarted = false;
-        var ident = '';
+        let identStarted = false;
+        let ident = "";
         while (iterator.hasNext()) {
-            var ch = iterator.next();
+            let ch = iterator.next();
             if (!identStarted && (ch === _WSB || ch === _TAB || ch === _NL)) {
                 continue;
             }
