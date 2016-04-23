@@ -306,11 +306,13 @@ export class Global {
             let newPosition: vscode.Position;
             if (left) {
                 let leftWordRange: vscode.Range = document.getWordRangeAtPosition(newRange.start);
-                result = document.getText(leftWordRange) + "." + word;
-                if (leftWordRange.start.character > 1) {
-                    newPosition = new vscode.Position(leftWordRange.start.line, leftWordRange.start.character - 1);
-                } else {
-                    newPosition = new vscode.Position(leftWordRange.start.line, 0);
+                if (leftWordRange !== undefined) {
+                    result = document.getText(leftWordRange) + "." + word;
+                    if (leftWordRange !== undefined && leftWordRange.start.character > 1) {
+                        newPosition = new vscode.Position(leftWordRange.start.line, leftWordRange.start.character - 1);
+                    } else {
+                        newPosition = new vscode.Position(leftWordRange.start.line, 0);
+                    }
                 }
             } else {
                 result = word + "." + document.getText(document.getWordRangeAtPosition(newRange.start));
