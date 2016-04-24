@@ -105,7 +105,26 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
             } else {
                 entry = entry[0];
                 if (entry._method.Params.length !== 0) {
-                    return this.GetSignature(entry, paramCount);
+                    let arraySignature = this._global.GetSignature(entry);
+                    let ret = new SignatureHelp();
+                    let signatureInfo = new SignatureInformation(entry.name + arraySignature.paramsString, "");
+
+                    let re = /([\wа-яА-Я]+)(:\s+[<а-яА-Я\w_\.>]+)?/g;
+                    let match: RegExpExecArray = null;
+                    while ((match = re.exec(arraySignature.paramsString)) !== null) {
+                        let documentationParam = this._global.GetDocParam(arraySignature.description, match[1]);
+                        signatureInfo.parameters.push({ label: match[0] + (documentationParam.optional ? "?" : ""), documentation: documentationParam.descriptionParam });
+                    }
+
+                    if (entry._method.Params.length - 1 < paramCount) {
+                        return null;
+                    }
+
+                    ret.signatures.push(signatureInfo);
+                    // ret.activeSignature = 0;
+                    ret.activeParameter = Math.min(paramCount, signatureInfo.parameters.length - 1);
+
+                    return ret;
                 } else {
                     return null;
                 }
@@ -134,67 +153,7 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
         return ret;
     }
 
-    private GetSignature(entry, paramCount) {
-        let description = entry.description.replace(/\/\//g, "");
-        description = description.replace(new RegExp("[ ]+", "g"), " ");
-        let retState = (new RegExp("(Возвращаемое значение|Return value):\\n\\s*([\\wа-яА-Я\\.]+)", "g")).exec(description);
-        let strRetState = null;
-        if (retState) {
-            strRetState = retState[2];
-            description = description.substr(0, retState.index);
-        }
-        let paramsString = "(";
-        for (let element in entry._method.Params) {
-            let nameParam = entry._method.Params[element];
-            paramsString = (paramsString === "(" ? paramsString : paramsString + ", ") + nameParam;
-            let re = new RegExp("(Параметры|Parameters)(.|\\n)*\\n\\s*" + nameParam + "\\s*(-|–)\\s*([<\\wа-яА-Я\\.>]+)", "g");
-            let match: RegExpExecArray = null;
-            if ((match = re.exec(description)) !== null) {
-                paramsString = paramsString + ": " + match[4];
-            }
-        }
-        paramsString = paramsString + ")";
-        if (strRetState) {
-            paramsString = paramsString + ": " + strRetState;
-        }
 
-        let ret = new SignatureHelp();
-        let signatureInfo = new SignatureInformation(entry.name + paramsString, "");
-
-        let re = /([\wа-яА-Я]+)(:\s+[<а-яА-Я\w_\.>]+)?/g;
-        let match: RegExpExecArray = null;
-        while ((match = re.exec(paramsString)) !== null) {
-            let documentationParam = this.GetDocParam(description, match[1]);
-            signatureInfo.parameters.push({ label: match[0] + (documentationParam.optional ? "?" : ""), documentation: documentationParam.descriptionParam });
-        }
-
-        if (entry._method.Params.length - 1 < paramCount) {
-                return null;
-            }
-
-        ret.signatures.push(signatureInfo);
-        // ret.activeSignature = 0;
-        ret.activeParameter = Math.min(paramCount, signatureInfo.parameters.length - 1);
-
-        return ret;
-    }
-
-    private GetDocParam(description: string, param) {
-        let optional = false;
-        let descriptionParam = "";
-        let re = new RegExp("(Параметры|Parameters)(.|\\n)*\\n\\s*" + param + "\\s*(-|–)\\s*([<\\wа-яА-Я\\.>]+)\\s*-?\\s*((.|\\n)*)", "g");
-        let match: RegExpExecArray = null;
-        if ((match = re.exec(description)) !== null) {
-            descriptionParam = match[5];
-            let cast = (new RegExp("\\n\\s*[<\\wа-яА-Я\\.>]+\\s*(-|–)\\s*", "g")).exec(descriptionParam);
-            if (cast) {
-                descriptionParam = descriptionParam.substr(0, cast.index);
-
-            }
-        }
-        let documentationParam = { optional: optional, descriptionParam: descriptionParam };
-        return documentationParam;
-    }
 
     private readArguments(iterator: BackwardIterator): number {
         let parentNesting = 0;
