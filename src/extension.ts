@@ -54,13 +54,16 @@ export function activate(context: vscode.ExtensionContext) {
                 for (let index = 0; index < params.length; index++) {
                     let element = params[index];
                     comment += "//   " + element + ((aL === "en") ? " - <Type.Subtype> - <parameter description>" : " - <Тип.Вид> - <описание параметра>");
+                    comment += "\n";
                 }
                 if (MatchMethod[1].toLowerCase() === "function" || MatchMethod[1].toLowerCase() === "функция") {
-                    comment += "\n//\n";
+                    comment += "//\n";
                     comment += ((aL === "en") ? "//  Returns:\n" : "//  Возвращаемое значение:\n");
                     comment += ((aL === "en") ? "//   <Type.Subtype>   - <returned value description>" : "//   <Тип.Вид>   - <описание возвращаемого значения>");
+                    comment += "\n//";
+                } else {
+                    comment += "//";
                 }
-                comment += "\n//";
                 editor.edit(function (editBuilder) {
                     editBuilder.replace(new vscode.Selection(positionStart, positionEnd), comment);
                 });
