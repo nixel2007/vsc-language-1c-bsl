@@ -345,7 +345,7 @@ export class Global {
         GetSignature(entry) {
         let description = entry.description.replace(/\/\//g, "");
         description = description.replace(new RegExp("[ ]+", "g"), " ");
-        let retState = (new RegExp("(Возвращаемое значение|Return value):\\n\\s*([\\wа-яА-Я\\.]+)(.|\\n)*", "g")).exec(description);
+        let retState = (new RegExp("(Возвращаемое значение|Return value|Returns):\\n\\s*([\\wа-яА-Я\\.]+)(.|\\n)*", "g")).exec(description);
         let strRetState = null;
         if (retState) {
             strRetState = retState[2];
