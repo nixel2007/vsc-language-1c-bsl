@@ -41,6 +41,11 @@
         "command": "language-1c-bsl.update",
         "title": "Update reference cache",
         "category": "Language 1C (BSL)"
+      },
+      {
+        "command": "language-1c-bsl.createComments",
+        "title": "Create comment to current function",
+        "category": "Language 1C (BSL)"
       }
     ],
     "configuration": {
