@@ -342,7 +342,7 @@ export class Global {
         return vscode.Uri.file(filepath);
     }
 
-        GetSignature(entry) {
+    GetSignature(entry) {
         let description = entry.description.replace(/\/\//g, "");
         description = description.replace(new RegExp("[ ]+", "g"), " ");
         let retState = (new RegExp("(Возвращаемое значение|Return value|Returns):\\n\\s*([\\wа-яА-Я\\.]+)(.|\\n)*", "g")).exec(description);
@@ -369,7 +369,7 @@ export class Global {
         return { description: description, paramsString: paramsString, strRetState: strRetState, fullRetState: retState[0]};
     }
 
-        GetDocParam(description: string, param) {
+    GetDocParam(description: string, param) {
         let optional = false;
         let descriptionParam = "";
         let re = new RegExp("(Параметры|Parameters)(.|\\n)*\\n\\s*" + param + "\\s*(-|–)\\s*([<\\wа-яА-Я\\.>]+)\\s*-?\\s*((.|\\n)*)", "g");
