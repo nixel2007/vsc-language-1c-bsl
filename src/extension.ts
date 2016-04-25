@@ -48,9 +48,11 @@ export function activate(context: vscode.ExtensionContext) {
             if (MatchMethod !== null) {
                 let comment = "\n";
                 comment += (aL === "en") ? "// <Function description>\n" : "// <Описание функции>\n";
-                comment += "//\n";
-                comment += ((aL === "en") ? "// Parameters:\n" : "// Параметры:\n");
                 let params = global.getCacheLocal(editor.document.fileName, MatchMethod[2], editor.document.getText())[0]._method.Params;
+                if (params.length > 0) {
+                    comment += "//\n";
+                    comment += ((aL === "en") ? "// Parameters:\n" : "// Параметры:\n");
+                }
                 for (let index = 0; index < params.length; index++) {
                     let element = params[index];
                     comment += "//   " + element + ((aL === "en") ? " - <Type.Subtype> - <parameter description>" : " - <Тип.Вид> - <описание параметра>");
@@ -60,10 +62,9 @@ export function activate(context: vscode.ExtensionContext) {
                     comment += "//\n";
                     comment += ((aL === "en") ? "//  Returns:\n" : "//  Возвращаемое значение:\n");
                     comment += ((aL === "en") ? "//   <Type.Subtype>   - <returned value description>" : "//   <Тип.Вид>   - <описание возвращаемого значения>");
-                    comment += "\n//";
-                } else {
-                    comment += "//";
+                    comment += "\n";
                 }
+                comment += "//";
                 editor.edit(function (editBuilder) {
                     editBuilder.replace(new vscode.Selection(positionStart, positionEnd), comment);
                 });
