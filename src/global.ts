@@ -346,7 +346,7 @@ export class Global {
     GetSignature(entry) {
         let description = entry.description.replace(/\/\//g, "");
         description = description.replace(new RegExp("[ ]+", "g"), " ");
-        let retState = (new RegExp("^\\s(Возвращаемое значение|Return value|Returns):?\\n\\s*([<\\wа-яА-Я\\.>]+)(.|\\n)*", "gm")).exec(description);
+        let retState = (new RegExp("^\\s*(Возвращаемое значение|Return value|Returns):?\\n\\s*([<\\wа-яА-Я\\.>]+)(.|\\n)*", "gm")).exec(description);
         let strRetState = null;
         if (retState) {
             strRetState = retState[2];
@@ -356,7 +356,7 @@ export class Global {
         for (let element in entry._method.Params) {
             let nameParam = entry._method.Params[element];
             paramsString = (paramsString === "(" ? paramsString : paramsString + ", ") + nameParam;
-            let re = new RegExp("^\\s(Параметры|Parameters)(.|\\n)*\\n\\s*" + nameParam + "\\s*(-|–)\\s*([<\\wа-яА-Я\\.>]+)", "gm");
+            let re = new RegExp("^\\s*(Параметры|Parameters)(.|\\n)*\\n\\s*" + nameParam + "\\s*(-|–)\\s*([<\\wа-яА-Я\\.>]+)", "gm");
             let match: RegExpExecArray = null;
             if ((match = re.exec(description)) !== null) {
                 paramsString = paramsString + ": " + match[4];
