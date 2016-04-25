@@ -29,11 +29,7 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
                 return null;
             } else {
                 entry = entry[0];
-                if (entry._method.Params.length !== 0) {
-                    return this.GetHover(entry);
-                } else {
-                    return null;
-                }
+                return this.GetHover(entry);
             }
         }
         let description = [];
@@ -59,8 +55,10 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
         let paramString = re.exec(arraySignature.description);
         if (paramString) {
             methodDescription = arraySignature.description.substr(0, paramString.index);
+        } else {
+            methodDescription = arraySignature.description;
         }
-        methodDescription = methodDescription + arraySignature.fullRetState;
+        methodDescription = methodDescription + (arraySignature.fullRetState ? arraySignature.fullRetState : "");
         description.push(methodDescription);
         description.push({language: "1C (BSL)", value: (arraySignature.strRetState ? "Функция " : "Процедура ") + entry.name + arraySignature.paramsString + (arraySignature.strRetState ? ": " + arraySignature.strRetState : "")});
         for (let param in entry._method.Params) {
