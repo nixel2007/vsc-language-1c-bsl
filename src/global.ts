@@ -23,6 +23,7 @@ export class Global {
     globalvariables: any;
     keywords: any;
     toreplaced: any;
+    methodForDescription: any = undefined;
     private cacheUpdates: boolean;
     private pathSeparator: string;
 

@@ -11,6 +11,7 @@ import WorkspaseSymbolProvider from "./features/workspaceSymbolProvider";
 import ReferenceProvider from "./features/referenceProvider";
 import SignatureHelpProvider from "./features/signatureHelpProvider";
 import HoverProvider from "./features/hoverProvider";
+import SyntaxHelper from "./features/syntaxHelper";
 
 let diagnosticCollection: vscode.DiagnosticCollection;
 
@@ -26,6 +27,9 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaseSymbolProvider(global)));
     context.subscriptions.push(vscode.languages.registerSignatureHelpProvider(BSL_MODE, new SignatureHelpProvider(global), "(", ","));
     context.subscriptions.push(vscode.languages.registerHoverProvider(BSL_MODE, new HoverProvider(global)));
+    
+    let syntaxHelper = new SyntaxHelper(global);
+    context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider("syntax-helper", syntaxHelper));
 
     let linter = new LintProvider();
     linter.activate(context.subscriptions);
@@ -156,6 +160,41 @@ export function activate(context: vscode.ExtensionContext) {
         if (vscode.workspace.rootPath !== undefined) {
             global.customUpdateCache(document.getText(), document.fileName);
         }
+    }));
+
+    let previewUri = vscode.Uri.parse("syntax-helper://authority/Синтакс-Помощник");
+
+    context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.syntaxHelper", () => {
+        if (!vscode.window.activeTextEditor) {
+            return;
+        }
+        // push the items
+        let items = [];
+        for (let element in global.globalfunctions) {
+            let method = global.globalfunctions[element];
+            items.push({ label: method.name, description: method.description });
+        }
+        // pick one
+        let currentLine = vscode.window.activeTextEditor.selection.active.line + 1;
+        let options = {
+            placeHolder: "Введите название интересующего метода",
+            matchOnDescription: false,
+            onDidSelectItem: function (item) {
+                global.methodForDescription = item;
+                vscode.commands.executeCommand("editor.action.showHover");
+            }
+        };
+        vscode.window.showQuickPick(items, options).then(function (selection) {
+            if (typeof selection === undefined) {
+                return;
+            }
+            global.methodForDescription = selection;
+            syntaxHelper.update(previewUri);
+            vscode.commands.executeCommand("vscode.previewHtml", vscode.Uri.parse("syntax-helper://authority/Синтакс-Помощник"), vscode.ViewColumn.Two).then((success) => {
+            }, (reason) => {
+                vscode.window.showErrorMessage(reason);
+            });
+        });
     }));
 
     if (vscode.window.activeTextEditor) {
