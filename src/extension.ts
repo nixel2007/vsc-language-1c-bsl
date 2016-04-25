@@ -48,10 +48,13 @@ export function activate(context: vscode.ExtensionContext) {
             let positionEnd = vscode.window.activeTextEditor.selection.active;
             let lineMethod = (positionStart.line > positionEnd.line) ? positionStart.line + 1 : positionEnd.line + 1;
             let re = /^(Процедура|Функция|procedure|function)\s*([\wа-яё]+)/im;
-            let MatchMethod = re.exec(editor.document.lineAt(lineMethod).text);
-            if (MatchMethod !== null) {
+            for (let index = lineMethod; index >= 0; index--) {
+                let MatchMethod = re.exec(editor.document.lineAt(index).text);
+                if (MatchMethod === null) {
+                    continue;
+                }
                 let isFunc = (MatchMethod[1].toLowerCase() === "function" || MatchMethod[1].toLowerCase() === "функция");
-                let comment = "\n";
+                let comment = "";
                 let methodDescription = "";
                 if (aL === "en") {
                     methodDescription = (isFunc) ? "Function description" : "Procedure description";
@@ -75,9 +78,9 @@ export function activate(context: vscode.ExtensionContext) {
                     comment += ((aL === "en") ? "//   <Type.Subtype>   - <returned value description>" : "//   <Тип.Вид>   - <описание возвращаемого значения>");
                     comment += "\n";
                 }
-                comment += "//";
+                comment += "//\n";
                 editor.edit(function (editBuilder) {
-                    editBuilder.replace(new vscode.Selection(positionStart, positionEnd), comment);
+                    editBuilder.replace(new vscode.Position(index, 0), comment);
                 });
             }
         }
