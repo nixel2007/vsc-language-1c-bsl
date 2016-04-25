@@ -177,7 +177,7 @@ export function activate(context: vscode.ExtensionContext) {
         // pick one
         let currentLine = vscode.window.activeTextEditor.selection.active.line + 1;
         let options = {
-            placeHolder: "Введите название интересующего метода",
+            placeHolder: "Введите название метода",
             matchOnDescription: false,
             onDidSelectItem: function (item) {
                 global.methodForDescription = item;
