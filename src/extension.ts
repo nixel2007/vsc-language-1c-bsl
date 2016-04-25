@@ -185,7 +185,7 @@ export function activate(context: vscode.ExtensionContext) {
             }
         };
         vscode.window.showQuickPick(items, options).then(function (selection) {
-            if (typeof selection === undefined) {
+            if (typeof selection === "undefined") {
                 return;
             }
             global.methodForDescription = selection;
