@@ -46,8 +46,15 @@ export function activate(context: vscode.ExtensionContext) {
             let re = /^(Процедура|Функция|procedure|function)\s*([\wа-яё]+)/im;
             let MatchMethod = re.exec(editor.document.lineAt(lineMethod).text);
             if (MatchMethod !== null) {
+                let isFunc = (MatchMethod[1].toLowerCase() === "function" || MatchMethod[1].toLowerCase() === "функция");
                 let comment = "\n";
-                comment += (aL === "en") ? "// <Function description>\n" : "// <Описание функции>\n";
+                let methodDescription = "";
+                if (aL === "en") {
+                    methodDescription = (isFunc) ? "Function description" : "Procedure description";
+                } else {
+                    methodDescription = (isFunc) ? "Описание функции" : "Описание процедуры";                    
+                }
+                comment += "// <" + methodDescription + ">\n";
                 let params = global.getCacheLocal(editor.document.fileName, MatchMethod[2], editor.document.getText())[0]._method.Params;
                 if (params.length > 0) {
                     comment += "//\n";
@@ -58,7 +65,7 @@ export function activate(context: vscode.ExtensionContext) {
                     comment += "//   " + element + ((aL === "en") ? " - <Type.Subtype> - <parameter description>" : " - <Тип.Вид> - <описание параметра>");
                     comment += "\n";
                 }
-                if (MatchMethod[1].toLowerCase() === "function" || MatchMethod[1].toLowerCase() === "функция") {
+                if (isFunc) {
                     comment += "//\n";
                     comment += ((aL === "en") ? "//  Returns:\n" : "//  Возвращаемое значение:\n");
                     comment += ((aL === "en") ? "//   <Type.Subtype>   - <returned value description>" : "//   <Тип.Вид>   - <описание возвращаемого значения>");
