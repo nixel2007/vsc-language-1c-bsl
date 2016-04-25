@@ -367,7 +367,7 @@ export class Global {
             paramsString = paramsString + ": " + strRetState;
         }
 
-        return { description: description, paramsString: paramsString, strRetState: strRetState, fullRetState: (!retState) ? null : retState[0]};
+        return { description: description, paramsString: paramsString, strRetState: strRetState, fullRetState: (!retState) ? "" : retState[0]};
     }
 
     GetDocParam(description: string, param) {
