@@ -60,7 +60,7 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
         }
         methodDescription = methodDescription + (arraySignature.fullRetState ? arraySignature.fullRetState : "");
         description.push(methodDescription);
-        description.push({language: "1C (BSL)", value: (arraySignature.strRetState ? "Функция " : "Процедура ") + entry.name + arraySignature.paramsString + (arraySignature.strRetState ? ": " + arraySignature.strRetState : "")});
+        description.push({language: "1C (BSL)", value: (entry.isproc ? "Процедура " : "Функция ") + entry.name + arraySignature.paramsString + (arraySignature.strRetState ? ": " + arraySignature.strRetState : "")});
         for (let param in entry._method.Params) {
             let documentationParam = this._global.GetDocParam(arraySignature.description, entry._method.Params[param]);
             description.push("***" + entry._method.Params[param] + "***: " + documentationParam.descriptionParam);
