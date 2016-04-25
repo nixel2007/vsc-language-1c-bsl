@@ -52,7 +52,7 @@ export function activate(context: vscode.ExtensionContext) {
                 if (aL === "en") {
                     methodDescription = (isFunc) ? "Function description" : "Procedure description";
                 } else {
-                    methodDescription = (isFunc) ? "Описание функции" : "Описание процедуры";                    
+                    methodDescription = (isFunc) ? "Описание функции" : "Описание процедуры";
                 }
                 comment += "// <" + methodDescription + ">\n";
                 let params = global.getCacheLocal(editor.document.fileName, MatchMethod[2], editor.document.getText())[0]._method.Params;
@@ -167,16 +167,16 @@ export function activate(context: vscode.ExtensionContext) {
 function applyConfigToTextEditor(textEditor: vscode.TextEditor): any {
 
     if (!textEditor) {
-        return ;
+        return;
     };
-    let  newOptions: vscode.TextEditorOptions = {
-        "insertSpaces" : false,
-        "tabSize" : 4
+    let newOptions: vscode.TextEditorOptions = {
+        "insertSpaces": false,
+        "tabSize": 4
     };
 
     let defaultOptions: vscode.TextEditorOptions = {
-        "insertSpaces" : Boolean(vscode.workspace.getConfiguration("editor").get("insertSpaces")),
-        "tabSize" : Number(vscode.workspace.getConfiguration("editor").get("tabSize"))
+        "insertSpaces": Boolean(vscode.workspace.getConfiguration("editor").get("insertSpaces")),
+        "tabSize": Number(vscode.workspace.getConfiguration("editor").get("tabSize"))
     };
 
     if (vscode.languages.match(BSL_MODE, textEditor.document)) {
