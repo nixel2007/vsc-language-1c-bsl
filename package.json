@@ -85,7 +85,7 @@
         "command": "language-1c-bsl.syntaxHelper",
         "key": "ctrl+f1",
         "mac": "cmd+f1",
-        "when": "editorTextFocus"
+        "when": "editorTextFocus && editorLangId == 'bsl'"
     }],
     "languages": [
       {
