@@ -57,7 +57,7 @@ export class Global {
             "ChartsOfAccounts": "ПланыСчетов",
             "ChartsOfCalculationTypes": "ПланыВидовРасчета",
             "ChartsOfCharacteristicTypes": "ПланыВидовХарактеристик",
-            "Сonstants": "Константы",
+            "Constants": "Константы",
             "Catalogs": "Справочники",
             "DataProcessors": "Обработки",
             "DocumentJournals": "ЖурналыДокументов",
