@@ -143,7 +143,7 @@ export class Global {
                     ++count;
                     this.db.insert(newItem);
                 }
-                if (i = filesLength) {
+                if (i === (filesLength - 1)) {
                     vscode.window.setStatusBarMessage("Обновлен список процедур.", 3000);
                 }
             });
