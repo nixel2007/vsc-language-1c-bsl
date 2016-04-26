@@ -1,12 +1,6 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-
 import {SignatureHelpProvider, SignatureHelp, SignatureInformation, CancellationToken, TextDocument, Position, workspace} from "vscode";
 import AbstractProvider from "./abstractProvider";
 import bslGlobals = require("./bslGlobals");
-
 
 let _NL = "\n".charCodeAt(0);
 let _TAB = "\t".charCodeAt(0);
@@ -30,7 +24,6 @@ let _9 = "9".charCodeAt(0);
 let _Dot = ".".charCodeAt(0);
 
 let BOF = 0;
-
 
 class BackwardIterator {
     private lineNumber: number;
@@ -66,7 +59,6 @@ class BackwardIterator {
     }
 
 }
-
 
 export default class GlobalSignatureHelpProvider extends AbstractProvider implements SignatureHelpProvider {
 
@@ -132,7 +124,6 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
         }
         let ret = new SignatureHelp();
         for (let element in entry.signature) {
-            // var paramsCount = entry.signature[element].Параметры
             let paramsString = entry.signature[element].СтрокаПараметров;
             let signatureInfo = new SignatureInformation(entry.name + paramsString, "");
 
@@ -152,8 +143,6 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
         }
         return ret;
     }
-
-
 
     private readArguments(iterator: BackwardIterator): number {
         let parentNesting = 0;
@@ -220,5 +209,4 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
         }
         return ident;
     }
-
 }
