@@ -106,6 +106,7 @@ export class Global {
                     throw err;
                 }
                 let moduleStr = this.getModuleForPath(fullpath, rootPath);;
+                source = source.replace(/\r/g, "\r\n");
                 let parsesModule = new Parser().parse(source);
                 let entries = parsesModule.getMethodsTable().find();
                 if (i % 100) {
