@@ -5,7 +5,6 @@ let path = require("path");
 export default class GlobalDefinitionProvider extends AbstractProvider implements vscode.DefinitionProvider {
     public provideDefinition(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Thenable<vscode.Location> {
         let word = document.getText(document.getWordRangeAtPosition(position)).split(/\r?\n/)[0];
-        let self = this;
         return new Promise((resolve, reject) => {
             let added = {};
             let filename = document.fileName;
@@ -14,8 +13,8 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
             if (!wordPosition) {
                 wordAtPosition = "";
             } else  {
-                wordAtPosition = self._global.fullNameRecursor(wordAtPosition, document, wordPosition, false);
-                wordAtPosition = self._global.fullNameRecursor(wordAtPosition, document, wordPosition, true);
+                wordAtPosition = this._global.fullNameRecursor(wordAtPosition, document, wordPosition, false);
+                wordAtPosition = this._global.fullNameRecursor(wordAtPosition, document, wordPosition, true);
                 if (this._global.toreplaced[wordAtPosition.split(".")[0]] !== undefined) {
                     let arrayName = wordAtPosition.split(".");
                     arrayName.splice(0, 1, this._global.toreplaced[arrayName[0]]);
@@ -34,12 +33,12 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
             let d: Array<any> = new Array();
             if (module.length === 0 ) {
                 let source = document.getText();
-                d = self._global.getCacheLocal(filename, wordAtPosition, source);
+                d = this._global.getCacheLocal(filename, wordAtPosition, source);
             } else {
-                d = self._global.query(wordAtPosition, module, false, false);
+                d = this._global.query(wordAtPosition, module, false, false);
             }
             if (d.length === 0) {
-                d = self._global.query(word, "", false, false);
+                d = this._global.query(word, "", false, false);
             }
             if (d) {
                 let bucket = new Array<any>();
