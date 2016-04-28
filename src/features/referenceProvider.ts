@@ -30,7 +30,6 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
     }
 
     private doFindReferences(document: vscode.TextDocument, position: vscode.Position, options: {includeDeclaration: boolean}, token: vscode.CancellationToken): Thenable<vscode.Location[]> {
-        let self = this;
         return new Promise((resolve, reject) => {
             let filename = document.fileName;
             let workspaceRoot = vscode.workspace.rootPath;
@@ -46,22 +45,22 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
             let source = document.getText();
             let lines = (source.indexOf("\r\n") === -1) ? source.split("\n") : source.split("\r\n");
 
-            let localRefs = self._global.getRefsLocal(filename, source);
-            let d = self._global.queryref(textAtPosition, localRefs, true);
+            let localRefs = this._global.getRefsLocal(filename, source);
+            let d = this._global.queryref(textAtPosition, localRefs, true);
             let res = this.addReference(d, results);
-            self._global.cache.removeCollection(filename);
+            this._global.cache.removeCollection(filename);
             if (results.length > 0) {
                 // resolve(results);
             }
             if (workspaceRoot) {
-                let fullmodule = self._global.getModuleForPath(filename, vscode.workspace.rootPath)["module"];
+                let fullmodule = this._global.getModuleForPath(filename, vscode.workspace.rootPath);
                 let localsearch = false;
                 if (fullmodule.length !== 0 ) {
                     textAtPosition = fullmodule + "." + textAtPosition;
                     localsearch = true;
                 }
 
-                d = self._global.queryref(textAtPosition, this._global.dbcalls, localsearch);
+                d = this._global.queryref(textAtPosition, this._global.dbcalls, localsearch);
                 res = this.addReference(d, results);
             }
             return resolve(results);

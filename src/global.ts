@@ -72,34 +72,19 @@ export class Global {
     }
 
     getModuleForPath(fullpath: string, rootPath: string): any {
-        fullpath = decodeURIComponent(fullpath);
         let splitsymbol = "/";
-        if (fullpath.startsWith("file:")) {
-            if (process.platform === "win32") {
-                fullpath = fullpath.substr(8);
-            } else {
-                fullpath = fullpath.substr(7);
-            }
-        }
-        let isbsl = fullpath.endsWith(".bsl") ? true : false;
         let moduleArray: Array<string> = fullpath.substr(rootPath.length + (rootPath.slice(-1) === "\\" ? 0 : 1)).split(splitsymbol);
-        let module: string = "";
-        if (isbsl) {
+        let moduleStr: string = "";
             let hierarchy = moduleArray.length;
             if (hierarchy > 3) {
                 if (moduleArray[hierarchy - 4].startsWith("CommonModules")) {
-                    module = moduleArray[hierarchy - 3];
+                    moduleStr = moduleArray[hierarchy - 3];
                 } else if (hierarchy > 3 && this.toreplaced[moduleArray[hierarchy - 4]] !== undefined) {
-                    // if (autocompleteLanguage === "en") {
-                        // module = moduleArray[hierarchy - 4] + "." + moduleArray[hierarchy - 3];
-                    // } else {
-                        module = this.toreplaced[moduleArray[hierarchy - 4]] + "." + moduleArray[hierarchy - 3];
-                    // }
+                    moduleStr = this.toreplaced[moduleArray[hierarchy - 4]] + "." + moduleArray[hierarchy - 3];
                 }
             }
-        };
-        return {"fullpath": fullpath,
-                "module": module};
+
+        return moduleStr;
     }
 
     addtocachefiles(files: Array<vscode.Uri>, isbsl: boolean = false, rootPath: any = null): any {
@@ -107,20 +92,23 @@ export class Global {
         if (!rootPath) {
             rootPath = vscode.workspace.rootPath;
         }
-        if (!this.toreplaced) {
-            this.toreplaced = this.getReplaceMetadata();
-        }
         let filesLength = files.length;
         for (let i = 0; i < filesLength; ++i) {
             // vscode.window.setStatusBarMessage("Обновляем список " + i + " из " + files.length, 1000);
             let fullpath = files[i].toString();
-            let moduleObj = this.getModuleForPath(fullpath, rootPath);
-            let module = moduleObj.module;
-            fullpath = moduleObj.fullpath;
+            fullpath = decodeURIComponent(fullpath);
+            if (fullpath.startsWith("file:")) {
+                if (process.platform === "win32") {
+                    fullpath = fullpath.substr(8);
+                } else {
+                    fullpath = fullpath.substr(7);
+                }
+            }
             fq.readFile(fullpath, {encoding: "utf8"}, (err, source) => {
                 if (err) {
                     throw err;
                 }
+                let moduleStr = this.getModuleForPath(fullpath, rootPath);;
                 let parsesModule = new Parser().parse(source);
                 let entries = parsesModule.getMethodsTable().find();
                 let count = 0;
@@ -137,14 +125,15 @@ export class Global {
                         "context": item.context,
                         "_method": item._method,
                         "filename": fullpath,
-                        "module": module,
+                        "module": moduleStr,
                         "description": item.description
                     };
                     ++count;
                     this.db.insert(newItem);
                 }
-                if (i === (filesLength - 1)) {
-                    vscode.window.setStatusBarMessage("Обновлен список процедур.", 3000);
+                if (i === filesLength - 1) {
+                    vscode.window.setStatusBarMessage("Обновление кэша завершено", 3000);
+                    this.cacheUpdates = true;
                 }
             });
         }
@@ -152,7 +141,6 @@ export class Global {
 
     updateCache(): any {
         console.log("update cache");
-        this.cacheUpdates = true;
         let configuration = vscode.workspace.getConfiguration("language-1c-bsl");
         let basePath: string = String(configuration.get("rootPath"));
         let rootPath = vscode.workspace.rootPath;
@@ -178,6 +166,9 @@ export class Global {
     };
 
     customUpdateCache(source: string, filename: string) {
+        if (!this.cacheUpdates) {
+            return;
+        }
         let configuration = vscode.workspace.getConfiguration("language-1c-bsl");
         let basePath: string = String(configuration.get("rootPath"));
         let rootPath = path.join(vscode.workspace.rootPath, basePath);
@@ -188,9 +179,7 @@ export class Global {
             this.db.remove(element["$loki"]);
         }
         let parsesModule = new Parser().parse(source);
-        let moduleObj = this.getModuleForPath(fullpath, rootPath);
-        let module = moduleObj.module;
-        fullpath = moduleObj.fullpath;
+        let moduleStr = this.getModuleForPath(fullpath, rootPath);
         let entries = parsesModule.getMethodsTable().find();
         this.updateReferenceCalls(this.dbcalls, parsesModule.context.CallsPosition, "GlobalModuleText", filename);
         for (let y = 0; y < entries.length; ++y) {
@@ -205,7 +194,7 @@ export class Global {
                 "context": item.context,
                 "_method": item._method,
                 "filename": fullpath,
-                "module": module,
+                "module": moduleStr,
                 "description": item.description
             };
             this.db.insert(newItem);
@@ -251,7 +240,6 @@ export class Global {
         // Проверяем локальный кэш. 
         // Проверяем глобальный кэш на модули. 
         if (!this.cacheUpdates) {
-            this.updateCache();
             return new Array();
         } else {
             let prefix = lazy ? "" : "^";
@@ -264,7 +252,6 @@ export class Global {
 
     query(word: string, module: string, all: boolean = true, lazy: boolean = false): any {
         if (!this.cacheUpdates) {
-            this.updateCache();
             return new Array();
         } else {
             let prefix = lazy ? "" : "^";
@@ -393,6 +380,9 @@ export class Global {
         let postfix = "";
         if (autocompleteLanguage === "en") {
             postfix = "_en";
+        }
+        if (!this.toreplaced) {
+            this.toreplaced = this.getReplaceMetadata();
         }
         this.cache = new loki("gtags.json");
         this.cacheUpdates = false;
