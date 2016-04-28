@@ -112,7 +112,7 @@ export class Global {
                 source = source.replace(/\r/g, "\r\n");
                 let parsesModule = new Parser().parse(source);
                 let entries = parsesModule.getMethodsTable().find();
-                if (i % 100) {
+                if (i % 100 === 0) {
                     vscode.window.setStatusBarMessage("Обновляем кэш файла № " + i + " из " + filesLength, 2000);
                 }
                 this.updateReferenceCalls(this.dbcalls, parsesModule.context.CallsPosition, "GlobalModuleText", fullpath);
