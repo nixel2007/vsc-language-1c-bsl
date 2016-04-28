@@ -2,7 +2,6 @@ import * as fs from "fs";
 import * as path from "path";
 
 import * as bslglobals from "./features/bslGlobals";
-// import keyword from "./features/bslGlobals";
 
 let exec = require("child-process-promise").exec;
 let iconv = require("iconv-lite");
@@ -88,13 +87,11 @@ export class Global {
     }
 
     addtocachefiles(files: Array<vscode.Uri>, isbsl: boolean = false, rootPath: any = null): any {
-        let failed = new Array();
         if (!rootPath) {
             rootPath = vscode.workspace.rootPath;
         }
         let filesLength = files.length;
         for (let i = 0; i < filesLength; ++i) {
-            // vscode.window.setStatusBarMessage("Обновляем список " + i + " из " + files.length, 1000);
             let fullpath = files[i].toString();
             fullpath = decodeURIComponent(fullpath);
             if (fullpath.startsWith("file:")) {
@@ -111,7 +108,6 @@ export class Global {
                 let moduleStr = this.getModuleForPath(fullpath, rootPath);;
                 let parsesModule = new Parser().parse(source);
                 let entries = parsesModule.getMethodsTable().find();
-                let count = 0;
                 this.updateReferenceCalls(this.dbcalls, parsesModule.context.CallsPosition, "GlobalModuleText", fullpath);
                 for (let y = 0; y < entries.length; ++y) {
                     let item = entries[y];
@@ -128,7 +124,6 @@ export class Global {
                         "module": moduleStr,
                         "description": item.description
                     };
-                    ++count;
                     this.db.insert(newItem);
                 }
                 if (i === filesLength - 1) {
