@@ -105,7 +105,7 @@ export class Global {
                 if (err) {
                     throw err;
                 }
-                let moduleStr = this.getModuleForPath(fullpath, rootPath);;
+                let moduleStr = "";
                 if (fullpath.endsWith(".bsl")) {
                     moduleStr = this.getModuleForPath(fullpath, rootPath);
                 }
