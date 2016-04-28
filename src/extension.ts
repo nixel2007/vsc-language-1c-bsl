@@ -202,8 +202,8 @@ export function activate(context: vscode.ExtensionContext) {
 
     if (vscode.window.activeTextEditor) {
         applyConfigToTextEditor(vscode.window.activeTextEditor);
-        global.updateCache();
     }
+    global.updateCache();
 }
 
 function applyConfigToTextEditor(textEditor: vscode.TextEditor): any {
