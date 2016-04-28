@@ -108,6 +108,9 @@ export class Global {
                 let moduleStr = this.getModuleForPath(fullpath, rootPath);;
                 let parsesModule = new Parser().parse(source);
                 let entries = parsesModule.getMethodsTable().find();
+                if (i % 100) {
+                    vscode.window.setStatusBarMessage("Обновляем кэш файла № " + i + " из " + filesLength, 2000);
+                }
                 this.updateReferenceCalls(this.dbcalls, parsesModule.context.CallsPosition, "GlobalModuleText", fullpath);
                 for (let y = 0; y < entries.length; ++y) {
                     let item = entries[y];
@@ -136,6 +139,7 @@ export class Global {
 
     updateCache(): any {
         console.log("update cache");
+        vscode.window.setStatusBarMessage("Запущено заполнение кеша", 3000);
         let configuration = vscode.workspace.getConfiguration("language-1c-bsl");
         let basePath: string = String(configuration.get("rootPath"));
         let rootPath = vscode.workspace.rootPath;
