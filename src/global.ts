@@ -153,15 +153,9 @@ export class Global {
             this.dbcalls = this.cache.addCollection("Calls");
 
             let self = this;
-            let files = vscode.workspace.findFiles(basePath !== "" ? basePath.substr(2) + "/**" : "" + "**/*.bsl", "");
+            let files = vscode.workspace.findFiles(basePath !== "" ? basePath.substr(2) + "/**" : "**/*.{bsl,os}", "");
             files.then((value) => {
                 this.addtocachefiles(value, false, rootPath);
-            }, (reason) => {
-                console.log(reason);
-            });
-            files = vscode.workspace.findFiles(basePath !== "" ? basePath.substr(2) + "/**" : "" + "**/*.os", "");
-            files.then((value) => {
-                this.addtocachefiles(value, true, rootPath);
             }, (reason) => {
                 console.log(reason);
             });
