@@ -109,7 +109,7 @@ export class Global {
                 if (fullpath.endsWith(".bsl")) {
                     moduleStr = this.getModuleForPath(fullpath, rootPath);
                 }
-                source = source.replace(/\r/g, "\r\n");
+                source = source.replace(/\r(?!\n)/g, "\r\n")
                 let parsesModule = new Parser().parse(source);
                 let entries = parsesModule.getMethodsTable().find();
                 if (i % 100 === 0) {
