@@ -378,9 +378,7 @@ export class Global {
         if (autocompleteLanguage === "en") {
             postfix = "_en";
         }
-        if (!this.toreplaced) {
-            this.toreplaced = this.getReplaceMetadata();
-        }
+        this.toreplaced = this.getReplaceMetadata();
         this.cache = new loki("gtags.json");
         this.cacheUpdates = false;
         this.pathSeparator = path.sep;
