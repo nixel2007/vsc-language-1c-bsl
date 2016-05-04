@@ -153,7 +153,7 @@ export class Global {
             this.dbcalls = this.cache.addCollection("Calls");
 
             let self = this;
-            let files = vscode.workspace.findFiles(basePath !== "" ? basePath.substr(2) + "/**" : "**/*.{bsl,os}", "");
+            let files = vscode.workspace.findFiles(basePath !== "" ? basePath.substr(2) + "/**" : "**/*.{bsl,os}", "**/Reports/РегламентированныйОтчет*/Forms/*/Ext/Form/Module.bsl");
             files.then((value) => {
                 this.addtocachefiles(value, false, rootPath);
             }, (reason) => {
