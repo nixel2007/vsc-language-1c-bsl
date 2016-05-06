@@ -179,13 +179,12 @@ export class Global {
         }
     };
 
-
-    queryref(word: string, collection: any, local: boolean = false ): any {
+    queryref(word: string, collection: any, local: boolean = false): any {
         if (!collection) {
             return new Array();
         }
         let prefix = local ? "" : ".";
-        let querystring = {"call": {"$regex": new RegExp(prefix + word + "$", "i")}};
+        let querystring = { "call": { "$regex": new RegExp(prefix + word + "$", "i") } };
         let search = collection.chain().find(querystring).simplesort("name").data();
         return search;
     }
@@ -221,8 +220,8 @@ export class Global {
             return new Array();
         } else {
             let prefix = lazy ? "" : "^";
-            let suffix = all  ? "" : "$";
-            let querystring = {"module": {"$regex": new RegExp(prefix + module + suffix, "i")}};
+            let suffix = all ? "" : "$";
+            let querystring = { "module": { "$regex": new RegExp(prefix + module + suffix, "i") } };
             let search = this.db.chain().find(querystring).simplesort("name").data();
             return search;
         }
@@ -277,8 +276,7 @@ export class Global {
         if (strRetState) {
             paramsString = paramsString + ": " + strRetState;
         }
-
-        return { description: description, paramsString: paramsString, strRetState: strRetState, fullRetState: (!retState) ? "" : retState[0]};
+        return { description: description, paramsString: paramsString, strRetState: strRetState, fullRetState: (!retState) ? "" : retState[0] };
     }
 
     GetDocParam(description: string, param) {
@@ -291,7 +289,6 @@ export class Global {
             let cast = (new RegExp("\\n\\s*[<\\wа-яА-Я\\.>]+\\s*(-|–)\\s*", "g")).exec(descriptionParam);
             if (cast) {
                 descriptionParam = descriptionParam.substr(0, cast.index);
-
             }
         }
         let documentationParam = { optional: optional, descriptionParam: descriptionParam };
@@ -317,10 +314,7 @@ export class Global {
     constructor(exec: string) {
         let configuration = this.getConfiguration("language-1c-bsl");
         let autocompleteLanguage: any = this.getConfigurationKey(configuration, "languageAutocomplete");
-        let postfix = "";
-        if (autocompleteLanguage === "en") {
-            postfix = "_en";
-        }
+        let postfix = (autocompleteLanguage === "en") ? "_en" : "";
         this.toreplaced = this.getReplaceMetadata();
         this.cache = new loki("gtags.json");
         this.cacheUpdates = false;
@@ -332,7 +326,7 @@ export class Global {
         for (let element in globalfunctions) {
             let new_name = globalfunctions[element]["name" + postfix];
             let new_element = {};
-            new_element["name"] =  new_name;
+            new_element["name"] = new_name;
             new_element["description"] = globalfunctions[element].description;
             new_element["signature"] = globalfunctions[element].signature;
             this.globalfunctions[new_name.toLowerCase()] = new_element;
@@ -340,7 +334,7 @@ export class Global {
         for (let element in globalvariables) {
             let new_name = globalvariables[element]["name" + postfix];
             let new_element = {};
-            new_element["name"] =  new_name;
+            new_element["name"] = new_name;
             new_element["description"] = globalvariables[element].description;
             this.globalvariables[new_name.toLowerCase()] = new_element;
         }
