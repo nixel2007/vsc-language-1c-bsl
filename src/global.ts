@@ -113,7 +113,7 @@ export class Global {
                 let parsesModule = new Parser().parse(source);
                 let entries = parsesModule.getMethodsTable().find();
                 if (i % 100 === 0) {
-                    vscode.window.setStatusBarMessage("Обновляем кэш файла № " + i + " из " + filesLength, 2000);
+                    this.postMessage("Обновляем кэш файла № " + i + " из " + filesLength, 2000);
                 }
                 this.updateReferenceCalls(this.dbcalls, parsesModule.context.CallsPosition, "GlobalModuleText", fullpath);
                 for (let y = 0; y < entries.length; ++y) {
@@ -134,7 +134,7 @@ export class Global {
                     this.db.insert(newItem);
                 }
                 if (i === filesLength - 1) {
-                    vscode.window.setStatusBarMessage("Обновление кэша завершено", 3000);
+                    this.postMessage("Обновление кэша завершено", 3000);
                     this.cacheUpdates = true;
                 }
             });
@@ -143,9 +143,9 @@ export class Global {
 
     updateCache(): any {
         console.log("update cache");
-        vscode.window.setStatusBarMessage("Запущено заполнение кеша", 3000);
+        this.postMessage("Запущено заполнение кеша", 3000);
         let configuration = vscode.workspace.getConfiguration("language-1c-bsl");
-        let basePath: string = String(configuration.get("rootPath"));
+        let basePath: string = String(this.getConfigurationKey(configuration, "rootPath"));
         let rootPath = vscode.workspace.rootPath;
         if (rootPath) {
             rootPath = path.join(vscode.workspace.rootPath, basePath);
@@ -166,8 +166,8 @@ export class Global {
         if (!this.cacheUpdates) {
             return;
         }
-        let configuration = vscode.workspace.getConfiguration("language-1c-bsl");
-        let basePath: string = String(configuration.get("rootPath"));
+        let configuration = this.getConfiguration("language-1c-bsl");
+        let basePath: string = String(this.getConfigurationKey(configuration, "rootPath"));
         let rootPath = path.join(vscode.workspace.rootPath, basePath);
         let fullpath = filename.replace(/\\/g, "/");
         let methodArray = this.db.find({ "filename": { "$eq": fullpath } });
@@ -371,9 +371,15 @@ export class Global {
         return documentationParam;
     }
 
+    public postMessage(description: string, interval: number) {}
+
+    public getConfiguration(section:string) {}
+
+    public getConfigurationKey(configuration, key: string) {}
+    
     constructor(exec: string) {
-        let configuration = vscode.workspace.getConfiguration("language-1c-bsl");
-        let autocompleteLanguage: any = configuration.get("languageAutocomplete");
+        let configuration = this.getConfiguration("language-1c-bsl");
+        let autocompleteLanguage: any = this.getConfigurationKey(configuration, "languageAutocomplete");
         let postfix = "";
         if (autocompleteLanguage === "en") {
             postfix = "_en";

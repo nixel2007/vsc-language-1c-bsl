@@ -12,6 +12,7 @@ import ReferenceProvider from "./features/referenceProvider";
 import SignatureHelpProvider from "./features/signatureHelpProvider";
 import HoverProvider from "./features/hoverProvider";
 import SyntaxHelper from "./features/syntaxHelper";
+import * as vscAdapter from "./vscAdapter";
 
 let diagnosticCollection: vscode.DiagnosticCollection;
 
@@ -20,6 +21,10 @@ let diagnosticCollection: vscode.DiagnosticCollection;
 export function activate(context: vscode.ExtensionContext) {
 
     const global = new Global("global");
+    global.postMessage          = vscAdapter.postMessage;
+    global.getConfiguration     = vscAdapter.getConfiguration;
+    global.getConfigurationKey  = vscAdapter.getConfigurationKey;
+    
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(BSL_MODE, new CompletionItemProvider(global), ".", "="));
     context.subscriptions.push(vscode.languages.registerDefinitionProvider(BSL_MODE, new DefinitionProvider(global)));
     context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider(BSL_MODE, new DocumentSymbolProvider(global)));
