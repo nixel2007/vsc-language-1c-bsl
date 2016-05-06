@@ -10,8 +10,6 @@ let Parser = require("onec-syntaxparser");
 let FileQueue = require("filequeue");
 let fq = new FileQueue(500);
 
-import * as vscode from "vscode";
-
 export class Global {
     exec: string;
     cache: any;
