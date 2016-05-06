@@ -24,6 +24,7 @@ export function activate(context: vscode.ExtensionContext) {
     global.postMessage          = vscAdapter.postMessage;
     global.getConfiguration     = vscAdapter.getConfiguration;
     global.getConfigurationKey  = vscAdapter.getConfigurationKey;
+    global.getRootPath          = vscAdapter.getRootPath;
     
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(BSL_MODE, new CompletionItemProvider(global), ".", "="));
     context.subscriptions.push(vscode.languages.registerDefinitionProvider(BSL_MODE, new DefinitionProvider(global)));

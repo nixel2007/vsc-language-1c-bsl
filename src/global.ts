@@ -88,7 +88,7 @@ export class Global {
 
     addtocachefiles(files: Array<vscode.Uri>, isbsl: boolean = false, rootPath: any = null): any {
         if (!rootPath) {
-            rootPath = vscode.workspace.rootPath;
+            rootPath = this.getRootPath();
         }
         let filesLength = files.length;
         for (let i = 0; i < filesLength; ++i) {
@@ -146,9 +146,9 @@ export class Global {
         this.postMessage("Запущено заполнение кеша", 3000);
         let configuration = this.getConfiguration("language-1c-bsl");
         let basePath: string = String(this.getConfigurationKey(configuration, "rootPath"));
-        let rootPath = vscode.workspace.rootPath;
+        let rootPath = this.getRootPath();
         if (rootPath) {
-            rootPath = path.join(vscode.workspace.rootPath, basePath);
+            rootPath = path.join(rootPath, basePath);
             this.db = this.cache.addCollection("ValueTable");
             this.dbcalls = this.cache.addCollection("Calls");
 
@@ -168,7 +168,7 @@ export class Global {
         }
         let configuration = this.getConfiguration("language-1c-bsl");
         let basePath: string = String(this.getConfigurationKey(configuration, "rootPath"));
-        let rootPath = path.join(vscode.workspace.rootPath, basePath);
+        let rootPath = path.join(this.getRootPath(), basePath);
         let fullpath = filename.replace(/\\/g, "/");
         let methodArray = this.db.find({ "filename": { "$eq": fullpath } });
         for (let index = 0; index < methodArray.length; index++) {
@@ -376,6 +376,10 @@ export class Global {
     public getConfiguration(section:string) {}
 
     public getConfigurationKey(configuration, key: string) {}
+    
+    public getRootPath(): string {
+        return "";
+    }
     
     constructor(exec: string) {
         let configuration = this.getConfiguration("language-1c-bsl");

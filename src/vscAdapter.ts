@@ -16,3 +16,7 @@ export function getConfiguration(section:string) {
 export function getConfigurationKey(configuration:vscode.WorkspaceConfiguration, key: string) {
     return configuration.get(key);
 }
+
+export function getRootPath() {
+    return vscode.workspace.rootPath;
+}
