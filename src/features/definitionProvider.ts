@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import AbstractProvider from "./abstractProvider";
-let path = require("path");
 
 export default class GlobalDefinitionProvider extends AbstractProvider implements vscode.DefinitionProvider {
     public provideDefinition(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Thenable<vscode.Location> {
@@ -12,7 +11,7 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
             let wordAtPosition = document.getText(wordPosition);
             if (!wordPosition) {
                 wordAtPosition = "";
-            } else  {
+            } else {
                 wordAtPosition = this._global.fullNameRecursor(wordAtPosition, document, wordPosition, false);
                 wordAtPosition = this._global.fullNameRecursor(wordAtPosition, document, wordPosition, true);
                 if (this._global.toreplaced[wordAtPosition.split(".")[0]] !== undefined) {
@@ -24,14 +23,14 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
             let module = "";
             if (wordAtPosition.indexOf(".") > 0) {
                 // if (path.extname(document.fileName) !== ".os") { // Для oscript не можем гаранитировать полное совпадение модулей.  
-                    let dotArray: Array<string> = wordAtPosition.split(".");
-                    wordAtPosition = dotArray.pop();
-                    module = dotArray.join(".");
+                let dotArray: Array<string> = wordAtPosition.split(".");
+                wordAtPosition = dotArray.pop();
+                module = dotArray.join(".");
                 // }
             }
             let local: Array<any>;
             let d: Array<any> = new Array();
-            if (module.length === 0 ) {
+            if (module.length === 0) {
                 let source = document.getText();
                 d = this._global.getCacheLocal(filename, wordAtPosition, source);
             } else {
@@ -84,7 +83,7 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                     try {
                         if (value) {
                             let referenceResource = vscode.Uri.file(value.path);
-                            let location = new vscode.Location(referenceResource, new vscode.Position(value.line, (value.isproc ? 9 : 7) + 1) );
+                            let location = new vscode.Location(referenceResource, new vscode.Position(value.line, (value.isproc ? 9 : 7) + 1));
                             return resolve(location);
                         } else {
                             return reject("value not found " + value);
@@ -93,12 +92,10 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                         console.error(e);
                         return reject(e);
                     }
-                }
-                );
+                });
             } else {
                 Promise.resolve(null);
             }
-        }
-        );
+        });
     }
 }
