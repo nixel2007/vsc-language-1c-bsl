@@ -3,9 +3,7 @@ import AbstractProvider from "./abstractProvider";
 
 export default class GlobalReferenceProvider extends AbstractProvider implements vscode.ReferenceProvider {
     public provideReferences(document: vscode.TextDocument, position: vscode.Position, options: { includeDeclaration: boolean; }, token: vscode.CancellationToken): Thenable<vscode.Location[]> {
-        return vscode.workspace.saveAll(false).then(() => {
-            return this.doFindReferences(document, position, options, token);
-        });
+        return this.doFindReferences(document, position, options, token);
     }
 
     private addReference(searchResult: any, results: vscode.Location[]): any {
@@ -13,7 +11,8 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
             let bucket = new Array<any>();
             for (let index = 0; index < searchResult.length; index++) {
                 let element = searchResult[index];
-                let result = {"path": element.filename,
+                let result = {
+                    "path": element.filename,
                     "line": element.line,
                     "description": element.name,
                     "label": element.filename
@@ -21,15 +20,15 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
                 let colStr = element.character;
                 let referenceResource = vscode.Uri.file(result.path);
                 let range = new vscode.Range(
-                                result.line, +colStr, result.line , +colStr + element.call.length
-                            );
-                    results.push(new vscode.Location(referenceResource, range));
+                    result.line, +colStr, result.line, +colStr + element.call.length
+                );
+                results.push(new vscode.Location(referenceResource, range));
 
             }
         }
     }
 
-    private doFindReferences(document: vscode.TextDocument, position: vscode.Position, options: {includeDeclaration: boolean}, token: vscode.CancellationToken): Thenable<vscode.Location[]> {
+    private doFindReferences(document: vscode.TextDocument, position: vscode.Position, options: { includeDeclaration: boolean }, token: vscode.CancellationToken): Thenable<vscode.Location[]> {
         return new Promise((resolve, reject) => {
             let filename = document.fileName;
             let workspaceRoot = vscode.workspace.rootPath;
@@ -39,7 +38,6 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
                 return resolve([]);
             }
             let textAtPosition = document.getText(wordRange);
-            let wordLength = textAtPosition.length;
             let results: vscode.Location[] = Array<vscode.Location>();
 
             let source = document.getText();
@@ -55,7 +53,7 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
             if (workspaceRoot) {
                 let fullmodule = this._global.getModuleForPath(filename, vscode.workspace.rootPath);
                 let localsearch = false;
-                if (fullmodule.length !== 0 ) {
+                if (fullmodule.length !== 0) {
                     textAtPosition = fullmodule + "." + textAtPosition;
                     localsearch = true;
                 }

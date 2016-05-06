@@ -1,17 +1,13 @@
-import * as fs from "fs";
 import * as path from "path";
 
 import * as bslglobals from "./features/bslGlobals";
 
-let exec = require("child-process-promise").exec;
-let iconv = require("iconv-lite");
 let loki = require("lokijs");
 let Parser = require("onec-syntaxparser");
 let FileQueue = require("filequeue");
 let fq = new FileQueue(500);
 
 export class Global {
-    exec: string;
     cache: any;
     db: any;
     dblocal: any;
@@ -24,9 +20,9 @@ export class Global {
     private cacheUpdates: boolean;
 
     getCacheLocal(filename: string, word: string, source, update: boolean = false, allToEnd: boolean = true, fromFirst: boolean = true) {
-        let suffix = allToEnd  ? "" : "$";
+        let suffix = allToEnd ? "" : "$";
         let prefix = fromFirst ? "^" : "";
-        let querystring = {"name": {"$regex": new RegExp(prefix + word + suffix, "i")}};
+        let querystring = { "name": { "$regex": new RegExp(prefix + word + suffix, "i") } };
         let entries = new Parser().parse(source).getMethodsTable().find(querystring);
         return entries;
     }
@@ -44,7 +40,7 @@ export class Global {
         return collection;
     }
 
-    getReplaceMetadata () {
+    getReplaceMetadata() {
         return {
             "AccountingRegisters": "РегистрыБухгалтерии",
             "AccumulationRegisters": "РегистрыНакопления",
@@ -70,16 +66,15 @@ export class Global {
     getModuleForPath(fullpath: string, rootPath: string): any {
         let splitsymbol = "/";
         let moduleArray: Array<string> = fullpath.substr(rootPath.length + (rootPath.slice(-1) === "\\" ? 0 : 1)).split(splitsymbol);
-        let moduleStr: string = "";
-            let hierarchy = moduleArray.length;
-            if (hierarchy > 3) {
-                if (moduleArray[hierarchy - 4].startsWith("CommonModules")) {
-                    moduleStr = moduleArray[hierarchy - 3];
-                } else if (hierarchy > 3 && this.toreplaced[moduleArray[hierarchy - 4]] !== undefined) {
-                    moduleStr = this.toreplaced[moduleArray[hierarchy - 4]] + "." + moduleArray[hierarchy - 3];
-                }
+        let moduleStr = "";
+        let hierarchy = moduleArray.length;
+        if (hierarchy > 3) {
+            if (moduleArray[hierarchy - 4].startsWith("CommonModules")) {
+                moduleStr = moduleArray[hierarchy - 3];
+            } else if (hierarchy > 3 && this.toreplaced[moduleArray[hierarchy - 4]] !== undefined) {
+                moduleStr = this.toreplaced[moduleArray[hierarchy - 4]] + "." + moduleArray[hierarchy - 3];
             }
-
+        }
         return moduleStr;
     }
 
@@ -88,24 +83,18 @@ export class Global {
             rootPath = this.getRootPath();
         }
         let filesLength = files.length;
+        let substrIndex = (process.platform === "win32") ? 8 : 7;
         for (let i = 0; i < filesLength; ++i) {
             let fullpath = files[i].toString();
             fullpath = decodeURIComponent(fullpath);
             if (fullpath.startsWith("file:")) {
-                if (process.platform === "win32") {
-                    fullpath = fullpath.substr(8);
-                } else {
-                    fullpath = fullpath.substr(7);
-                }
+                fullpath = fullpath.substr(substrIndex);
             }
-            fq.readFile(fullpath, {encoding: "utf8"}, (err, source) => {
+            fq.readFile(fullpath, { encoding: "utf8" }, (err, source) => {
                 if (err) {
                     throw err;
                 }
-                let moduleStr = "";
-                if (fullpath.endsWith(".bsl")) {
-                    moduleStr = this.getModuleForPath(fullpath, rootPath);
-                }
+                let moduleStr = fullpath.endsWith(".bsl") ? this.getModuleForPath(fullpath, rootPath) : "";
                 source = source.replace(/\r(?!\n)/g, "\r\n")
                 let parsesModule = new Parser().parse(source);
                 let entries = parsesModule.getMethodsTable().find();
