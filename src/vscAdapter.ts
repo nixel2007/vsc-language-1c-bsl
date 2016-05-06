@@ -53,7 +53,7 @@ export function fullNameRecursor(word: string, document: vscode.TextDocument, ra
             }
             if (document.getText(new vscode.Range(new vscode.Position(newPosition.line, newPosition.character + 1), newPosition)) === ".") {
                 let newWord = document.getWordRangeAtPosition(newPosition);
-                return document.getText(newWord) +  "." + result;
+                return document.getText(newWord) + "." + result;
             }
             return result;
         } else {
