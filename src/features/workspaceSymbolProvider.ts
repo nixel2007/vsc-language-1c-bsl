@@ -1,6 +1,7 @@
 "use strict";
 
 import { workspace, Uri, WorkspaceSymbolProvider, SymbolInformation, SymbolKind, Range, CancellationToken } from "vscode";
+import {sep} from "path";
 
 import * as vscode from "vscode";
 import AbstractProvider from "./abstractProvider";
@@ -25,7 +26,7 @@ export default class GlobalworkspaseSymbolProvider extends AbstractProvider impl
             return Promise.resolve<SymbolInformation[]>([]);
         }
 
-        let file =  this._global.asAbsolutePath(uri);
+        let file =  this.asAbsolutePath(uri);
         if (!file) {
             return Promise.resolve<SymbolInformation[]>([]);
         }
@@ -35,9 +36,22 @@ export default class GlobalworkspaseSymbolProvider extends AbstractProvider impl
             let element = d[index];
             let range = new vscode.Range(new vscode.Position(element.line, 0), new vscode.Position(element.line, 0));
             let result = new SymbolInformation(element.name, SymbolKind.Function,
-                range, this._global.asUrl(element.filename));
+                range, this.asUrl(element.filename));
             bucket.push(result);
         }
         return Promise.resolve(bucket);
+    }
+    
+    private asAbsolutePath(resource: vscode.Uri): string {
+        if (resource.scheme !== "file") {
+            return null;
+        }
+        let result = resource.fsPath;
+        // Both \ and / must be escaped in regular expressions
+        return result ? result.replace(new RegExp("\\" + sep, "g"), "/") : null;
+    }
+
+    private asUrl(filepath: string): vscode.Uri {
+        return vscode.Uri.file(filepath);
     }
 }

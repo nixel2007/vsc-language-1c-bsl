@@ -24,7 +24,6 @@ export class Global {
     toreplaced: any;
     methodForDescription: any = undefined;
     private cacheUpdates: boolean;
-    private pathSeparator: string;
 
     getCacheLocal(filename: string, word: string, source, update: boolean = false, allToEnd: boolean = true, fromFirst: boolean = true) {
         let suffix = allToEnd  ? "" : "$";
@@ -268,19 +267,6 @@ export class Global {
         }
     }
 
-    public asAbsolutePath(resource: vscode.Uri): string {
-        if (resource.scheme !== "file") {
-            return null;
-        }
-        let result = resource.fsPath;
-        // Both \ and / must be escaped in regular expressions
-        return result ? result.replace(new RegExp("\\" + this.pathSeparator, "g"), "/") : null;
-    }
-
-    public asUrl(filepath: string): vscode.Uri {
-        return vscode.Uri.file(filepath);
-    }
-
     GetSignature(entry) {
         let description = entry.description.replace(/\/\//g, "");
         description = description.replace(new RegExp("[ ]+", "g"), " ");
@@ -351,7 +337,6 @@ export class Global {
         this.toreplaced = this.getReplaceMetadata();
         this.cache = new loki("gtags.json");
         this.cacheUpdates = false;
-        this.pathSeparator = path.sep;
         this.globalfunctions = {};
         this.globalvariables = {};
         let globalfunctions = bslglobals.globalfunctions();
