@@ -86,7 +86,7 @@ export class Global {
         return moduleStr;
     }
 
-    addtocachefiles(files: Array<vscode.Uri>, rootPath: any = null): any {
+    addtocachefiles(files: Array<string>, rootPath: any = null): any {
         if (!rootPath) {
             rootPath = this.getRootPath();
         }
@@ -152,13 +152,8 @@ export class Global {
             this.db = this.cache.addCollection("ValueTable");
             this.dbcalls = this.cache.addCollection("Calls");
 
-            let self = this;
-            let files = vscode.workspace.findFiles(basePath !== "" ? basePath.substr(2) + "/**" : "**/*.{bsl,os}", "**/Reports/РегламентированныйОтчет*/Forms/*/Ext/Form/Module.bsl");
-            files.then((value) => {
-                this.addtocachefiles(value, rootPath);
-            }, (reason) => {
-                console.log(reason);
-            });
+            let searchPattern = basePath !== "" ? basePath.substr(2) + "/**" : "**/*.{bsl,os}";
+            this.findFilesForCache(searchPattern, rootPath);
         }
     };
 
@@ -343,6 +338,8 @@ export class Global {
     public fullNameRecursor(word: string, document, range, left: boolean): string {
         return "";
     }
+    
+    public findFilesForCache(searchPattern: string, rootPath: string) {}
     
     constructor(exec: string) {
         let configuration = this.getConfiguration("language-1c-bsl");

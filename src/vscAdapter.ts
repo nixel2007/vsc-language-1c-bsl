@@ -61,3 +61,12 @@ export function fullNameRecursor(word: string, document: vscode.TextDocument, ra
             return result;
         }
     }
+
+export function findFilesForCahce(searchPattern: string, rootPath: string) {
+    let files = vscode.workspace.findFiles(searchPattern, "");
+    files.then((value) => {
+        this.addtocachefiles(value, rootPath);
+    }, (reason) => {
+        console.log(reason);
+    });
+}
