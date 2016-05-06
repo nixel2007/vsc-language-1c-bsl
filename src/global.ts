@@ -78,10 +78,7 @@ export class Global {
         return moduleStr;
     }
 
-    addtocachefiles(files: Array<string>, rootPath: any = null): any {
-        if (!rootPath) {
-            rootPath = this.getRootPath();
-        }
+    addtocachefiles(files: Array<string>, rootPath: string): any {
         let filesLength = files.length;
         let substrIndex = (process.platform === "win32") ? 8 : 7;
         for (let i = 0; i < filesLength; ++i) {
@@ -97,15 +94,21 @@ export class Global {
                 let moduleStr = fullpath.endsWith(".bsl") ? this.getModuleForPath(fullpath, rootPath) : "";
                 source = source.replace(/\r(?!\n)/g, "\r\n")
                 let parsesModule = new Parser().parse(source);
+                source = null;
                 let entries = parsesModule.getMethodsTable().find();
                 if (i % 100 === 0) {
                     this.postMessage("Обновляем кэш файла № " + i + " из " + filesLength, 2000);
                 }
-                this.updateReferenceCalls(this.dbcalls, parsesModule.context.CallsPosition, "GlobalModuleText", fullpath);
+                if (parsesModule.context.CallsPosition.length > 0) {
+                    this.updateReferenceCalls(this.dbcalls, parsesModule.context.CallsPosition, "GlobalModuleText", fullpath);
+                }
+                parsesModule = null;
                 for (let y = 0; y < entries.length; ++y) {
                     let item = entries[y];
-                    this.updateReferenceCalls(this.dbcalls, item._method.CallsPosition, item, fullpath);
-                    item["filename"] = fullpath;
+                    let method = { name: item.name, endline: item.endline, context: item.context, isproc: item.isproc }
+                    if (item._method.CallsPosition.length > 0) {
+                        this.updateReferenceCalls(this.dbcalls, item._method.CallsPosition, method, fullpath);
+                    }
                     let newItem: MethodValue = {
                         "name": String(item.name),
                         "isproc": Boolean(item.isproc),
