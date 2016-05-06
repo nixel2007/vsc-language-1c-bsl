@@ -1,57 +1,24 @@
 "use strict";
 
-import { workspace, Uri, WorkspaceSymbolProvider, SymbolInformation, SymbolKind, Range, CancellationToken } from "vscode";
-import {sep} from "path";
-
 import * as vscode from "vscode";
 import AbstractProvider from "./abstractProvider";
 import {BSL_MODE} from "../const";
-// import * as global from "../global";
 
-export default class GlobalworkspaseSymbolProvider extends AbstractProvider implements WorkspaceSymbolProvider {
-    public provideWorkspaceSymbols(search: string, token: CancellationToken): Promise<SymbolInformation[]> {
-        let uri: Uri;
-        let documents = workspace.textDocuments;
-        for (let document of documents) {
-            if (vscode.languages.match(BSL_MODE, document)) {
-                uri = document.uri;
-                break;
-            }
-        }
-
-        this._global.customUpdateCache(vscode.window.activeTextEditor.document.getText(), vscode.window.activeTextEditor.document.fileName);
-
-
-        if (!uri) {
-            return Promise.resolve<SymbolInformation[]>([]);
-        }
-
-        let file =  this.asAbsolutePath(uri);
-        if (!file) {
-            return Promise.resolve<SymbolInformation[]>([]);
+export default class GlobalworkspaseSymbolProvider extends AbstractProvider implements vscode.WorkspaceSymbolProvider {
+    public provideWorkspaceSymbols(search: string, token: vscode.CancellationToken): Promise<vscode.SymbolInformation[]> {
+        let document = vscode.window.activeTextEditor.document;
+        if (vscode.window.activeTextEditor && vscode.languages.match(BSL_MODE, document) && document.isDirty) {
+            this._global.customUpdateCache(document.getText(), document.fileName);
         }
         let d: Array<any> = this._global.query(search, "", true, true);
-        let bucket = new Array<SymbolInformation>();
+        let bucket = new Array<vscode.SymbolInformation>();
         for (let index = 0; index < d.length; index++) {
             let element = d[index];
             let range = new vscode.Range(new vscode.Position(element.line, 0), new vscode.Position(element.line, 0));
-            let result = new SymbolInformation(element.name, SymbolKind.Function,
-                range, this.asUrl(element.filename));
+            let result = new vscode.SymbolInformation(element.name, vscode.SymbolKind.Function,
+                range, vscode.Uri.file(element.filename));
             bucket.push(result);
         }
         return Promise.resolve(bucket);
-    }
-    
-    private asAbsolutePath(resource: vscode.Uri): string {
-        if (resource.scheme !== "file") {
-            return null;
-        }
-        let result = resource.fsPath;
-        // Both \ and / must be escaped in regular expressions
-        return result ? result.replace(new RegExp("\\" + sep, "g"), "/") : null;
-    }
-
-    private asUrl(filepath: string): vscode.Uri {
-        return vscode.Uri.file(filepath);
     }
 }
