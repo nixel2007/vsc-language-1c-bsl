@@ -86,7 +86,7 @@ export class Global {
         return moduleStr;
     }
 
-    addtocachefiles(files: Array<vscode.Uri>, isbsl: boolean = false, rootPath: any = null): any {
+    addtocachefiles(files: Array<vscode.Uri>, rootPath: any = null): any {
         if (!rootPath) {
             rootPath = this.getRootPath();
         }
@@ -155,7 +155,7 @@ export class Global {
             let self = this;
             let files = vscode.workspace.findFiles(basePath !== "" ? basePath.substr(2) + "/**" : "**/*.{bsl,os}", "**/Reports/РегламентированныйОтчет*/Forms/*/Ext/Form/Module.bsl");
             files.then((value) => {
-                this.addtocachefiles(value, false, rootPath);
+                this.addtocachefiles(value, rootPath);
             }, (reason) => {
                 console.log(reason);
             });
