@@ -340,7 +340,7 @@ export class Global {
         return "";
     }
     
-    public fullNameRecursor(word: string, document: vscode.TextDocument, range: vscode.Range, left: boolean): string {
+    public fullNameRecursor(word: string, document, range, left: boolean): string {
         return "";
     }
     
