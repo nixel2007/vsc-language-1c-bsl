@@ -144,7 +144,7 @@ export class Global {
     updateCache(): any {
         console.log("update cache");
         this.postMessage("Запущено заполнение кеша", 3000);
-        let configuration = vscode.workspace.getConfiguration("language-1c-bsl");
+        let configuration = this.getConfiguration("language-1c-bsl");
         let basePath: string = String(this.getConfigurationKey(configuration, "rootPath"));
         let rootPath = vscode.workspace.rootPath;
         if (rootPath) {
