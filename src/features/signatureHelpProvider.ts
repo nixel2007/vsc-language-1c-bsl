@@ -1,6 +1,5 @@
 import {SignatureHelpProvider, SignatureHelp, SignatureInformation, CancellationToken, TextDocument, Position, workspace} from "vscode";
 import AbstractProvider from "./abstractProvider";
-import bslGlobals = require("./bslGlobals");
 
 let _NL = "\n".charCodeAt(0);
 let _TAB = "\t".charCodeAt(0);
