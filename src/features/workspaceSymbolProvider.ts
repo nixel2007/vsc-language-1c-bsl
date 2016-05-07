@@ -12,7 +12,8 @@ export default class GlobalworkspaseSymbolProvider extends AbstractProvider impl
         }
         let d: Array<any> = this._global.query(search, "", true, true);
         let bucket = new Array<vscode.SymbolInformation>();
-        for (let index = 0; index < d.length; index++) {
+        let arrayLength = Math.min(d.length, 1000);
+        for (let index = 0; index < arrayLength; index++) {
             let element = d[index];
             let range = new vscode.Range(new vscode.Position(element.line, 0), new vscode.Position(element.line, 0));
             let result = new vscode.SymbolInformation(element.name, vscode.SymbolKind.Function,
