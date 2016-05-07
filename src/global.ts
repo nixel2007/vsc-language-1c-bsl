@@ -199,7 +199,7 @@ export class Global {
         let self = this;
         for (let index = 0; index < calls.length; index++) {
             let value = calls[index];
-            if (value.call.startsWith(".")) {
+            if (value.call.indexOf(".") === -1) {
                 continue;
             }
             let newItem: MethodValue = {
