@@ -53,12 +53,24 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
             if (workspaceRoot) {
                 let fullmodule = this._global.getModuleForPath(filename.replace(/\\/g, "/"), vscode.workspace.rootPath);
                 let localsearch = false;
+                let enTextAtPosition = undefined;
                 if (fullmodule.length !== 0) {
+                    let arrName = filename.substr(vscode.workspace.rootPath.length).split("\\");
+                    if (this._global.toreplaced[arrName[arrName.length - 4]] !== undefined) {
+                        enTextAtPosition = arrName[arrName.length - 4] + "." + arrName[arrName.length - 3] + "." + textAtPosition;
+                    }
                     textAtPosition = fullmodule + "." + textAtPosition;
                     localsearch = true;
                 }
-
                 d = this._global.dbcalls.get(textAtPosition);
+                if (enTextAtPosition) {
+                    let en_d = this._global.dbcalls.get(enTextAtPosition);
+                    if (en_d !== undefined && d === undefined) {
+                        d = en_d;
+                    } else if (en_d !== undefined && d !== undefined) {
+                        d = d.concat(en_d);
+                    }
+                }
                 res = this.addReference(d, results);
             }
             return resolve(results);
