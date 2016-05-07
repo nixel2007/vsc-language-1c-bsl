@@ -3,6 +3,10 @@ import AbstractProvider from "./abstractProvider";
 
 export default class GlobalHoverProvider extends AbstractProvider implements vscode.HoverProvider {
     public provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.Hover {
+        if (!this._global.hoverTrue) {
+            this._global.hoverTrue = true;
+            return null;
+        }
         let word = document.getText(document.getWordRangeAtPosition(position));
         if (word.split(" ").length > 1) {
             return null;

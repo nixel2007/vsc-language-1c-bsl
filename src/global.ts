@@ -16,6 +16,7 @@ export class Global {
     keywords: any;
     toreplaced: any;
     methodForDescription: any = undefined;
+    hoverTrue: boolean = true;
     private cacheUpdates: boolean;
 
     getCacheLocal(filename: string, word: string, source, update: boolean = false, allToEnd: boolean = true, fromFirst: boolean = true) {
