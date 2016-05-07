@@ -51,14 +51,14 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
                 // resolve(results);
             }
             if (workspaceRoot) {
-                let fullmodule = this._global.getModuleForPath(filename, vscode.workspace.rootPath);
+                let fullmodule = this._global.getModuleForPath(filename.replace(/\\/g, "/"), vscode.workspace.rootPath);
                 let localsearch = false;
                 if (fullmodule.length !== 0) {
                     textAtPosition = fullmodule + "." + textAtPosition;
                     localsearch = true;
                 }
 
-                d = this._global.queryref(textAtPosition, this._global.dbcalls, localsearch);
+                d = this._global.dbcalls.get(textAtPosition);
                 res = this.addReference(d, results);
             }
             return resolve(results);

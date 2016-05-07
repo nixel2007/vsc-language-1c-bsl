@@ -10,8 +10,7 @@ let fq = new FileQueue(500);
 export class Global {
     cache: any;
     db: any;
-    dblocal: any;
-    dbcalls: any;
+    dbcalls: Map<string, Array<{}>>;
     globalfunctions: any;
     globalvariables: any;
     keywords: any;
@@ -109,13 +108,14 @@ export class Global {
                     if (item._method.CallsPosition.length > 0) {
                         this.updateReferenceCalls(this.dbcalls, item._method.CallsPosition, method, fullpath);
                     }
+                    let _method = { Params: item._method.Params, IsExport: item._method.IsExport };
                     let newItem: MethodValue = {
                         "name": String(item.name),
                         "isproc": Boolean(item.isproc),
                         "line": item.line,
                         "endline": item.endline,
                         "context": item.context,
-                        "_method": item._method,
+                        "_method": _method,
                         "filename": fullpath,
                         "module": moduleStr,
                         "description": item.description
@@ -139,10 +139,9 @@ export class Global {
         if (rootPath) {
             rootPath = path.join(rootPath, basePath);
             this.db = this.cache.addCollection("ValueTable");
-            this.dbcalls = this.cache.addCollection("Calls");
-
             let searchPattern = basePath !== "" ? basePath.substr(2) + "/**" : "**/*.{bsl,os}";
             this.findFilesForCache(searchPattern, rootPath);
+            this.dbcalls = new Map();
         }
     };
 
@@ -162,18 +161,16 @@ export class Global {
         let parsesModule = new Parser().parse(source);
         let moduleStr = this.getModuleForPath(fullpath, rootPath);
         let entries = parsesModule.getMethodsTable().find();
-        this.updateReferenceCalls(this.dbcalls, parsesModule.context.CallsPosition, "GlobalModuleText", filename);
         for (let y = 0; y < entries.length; ++y) {
             let item = entries[y];
-            this.updateReferenceCalls(this.dbcalls, item._method.CallsPosition, item, filename);
-            item["filename"] = filename;
+            let _method = { Params: item._method.Params, IsExport: item._method.IsExport };
             let newItem = {
                 "name": String(item.name),
                 "isproc": Boolean(item.isproc),
                 "line": item.line,
                 "endline": item.endline,
                 "context": item.context,
-                "_method": item._method,
+                "_method": _method,
                 "filename": fullpath,
                 "module": moduleStr,
                 "description": item.description
@@ -193,26 +190,17 @@ export class Global {
     }
 
     private updateReferenceCalls(collection: any, calls: Array<any>, method: any, file: string): any {
-        if (!collection) {
-            collection = this.cache.addCollection("Calls");
-        }
-        let self = this;
         for (let index = 0; index < calls.length; index++) {
             let value = calls[index];
             if (value.call.indexOf(".") === -1) {
                 continue;
             }
-            let newItem: MethodValue = {
-                "name": String(method.name),
-                "filename": file,
-                "isproc": Boolean(method.isproc),
-                "call": value.call,
-                "context": method.context,
-                "line": value.line,
-                "character": value.character,
-                "endline": method.endline
-            };
-            collection.insert(newItem);
+            let arrCalls = this.dbcalls.get(value.call);
+            if (!arrCalls) {
+                this.dbcalls.set(value.call,[])
+                arrCalls = this.dbcalls.get(value.call);
+            }
+            arrCalls.push({ filename: file, call: value.call, line: value.line, character: value.character, name: String(method.name) });
         }
     }
 
@@ -231,29 +219,25 @@ export class Global {
     }
 
     query(word: string, module: string, all: boolean = true, lazy: boolean = false): any {
-        if (!this.cacheUpdates) {
-            return new Array();
-        } else {
-            let prefix = lazy ? "" : "^";
-            let suffix = all  ? "" : "$";
-            let querystring = {"name": {"$regex": new RegExp(prefix + word + suffix, "i")}};
-            if (module && module.length > 0) {
-                querystring["module"] = {"$regex": new RegExp("^" + module + "", "i")};
-            }
-            let moduleRegexp = new RegExp("^" + module + "$", "i");
-            function filterByModule(obj) {
-                if (module && module.length > 0) {
-                    if (moduleRegexp.exec(obj.module) != null) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-                return true;
-            }
-            let search = this.db.chain().find(querystring).where(filterByModule).simplesort("name").data();
-            return search;
+        let prefix = lazy ? "" : "^";
+        let suffix = all ? "" : "$";
+        let querystring = { "name": { "$regex": new RegExp(prefix + word + suffix, "i") } };
+        if (module && module.length > 0) {
+            querystring["module"] = { "$regex": new RegExp("^" + module + "", "i") };
         }
+        let moduleRegexp = new RegExp("^" + module + "$", "i");
+        function filterByModule(obj) {
+            if (module && module.length > 0) {
+                if (moduleRegexp.exec(obj.module) != null) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+            return true;
+        }
+        let search = this.db.chain().find(querystring).where(filterByModule).simplesort("name").data();
+        return search;
     }
 
     GetSignature(entry) {
