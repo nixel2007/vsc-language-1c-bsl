@@ -192,6 +192,9 @@ export class Global {
     private updateReferenceCalls(collection: any, calls: Array<any>, method: any, file: string): any {
         for (let index = 0; index < calls.length; index++) {
             let value = calls[index];
+            if (value.call.startsWith(".")) {
+                continue;
+            }
             if (value.call.indexOf(".") === -1) {
                 continue;
             }
