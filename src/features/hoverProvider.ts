@@ -55,7 +55,7 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
         let description = [];
         let methodDescription = "";
         let arraySignature = this._global.GetSignature(entry);
-        let re = new RegExp("(Параметры|Parameters)(.|\\n)*\\n\\s*", "g");
+        let re = new RegExp("(Параметры|Parameters)(.|\\s)*\\n\\s*", "g");
         let paramString = re.exec(arraySignature.description);
         if (paramString) {
             methodDescription = arraySignature.description.substr(0, paramString.index);
