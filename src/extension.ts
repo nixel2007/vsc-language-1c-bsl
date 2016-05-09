@@ -176,7 +176,8 @@ export function activate(context: vscode.ExtensionContext) {
         }
     }));
 
-    let previewUri = vscode.Uri.parse("syntax-helper://authority/Синтакс-Помощник");
+    let previewUriString = "syntax-helper://authority/Синтакс-Помощник";
+    let previewUri = vscode.Uri.parse(previewUriString);
 
     context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.syntaxHelper", () => {
         if (!vscode.window.activeTextEditor) {
@@ -187,7 +188,7 @@ export function activate(context: vscode.ExtensionContext) {
         if (globalMethod){
             global.methodForDescription = { label: globalMethod.name, description: globalMethod.description };
             syntaxHelper.update(previewUri);
-            vscode.commands.executeCommand("vscode.previewHtml", vscode.Uri.parse("syntax-helper://authority/Синтакс-Помощник"), vscode.ViewColumn.Two).then((success) => {
+            vscode.commands.executeCommand("vscode.previewHtml", vscode.Uri.parse(previewUriString), vscode.ViewColumn.Two).then((success) => {
             }, (reason) => {
                 vscode.window.showErrorMessage(reason);
             });
@@ -215,7 +216,7 @@ export function activate(context: vscode.ExtensionContext) {
             }
             global.methodForDescription = selection;
             syntaxHelper.update(previewUri);
-            vscode.commands.executeCommand("vscode.previewHtml", vscode.Uri.parse("syntax-helper://authority/Синтакс-Помощник"), vscode.ViewColumn.Two).then((success) => {
+            vscode.commands.executeCommand("vscode.previewHtml", vscode.Uri.parse(previewUriString), vscode.ViewColumn.Two).then((success) => {
             }, (reason) => {
                 vscode.window.showErrorMessage(reason);
             });
