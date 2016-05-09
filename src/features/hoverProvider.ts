@@ -7,14 +7,15 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
             this._global.hoverTrue = true;
             return null;
         }
-        let word = document.getText(document.getWordRangeAtPosition(position));
+        let wordRange = document.getWordRangeAtPosition(position);
+        let word = document.getText(wordRange);
         if (word.split(" ").length > 1) {
             return null;
         }
+        word = this._global.fullNameRecursor(word, document, wordRange, false);
         let entry = this._global.globalfunctions[word.toLowerCase()];
         if (!entry || !entry.description) {
             let module = "";
-            word = this._global.fullNameRecursor(word, document, document.getWordRangeAtPosition(position), false);
             if (word.indexOf(".") > 0) {
                 let dotArray: Array<string> = word.split(".");
                 word = dotArray.pop();
