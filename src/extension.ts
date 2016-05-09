@@ -213,6 +213,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     if (vscode.window.activeTextEditor) {
         applyConfigToTextEditor(vscode.window.activeTextEditor);
+        global.getRefsLocal(vscode.window.activeTextEditor.document.fileName, vscode.window.activeTextEditor.document.getText());
     }
     global.updateCache();
 }
