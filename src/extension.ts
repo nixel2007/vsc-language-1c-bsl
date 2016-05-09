@@ -157,6 +157,9 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(function (textEditor: vscode.TextEditor) {
         applyConfigToTextEditor(textEditor);
+        if (!global.cache.getCollection(textEditor.document.fileName)) {
+            global.getRefsLocal(textEditor.document.fileName, textEditor.document.getText());
+        }
         if (vscode.workspace.rootPath !== undefined) {
             for (let index = 0; index < vscode.workspace.textDocuments.length; index++) {
                 let element = vscode.workspace.textDocuments[index];
