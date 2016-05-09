@@ -12,6 +12,9 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
         if (word.split(" ").length > 1) {
             return null;
         }
+        if (document.getText(new vscode.Range(wordRange.end, new vscode.Position(wordRange.end.line, wordRange.end.character+1))) !== "(") {
+            return null;
+        }
         word = this._global.fullNameRecursor(word, document, wordRange, false);
         let entry = this._global.globalfunctions[word.toLowerCase()];
         if (!entry || !entry.description) {
