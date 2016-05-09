@@ -56,8 +56,8 @@ export function activate(context: vscode.ExtensionContext) {
             let positionEnd = vscode.window.activeTextEditor.selection.active;
             let lineMethod = (positionStart.line > positionEnd.line) ? positionStart.line + 1 : positionEnd.line + 1;
             let re = /^(Процедура|Функция|procedure|function)\s*([\wа-яё]+)/im;
-            for (let index = lineMethod; index >= 0; index--) {
-                let MatchMethod = re.exec(editor.document.lineAt(index).text);
+            for (let indexLine = lineMethod; indexLine >= 0; --indexLine) {
+                let MatchMethod = re.exec(editor.document.lineAt(indexLine).text);
                 if (MatchMethod === null) {
                     continue;
                 }
@@ -88,7 +88,7 @@ export function activate(context: vscode.ExtensionContext) {
                 }
                 comment += "//\n";
                 editor.edit(function (editBuilder) {
-                    editBuilder.replace(new vscode.Position(index, 0), comment);
+                    editBuilder.replace(new vscode.Position(indexLine, 0), comment);
                 });
             }
         }
