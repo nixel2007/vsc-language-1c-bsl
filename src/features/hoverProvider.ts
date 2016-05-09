@@ -22,12 +22,12 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
             }
             if (module.length === 0) {
                 let source = document.getText();
-                entry = this._global.getCacheLocal(document.fileName, word, source);
+                entry = this._global.getCacheLocal(document.fileName, word, source, false,false);
             } else {
-                entry = this._global.query(word, module, false, false);
+                entry = this._global.query(word, module, true, true);
             }
             if (entry.length === 0) {
-                entry = this._global.query(word, "", false, false);
+                entry = this._global.query(word, "", true, true);
             }
             if (!entry) {
                 return null;
