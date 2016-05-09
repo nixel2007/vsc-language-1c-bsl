@@ -182,6 +182,17 @@ export function activate(context: vscode.ExtensionContext) {
         if (!vscode.window.activeTextEditor) {
             return;
         }
+        let word = vscode.window.activeTextEditor.document.getText(vscode.window.activeTextEditor.document.getWordRangeAtPosition(vscode.window.activeTextEditor.selection.active));
+        let globalMethod =  global.globalfunctions[word.toLowerCase()];
+        if (globalMethod){
+            global.methodForDescription = { label: globalMethod.name, description: globalMethod.description };
+            syntaxHelper.update(previewUri);
+            vscode.commands.executeCommand("vscode.previewHtml", vscode.Uri.parse("syntax-helper://authority/Синтакс-Помощник"), vscode.ViewColumn.Two).then((success) => {
+            }, (reason) => {
+                vscode.window.showErrorMessage(reason);
+            });
+            return;
+        }
         // push the items
         let items = [];
         for (let element in global.globalfunctions) {
