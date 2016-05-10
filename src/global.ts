@@ -132,12 +132,12 @@ export class Global {
     }
 
     updateCache(): any {
-        console.log("update cache");
-        this.postMessage("Запущено заполнение кеша", 3000);
         let configuration = this.getConfiguration("language-1c-bsl");
         let basePath: string = String(this.getConfigurationKey(configuration, "rootPath"));
         let rootPath = this.getRootPath();
         if (rootPath) {
+            console.log("update cache");
+            this.postMessage("Запущено заполнение кеша", 3000);
             rootPath = path.join(rootPath, basePath);
             this.db = this.cache.addCollection("ValueTable");
             this.dbcalls = new Map();
