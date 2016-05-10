@@ -99,6 +99,7 @@
       },
       {
         "id": "sdbl",
+        "extensions": [ ".query" ],
         "aliases": [ "1C (Query)", "SDBL" ]
       }
     ],
