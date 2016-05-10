@@ -35,10 +35,18 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
             }
             if (!entry) {
                 return null;
-            } else {
-                entry = entry[0];
-                return this.GetHover(entry);
-            }
+            } else if (module.length === 0) {
+               entry = entry[0];
+               return this.GetHover(entry);
+           } else {
+               for (let i = 0; i < entry.length; i++) {
+                   let hoverElement = entry[i];
+                   if (hoverElement._method.IsExport) {
+                       return this.GetHover(hoverElement);
+                   }
+               }
+               return null;
+           }
         }
         let description = [];
         description.push(entry.description);
