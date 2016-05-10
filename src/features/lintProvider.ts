@@ -56,6 +56,7 @@ export default class LintProvider {
         let configuration = vscode.workspace.getConfiguration("language-1c-bsl");
         let linterEnabled = Boolean(configuration.get("enableOneScriptLinter"));
         let otherExtensions = String(configuration.get("lintOtherExtensions"));
+        let linterEntryPoint = String(configuration.get("linterEntryPoint"));
         let diagnostics: vscode.Diagnostic[] = [];
         if (!linterEnabled) {
             return;
@@ -71,6 +72,9 @@ export default class LintProvider {
         }
         let args = this.args.slice();
         args.push(filename);
+        if (linterEntryPoint) {
+            args.push("-env=" + vscode.workspace.rootPath + path.sep + linterEntryPoint);
+        }
         let options = {
             cwd: path.dirname(filename),
             env: process.env

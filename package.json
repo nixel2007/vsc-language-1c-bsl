@@ -70,6 +70,10 @@
           "type": "string",
           "default": ""
         },
+        "language-1c-bsl.linterEntryPoint": {
+          "description": "Entry point for OneScriptLinter. Relative path from project root folder",
+          "type": "string"
+        },
         "language-1c-bsl.languageAutocomplete": {
           "description": "Autocomplete language (en/ru)",
           "type": "string",
