@@ -42,6 +42,10 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
            } else {
                for (let i = 0; i < entry.length; i++) {
                    let hoverElement = entry[i];
+                   let arrayFilename = hoverElement.filename.split("/");
+                   if (arrayFilename[arrayFilename.length - 4] !== "CommonModules" && !hoverElement.filename.endsWith("ManagerModule.bsl")) {
+                       continue;
+                   }
                    if (hoverElement._method.IsExport) {
                        return this.GetHover(hoverElement, "Метод из " + hoverElement.filename);
                    }
