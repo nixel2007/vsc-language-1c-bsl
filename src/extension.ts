@@ -20,13 +20,7 @@ let diagnosticCollection: vscode.DiagnosticCollection;
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
-    const global = new Global("global");
-    global.postMessage          = vscAdapter.postMessage;
-    global.getConfiguration     = vscAdapter.getConfiguration;
-    global.getConfigurationKey  = vscAdapter.getConfigurationKey;
-    global.getRootPath          = vscAdapter.getRootPath;
-    global.fullNameRecursor     = vscAdapter.fullNameRecursor;
-    global.findFilesForCache    = vscAdapter.findFilesForCahce;
+    const global = new Global(vscAdapter);
     
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(BSL_MODE, new CompletionItemProvider(global), ".", "="));
     context.subscriptions.push(vscode.languages.registerDefinitionProvider(BSL_MODE, new DefinitionProvider(global)));

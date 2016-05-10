@@ -331,6 +331,22 @@ export class Global {
         return documentationParam;
     }
 
+    redefineMethods(adapter) {
+        let methodsList = [
+            "postMessage",
+            "getConfiguration",
+            "getConfigurationKey",
+            "getRootPath",
+            "fullNameRecursor",
+            "findFilesForCache"
+        ];
+        methodsList.forEach(element => {
+            if (adapter.hasOwnProperty(element)) {
+                this[element] = adapter[element];
+            }
+        });
+    }
+
     public postMessage(description: string, interval?: number) {}
 
     public getConfiguration(section: string) {}
@@ -347,7 +363,10 @@ export class Global {
 
     public findFilesForCache(searchPattern: string, rootPath: string) {}
 
-    constructor(exec: string) {
+    constructor(adapter?: any) {
+        if (adapter) {
+            this.redefineMethods(adapter);
+        }
         let configuration = this.getConfiguration("language-1c-bsl");
         let autocompleteLanguage: any = this.getConfigurationKey(configuration, "languageAutocomplete");
         let postfix = (autocompleteLanguage === "en") ? "_en" : "";
