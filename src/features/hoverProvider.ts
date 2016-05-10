@@ -15,7 +15,7 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
         if (document.getText(new vscode.Range(wordRange.end, new vscode.Position(wordRange.end.line, wordRange.end.character+1))) !== "(") {
             return null;
         }
-        word = this._global.fullNameRecursor(word, document, wordRange, false);
+        word = this._global.fullNameRecursor(word, document, wordRange, true);
         let entry = this._global.globalfunctions[word.toLowerCase()];
         if (!entry || !entry.description) {
             let module = "";
@@ -28,10 +28,10 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
                 let source = document.getText();
                 entry = this._global.getCacheLocal(document.fileName, word, source, false,false);
             } else {
-                entry = this._global.query(word, module, true, true);
+                entry = this._global.query(word, module, false, false);
             }
             if (entry.length === 0) {
-                entry = this._global.query(word, "", true, true);
+                entry = this._global.query(word, "", false, false);
             }
             if (!entry) {
                 return null;
