@@ -12,7 +12,7 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
         if (word.split(" ").length > 1) {
             return null;
         }
-        if (document.getText(new vscode.Range(wordRange.end, new vscode.Position(wordRange.end.line, wordRange.end.character+1))) !== "(") {
+        if (document.getText(new vscode.Range(wordRange.end, new vscode.Position(wordRange.end.line, wordRange.end.character + 1))) !== "(") {
             return null;
         }
         word = this._global.fullNameRecursor(word, document, wordRange, true);
@@ -26,7 +26,7 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
             }
             if (module.length === 0) {
                 let source = document.getText();
-                entry = this._global.getCacheLocal(document.fileName, word, source, false,false);
+                entry = this._global.getCacheLocal(document.fileName, word, source, false, false);
             } else {
                 entry = this._global.query(word, module, false, false);
             }
