@@ -94,8 +94,8 @@ export default class LintProvider {
                     match = lines[line].match(regex);
                     if (match !== null) {
                         let range = new vscode.Range(
-                                new vscode.Position(match[2] - 1, 0),
-                                new vscode.Position(+match[2] - 1, vscode.window.activeTextEditor.document.lineAt(match[2] - 1).text.length)
+                                new vscode.Position(+match[2] - 1, 0),
+                                new vscode.Position(+match[2] - 1, vscode.window.activeTextEditor.document.lineAt(+match[2] - 1).text.length)
                                 );
                         let vscodeDiagnostic = new vscode.Diagnostic(range, match[3], vscode.DiagnosticSeverity.Error);
                         vscodeDiagnosticArray.push(vscodeDiagnostic);
