@@ -30,9 +30,10 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
             } else {
                 entry = this._global.query(word, module, false, false);
             }
-            if (entry.length === 0) {
-                entry = this._global.query(word, "", false, false);
-            }
+            // Показ ховера по имени функции
+            // if (entry.length === 0) {
+            //     entry = this._global.query(word, "", false, false);
+            // }
             if (!entry) {
                 return null;
             } else if (module.length === 0) {

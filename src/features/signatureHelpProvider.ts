@@ -88,9 +88,10 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
             } else {
                 entry = this._global.query(ident, module, false, false);
             }
-            if (entry.length === 0) {
-                entry = this._global.query(ident, "", false, false);
-            }
+            // Показ сигнатур по имени функции
+            // if (entry.length === 0) {
+            //     entry = this._global.query(ident, "", false, false);
+            // }
             if (!entry) {
                 return null;
             } else {
