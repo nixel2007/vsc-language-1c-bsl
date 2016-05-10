@@ -22,6 +22,9 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
             if (word.indexOf(".") > 0) {
                 let dotArray: Array<string> = word.split(".");
                 word = dotArray.pop();
+                if (this._global.toreplaced[dotArray[0]] !== undefined) {
+                    dotArray[0] = this._global.toreplaced[dotArray[0]];
+                }
                 module = dotArray.join(".");
             }
             if (module.length === 0) {
