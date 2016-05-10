@@ -38,18 +38,19 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
                 return null;
             } else if (module.length === 0) {
                entry = entry[0];
-               return this.GetHover(entry);
+               return this.GetHover(entry, "Метод текущего модуля");
            } else {
                for (let i = 0; i < entry.length; i++) {
                    let hoverElement = entry[i];
                    if (hoverElement._method.IsExport) {
-                       return this.GetHover(hoverElement);
+                       return this.GetHover(hoverElement, "Метод из " + hoverElement.filename);
                    }
                }
                return null;
            }
         }
         let description = [];
+        description.push("Метод глобального контекста");
         description.push(entry.description);
 
         for (let element in entry.signature) {
@@ -64,7 +65,7 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
         return new vscode.Hover(description);
     }
 
-    private GetHover(entry) {
+    private GetHover(entry, methodContext) {
         let description = [];
         let methodDescription = "";
         let arraySignature = this._global.GetSignature(entry);
@@ -76,6 +77,7 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
             methodDescription = arraySignature.description;
         }
         methodDescription = methodDescription + (arraySignature.fullRetState ? arraySignature.fullRetState : "");
+        description.push(methodContext);
         description.push(methodDescription);
         description.push({language: "1C (BSL)", value: (entry.isproc ? "Процедура " : "Функция ") + entry.name + arraySignature.paramsString + (arraySignature.strRetState ? ": " + arraySignature.strRetState : "")});
         for (let param in entry._method.Params) {
