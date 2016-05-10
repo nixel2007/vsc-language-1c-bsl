@@ -44,7 +44,7 @@
       },
       {
         "command": "language-1c-bsl.createComments",
-        "title": "Create comment to current function",
+        "title": "Create comment to current method",
         "category": "Language 1C (BSL)"
       },
       {
