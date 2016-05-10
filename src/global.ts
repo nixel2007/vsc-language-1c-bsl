@@ -124,7 +124,7 @@ export class Global {
                     this.db.insert(newItem);
                 }
                 if (i === filesLength - 1) {
-                    this.postMessage("Обновление кэша завершено", 3000);
+                    this.postMessage("Кэш обновлен");
                     this.cacheUpdates = true;
                 }
             });
@@ -331,7 +331,7 @@ export class Global {
         return documentationParam;
     }
 
-    public postMessage(description: string, interval: number) {}
+    public postMessage(description: string, interval?: number) {}
 
     public getConfiguration(section:string) {}
 
