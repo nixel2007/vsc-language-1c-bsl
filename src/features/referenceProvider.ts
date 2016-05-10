@@ -49,7 +49,6 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
             let localRefs = this._global.cache.getCollection(filename);
             let d = this._global.queryref(textAtPosition, localRefs, true);
             let res = this.addReference(d, results);
-            this._global.cache.removeCollection(filename);
             if (results.length > 0) {
                 // resolve(results);
             }
