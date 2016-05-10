@@ -53,8 +53,9 @@ export default class LintProvider {
         if (!vscode.languages.match(BSL_MODE, textDocument)) {
             return;
         }
-        let linterEnabled = Boolean(vscode.workspace.getConfiguration("language-1c-bsl").get("enableOneScriptLinter"));
-        let otherExtensions = String(vscode.workspace.getConfiguration("language-1c-bsl").get("lintOtherExtensions"));
+        let configuration = vscode.workspace.getConfiguration("language-1c-bsl");
+        let linterEnabled = Boolean(configuration.get("enableOneScriptLinter"));
+        let otherExtensions = String(configuration.get("lintOtherExtensions"));
         let diagnostics: vscode.Diagnostic[] = [];
         if (!linterEnabled) {
             return;
