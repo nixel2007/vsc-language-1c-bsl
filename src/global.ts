@@ -92,7 +92,7 @@ export class Global {
                     throw err;
                 }
                 let moduleStr = fullpath.endsWith(".bsl") ? this.getModuleForPath(fullpath, rootPath) : "";
-                source = source.replace(/\r(?!\n)/g, "\r\n")
+                source = source.replace(/\r(?!\n)/g, "\r\n");
                 let parsesModule = new Parser().parse(source);
                 source = null;
                 let entries = parsesModule.getMethodsTable().find();
@@ -105,7 +105,7 @@ export class Global {
                 parsesModule = null;
                 for (let y = 0; y < entries.length; ++y) {
                     let item = entries[y];
-                    let method = { name: item.name, endline: item.endline, context: item.context, isproc: item.isproc }
+                    let method = { name: item.name, endline: item.endline, context: item.context, isproc: item.isproc };
                     if (item._method.CallsPosition.length > 0) {
                         this.updateReferenceCalls(item._method.CallsPosition, method, fullpath);
                     }
@@ -140,7 +140,7 @@ export class Global {
             this.postMessage("Запущено заполнение кеша", 3000);
             rootPath = path.join(rootPath, basePath);
             if (this.cache.getCollection ("ValueTable")) {
-                this.cache.removeCollection("ValueTable") 
+                this.cache.removeCollection("ValueTable");
             }
             this.db = this.cache.addCollection("ValueTable");
             this.dbcalls = new Map();
@@ -175,8 +175,8 @@ export class Global {
             }
             let arrCalls = this.dbcalls.get(value.call);
             if (arrCalls) {
-                for (var k = arrCalls.length-1; k >= 0; --k) {
-                    var it = arrCalls[k];
+                for (let k = arrCalls.length - 1; k >= 0; --k) {
+                    let it = arrCalls[k];
                     if (it["filename"] === fullpath) {
                         arrCalls.splice(k, 1);
                     }
@@ -226,13 +226,13 @@ export class Global {
             }
             let arrCalls = this.dbcalls.get(value.call);
             if (!arrCalls) {
-                this.dbcalls.set(value.call,[])
+                this.dbcalls.set(value.call, []);
                 arrCalls = this.dbcalls.get(value.call);
             }
             arrCalls.push({ filename: file, call: value.call, line: value.line, character: value.character, name: String(method.name) });
         }
     }
-    
+
     private updateReferenceCallsOld(collection: any, calls: Array<any>, method: any, file: string): any {
         for (let index = 0; index < calls.length; index++) {
             let value = calls[index];
@@ -333,20 +333,20 @@ export class Global {
 
     public postMessage(description: string, interval?: number) {}
 
-    public getConfiguration(section:string) {}
+    public getConfiguration(section: string) {}
 
     public getConfigurationKey(configuration, key: string) {}
-    
+
     public getRootPath(): string {
         return "";
     }
-    
+
     public fullNameRecursor(word: string, document, range, left: boolean): string {
         return "";
     }
-    
+
     public findFilesForCache(searchPattern: string, rootPath: string) {}
-    
+
     constructor(exec: string) {
         let configuration = this.getConfiguration("language-1c-bsl");
         let autocompleteLanguage: any = this.getConfigurationKey(configuration, "languageAutocomplete");
