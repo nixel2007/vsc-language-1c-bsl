@@ -139,6 +139,9 @@ export class Global {
             console.log("update cache");
             this.postMessage("Запущено заполнение кеша", 3000);
             rootPath = path.join(rootPath, basePath);
+            if (this.cache.getCollection ("ValueTable")) {
+                this.cache.removeCollection("ValueTable") 
+            }
             this.db = this.cache.addCollection("ValueTable");
             this.dbcalls = new Map();
             let searchPattern = basePath !== "" ? basePath.substr(2) + "/**" : "**/*.{bsl,os}";
