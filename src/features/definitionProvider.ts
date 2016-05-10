@@ -13,7 +13,6 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
             if (!wordPosition) {
                 wordAtPosition = "";
             } else {
-                wordAtPosition = this._global.fullNameRecursor(wordAtPosition, document, wordPosition, false);
                 wordAtPosition = this._global.fullNameRecursor(wordAtPosition, document, wordPosition, true);
                 if (this._global.toreplaced[wordAtPosition.split(".")[0]] !== undefined) {
                     let arrayName = wordAtPosition.split(".");
