@@ -97,32 +97,22 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
             // }
             if (!entry) {
                 return null;
-            } else {
+            } else if (module.length === 0){
                 entry = entry[0];
-                if (entry._method.Params.length !== 0) {
-                    let arraySignature = this._global.GetSignature(entry);
-                    let ret = new SignatureHelp();
-                    let signatureInfo = new SignatureInformation(entry.name + arraySignature.paramsString, "");
-
-                    let re = /([\wа-яА-Я]+)(:\s+[<а-яА-Я\w_\.>]+)?/g;
-                    let match: RegExpExecArray = null;
-                    while ((match = re.exec(arraySignature.paramsString)) !== null) {
-                        let documentationParam = this._global.GetDocParam(arraySignature.description, match[1]);
-                        signatureInfo.parameters.push({ label: match[0] + (documentationParam.optional ? "?" : ""), documentation: documentationParam.descriptionParam });
-                    }
-
-                    if (entry._method.Params.length - 1 < paramCount) {
-                        return null;
-                    }
-
-                    ret.signatures.push(signatureInfo);
-                    // ret.activeSignature = 0;
-                    ret.activeParameter = Math.min(paramCount, signatureInfo.parameters.length - 1);
-
-                    return ret;
-                } else {
-                    return null;
-                }
+                return this.GetSignature(entry, paramCount);
+            } else {
+               for (let i = 0; i < entry.length; i++) {
+                   let signatureElement = entry[i];
+                   let arrayFilename = signatureElement.filename.split("/");
+                   if (arrayFilename[arrayFilename.length - 4] !== "CommonModules" && !signatureElement.filename.endsWith("ManagerModule.bsl")) {
+                       continue;
+                   }
+                   if (signatureElement._method.IsExport) {
+                       return this.GetSignature(signatureElement, paramCount);
+                   }
+               }
+               return null;
+            // }
             }
         }
         let ret = new SignatureHelp();
@@ -145,6 +135,33 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
 
         }
         return ret;
+    }
+
+    private GetSignature(entry, paramCount) {
+        if (entry._method.Params.length !== 0) {
+            let arraySignature = this._global.GetSignature(entry);
+            let ret = new SignatureHelp();
+            let signatureInfo = new SignatureInformation(entry.name + arraySignature.paramsString, "");
+
+            let re = /([\wа-яА-Я]+)(:\s+[<а-яА-Я\w_\.>]+)?/g;
+            let match: RegExpExecArray = null;
+            while ((match = re.exec(arraySignature.paramsString)) !== null) {
+                let documentationParam = this._global.GetDocParam(arraySignature.description, match[1]);
+                signatureInfo.parameters.push({ label: match[0] + (documentationParam.optional ? "?" : ""), documentation: documentationParam.descriptionParam });
+            }
+
+            if (entry._method.Params.length - 1 < paramCount) {
+                return null;
+            }
+
+            ret.signatures.push(signatureInfo);
+            // ret.activeSignature = 0;
+            ret.activeParameter = Math.min(paramCount, signatureInfo.parameters.length - 1);
+
+            return ret;
+        } else {
+            return null;
+        }
     }
 
     private readArguments(iterator: BackwardIterator): number {
