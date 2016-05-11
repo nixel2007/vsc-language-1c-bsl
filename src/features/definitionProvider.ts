@@ -32,7 +32,7 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
             let d: Array<any> = new Array();
             if (module.length === 0) {
                 let source = document.getText();
-                d = this._global.getCacheLocal(filename, wordAtPosition, source);
+                d = this._global.getCacheLocal(filename, wordAtPosition, source, false, false);
             } else {
                 d = this._global.query(wordAtPosition, module, false, false);
                 if (d.length > 1) {
