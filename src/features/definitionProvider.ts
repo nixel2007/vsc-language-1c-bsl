@@ -20,6 +20,9 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                     wordAtPosition = arrayName.join(".");
                 }
             }
+            if (this._global.globalfunctions[wordAtPosition.toLowerCase()]) {
+                return null;
+            }
             let module = "";
             if (wordAtPosition.indexOf(".") > 0) {
                 // if (path.extname(document.fileName) !== ".os") { // Для oscript не можем гаранитировать полное совпадение модулей.  
