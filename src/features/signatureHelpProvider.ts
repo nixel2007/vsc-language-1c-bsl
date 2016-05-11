@@ -80,6 +80,9 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
             if (ident.indexOf(".") > 0) {
                 let dotArray: Array<string> = ident.split(".");
                 ident = dotArray.pop();
+                if (this._global.toreplaced[dotArray[0]] !== undefined) {
+                    dotArray[0] = this._global.toreplaced[dotArray[0]];
+                }
                 module = dotArray.join(".");
             }
             if (module.length === 0) {
