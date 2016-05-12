@@ -54,8 +54,10 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                         }
                         completion.detail = "" + syn + " вариант" + (syn < 5 ? "a " : "ов ") + "синтаксиса: \n" + detail;
                     }
+                    completion.insertText = full["name"] + "(";
+                } else {
+                    completion.insertText = full["name"] + "()";
                 }
-                completion.insertText = full["name"] + "(";
                 completions.push(completion);
                 this.added[name] = true;
             }
@@ -117,7 +119,11 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                 let item: vscode.CompletionItem = new vscode.CompletionItem(element.name);
                 item.kind = vscode.CompletionItemKind.Function;
                 item.documentation = element.description;
-                item.insertText = element.name + "(";
+                if (element._method.Params.length > 0) {
+                    item.insertText = element.name + "(";
+                } else {
+                    item.insertText = element.name + "()";
+                }
                 result.push(item);
             }
         }
@@ -183,7 +189,11 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                                 let item = new vscode.CompletionItem(value.name);
                                 item.documentation = value.description;
                                 item.kind = vscode.CompletionItemKind.Function;
-                                item.insertText = value.name + "(";
+                                if (value._method.Params.length > 0) {
+                                    item.insertText = value.name + "(";
+                                } else {
+                                    item.insertText = value.name + "()";
+                                }
                                 bucket.push(item);
                                 this.added[value.name.toLowerCase()] = true;
                             }
