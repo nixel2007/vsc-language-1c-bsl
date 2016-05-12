@@ -161,7 +161,6 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
 
     provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Thenable<vscode.CompletionItem[]> {
 
-        let self = this;
         this.added = {};
 
         return new Promise((resolve, reject) => {
@@ -170,7 +169,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                 let char = document.getText(new vscode.Range(
                                             new vscode.Position(position.line, position.character - 1), position));
                 if (char === "." && position.character > 1) {
-                    bucket = self.getDotComplection(document, position);
+                    bucket = this.getDotComplection(document, position);
                     return resolve(bucket);
                 } else if (char.match(/[/\()"':,.;<>~!@#$%^&*|+=\[\]{}`?\…-\s\n\t]/) === null) {
                     let word = document.getText(document.getWordRangeAtPosition(position));
@@ -178,20 +177,20 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                     let result: Array<any>;
                     if (word.indexOf(".") === -1) {
                         bucket = this.getGlobals(word);
-                        result = self._global.getCacheLocal(document.fileName, word, document.getText(), false);
-                        result.forEach(function (value, index, array) {
-                            if (!self.added[value.name.toLowerCase()] === true) {
+                        result = this._global.getCacheLocal(document.fileName, word, document.getText(), false);
+                        result.forEach( (value, index, array) => {
+                            if (!this.added[value.name.toLowerCase()] === true) {
                                 let item = new vscode.CompletionItem(value.name);
                                 item.documentation = value.description;
                                 item.kind = vscode.CompletionItemKind.Function;
                                 item.insertText = value.name + "(";
                                 bucket.push(item);
-                                self.added[value.name.toLowerCase()] = true;
+                                this.added[value.name.toLowerCase()] = true;
                             }
                         });
-                        bucket = self.getAllWords(word, document.getText(), bucket);
-                        result = self._global.querydef(word);
-                        result.forEach(function (value, index, array) {
+                        bucket = this.getAllWords(word, document.getText(), bucket);
+                        result = this._global.querydef(word);
+                        result.forEach( (value, index, array) => {
                             let moduleDescription = (value.module && value.module.length > 0) ? value.module + "." : "";
                             let fullName = moduleDescription + value.name;
                             let description = value.description;
@@ -199,12 +198,12 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                                 fullName = value.module;
                                 description = fullName;
                             }
-                            if (self.added[(fullName).toLowerCase()] !== true) {
+                            if (this.added[(fullName).toLowerCase()] !== true) {
                                 let item = new vscode.CompletionItem(fullName);
                                 item.documentation = description;
                                 item.kind = vscode.CompletionItemKind.File;
                                 bucket.push(item);
-                                self.added[(fullName).toLowerCase()] = true;
+                                this.added[(fullName).toLowerCase()] = true;
                             }
                         });
                     } else {
