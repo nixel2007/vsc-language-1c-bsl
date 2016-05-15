@@ -97,7 +97,7 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
             // }
             if (!entry) {
                 return null;
-            } else if (module.length === 0){
+            } else if (module.length === 0) {
                 entry = entry[0];
                 return this.GetSignature(entry, paramCount);
             } else {
