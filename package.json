@@ -90,12 +90,20 @@
         }
       }
     },
-    "keybindings": [{
+    "keybindings": [
+      {
         "command": "language-1c-bsl.syntaxHelper",
         "key": "ctrl+f1",
         "mac": "cmd+f1",
         "when": "editorTextFocus && editorLangId == 'bsl'"
-    }],
+      },
+      {
+        "command": "language-1c-bsl.dynamicSnippets",
+        "key": "ctrl+q",
+        "mac": "cmd+q",
+        "when": "editorTextFocus && editorLangId == 'bsl'"
+      }
+    ],
     "languages": [
       {
         "id": "bsl",
