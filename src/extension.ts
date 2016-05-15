@@ -21,7 +21,7 @@ let diagnosticCollection: vscode.DiagnosticCollection;
 export function activate(context: vscode.ExtensionContext) {
 
     const global = new Global(vscAdapter);
-    
+
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(BSL_MODE, new CompletionItemProvider(global), ".", "="));
     context.subscriptions.push(vscode.languages.registerDefinitionProvider(BSL_MODE, new DefinitionProvider(global)));
     context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider(BSL_MODE, new DocumentSymbolProvider(global)));
@@ -29,7 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaseSymbolProvider(global)));
     context.subscriptions.push(vscode.languages.registerSignatureHelpProvider(BSL_MODE, new SignatureHelpProvider(global), "(", ","));
     context.subscriptions.push(vscode.languages.registerHoverProvider(BSL_MODE, new HoverProvider(global)));
-    
+
     let syntaxHelper = new SyntaxHelper(global);
     context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider("syntax-helper", syntaxHelper));
 
@@ -178,8 +178,8 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
         let word = vscode.window.activeTextEditor.document.getText(vscode.window.activeTextEditor.document.getWordRangeAtPosition(vscode.window.activeTextEditor.selection.active));
-        let globalMethod =  global.globalfunctions[word.toLowerCase()];
-        if (globalMethod){
+        let globalMethod = global.globalfunctions[word.toLowerCase()];
+        if (globalMethod) {
             global.methodForDescription = { label: globalMethod.name, description: globalMethod.description };
             syntaxHelper.update(previewUri);
             vscode.commands.executeCommand("vscode.previewHtml", vscode.Uri.parse(previewUriString), vscode.ViewColumn.Two).then((success) => {
