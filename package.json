@@ -47,6 +47,11 @@
         "title": "Create comment to current method",
         "category": "Language 1C (BSL)"
       },
+       {
+        "command": "language-1c-bsl.dynamicSnippets",
+        "title": "dynamicSnippets",
+        "category": "Language 1C (BSL)"
+      },
       {
         "command": "language-1c-bsl.syntaxHelper",
         "title": "Show syntax-helper",

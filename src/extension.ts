@@ -13,6 +13,7 @@ import SignatureHelpProvider from "./features/signatureHelpProvider";
 import HoverProvider from "./features/hoverProvider";
 import SyntaxHelper from "./features/syntaxHelper";
 import * as vscAdapter from "./vscAdapter";
+import * as dynamicSnippets from "./features/dynamicSnippets";
 
 let diagnosticCollection: vscode.DiagnosticCollection;
 
@@ -172,6 +173,43 @@ export function activate(context: vscode.ExtensionContext) {
 
     let previewUriString = "syntax-helper://authority/Синтакс-Помощник";
     let previewUri = vscode.Uri.parse(previewUriString);
+
+    context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.dynamicSnippets", () => {
+        let editor = vscode.window.activeTextEditor;
+        if (!editor || editor.selection.isEmpty) {
+            return;
+        }
+        let startSelection = editor.selection.isReversed ? editor.selection.active : editor.selection.anchor;
+        let items = [];
+        for (let element in dynamicSnippets.dynamicSnippets()) {
+            let snippet = dynamicSnippets.dynamicSnippets()[element];
+            items.push({ label: snippet.description, description: "" });
+        }
+
+        vscode.window.showQuickPick(items).then(function(selection) {
+            let snippetBody = dynamicSnippets.dynamicSnippets()[selection.label].body;
+            let t = editor.document.getText(editor.selection);
+            let arrSnippet = snippetBody.split("$1");
+            if (arrSnippet.length === 1) {
+                editor.edit( (editBuilder) => {
+                    editBuilder.replace(editor.selection, snippetBody.replace("$0", t));
+                }).then( () => {
+                    let position = editor.selection.isReversed ? editor.selection.anchor : editor.selection.active;
+                    editor.selection = new vscode.Selection(position.line, position.character, position.line, position.character);
+                });
+            } else {
+                editor.edit( (editBuilder) => {
+                    editBuilder.replace(editor.selection, snippetBody.split("$1")[1].replace("$0", t));
+                }).then( () => {
+                    let position = editor.selection.isReversed ? editor.selection.active : editor.selection.anchor;
+                    editor.selection = new vscode.Selection(position.line, position.character, position.line, position.character);
+                    editor.edit( (editBuilder) => {
+                        editBuilder.insert(editor.selection.active, snippetBody.split("$1")[0].replace("$0", t));
+                    });
+                });
+            }
+        });
+    }));
 
     context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.syntaxHelper", () => {
         if (!vscode.window.activeTextEditor) {
