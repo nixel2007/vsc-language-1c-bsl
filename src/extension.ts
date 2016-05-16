@@ -1,5 +1,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
+import * as fs from "fs";
 import * as vscode from "vscode";
 import { BSL_MODE } from "./const";
 import {Global} from "./global";
@@ -13,6 +14,7 @@ import SignatureHelpProvider from "./features/signatureHelpProvider";
 import HoverProvider from "./features/hoverProvider";
 import SyntaxHelper from "./features/syntaxHelper";
 import * as vscAdapter from "./vscAdapter";
+import * as dynamicSnippets from "./features/dynamicSnippets";
 
 let diagnosticCollection: vscode.DiagnosticCollection;
 
@@ -172,6 +174,67 @@ export function activate(context: vscode.ExtensionContext) {
 
     let previewUriString = "syntax-helper://authority/Синтакс-Помощник";
     let previewUri = vscode.Uri.parse(previewUriString);
+
+    context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.dynamicSnippets", () => {
+        let editor = vscode.window.activeTextEditor;
+        if (!editor || editor.selection.isEmpty) {
+            return;
+        }
+        let dynamicSnippetsCollection = {};
+        for (let element in dynamicSnippets.dynamicSnippets()) {
+            let snippet = dynamicSnippets.dynamicSnippets()[element];
+            dynamicSnippetsCollection[element] = snippet;
+        }
+        let configuration = vscode.workspace.getConfiguration("language-1c-bsl");
+        let userDynamicSnippetsList: Array<string> = configuration.get("dynamicSnippets", []);
+        for (let index in userDynamicSnippetsList) {
+            try {
+                let userDynamicSnippetsString = fs.readFileSync(userDynamicSnippetsList[index], "utf-8");
+                let snippetsData = JSON.parse(userDynamicSnippetsString);
+                for (let element in snippetsData) {
+                    let snippet = snippetsData[element];
+                    dynamicSnippetsCollection[element] = snippet;
+                }                
+            } catch (error) {
+                console.error(error);    
+            }
+        }
+        let items = [];
+        for (let element in dynamicSnippetsCollection) {
+            let snippet = dynamicSnippetsCollection[element];
+            let description = (element === snippet.description) ? "" : snippet.description;
+            items.push({ label: element, description: description });
+        }
+
+        vscode.window.showQuickPick(items).then((selection) => {
+            if (!selection) {
+                return;
+            }
+            let indent = editor.document.getText(new vscode.Range(editor.selection.start.line, 0, editor.selection.start.line, editor.selection.start.character));
+            let snippetBody: string = dynamicSnippetsCollection[selection.label].body;
+            snippetBody = snippetBody.replace(/\n/gm, "\n" + indent);
+            let t = editor.document.getText(editor.selection);
+            let arrSnippet = snippetBody.split("$1");
+            if (arrSnippet.length === 1) {
+                editor.edit((editBuilder) => {
+                    editBuilder.replace(editor.selection, snippetBody.replace("$0", t));
+                }).then(() => {
+                    let position = editor.selection.isReversed ? editor.selection.anchor : editor.selection.active;
+                    editor.selection = new vscode.Selection(position.line, position.character, position.line, position.character);
+                });
+            } else {
+                editor.edit((editBuilder) => {
+                    editBuilder.replace(editor.selection, snippetBody.split("$1")[1].replace("$0", t));
+                }).then(() => {
+                    let position = editor.selection.isReversed ? editor.selection.active : editor.selection.anchor;
+                    editor.selection = new vscode.Selection(position.line, position.character, position.line, position.character);
+                    editor.edit((editBuilder) => {
+                        editBuilder.insert(editor.selection.active, snippetBody.split("$1")[0].replace("$0", t));
+                    });
+                });
+            }
+        });
+    }));
 
     context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.syntaxHelper", () => {
         if (!vscode.window.activeTextEditor) {
