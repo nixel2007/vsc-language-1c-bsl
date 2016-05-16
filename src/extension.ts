@@ -179,15 +179,16 @@ export function activate(context: vscode.ExtensionContext) {
         if (!editor || editor.selection.isEmpty) {
             return;
         }
-        let startSelection = editor.selection.isReversed ? editor.selection.active : editor.selection.anchor;
         let items = [];
         for (let element in dynamicSnippets.dynamicSnippets()) {
             let snippet = dynamicSnippets.dynamicSnippets()[element];
             items.push({ label: snippet.description, description: "" });
         }
 
-        vscode.window.showQuickPick(items).then(function(selection) {
-            let snippetBody = dynamicSnippets.dynamicSnippets()[selection.label].body;
+        vscode.window.showQuickPick(items).then( (selection) => {
+            let indent = editor.document.getText(new vscode.Range(editor.selection.start.line, 0, editor.selection.start.line, editor.selection.start.character));
+            let snippetBody: string = dynamicSnippets.dynamicSnippets()[selection.label].body;
+            snippetBody = snippetBody.replace(/\n/gm, "\n" + indent);
             let t = editor.document.getText(editor.selection);
             let arrSnippet = snippetBody.split("$1");
             if (arrSnippet.length === 1) {
