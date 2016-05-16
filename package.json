@@ -49,7 +49,7 @@
       },
        {
         "command": "language-1c-bsl.dynamicSnippets",
-        "title": "dynamicSnippets",
+        "title": "Show dynamic snippets list",
         "category": "Language 1C (BSL)"
       },
       {
