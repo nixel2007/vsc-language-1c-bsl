@@ -17,7 +17,7 @@ export function dynamicSnippets(): any {
             "description": "Для"
         },
         "Для каждого": {
-            "body": "Для каждого $1 Из $2 Цикл\n\t$0\nКонецЦикла;",
+            "body": "Для каждого $1 Из  Цикл\n\t$0\nКонецЦикла;",
             "description": "Для каждого"
         },
         "Процедура": {
