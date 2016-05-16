@@ -1,5 +1,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
+import * as fs from "fs";
 import * as vscode from "vscode";
 import { BSL_MODE } from "./const";
 import {Global} from "./global";
@@ -179,15 +180,30 @@ export function activate(context: vscode.ExtensionContext) {
         if (!editor || editor.selection.isEmpty) {
             return;
         }
-        let items = [];
+        let dynamicSnippetsCollection = {};
         for (let element in dynamicSnippets.dynamicSnippets()) {
             let snippet = dynamicSnippets.dynamicSnippets()[element];
+            dynamicSnippetsCollection[element] = snippet;
+        }
+        let configuration = vscode.workspace.getConfiguration("language-1c-bsl");
+        let userDynamicSnippetsList: Array<string> = configuration.get("dynamicSnippets", []);
+        for (let index in userDynamicSnippetsList) {
+            let userDynamicSnippetsString = fs.readFileSync(userDynamicSnippetsList[index], "utf-8");
+            let snippetsData = JSON.parse(userDynamicSnippetsString);
+            for (let element in snippetsData) {
+                let snippet = snippetsData[element];
+                dynamicSnippetsCollection[element] = snippet;
+            }
+        }
+        let items = [];
+        for (let element in dynamicSnippetsCollection) {
+            let snippet = dynamicSnippetsCollection[element];
             items.push({ label: snippet.description, description: "" });
         }
 
         vscode.window.showQuickPick(items).then( (selection) => {
             let indent = editor.document.getText(new vscode.Range(editor.selection.start.line, 0, editor.selection.start.line, editor.selection.start.character));
-            let snippetBody: string = dynamicSnippets.dynamicSnippets()[selection.label].body;
+            let snippetBody: string = dynamicSnippetsCollection[selection.label].body;
             snippetBody = snippetBody.replace(/\n/gm, "\n" + indent);
             let t = editor.document.getText(editor.selection);
             let arrSnippet = snippetBody.split("$1");

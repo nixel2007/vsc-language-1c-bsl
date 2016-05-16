@@ -84,6 +84,11 @@
           "type": "string",
           "default": "ru"
         },
+        "language-1c-bsl.dynamicSnippets": {
+          "description": "Paths to dynamic snippets' files",
+          "type": "array",
+          "default": []
+        },
         "language-1c-bsl.rootPath": {
           "description": "Путь по умолчанию к корню файла конфигурации (./src/cf) относительно каталога workspace для правильного autocomplete",
           "type": "string"
