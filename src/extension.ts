@@ -188,11 +188,15 @@ export function activate(context: vscode.ExtensionContext) {
         let configuration = vscode.workspace.getConfiguration("language-1c-bsl");
         let userDynamicSnippetsList: Array<string> = configuration.get("dynamicSnippets", []);
         for (let index in userDynamicSnippetsList) {
-            let userDynamicSnippetsString = fs.readFileSync(userDynamicSnippetsList[index], "utf-8");
-            let snippetsData = JSON.parse(userDynamicSnippetsString);
-            for (let element in snippetsData) {
-                let snippet = snippetsData[element];
-                dynamicSnippetsCollection[element] = snippet;
+            try {
+                let userDynamicSnippetsString = fs.readFileSync(userDynamicSnippetsList[index], "utf-8");
+                let snippetsData = JSON.parse(userDynamicSnippetsString);
+                for (let element in snippetsData) {
+                    let snippet = snippetsData[element];
+                    dynamicSnippetsCollection[element] = snippet;
+                }                
+            } catch (error) {
+                console.error(error);    
             }
         }
         let items = [];
@@ -202,6 +206,9 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         vscode.window.showQuickPick(items).then((selection) => {
+            if (!selection) {
+                return;
+            }
             let indent = editor.document.getText(new vscode.Range(editor.selection.start.line, 0, editor.selection.start.line, editor.selection.start.character));
             let snippetBody: string = dynamicSnippetsCollection[selection.label].body;
             snippetBody = snippetBody.replace(/\n/gm, "\n" + indent);
