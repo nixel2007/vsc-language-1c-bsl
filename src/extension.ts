@@ -201,26 +201,26 @@ export function activate(context: vscode.ExtensionContext) {
             items.push({ label: snippet.description, description: "" });
         }
 
-        vscode.window.showQuickPick(items).then( (selection) => {
+        vscode.window.showQuickPick(items).then((selection) => {
             let indent = editor.document.getText(new vscode.Range(editor.selection.start.line, 0, editor.selection.start.line, editor.selection.start.character));
             let snippetBody: string = dynamicSnippetsCollection[selection.label].body;
             snippetBody = snippetBody.replace(/\n/gm, "\n" + indent);
             let t = editor.document.getText(editor.selection);
             let arrSnippet = snippetBody.split("$1");
             if (arrSnippet.length === 1) {
-                editor.edit( (editBuilder) => {
+                editor.edit((editBuilder) => {
                     editBuilder.replace(editor.selection, snippetBody.replace("$0", t));
-                }).then( () => {
+                }).then(() => {
                     let position = editor.selection.isReversed ? editor.selection.anchor : editor.selection.active;
                     editor.selection = new vscode.Selection(position.line, position.character, position.line, position.character);
                 });
             } else {
-                editor.edit( (editBuilder) => {
+                editor.edit((editBuilder) => {
                     editBuilder.replace(editor.selection, snippetBody.split("$1")[1].replace("$0", t));
-                }).then( () => {
+                }).then(() => {
                     let position = editor.selection.isReversed ? editor.selection.active : editor.selection.anchor;
                     editor.selection = new vscode.Selection(position.line, position.character, position.line, position.character);
-                    editor.edit( (editBuilder) => {
+                    editor.edit((editBuilder) => {
                         editBuilder.insert(editor.selection.active, snippetBody.split("$1")[0].replace("$0", t));
                     });
                 });
