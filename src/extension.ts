@@ -202,7 +202,8 @@ export function activate(context: vscode.ExtensionContext) {
         let items = [];
         for (let element in dynamicSnippetsCollection) {
             let snippet = dynamicSnippetsCollection[element];
-            items.push({ label: snippet.description, description: "" });
+            let description = (element === snippet.description) ? "" : snippet.description;
+            items.push({ label: element, description: description });
         }
 
         vscode.window.showQuickPick(items).then((selection) => {
