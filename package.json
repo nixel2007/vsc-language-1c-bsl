@@ -3,7 +3,7 @@
   "displayName": "Language 1C (BSL)",
   "description": "Syntax highlighting for 1C:Enterprise 8.",
   "icon": "images/xDDIcon.png",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "publisher": "xDrivenDevelopment",
   "galleryBanner": {
     "color": "#0000FF",
@@ -47,6 +47,11 @@
         "title": "Create comment to current method",
         "category": "Language 1C (BSL)"
       },
+       {
+        "command": "language-1c-bsl.dynamicSnippets",
+        "title": "Show dynamic snippets list",
+        "category": "Language 1C (BSL)"
+      },
       {
         "command": "language-1c-bsl.syntaxHelper",
         "title": "Show syntax-helper",
@@ -79,18 +84,31 @@
           "type": "string",
           "default": "ru"
         },
+        "language-1c-bsl.dynamicSnippets": {
+          "description": "Paths to dynamic snippets' files",
+          "type": "array",
+          "default": []
+        },
         "language-1c-bsl.rootPath": {
           "description": "Путь по умолчанию к корню файла конфигурации (./src/cf) относительно каталога workspace для правильного autocomplete",
           "type": "string"
         }
       }
     },
-    "keybindings": [{
+    "keybindings": [
+      {
         "command": "language-1c-bsl.syntaxHelper",
         "key": "ctrl+f1",
         "mac": "cmd+f1",
         "when": "editorTextFocus && editorLangId == 'bsl'"
-    }],
+      },
+      {
+        "command": "language-1c-bsl.dynamicSnippets",
+        "key": "ctrl+q",
+        "mac": "cmd+q",
+        "when": "editorTextFocus && editorLangId == 'bsl'"
+      }
+    ],
     "languages": [
       {
         "id": "bsl",
@@ -123,14 +141,13 @@
     ]
   },
   "devDependencies": {
-    "typescript": "1.8.9",
+    "typescript": "1.8.10",
     "vscode": "^0.11.10"
   },
   "dependencies": {
-    "child-process-promise": "^1.1.0",
     "filequeue": "^0.5.0",
     "iconv-lite": "^0.4.13",
     "lokijs": "^1.3.16",
-    "onec-syntaxparser": "0.1.8"
+    "onec-syntaxparser": "0.1.9"
   }
 }

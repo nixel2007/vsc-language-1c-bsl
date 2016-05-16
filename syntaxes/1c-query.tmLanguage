@@ -69,7 +69,7 @@
         <key>name</key>
         <string>keyword.operator.logical.sdbl</string>
         <key>match</key>
-        <string>(?i)(?&lt;=[^\wа-яё\.]|^)(НЕ|NOT|И|AND|ИЛИ|OR|В\s+ИЕРАРХИИ|IN\s+HIERARCHY|В|In|Между|Between|Есть\sNULL|Is\s+NULL|Ссылка|Refs|Подобно|Like)(?=[^\wа-яё\.]|$)</string>
+        <string>(?i)(?&lt;!КАК\s|AS\s)(?&lt;=[^\wа-яё\.]|^)(НЕ|NOT|И|AND|ИЛИ|OR|В\s+ИЕРАРХИИ|IN\s+HIERARCHY|В|In|Между|Between|Есть\sNULL|Is\s+NULL|Ссылка|Refs|Подобно|Like)(?=[^\wа-яё\.]|$)</string>
       </dict>
       <dict>
         <key>name</key>
