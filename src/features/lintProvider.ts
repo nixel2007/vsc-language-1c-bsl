@@ -73,7 +73,7 @@ export default class LintProvider {
         let args = this.args.slice();
         args.push(filename);
         if (linterEntryPoint) {
-            args.push("-env=" + vscode.workspace.rootPath + path.sep + linterEntryPoint);
+            args.push("-env=" + path.join(vscode.workspace.rootPath, linterEntryPoint));
         }
         let options = {
             cwd: path.dirname(filename),

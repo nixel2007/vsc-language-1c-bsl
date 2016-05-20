@@ -10,8 +10,8 @@
 
 ### Дополнительные возможности
 
-* Список процедур и функций текущего файла по нажатию `Ctrl-Shift-O`
-* Переход к определению процедур и функций по нажатию `F12`
+* Список процедур и функций текущего файла (`Ctrl`+`Shift`+`O`)
+* Переход к определению процедур и функций (`F12`)
 * Автодополнение процедур и функций глобального контекста
 * Сниппеты (шаблоны текста)
 * Использование автоматических отступов по ключевым словам
@@ -19,7 +19,7 @@
 * Запуск скриптов `.os`/`.bsl` с помощью OneScript - [инструкция](https://github.com/xDrivenDevelopment/vsc-language-1c-bsl/wiki/%D0%97%D0%B0%D0%BF%D1%83%D1%81%D0%BA-%D1%81%D0%BA%D1%80%D0%B8%D0%BF%D1%82%D0%BE%D0%B2-.os-.bsl-%D1%81-%D0%BF%D0%BE%D0%BC%D0%BE%D1%89%D1%8C%D1%8E-OneScript)
 * Проверка корректности кода в файлах `*.os` и `*.bsl` (опционально) через интерпретатор OneScript - [инструкция](https://github.com/xDrivenDevelopment/vsc-language-1c-bsl/wiki/%D0%98%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5-%D0%BB%D0%B8%D0%BD%D1%82%D0%B5%D1%80%D0%B0)
 * Автоматическая вставка скобок
-* Динамические шаблоны - [инструкция](https://github.com/xDrivenDevelopment/vsc-language-1c-bsl/wiki/%D0%94%D0%B8%D0%BD%D0%B0%D0%BC%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B8%D0%B5-%D1%88%D0%B0%D0%B1%D0%BB%D0%BE%D0%BD%D1%8B)
+* Динамические шаблоны (`Ctrl`+`Q`) - [инструкция](https://github.com/xDrivenDevelopment/vsc-language-1c-bsl/wiki/%D0%94%D0%B8%D0%BD%D0%B0%D0%BC%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B8%D0%B5-%D1%88%D0%B0%D0%B1%D0%BB%D0%BE%D0%BD%D1%8B)
 
 Система автодополнения - [описание](https://github.com/xDrivenDevelopment/vsc-language-1c-bsl/wiki/%D0%9E%D0%BF%D0%B8%D1%81%D0%B0%D0%BD%D0%B8%D0%B5-%D0%B8%D0%B7%D0%BC%D0%B5%D0%BD%D0%B5%D0%BD%D0%B8%D0%B9-%D1%80%D0%B5%D0%BB%D0%B8%D0%B7%D0%B0-1.5.0)
 * Переход к определению
