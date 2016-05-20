@@ -16,41 +16,12 @@
     <key>patterns</key>
     <array>
       <dict>
-        <key>name</key>
-        <string>comment.line.double-slash.bsl</string>
-        <key>match</key>
-        <string>(//.*$)</string>
-      </dict>
-      <dict>
-        <key>name</key>
-        <string>string.quoted.double.bsl</string>
-        <key>begin</key>
-        <string>\"</string>
-        <key>end</key>
-        <string>\"(?![\"])</string>
-        <key>patterns</key>
-        <array>
-          <dict>
-            <key>include</key>
-            <string>#query</string>
-          </dict>
-          <dict>
-            <key>name</key>
-            <string>constant.character.escape.bsl</string>
-            <key>match</key>
-            <string>\"\"</string>
-          </dict>
-          <dict>
-            <key>name</key>
-            <string>comment.line.double-slash.bsl</string>
-            <key>match</key>
-            <string>(^\s*//.*$)</string>
-          </dict>
-        </array>
+        <key>include</key>
+        <string>#basic</string>
       </dict>
       <dict>
         <key>comment</key>
-        <string>Proc and function defenition</string>
+        <string>Proc and function definition</string>
         <key>begin</key>
         <string>(?i:(?&lt;=[^\wа-яё\.]|^)(Процедура|Procedure|Функция|Function)\s+([a-zа-яё0-9_]+)\s*\()</string>
         <key>beginCaptures</key>
@@ -80,7 +51,13 @@
         <array>
           <dict>
             <key>include</key>
-            <string>$self</string>
+            <string>#basic</string>
+          </dict>
+          <dict>
+            <key>name</key>
+            <string>keyword.operator.assignment.bsl</string>
+            <key>match</key>
+            <string>(=)</string>
           </dict>
           <dict>
             <key>name</key>
@@ -138,22 +115,34 @@
         </dict>
       </dict>
       <dict>
+        <key>comment</key>
+        <string>Variable assignment</string>
         <key>name</key>
-        <string>constant.language.bsl</string>
-        <key>match</key>
-        <string>(?i:(?&lt;=[^\wа-яё\.]|^)(Неопределено|Undefined|Истина|True|Ложь|False|NULL)(?=[^\wа-яё\.]|$))</string>
-      </dict>
-      <dict>
-        <key>name</key>
-        <string>constant.numeric.bsl</string>
-        <key>match</key>
-        <string>\b((\h{8}-(\h{4}-){3}\h{12})|\d+\.?\d*)\b</string>
-      </dict>
-      <dict>
-        <key>name</key>
-        <string>constant.other.date.bsl</string>
-        <key>match</key>
-        <string>\'((\d{4}[^\d\']*\d{2}[^\d\']*\d{2})([^\d\']*\d{2}[^\d\']*\d{2}([^\d\']*\d{2})?)?)\'</string>
+        <string>meta.var-single-variable.bsl</string>
+        <key>begin</key>
+        <string>(?i:(?&lt;=;|^)\s*([\wа-яё]+))\s*(=)</string>
+        <key>beginCaptures</key>
+        <dict>
+          <key>1</key>
+          <dict>
+            <key>name</key>
+            <string>variable.assignment.bsl</string>
+          </dict>
+          <key>2</key>
+          <dict>
+            <key>name</key>
+            <string>keyword.operator.assignment.bsl</string>
+          </dict>
+        </dict>
+        <key>end</key>
+        <string>(?=;)</string>
+        <key>patterns</key>
+        <array>
+          <dict>
+            <key>include</key>
+            <string>$self</string>
+          </dict>
+        </array>
       </dict>
       <dict>
         <key>name</key>
@@ -205,12 +194,6 @@
       </dict>
       <dict>
         <key>name</key>
-        <string>keyword.operator.assignment.bsl</string>
-        <key>match</key>
-        <string>(=)</string>
-      </dict>
-      <dict>
-        <key>name</key>
         <string>keyword.operator.arithmetic.bsl</string>
         <key>match</key>
         <string>(\+|-|\*|/|%)</string>
@@ -219,7 +202,7 @@
         <key>name</key>
         <string>keyword.operator.bsl</string>
         <key>match</key>
-        <string>(,|;|\?)</string>
+        <string>(;|\?)</string>
       </dict>
       <dict>
         <key>name</key>
@@ -435,7 +418,7 @@
         <key>name</key>
         <string>support.class.bsl</string>
         <key>match</key>
-        <string>(?i:(?&lt;=[^\wа-яё\.]|^)(WSСсылки|WSReferences|БиблиотекаКартинок|PictureLib|БиблиотекаМакетовОформленияКомпоновкиДанных|DataCompositionAppearanceTemplateLib|БиблиотекаСтилей|StyleLib|БизнесПроцессы|BusinessProcesses|ВнешниеИсточникиДанных|ExternalDataSources|ВнешниеОбработки|ExternalDataProcessors|ВнешниеОтчеты|ExternalReports|Документы|Documents|ДоставляемыеУведомления|DeliverableNotifications|ЖурналыДокументов|DocumentJournals|Задачи|Tasks|ИспользованиеРабочейДаты|WorkingDateUse|ИсторияРаботыПользователя|UserWorkHistory|Константы|Constants|КритерииОтбора|FilterCriteria|Метаданные|Metadata|Обработки|DataProcessors|ОтправкаДоставляемыхУведомлений|DeliverableNotificationSend|Отчеты|Reports|ПараметрыСеанса|SessionParameters|Перечисления|Enums|ПланыВидовРасчета|ChartsOfCalculationTypes|ПланыВидовХарактеристик|ChartsOfCharacteristicTypes|ПланыОбмена|ExchangePlans|ПланыСчетов|ChartsOfAccounts|ПолнотекстовыйПоиск|FullTextSearch|ПользователиИнформационнойБазы|InfoBaseUsers|Последовательности|Sequences|РасширенияКонфигурации|ConfigurationExtensions|РегистрыБухгалтерии|AccountingRegisters|РегистрыНакопления|AccumulationRegisters|РегистрыРасчета|CalculationRegisters|РегистрыСведений|InformationRegisters|РегламентныеЗадания|ScheduledJobs|СериализаторXDTO|XDTOSerializer|Справочники|Catalogs|СредстваГеопозиционирования|LocationTools|СредстваКриптографии|CryptoToolsManager|СредстваМультимедиа|MultimediaTools|СредстваПочты|MailTools|СредстваТелефонии|TelephonyTools|ФабрикаXDTO|XDTOFactory|ФоновыеЗадания|BackgroundJobs|ХранилищаНастроек)(?=[^\wа-яё]|$))</string>
+        <string>(?i:(?&lt;=[^\wа-яё\.]|^)(WSСсылки|WSReferences|БиблиотекаКартинок|PictureLib|БиблиотекаМакетовОформленияКомпоновкиДанных|DataCompositionAppearanceTemplateLib|БиблиотекаСтилей|StyleLib|БизнесПроцессы|BusinessProcesses|ВнешниеИсточникиДанных|ExternalDataSources|ВнешниеОбработки|ExternalDataProcessors|ВнешниеОтчеты|ExternalReports|Документы|Documents|ДоставляемыеУведомления|DeliverableNotifications|ЖурналыДокументов|DocumentJournals|Задачи|Tasks|ИспользованиеРабочейДаты|WorkingDateUse|ИсторияРаботыПользователя|UserWorkHistory|Константы|Constants|КритерииОтбора|FilterCriteria|Метаданные|Metadata|Обработки|DataProcessors|ОтправкаДоставляемыхУведомлений|DeliverableNotificationSend|Отчеты|Reports|ПараметрыСеанса|SessionParameters|Перечисления|Enums|ПланыВидовРасчета|ChartsOfCalculationTypes|ПланыВидовХарактеристик|ChartsOfCharacteristicTypes|ПланыОбмена|ExchangePlans|ПланыСчетов|ChartsOfAccounts|ПолнотекстовыйПоиск|FullTextSearch|ПользователиИнформационнойБазы|InfoBaseUsers|Последовательности|Sequences|РасширенияКонфигурации|ConfigurationExtensions|РегистрыБухгалтерии|AccountingRegisters|РегистрыНакопления|AccumulationRegisters|РегистрыРасчета|CalculationRegisters|РегистрыСведений|InformationRegisters|РегламентныеЗадания|ScheduledJobs|СериализаторXDTO|XDTOSerializer|Справочники|Catalogs|СредстваГеопозиционирования|LocationTools|СредстваКриптографии|CryptoToolsManager|СредстваМультимедиа|MultimediaTools|СредстваПочты|MailTools|СредстваТелефонии|TelephonyTools|ФабрикаXDTO|XDTOFactory|ФоновыеЗадания|BackgroundJobs|ХранилищаНастроек|SettingsStorages|ВстроенныеПокупки|InAppPurchases|ОтображениеРекламы|AdRepresentationПанельЗадачОС|OSTaskbar|ПроверкаВстроенныхПокупок|InAppPurchasesValidation)(?=[^\wа-яё]|$))</string>
       </dict>
       <dict>
         <key>comment</key>
@@ -443,7 +426,7 @@
         <key>name</key>
         <string>support.variable.bsl</string>
         <key>match</key>
-        <string>(?i:(?&lt;=[^\wа-яё\.]|^)(ГлавныйИнтерфейс|MainInterface|ГлавныйСтиль|MainStyle|ПараметрЗапуска|LaunchParameter|РабочаяДата|WorkingDate|SettingsStorages|ХранилищеВариантовОтчетов|ReportsVariantsStorage|ХранилищеНастроекДанныхФорм|FormDataSettingsStorage|ХранилищеОбщихНастроек|CommonSettingsStorage|ХранилищеПользовательскихНастроекДинамическихСписков|DynamicListsUserSettingsStorage|ХранилищеПользовательскихНастроекОтчетов|ReportsUserSettingsStorage|ХранилищеСистемныхНастроек|SystemSettingsStorage)(?=[^\wа-яё]|$))</string>
+        <string>(?i:(?&lt;=[^\wа-яё\.]|^)(ГлавныйИнтерфейс|MainInterface|ГлавныйСтиль|MainStyle|ПараметрЗапуска|LaunchParameter|РабочаяДата|WorkingDate|ХранилищеВариантовОтчетов|ReportsVariantsStorage|ХранилищеНастроекДанныхФорм|FormDataSettingsStorage|ХранилищеОбщихНастроек|CommonSettingsStorage|ХранилищеПользовательскихНастроекДинамическихСписков|DynamicListsUserSettingsStorage|ХранилищеПользовательскихНастроекОтчетов|ReportsUserSettingsStorage|ХранилищеСистемныхНастроек|SystemSettingsStorage)(?=[^\wа-яё]|$))</string>
       </dict>
       <dict>
         <key>name</key>
@@ -526,6 +509,69 @@
           <dict>
             <key>include</key>
             <string>source.sdbl</string>
+          </dict>
+        </array>
+      </dict>
+      <key>basic</key>
+      <dict>
+        <key>patterns</key>
+        <array>
+          <dict>
+            <key>name</key>
+            <string>comment.line.double-slash.bsl</string>
+            <key>match</key>
+            <string>(//.*$)</string>
+          </dict>
+          <dict>
+            <key>name</key>
+            <string>string.quoted.double.bsl</string>
+            <key>begin</key>
+            <string>\"</string>
+            <key>end</key>
+            <string>\"(?![\"])</string>
+            <key>patterns</key>
+            <array>
+              <dict>
+                <key>include</key>
+                <string>#query</string>
+              </dict>
+              <dict>
+                <key>name</key>
+                <string>constant.character.escape.bsl</string>
+                <key>match</key>
+                <string>\"\"</string>
+              </dict>
+              <dict>
+                <key>name</key>
+                <string>comment.line.double-slash.bsl</string>
+                <key>match</key>
+                <string>(^\s*//.*$)</string>
+              </dict>
+            </array>
+          </dict>
+          <dict>
+            <key>name</key>
+            <string>constant.language.bsl</string>
+            <key>match</key>
+            <string>(?i:(?&lt;=[^\wа-яё\.]|^)(Неопределено|Undefined|Истина|True|Ложь|False|NULL)(?=[^\wа-яё\.]|$))</string>
+          </dict>
+          <dict>
+            <key>name</key>
+            <string>constant.numeric.bsl</string>
+            <key>match</key>
+            <string>\b((\h{8}-(\h{4}-){3}\h{12})|\d+\.?\d*)\b</string>
+          </dict>
+          <dict>
+            <key>name</key>
+            <string>constant.other.date.bsl</string>
+            <key>match</key>
+            <string>\'((\d{4}[^\d\']*\d{2}[^\d\']*\d{2})([^\d\']*\d{2}[^\d\']*\d{2}([^\d\']*\d{2})?)?)\'</string>
+          </dict>
+          <dict>
+            <key>name</key>
+            <string>keyword.operator.bsl</string>
+            <key>match</key>
+            <string>(,)</string>
           </dict>
         </array>
       </dict>
