@@ -3,6 +3,7 @@
 # Поддержка языка 1С:Предприятие 8 (BSL) в VSC
 
 [![Join the chat at https://gitter.im/xDrivenDevelopment/1c-syntax](https://badges.gitter.im/xDrivenDevelopment/1c-syntax.svg)](https://gitter.im/xDrivenDevelopment/1c-syntax?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![GitHub release](https://img.shields.io/github/release/xDrivenDevelopment/vsc-language-1c-bsl.svg)](https://github.com/xDrivenDevelopment/vsc-language-1c-bsl/blob/master/CHANGELOG.md)
 [![Dependency Status](https://gemnasium.com/badges/github.com/xDrivenDevelopment/vsc-language-1c-bsl.svg)](https://gemnasium.com/github.com/xDrivenDevelopment/vsc-language-1c-bsl)
 
 Добавляет подсветку встроенного языка 1С:Предпрятие 8 файлам \*.bsl и \*.os - синтаксис `1C (BSL)`.  
