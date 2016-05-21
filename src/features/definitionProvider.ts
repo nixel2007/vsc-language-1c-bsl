@@ -64,19 +64,16 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                     added[element.name] = true;
                     let moduleDescription = (module && module.length > 0) ? module + "." : "";
                     let result = {
-                        "path": element.filename,
+                        "path": (element.filename) ? vscode.Uri.file(element.filename) : document.uri,
                         "line": element.line,
                         "description": element.description,
                         "label": moduleDescription + element.name,
                         "isproc": element.isproc
                     };
-                    if (!result.path) {
-                        result.path = filename;
-                    }
                     bucket.push(result);
                 }
                 if (bucket.length === 1) {
-                    let location: vscode.Location = new vscode.Location(vscode.Uri.file(bucket[0].path),
+                    let location: vscode.Location = new vscode.Location(bucket[0].path,
                         new vscode.Position(bucket[0].line, (bucket[0].isproc ? 9 : 7) + 1));
                     return resolve(location);
                 } else if (bucket.length === 0) {
@@ -85,26 +82,12 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                     let results: vscode.Location[] = Array<vscode.Location>();
                     for (let index = 0; index < bucket.length; index++) {
                         let element = bucket[index];
-                        let location: vscode.Location = new vscode.Location(vscode.Uri.file(bucket[index].path),
+                        let location: vscode.Location = new vscode.Location(bucket[index].path,
                             new vscode.Position(bucket[index].line, (bucket[index].isproc ? 9 : 7) + 1));
                         results.push(location);
                     }
                     return resolve(results);
                 }
-                return vscode.window.showQuickPick(bucket).then(value => {
-                    try {
-                        if (value) {
-                            let referenceResource = vscode.Uri.file(value.path);
-                            let location = new vscode.Location(referenceResource, new vscode.Position(value.line, (value.isproc ? 9 : 7) + 1));
-                            return resolve(location);
-                        } else {
-                            return reject("value not found " + value);
-                        }
-                    } catch (e) {
-                        console.error(e);
-                        return reject(e);
-                    }
-                });
             } else {
                 Promise.resolve(null);
             }

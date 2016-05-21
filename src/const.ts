@@ -1,5 +1,5 @@
 "use strict";
 
-import * as vscode from "vscode";
+import { DocumentSelector } from "vscode";
 
-export const BSL_MODE: vscode.DocumentFilter = { language: "bsl", scheme: "file" };
+export const BSL_MODE: DocumentSelector = "bsl";
