@@ -47,6 +47,11 @@
         "title": "Create comment to current method",
         "category": "Language 1C (BSL)"
       },
+      {
+        "command": "language-1c-bsl.createTasks",
+        "title": "Create tasks.json for current workspace",
+        "category": "Language 1C (BSL)"
+      },
        {
         "command": "language-1c-bsl.dynamicSnippets",
         "title": "Show dynamic snippets list",

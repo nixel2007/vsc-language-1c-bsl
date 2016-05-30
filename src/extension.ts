@@ -1,6 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as fs from "fs";
+import * as path from "path";
 import * as vscode from "vscode";
 import { BSL_MODE } from "./const";
 import {Global} from "./global";
@@ -88,6 +89,34 @@ export function activate(context: vscode.ExtensionContext) {
                 });
             }
         }
+    }));
+
+    context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.createTasks", () => {
+        let rootPath = vscode.workspace.rootPath;
+        if (rootPath === undefined) {
+            return;
+        }
+        let vscodePath = path.join(rootPath, ".vscode");
+        let promise = new Promise( (resolve, reject) => {
+            fs.stat(vscodePath, (err: NodeJS.ErrnoException, stats: fs.Stats) => {
+                if (err) {
+                    fs.mkdir(vscodePath, (err) => {
+                        if (err) {
+                            reject(err);
+                        }
+                        resolve();
+                    })
+                    return;
+                }
+                resolve();
+            });            
+        });
+        
+        promise.then( (result) => {
+            console.log("ok");
+        }, (reason) => {
+            throw reason;
+        });        
     }));
 
     vscode.languages.setLanguageConfiguration("bsl", {
