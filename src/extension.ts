@@ -16,6 +16,7 @@ import HoverProvider from "./features/hoverProvider";
 import SyntaxHelper from "./features/syntaxHelper";
 import * as vscAdapter from "./vscAdapter";
 import * as dynamicSnippets from "./features/dynamicSnippets";
+import * as tasksTemplate from "./features/tasksTemplate";
 
 let diagnosticCollection: vscode.DiagnosticCollection;
 
@@ -113,8 +114,20 @@ export function activate(context: vscode.ExtensionContext) {
         });
         
         promise.then( (result) => {
-            console.log("ok");
-        }, (reason) => {
+            let tasksPath = path.join(vscodePath, "tasks.json");
+            fs.stat(tasksPath, (err: NodeJS.ErrnoException, stats: fs.Stats) => {
+                if (err) {
+                    fs.writeFile(tasksPath, JSON.stringify(tasksTemplate.getTasksObject(), null, 4), (err: NodeJS.ErrnoException) => {
+                        if (err) {
+                            throw err;
+                        }
+                        vscode.window.showInformationMessage("tasks.json was created");
+                    });
+                } else {
+                    vscode.window.showInformationMessage("tasks.json already exists")
+                }
+            });
+        }).catch( (reason) => {
             throw reason;
         });        
     }));
