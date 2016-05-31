@@ -33,6 +33,7 @@
   "activationEvents": [
     "onLanguage:bsl",
     "onLanguage:sdbl",
+    "onCommand:language-1c-bsl.createTasks",
     "onCommand:language-1c-bsl.update"
   ],
   "contributes": {
