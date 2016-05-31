@@ -20,6 +20,17 @@ export function getTasksObject(): any {
         "isBuildCommand": false
       },
       {
+        "taskName": "OneScript: check",
+        "args": [
+          "-check",
+          "${file}"
+        ],
+        "echoCommand": true,
+        "showOutput": "always",
+        "suppressTaskName": true,
+        "isBuildCommand": false
+      },
+      {
         "taskName": "OneScript: make",
         "args": [
           "-make",
