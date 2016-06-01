@@ -33,6 +33,7 @@
   "activationEvents": [
     "onLanguage:bsl",
     "onLanguage:sdbl",
+    "onCommand:language-1c-bsl.createTasks",
     "onCommand:language-1c-bsl.update"
   ],
   "contributes": {
@@ -45,6 +46,11 @@
       {
         "command": "language-1c-bsl.createComments",
         "title": "Create comment to current method",
+        "category": "Language 1C (BSL)"
+      },
+      {
+        "command": "language-1c-bsl.createTasks",
+        "title": "Create tasks.json for current workspace",
         "category": "Language 1C (BSL)"
       },
        {
