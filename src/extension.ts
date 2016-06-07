@@ -1,6 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as fs from "fs";
+import * as path from "path";
 import * as vscode from "vscode";
 import { BSL_MODE } from "./const";
 import {Global} from "./global";
@@ -15,6 +16,7 @@ import HoverProvider from "./features/hoverProvider";
 import SyntaxHelper from "./features/syntaxHelper";
 import * as vscAdapter from "./vscAdapter";
 import * as dynamicSnippets from "./features/dynamicSnippets";
+import * as tasksTemplate from "./features/tasksTemplate";
 
 let diagnosticCollection: vscode.DiagnosticCollection;
 
@@ -88,6 +90,46 @@ export function activate(context: vscode.ExtensionContext) {
                 });
             }
         }
+    }));
+
+    context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.createTasks", () => {
+        let rootPath = vscode.workspace.rootPath;
+        if (rootPath === undefined) {
+            return;
+        }
+        let vscodePath = path.join(rootPath, ".vscode");
+        let promise = new Promise( (resolve, reject) => {
+            fs.stat(vscodePath, (err: NodeJS.ErrnoException, stats: fs.Stats) => {
+                if (err) {
+                    fs.mkdir(vscodePath, (err) => {
+                        if (err) {
+                            reject(err);
+                        }
+                        resolve();
+                    })
+                    return;
+                }
+                resolve();
+            });            
+        });
+        
+        promise.then( (result) => {
+            let tasksPath = path.join(vscodePath, "tasks.json");
+            fs.stat(tasksPath, (err: NodeJS.ErrnoException, stats: fs.Stats) => {
+                if (err) {
+                    fs.writeFile(tasksPath, JSON.stringify(tasksTemplate.getTasksObject(), null, 4), (err: NodeJS.ErrnoException) => {
+                        if (err) {
+                            throw err;
+                        }
+                        vscode.window.showInformationMessage("tasks.json was created");
+                    });
+                } else {
+                    vscode.window.showInformationMessage("tasks.json already exists")
+                }
+            });
+        }).catch( (reason) => {
+            throw reason;
+        });        
     }));
 
     vscode.languages.setLanguageConfiguration("bsl", {
@@ -172,9 +214,6 @@ export function activate(context: vscode.ExtensionContext) {
         }
     }));
 
-    let previewUriString = "syntax-helper://authority/Синтакс-Помощник";
-    let previewUri = vscode.Uri.parse(previewUriString);
-
     context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.dynamicSnippets", () => {
         let editor = vscode.window.activeTextEditor;
         if (!editor || editor.selection.isEmpty) {
@@ -236,6 +275,9 @@ export function activate(context: vscode.ExtensionContext) {
         });
     }));
 
+    let previewUriString = "syntax-helper://authority/Синтакс-Помощник";
+    let previewUri = vscode.Uri.parse(previewUriString);
+
     context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.syntaxHelper", () => {
         if (!vscode.window.activeTextEditor) {
             return;
@@ -245,7 +287,7 @@ export function activate(context: vscode.ExtensionContext) {
         if (globalMethod) {
             global.methodForDescription = { label: globalMethod.name, description: globalMethod.description };
             syntaxHelper.update(previewUri);
-            vscode.commands.executeCommand("vscode.previewHtml", vscode.Uri.parse(previewUriString), vscode.ViewColumn.Two).then((success) => {
+            vscode.commands.executeCommand("vscode.previewHtml", previewUri, vscode.ViewColumn.Two).then((success) => {
             }, (reason) => {
                 vscode.window.showErrorMessage(reason);
             });

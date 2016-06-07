@@ -3,13 +3,13 @@
   "displayName": "Language 1C (BSL)",
   "description": "Syntax highlighting for 1C:Enterprise 8.",
   "icon": "images/xDDIcon.png",
-  "version": "1.5.4",
+  "version": "1.5.5",
   "publisher": "xDrivenDevelopment",
   "galleryBanner": {
     "color": "#0000FF",
     "theme": "dark"
   },
-  "license": "LICENSE.md",
+  "license": "SEE LICENSE IN LICENSE.md",
   "bugs": {
     "url": "https://github.com/xDrivenDevelopment/vsc-language-1c-bsl/issues"
   },
@@ -33,6 +33,7 @@
   "activationEvents": [
     "onLanguage:bsl",
     "onLanguage:sdbl",
+    "onCommand:language-1c-bsl.createTasks",
     "onCommand:language-1c-bsl.update"
   ],
   "contributes": {
@@ -45,6 +46,11 @@
       {
         "command": "language-1c-bsl.createComments",
         "title": "Create comment to current method",
+        "category": "Language 1C (BSL)"
+      },
+      {
+        "command": "language-1c-bsl.createTasks",
+        "title": "Create tasks.json for current workspace",
         "category": "Language 1C (BSL)"
       },
        {
