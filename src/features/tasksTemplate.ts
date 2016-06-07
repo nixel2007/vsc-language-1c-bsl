@@ -54,7 +54,7 @@ export function getTasksObject(): any {
         "problemMatcher": {
           "fileLocation": "absolute",
           "pattern": {
-            "regexp": "^{Модуль\\s+(.*)\\s\\/\\s.*:\\s+(\\d+)\\s+\\/\\s+(.*)}$",
+            "regexp": "{Модуль\\s+(.+)\\s\\/\\s.*:\\s+(\\d+)\\s+\\/\\s+([^{]*)",
             "file": 1,
             "location": 2,
             "message": 3
