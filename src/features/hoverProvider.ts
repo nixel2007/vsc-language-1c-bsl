@@ -17,7 +17,7 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
         }
         word = this._global.fullNameRecursor(word, document, wordRange, true);
         let entry = this._global.globalfunctions[word.toLowerCase()];
-        if (!entry || !entry.description) {
+        if (!entry) {
             let module = "";
             if (word.indexOf(".") > 0) {
                 let dotArray: Array<string> = word.split(".");
@@ -57,16 +57,28 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
            }
         }
         let description = [];
-        description.push("Метод глобального контекста");
-        description.push(entry.description);
+        let context = "1C";
+        let signature = (!entry.signature) ? entry.oscript_signature : entry.signature;
+        let descMethod = (!entry.description) ? entry.oscript_description : entry.description;
+        if (!descMethod) { return null; }
+        if (!entry.description) {
+            context = "OneScript";
+        } else if (entry.oscript_signature) {
+            context = context + " (доступен в OneScript)";
+        }
+        description.push("Метод глобального контекста " + context);
+        description.push(descMethod);
+        if (entry.returns) {
+            description.push("***Возвращаемое значение:*** " + entry.returns);
+        }
 
-        for (let element in entry.signature) {
+        for (let element in signature) {
             let re = new RegExp("\\(.*\\):\\s*.*", "g");
-            let retValue = re.exec(entry.signature[element].СтрокаПараметров) ? "Функция " : "Процедура ";
-            description.push({ language: "1C (BSL)", value: retValue + entry.name + entry.signature[element].СтрокаПараметров });
+            let retValue = re.exec(signature[element].СтрокаПараметров) ? "Функция " : "Процедура ";
+            description.push({ language: "1C (BSL)", value: retValue + entry.name + signature[element].СтрокаПараметров });
             // description.push("Параметры");
-            for (let param in entry.signature[element].Параметры) {
-                description.push("***" + param + "***: " + entry.signature[element].Параметры[param]);
+            for (let param in signature[element].Параметры) {
+                description.push("***" + param + "***: " + signature[element].Параметры[param]);
             }
         }
         return new vscode.Hover(description);
