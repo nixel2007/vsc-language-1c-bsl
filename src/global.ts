@@ -1,6 +1,7 @@
 import * as path from "path";
 
 import * as bslglobals from "./features/bslGlobals";
+import * as oscriptStdLib from "./features/oscriptStdLib";
 
 let loki = require("lokijs");
 let Parser = require("onec-syntaxparser");
@@ -14,8 +15,11 @@ export class Global {
     globalfunctions: any;
     globalvariables: any;
     keywords: any;
+    systemEnum: any;
+    classes: any;
     toreplaced: any;
     methodForDescription: any = undefined;
+    syntaxFilled: string = "";
     hoverTrue: boolean = true;
     private cacheUpdates: boolean;
 
@@ -375,6 +379,8 @@ export class Global {
         this.cacheUpdates = false;
         this.globalfunctions = {};
         this.globalvariables = {};
+        this.systemEnum = {};
+        this. classes = {};
         let globalfunctions = bslglobals.globalfunctions();
         let globalvariables = bslglobals.globalvariables();
         this.keywords = bslglobals.keywords()[autocompleteLanguage];
@@ -382,16 +388,215 @@ export class Global {
             let new_name = globalfunctions[element]["name" + postfix];
             let new_element = {};
             new_element["name"] = new_name;
+            new_element["alias"] = (postfix === "_en") ? globalfunctions[element]["name"] : globalfunctions[element]["name_en"];
             new_element["description"] = globalfunctions[element].description;
             new_element["signature"] = globalfunctions[element].signature;
+            new_element["returns"] = globalfunctions[element].returns;
             this.globalfunctions[new_name.toLowerCase()] = new_element;
+        }
+        for (let element in oscriptStdLib.globalContextOscript()) {
+            let segment = oscriptStdLib.globalContextOscript()[element];
+            for (let key in segment["methods"]) {
+                if (this.globalfunctions[segment["methods"][key]["name" + postfix].toLowerCase()]) {
+                    let globMethod = this.globalfunctions[segment["methods"][key]["name" + postfix].toLowerCase()];
+                    globMethod["oscript_signature"] = { "default": { "СтрокаПараметров": segment["methods"][key].signature, "Параметры": segment["methods"][key].params } };
+                    globMethod["oscript_description"] = segment["methods"][key].description;
+                } else {
+                    let new_element = {};
+                    let new_name = segment["methods"][key]["name" + postfix];
+                    new_element["name"] = new_name;
+                    new_element["alias"] = (postfix === "_en") ? segment["methods"][key]["name"] : segment["methods"][key]["name_en"];
+                    new_element["description"] = undefined;
+                    new_element["signature"] = undefined;
+                    new_element["returns"] = segment["methods"][key].returns;
+                    new_element["oscript_signature"] = { "default": { "СтрокаПараметров": segment["methods"][key].signature, "Параметры": segment["methods"][key].params } };
+                    new_element["oscript_description"] = segment["methods"][key].description;
+                    this.globalfunctions[new_name.toLowerCase()] = new_element;
+                }
+            }
         }
         for (let element in globalvariables) {
             let new_name = globalvariables[element]["name" + postfix];
             let new_element = {};
             new_element["name"] = new_name;
+            new_element["alias"] = (postfix === "_en") ? globalvariables[element]["name"] : globalvariables[element]["name_en"];
             new_element["description"] = globalvariables[element].description;
             this.globalvariables[new_name.toLowerCase()] = new_element;
+        }
+        for (let element in oscriptStdLib.globalContextOscript()) {
+            let segment = oscriptStdLib.globalContextOscript()[element];
+            for (let key in segment["properties"]) {
+                if (this.globalvariables[segment["properties"][key]["name" + postfix].toLowerCase()]) {
+                    let globVar = this.globalvariables[segment["properties"][key]["name" + postfix].toLowerCase()];
+                    globVar["oscript_description"] = segment["properties"][key].description;
+                    globVar["oscript_access"] = segment["properties"][key].access;
+                } else {
+                    let new_element = {};
+                    let new_name = segment["properties"][key]["name" + postfix];
+                    new_element["name"] = new_name;
+                    new_element["alias"] = (postfix === "_en") ? segment["properties"][key]["name"] : segment["properties"][key]["name_en"];
+                    new_element["description"] = undefined;
+                    new_element["oscript_description"] = segment["properties"][key].description;
+                    new_element["oscript_access"] = segment["properties"][key].access;
+                    this.globalvariables[new_name.toLowerCase()] = new_element;
+                }
+            }
+        }
+        for (let element in bslglobals.systemEnum()) {
+            let segment = bslglobals.systemEnum()[element];
+            let new_name = segment["name" + postfix];
+            let new_element = {};
+            new_element["name"] = new_name;
+            new_element["alias"] = (postfix === "_en") ? segment["name"] : segment["name_en"];
+            new_element["description"] = segment.description;
+            for (let key in segment["values"]) {
+                let new_name_values = segment["values"][key]["name" + postfix];
+                let element_values = {};
+                element_values["name"] = new_name;
+                element_values["alias"] = (postfix === "_en") ? segment["values"][key]["name"] : segment["values"][key]["name_en"];
+                element_values["description"] = segment.description;
+                new_element[new_name_values.toLowerCase()] = element_values;
+            }
+            this.systemEnum[new_name.toLowerCase()] = new_element;
+        }
+        for (let element in oscriptStdLib.systemEnum()) {
+            let segment = oscriptStdLib.systemEnum()[element];
+            let new_name = segment["name" + postfix];
+            if (this.systemEnum[new_name.toLowerCase()]) {
+                let find_enum = this.systemEnum[new_name.toLowerCase()];
+                find_enum["oscript_description"] = segment.description;
+            } else {
+                let new_element = {};
+                new_element["name"] = new_name;
+                new_element["alias"] = (postfix === "_en") ? segment["name"] : segment["name_en"];
+                new_element["description"] = undefined;
+                new_element["oscript_description"] = segment.description;
+                for (let key in segment["values"]) {
+                    let new_name_values = segment["values"][key]["name" + postfix];
+                    let element_values = {};
+                    element_values["name"] = new_name;
+                    element_values["alias"] = (postfix === "_en") ? segment["values"][key]["name"] : segment["values"][key]["name_en"];
+                    element_values["description"] = segment.description;
+                    new_element[new_name_values.toLowerCase()] = element_values;
+                }
+            this.systemEnum[new_name.toLowerCase()] = new_element;
+            }
+        }
+        for (let element in bslglobals.classes()) {
+            let segment = bslglobals.classes()[element];
+            let new_name = segment["name" + postfix];
+            let new_element = {};
+            new_element["name"] = new_name;
+            new_element["alias"] = (postfix === "_en") ? segment["name"] : segment["name_en"];
+            new_element["description"] = segment.description;
+            new_element["methods"] = (segment["methods"]) ? {} : undefined;
+            for (let key in segment["methods"]) {
+                let new_name_method = segment["methods"][key]["name" + postfix];
+                let new_method = {};
+                new_method["name"] = new_name;
+                new_method["alias"] = (postfix === "_en") ? segment["methods"][key]["name"] : segment["methods"][key]["name_en"];
+                new_method["description"] = segment["methods"][key].description;
+                new_element["methods"][new_name_method.toLowerCase()] = new_method;
+            }
+            new_element["properties"] = (segment["properties"]) ? {} : undefined;
+            for (let key in segment["properties"]) {
+                let new_name_prop = segment["properties"][key]["name" + postfix];
+                let new_prop = {};
+                new_prop["name"] = new_name;
+                new_prop["alias"] = (postfix === "_en") ? segment["properties"][key]["name"] : segment["properties"][key]["name_en"];
+                new_prop["description"] = segment["properties"][key].description;
+                new_element["properties"][new_name_prop.toLowerCase()] = new_prop;
+            }
+            new_element["constructors"] = (segment["constructors"]) ? {} : undefined;
+            for (let key in segment["constructors"]) {
+                let new_cntr = {};
+                new_cntr["signature"] = segment["constructors"][key].signature;
+                new_cntr["description"] = segment["constructors"][key].description;
+                new_element["constructors"][key.toLowerCase()] = new_cntr;
+            }
+            this.classes[new_name.toLowerCase()] = new_element;
+        }
+        for (let element in oscriptStdLib.classesOscript()) {
+            let segment = oscriptStdLib.classesOscript()[element];
+            let new_name = segment["name" + postfix];
+            if (this.classes[new_name.toLowerCase()]) {
+                let find_class = this.classes[new_name.toLowerCase()];
+                find_class["oscript_description"] = segment.description;
+                for (let key in segment["methods"]) {
+                    let find_method = segment["methods"][key];
+                    let name_method = find_method["name" + postfix];
+                    if (!find_method) {
+                        find_method = {};
+                        find_method["name"] = name_method;
+                        find_method["alias"] = (postfix === "_en") ? segment["methods"][key]["name"] : segment["methods"][key]["name_en"];
+                        find_method["description"] = undefined;
+                        find_method["oscript_description"] = segment["methods"][key]["description"];
+                        find_class["methods"][name_method.toLowerCase()] = find_method;
+                    } else {
+                        find_method["oscript_description"] = segment["methods"][key]["description"];
+                    }
+                }
+                for (let key in segment["properties"]) {
+                    let find_prop = segment["properties"][key];
+                    let name_prop = find_prop["name" + postfix];
+                    if (!find_prop) {
+                        find_prop = {};
+                        find_prop["name"] = name_prop;
+                        find_prop["alias"] = (postfix === "_en") ? segment["properties"][key]["name"] : segment["properties"][key]["name_en"];
+                        find_prop["description"] = undefined;
+                        find_prop["oscript_description"] = segment["properties"][key]["description"];
+                        find_class["properties"][name_prop.toLowerCase()] = find_prop;
+                    } else {
+                        find_prop["oscript_description"] = segment["properties"][key]["description"];
+                    }
+                }
+                for (let key in segment["constructors"]) {
+                    let find_cntr = segment["constructors"][key];
+                    if (!find_cntr) {
+                        find_cntr = {};
+                        find_cntr["description"] = undefined;
+                        find_cntr["oscript_description"] = segment["constructors"][key]["description"];
+                        find_class["constructors"][key.toLowerCase()] = find_cntr;
+                    } else {
+                        find_cntr["oscript_description"] = segment["constructors"][key]["description"];
+                    }
+                }
+            } else {
+                let new_element = {};
+                new_element["name"] = new_name;
+                new_element["alias"] = (postfix === "_en") ? segment["name"] : segment["name_en"];
+                new_element["description"] = undefined;
+                new_element["oscript_description"] = segment.description;
+                new_element["methods"] = (segment["methods"]) ? {} : undefined;
+                for (let key in segment["methods"]) {
+                    let new_name_method = segment["methods"][key]["name" + postfix];
+                    let new_method = {};
+                    new_method["name"] = new_name;
+                    new_method["alias"] = (postfix === "_en") ? segment["methods"][key]["name"] : segment["methods"][key]["name_en"];
+                    new_method["description"] = undefined;
+                    new_method["oscript_description"] = segment["methods"][key].description;
+                    new_element["methods"][new_name_method.toLowerCase()] = new_method;
+                }
+                new_element["properties"] = (segment["properties"]) ? {} : undefined;
+                for (let key in segment["properties"]) {
+                    let new_name_prop = segment["properties"][key]["name" + postfix];
+                    let new_prop = {};
+                    new_prop["name"] = new_name;
+                    new_prop["alias"] = (postfix === "_en") ? segment["properties"][key]["name"] : segment["properties"][key]["name_en"];
+                    new_prop["description"] = undefined;
+                    new_prop["oscript_description"] = segment["properties"][key].description;
+                    new_element["properties"][new_name_prop.toLowerCase()] = new_prop;
+                }
+                new_element["constructors"] = (segment["constructors"]) ? {} : undefined;
+                for (let key in segment["constructors"]) {
+                    let new_cntr = {};
+                    new_cntr["signature"] = segment["constructors"][key].signature;
+                    new_cntr["description"] = undefined;
+                    new_cntr["oscript_description"] = segment["constructors"][key].description;
+                    new_element["constructors"][key.toLowerCase()] = new_cntr;
+                }
+                this.classes[new_name.toLowerCase()] = new_element;
+            }
         }
     }
 }
