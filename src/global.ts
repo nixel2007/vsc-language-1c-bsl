@@ -521,7 +521,7 @@ export class Global {
             let new_name = segment["name" + postfix];
             if (this.classes[new_name.toLowerCase()]) {
                 let find_class = this.classes[new_name.toLowerCase()];
-                find_class["oscript_description"] = segment.description;
+                find_class["oscript_description"] = (segment.description) ? (segment.description) : find_class.description;
                 for (let key in segment["methods"]) {
                     let find_method = segment["methods"][key];
                     let name_method = find_method["name" + postfix];
