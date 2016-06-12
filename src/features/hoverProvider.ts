@@ -37,7 +37,7 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
             // if (entry.length === 0) {
             //     entry = this._global.query(word, "", false, false);
             // }
-            if (!entry) {
+            if (!entry || entry.length === 0) {
                 return null;
             } else if (module.length === 0) {
                entry = entry[0];
