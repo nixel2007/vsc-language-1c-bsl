@@ -194,6 +194,9 @@ export function activate(context: vscode.ExtensionContext) {
     }));
 
     context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(function (textEditor: vscode.TextEditor) {
+        if (!textEditor) {
+            return;
+        }
         applyConfigToTextEditor(textEditor);
         if (!global.cache.getCollection(textEditor.document.fileName)) {
             global.getRefsLocal(textEditor.document.fileName, textEditor.document.getText());
