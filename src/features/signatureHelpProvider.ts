@@ -75,7 +75,7 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
         }
 
         let entry = this._global.globalfunctions[ident.toLowerCase()];
-        if (!entry || !entry.signature) {
+        if (!entry) {
             let module = "";
             if (ident.indexOf(".") > 0) {
                 let dotArray: Array<string> = ident.split(".");
@@ -115,15 +115,17 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
             // }
             }
         }
+        let signature = (!entry.signature) ? entry.oscript_signature : entry.signature;
+        if  (!signature) { return null; }
         let ret = new SignatureHelp();
-        for (let element in entry.signature) {
-            let paramsString = entry.signature[element].СтрокаПараметров;
+        for (let element in signature) {
+            let paramsString = signature[element].СтрокаПараметров;
             let signatureInfo = new SignatureInformation(entry.name + paramsString, "");
 
-            let re = /([\wа-яА-Я]+)\??:\s+[а-яА-Я\w_\.]+/g;
+            let re = /([\wа-яА-Я]+)\??:\s+[а-яА-Я\w_\.\|]+/g;
             let match: RegExpExecArray = null;
             while ((match = re.exec(paramsString)) !== null) {
-                signatureInfo.parameters.push({ label: match[0], documentation: entry.signature[element].Параметры[match[1]] });
+                signatureInfo.parameters.push({ label: match[0], documentation: signature[element].Параметры[match[1]] });
             }
 
             if (signatureInfo.parameters.length - 1 < paramCount) {
@@ -143,7 +145,7 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
             let ret = new SignatureHelp();
             let signatureInfo = new SignatureInformation(entry.name + arraySignature.paramsString, "");
 
-            let re = /([\wа-яА-Я]+)(:\s+[<а-яА-Я\w_\.>]+)?/g;
+            let re = /([\wа-яА-Я]+)(:\s+[<а-яА-Я\w_\.>\|]+)?/g;
             let match: RegExpExecArray = null;
             while ((match = re.exec(arraySignature.paramsString)) !== null) {
                 let documentationParam = this._global.GetDocParam(arraySignature.description, match[1]);
