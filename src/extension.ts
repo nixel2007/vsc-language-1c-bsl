@@ -17,6 +17,8 @@ import SyntaxHelper from "./features/syntaxHelper";
 import * as vscAdapter from "./vscAdapter";
 import * as dynamicSnippets from "./features/dynamicSnippets";
 import * as tasksTemplate from "./features/tasksTemplate";
+import * as oscriptStdLib from "./features/oscriptStdLib";
+import * as bslGlobals from "./features/bslGlobals";
 
 let diagnosticCollection: vscode.DiagnosticCollection;
 
@@ -194,6 +196,9 @@ export function activate(context: vscode.ExtensionContext) {
     }));
 
     context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(function (textEditor: vscode.TextEditor) {
+        if (!textEditor) {
+            return;
+        }
         applyConfigToTextEditor(textEditor);
         if (!global.cache.getCollection(textEditor.document.fileName)) {
             global.getRefsLocal(textEditor.document.fileName, textEditor.document.getText());
@@ -284,42 +289,154 @@ export function activate(context: vscode.ExtensionContext) {
         }
         let word = vscode.window.activeTextEditor.document.getText(vscode.window.activeTextEditor.document.getWordRangeAtPosition(vscode.window.activeTextEditor.selection.active));
         let globalMethod = global.globalfunctions[word.toLowerCase()];
-        if (globalMethod) {
-            global.methodForDescription = { label: globalMethod.name, description: globalMethod.description };
-            syntaxHelper.update(previewUri);
-            vscode.commands.executeCommand("vscode.previewHtml", previewUri, vscode.ViewColumn.Two).then((success) => {
-            }, (reason) => {
-                vscode.window.showErrorMessage(reason);
-            });
-            return;
-        }
         // push the items
         let items = [];
-        for (let element in global.globalfunctions) {
-            let method = global.globalfunctions[element];
-            items.push({ label: method.name, description: method.description });
+        items.push({ label: "OneScript", description: "" });
+        items.push({ label: "1C", description: "" });
+        let autocompleteLanguage: any = vscode.workspace.getConfiguration("language-1c-bsl")["languageAutocomplete"];
+        let postfix = ""; // (autocompleteLanguage === "en") ? "_en" : "";
+        if (vscode.window.activeTextEditor.document.fileName.endsWith(".bsl") && globalMethod) {
+            for (let element in bslGlobals.structureGlobContext()["global"]) {
+                let segment = bslGlobals.structureGlobContext()["global"][element];
+                if (segment[globalMethod.name] !== undefined || segment[globalMethod.alias] !== undefined) {
+                    let target = (segment[globalMethod.name] !== undefined) ?  segment[globalMethod.name] : segment[globalMethod.alias];
+                    global.methodForDescription = { label: target, description: "1С/Глобальный контекст/" + element };
+                    syntaxHelper.update(previewUri);
+                    vscode.commands.executeCommand("vscode.previewHtml", previewUri, vscode.ViewColumn.Two).then((success) => {
+                    }, (reason) => {
+                        vscode.window.showErrorMessage(reason);
+                    });
+                    return;
+                }
+            }
+        } else if (vscode.window.activeTextEditor.document.fileName.endsWith(".os") && globalMethod) {
+            for (let element in oscriptStdLib.globalContextOscript()) {
+                let segment = oscriptStdLib.globalContextOscript()[element];
+                if (segment["methods"][globalMethod.name] || segment["methods"][globalMethod.alias]) {
+                    let target = (segment["methods"][globalMethod.name] !== undefined) ?  segment["methods"][globalMethod.name] : segment["methods"][globalMethod.alias];
+                    global.methodForDescription = { label: target.name, description: "OneScript/Глобальный контекст/" + element };
+                    syntaxHelper.update(previewUri);
+                    vscode.commands.executeCommand("vscode.previewHtml", previewUri, vscode.ViewColumn.Two).then((success) => {
+                    }, (reason) => {
+                        vscode.window.showErrorMessage(reason);
+                    });
+                    return;
+                }
+            }
+        } else if (vscode.window.activeTextEditor.document.fileName.endsWith(".os")) {
+            for (let element in oscriptStdLib.globalContextOscript()) {
+                let segment = oscriptStdLib.globalContextOscript()[element];
+                for (let sectionTitle in segment) {
+                    if (sectionTitle === "description" || sectionTitle === "name" || sectionTitle === "name_en") {
+                        continue;
+                    }
+                    for (let indexMethod in segment[sectionTitle]) {
+                        let method = segment[sectionTitle][indexMethod];
+                        items.push({ label: method["name" + postfix], description: "OneScript/Глобальный контекст/" + element });
+                    }
+                }
+            }
+            for (let element in oscriptStdLib.classesOscript()) {
+                let classOscript = oscriptStdLib.classesOscript()[element];
+                items.push({ label: classOscript["name" + postfix], description: "OneScript/Классы/" + element });
+                for (let sectionTitle in classOscript) {
+                    if (sectionTitle === "constructors" || sectionTitle === "description" || sectionTitle === "name" || sectionTitle === "name_en") {
+                        continue;
+                    }
+                    for (let indexMethod in classOscript[sectionTitle]) {
+                        let method = classOscript[sectionTitle][indexMethod];
+                        items.push({ label: classOscript["name" + postfix] + "." + method["name" + postfix], description: "OneScript/Классы/" + element });
+                    }
+                }
+            }
+            for (let element in oscriptStdLib.systemEnum()) {
+                let classOscript = oscriptStdLib.systemEnum()[element];
+                items.push({ label: classOscript["name" + postfix], description: "OneScript/Системные перечисления/" + element });
+                for (let sectionTitle in classOscript) {
+                    if (sectionTitle === "description" || sectionTitle === "name" || sectionTitle === "name_en") {
+                        continue;
+                    }
+                    for (let indexMethod in classOscript[sectionTitle]) {
+                        let method = classOscript[sectionTitle][indexMethod];
+                        items.push({ label: classOscript["name" + postfix] + "." + method["name" + postfix], description: "OneScript/Системные перечисления/" + element });
+                    }
+                }
+            }
+
+        } else if (vscode.window.activeTextEditor.document.languageId === "bsl") {
+            for (let elementSegment in bslGlobals.structureGlobContext()["global"]) {
+                let segment = bslGlobals.structureGlobContext()["global"][elementSegment];
+                for (let element in segment) {
+                    let method = segment[element];
+                    items.push({ label: element, description: "1С/Глобальный контекст/" + elementSegment });
+                }
+            }
+            for (let elementSegment in bslGlobals.classes()) {
+                let class1C = bslGlobals.classes()[elementSegment];
+                items.push({ label: elementSegment, description: "1С/Классы/" + elementSegment });
+                for (let sectionTitle in class1C) {
+                    if (sectionTitle === "constructors" || sectionTitle === "description" || sectionTitle === "name" || sectionTitle === "name_en") {
+                        continue;
+                    }
+                    for (let element in class1C[sectionTitle]) {
+                        let method1С = class1C[sectionTitle][element];
+                        items.push({ label: elementSegment + "." + element, description: "1С/Классы/" + elementSegment });
+                    }
+                }
+            }
+            for (let elementSegment in bslGlobals.systemEnum()) {
+                let class1C = bslGlobals.systemEnum()[elementSegment];
+                items.push({ label: elementSegment, description: "1С/Системные перечисления/" + elementSegment });
+                for (let sectionTitle in class1C) {
+                    if (sectionTitle === "description" || sectionTitle === "name" || sectionTitle === "name_en") {
+                        continue;
+                    }
+                    for (let element in class1C[sectionTitle]) {
+                        let method1С = class1C[sectionTitle][element];
+                        items.push({ label: elementSegment + "." + element, description: "1С/Системные перечисления/" + elementSegment });
+                    }
+                }
+            }
+        } else {
+            return;
         }
         // pick one
         let currentLine = vscode.window.activeTextEditor.selection.active.line + 1;
         let options = {
             placeHolder: "Введите название метода",
-            matchOnDescription: false,
-            onDidSelectItem: function (item) {
-                global.methodForDescription = item;
-                vscode.commands.executeCommand("editor.action.showHover");
-            }
+            matchOnDescription: false
         };
-        vscode.window.showQuickPick(items, options).then(function (selection) {
-            if (typeof selection === "undefined") {
-                return;
+        if (!global.syntaxFilled) {
+            if (vscode.window.activeTextEditor.document.fileName.endsWith(".os")) {
+                global.methodForDescription = { label: "OneScript", description: "" };
             }
-            global.methodForDescription = selection;
+            else if (vscode.window.activeTextEditor.document.languageId === "bsl") {
+                global.methodForDescription = { label: "1C", description: "" };
+            }
             syntaxHelper.update(previewUri);
-            vscode.commands.executeCommand("vscode.previewHtml", vscode.Uri.parse(previewUriString), vscode.ViewColumn.Two).then((success) => {
-            }, (reason) => {
-                vscode.window.showErrorMessage(reason);
+            vscode.commands.executeCommand("vscode.previewHtml", previewUri, vscode.ViewColumn.Two).then(
+                (success) => {
+                    vscode.window.showQuickPick(items, options).then(function (selection) {
+                        if (typeof selection === "undefined") {
+                            return;
+                        }
+                        global.methodForDescription = selection;
+                        syntaxHelper.update(previewUri);
+                        vscode.commands.executeCommand("vscode.previewHtml", previewUri, vscode.ViewColumn.Two);
+                    });
+                }, (reason) => {
+                    vscode.window.showErrorMessage(reason);
+                });
+        } else {
+            vscode.window.showQuickPick(items, options).then(function (selection) {
+                if (typeof selection === "undefined") {
+                    return;
+                }
+                global.methodForDescription = selection;
+                syntaxHelper.update(previewUri);
+                vscode.commands.executeCommand("vscode.previewHtml", previewUri, vscode.ViewColumn.Two);
             });
-        });
+        }
     }));
 
     if (vscode.window.activeTextEditor) {

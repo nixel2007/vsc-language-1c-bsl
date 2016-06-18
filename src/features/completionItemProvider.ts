@@ -29,28 +29,37 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
         return completions;
     }
 
-    private getGlobals(word: string): vscode.CompletionItem[] {
+    private getGlobals(word: string, returns = false): vscode.CompletionItem[] {
         let completions: Array<vscode.CompletionItem> = new Array<vscode.CompletionItem>();
         let wordMatch = this.getRegExp(word);
         let completionDict = this._global.globalfunctions;
         for (let name in completionDict) {
             if (wordMatch.exec(name) !== null) {
+                if (returns && !completionDict[name].returns) {
+                    continue;
+                }
                 let full = completionDict[name];
+                if (vscode.window.activeTextEditor.document.fileName.endsWith(".bsl") && !full.description) {
+                    continue;
+                } else if (vscode.window.activeTextEditor.document.fileName.endsWith(".os") && !full.oscript_signature) {
+                    continue;
+                }
                 let completion = new vscode.CompletionItem(full["name"]);
                 completion.kind = vscode.CompletionItemKind.Function;
-                if (full["description"]) {
-                    completion.documentation = full["description"];
+                if (full["description"] || full["oscript_description"]) {
+                    completion.documentation = (full["description"]) ? full["description"] : full["oscript_description"];
                 }
-                if (full["signature"]) {
-                    let signature_default = full["signature"].default;
+                if (full["signature"] || full["oscript_signature"]) {
+                    let signature = (full["signature"]) ? full["signature"] : full["oscript_signature"];
+                    let signature_default = signature.default;
                     if (signature_default) {
-                        completion.detail = full["signature"].default.СтрокаПараметров;
+                        completion.detail = signature_default.СтрокаПараметров;
                     } else {
                         let syn = 0;
                         let detail = "";
-                        for (let signature_name in full["signature"]) {
+                        for (let signature_name in signature) {
                             syn++;
-                            detail = detail + (syn === 1 ? "" : ", \n") + syn + ". " + full["signature"][signature_name].СтрокаПараметров;
+                            detail = detail + (syn === 1 ? "" : ", \n") + syn + ". " + signature[signature_name].СтрокаПараметров;
                         }
                         completion.detail = "" + syn + " вариант" + (syn < 5 ? "a " : "ов ") + "синтаксиса: \n" + detail;
                     }
@@ -66,10 +75,15 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
         for (let name in completionDict) {
             if (wordMatch.exec(name) !== null) {
                 let full = completionDict[name];
+                if (vscode.window.activeTextEditor.document.fileName.endsWith(".bsl") && full.oscript_access) {
+                    continue;
+                } else if (vscode.window.activeTextEditor.document.fileName.endsWith(".os") && !full.oscript_access) {
+                    continue;
+                }
                 let completion = new vscode.CompletionItem(full["name"]);
                 completion.kind = vscode.CompletionItemKind.Variable;
-                if (full["description"]) {
-                    completion.documentation = full["description"];
+                if (full["description"] || full["oscript_description"]) {
+                    completion.documentation = (full["description"]) ? full["description"] : full["oscript_description"];
                 }
                 completions.push(completion);
                this.added[name] = true;
@@ -178,44 +192,79 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                     bucket = this.getDotComplection(document, position);
                     return resolve(bucket);
                 } else if (char.match(/[/\()"':,.;<>~!@#$%^&*|+=\[\]{}`?\…-\s\n\t]/) === null) {
-                    let word = document.getText(document.getWordRangeAtPosition(position));
+                    let word = document.getText(new vscode.Range(document.getWordRangeAtPosition(position).start, position));
                     word = this._global.fullNameRecursor(word, document, document.getWordRangeAtPosition(position), true);
                     let result: Array<any>;
                     if (word.indexOf(".") === -1) {
-                        bucket = this.getGlobals(word);
-                        result = this._global.getCacheLocal(document.fileName, word, document.getText(), false);
-                        result.forEach( (value, index, array) => {
-                            if (!this.added[value.name.toLowerCase()] === true) {
-                                let item = new vscode.CompletionItem(value.name);
-                                item.documentation = value.description;
-                                item.kind = vscode.CompletionItemKind.Function;
-                                if (value._method.Params.length > 0) {
-                                    item.insertText = value.name + "(";
-                                } else {
-                                    item.insertText = value.name + "()";
+                        if (document.getText(new vscode.Range(new vscode.Position(position.line, 0), position)).match(/.*=\s*[\wа-яё]+$/i)) {
+                            bucket = this.getGlobals(word, true);
+                            bucket = this.getAllWords(word, document.getText(), bucket);
+                            for (let key in this._global.systemEnum) {
+                                let full = this._global.systemEnum[key];
+                                if (vscode.window.activeTextEditor.document.fileName.endsWith(".bsl") && !full.description) {
+                                    continue;
+                                } else if (vscode.window.activeTextEditor.document.fileName.endsWith(".os") && !full.oscript_description) {
+                                    continue;
                                 }
+                                let item = new vscode.CompletionItem(full.name);
+                                item.documentation = full.description;
+                                item.kind = vscode.CompletionItemKind.Enum;
                                 bucket.push(item);
-                                this.added[value.name.toLowerCase()] = true;
                             }
-                        });
-                        bucket = this.getAllWords(word, document.getText(), bucket);
-                        result = this._global.querydef(word);
-                        result.forEach( (value, index, array) => {
-                            let moduleDescription = (value.module && value.module.length > 0) ? value.module + "." : "";
-                            let fullName = moduleDescription + value.name;
-                            let description = value.description;
-                            if (moduleDescription.length > 0) {
-                                fullName = value.module;
-                                description = fullName;
-                            }
-                            if (this.added[(fullName).toLowerCase()] !== true) {
-                                let item = new vscode.CompletionItem(fullName);
-                                item.documentation = description;
-                                item.kind = vscode.CompletionItemKind.File;
+                            return resolve(bucket);
+                        } else if (document.getText(new vscode.Range(new vscode.Position(position.line, 0), position)).match(/(^|[\(;=,\s])(новый|new)\s+[\wа-яё]+$/i)) {
+                            for (let key in this._global.classes) {
+                                let full = this._global.classes[key];
+                                if (!full.constructors) {
+                                    continue;
+                                }
+                                if (vscode.window.activeTextEditor.document.fileName.endsWith(".bsl") && !full.description) {
+                                    continue;
+                                } else if (vscode.window.activeTextEditor.document.fileName.endsWith(".os") && !full.oscript_description) {
+                                    continue;
+                                }
+                                let item = new vscode.CompletionItem(full.name);
+                                item.documentation = full.description;
+                                item.kind = vscode.CompletionItemKind.Class;
                                 bucket.push(item);
-                                this.added[(fullName).toLowerCase()] = true;
                             }
-                        });
+                            return resolve(bucket);
+                        } else {
+                            bucket = this.getGlobals(word);
+                            bucket = this.getAllWords(word, document.getText(), bucket);
+                            result = this._global.getCacheLocal(document.fileName, word, document.getText(), false);
+                            result.forEach((value, index, array) => {
+                                if (!this.added[value.name.toLowerCase()] === true) {
+                                    let item = new vscode.CompletionItem(value.name);
+                                    item.documentation = value.description;
+                                    item.kind = vscode.CompletionItemKind.Function;
+                                    if (value._method.Params.length > 0) {
+                                        item.insertText = value.name + "(";
+                                    } else {
+                                        item.insertText = value.name + "()";
+                                    }
+                                    bucket.push(item);
+                                    this.added[value.name.toLowerCase()] = true;
+                                }
+                            });
+                            result = this._global.querydef(word);
+                            result.forEach((value, index, array) => {
+                                let moduleDescription = (value.module && value.module.length > 0) ? value.module + "." : "";
+                                let fullName = moduleDescription + value.name;
+                                let description = value.description;
+                                if (moduleDescription.length > 0) {
+                                    fullName = value.module;
+                                    description = fullName;
+                                }
+                                if (this.added[(fullName).toLowerCase()] !== true) {
+                                    let item = new vscode.CompletionItem(fullName);
+                                    item.documentation = description;
+                                    item.kind = vscode.CompletionItemKind.File;
+                                    bucket.push(item);
+                                    this.added[(fullName).toLowerCase()] = true;
+                                }
+                            });
+                        }
                     } else {
                         let arrayObjectName = word.split(".").slice(0, -1);
                         word = arrayObjectName.join(".");
