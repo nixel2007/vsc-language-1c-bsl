@@ -154,12 +154,13 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                             let header = false;
                             for (let param in methodData["signature"][element].Параметры) {
                                 if (header === false) {
-                                    methodDescription = methodDescription + "<h3 style='font-size: 1em;>Параметры:</h3>";
+                                    methodDescription = methodDescription + "<p><b>Параметры:</b></p><p>";
                                     header = true;
                                 }
                                 let paramDescription = "<b><em>" + param + ":</em></b> " + methodData["signature"][element].Параметры[param].replace(new RegExp("\\\\^\\\\&\\\\*", "g"), "\\/").replace("^&%", "\\\\");
                                 methodDescription = methodDescription + paramDescription + "<br/>";
                             }
+                            methodDescription = methodDescription + "</p>";
                         }
                     } else {
                         let ret = new RegExp("Тип: ([^.]+)\\.", "");
@@ -422,11 +423,12 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                     let stingParams = methodData["signature"]["default"]["СтрокаПараметров"];
                     methodDescription = methodDescription + "<p><b>Синтаксис:</b></p><p><span class='function_name'>" + descMethod + "</span><span class='parameter_variable'>" + stingParams + "</span></p>";
                     if (methodData["signature"]["default"]["Параметры"]) {
-                        methodDescription = methodDescription + "<h3 style='font-size: 1em;>Параметры:</h3>";
+                        methodDescription = methodDescription + "<p><b>Параметры:</b></p><p>";
                         for (let param in methodData["signature"]["default"]["Параметры"]) {
                             let paramDescription = "<b><em>" + param + ": </em></b>" + methodData["signature"]["default"]["Параметры"][param];
                             methodDescription = methodDescription + paramDescription + "<br/>";
                         }
+                        methodDescription = methodDescription + "</p>";
                     }
                 }
                 if (methodData["example"]) { methodDescription = methodDescription + "<h3 style='font-size: 1em;>Пример:</h3><p>" + methodData["example"] + "</p>"; }
@@ -652,12 +654,13 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                                         let header = false;
                                         for (let param in methodData[paramContext][element].Параметры) {
                                             if (header === false) {
-                                                depp = depp + "<h3 style='font-size: 1em;>Параметры:</h3>";
+                                                depp = depp + "<p><b>Параметры:</b></p><p>";
                                                 header = true;
                                             }
                                             var paramDescription = "<b><em>" + param + ":</em></b> " + methodData[paramContext][element].Параметры[param].replace(new RegExp("\\\\^\\\\&\\\\*","g"),'\\/').replace(new RegExp("\\\\^\\\\&%","g"),'\\\\');
                                             depp = depp + paramDescription + "<br/>";
                                         }
+                                        depp = depp + "</p>";
                                     }
                                 } else {
                                     var ret = new RegExp("Тип: ([^.]+)\\.", "");
@@ -736,7 +739,7 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                     <div id = "splitter2" style = "background: #9A9A9A; display:${fillStructure.methodVisible}; cursor: n-resize; height:2px; margin-top:4px;" onmousedown="drag(this, event);"></div>
                     <div id="contMethod" style = "display:${fillStructure.methodVisible};">
                         <div style="float:left; width:90%; margin-right:0px; margin-left:5px"><h1 id="headerMethod" style="font-size: 1em; float:left; width:50%;">${fillStructure.methodHeader}</h1> 
-                        <span id = "desc" style='font-size:0.8em; width:85px; float:right; margin-top:5px; display:${fillStructure.displaySwitch}'>${fillStructure.switch1C}<\span>
+                        <span id = "desc" style='font-size:0.8em; width:95px; float:right; margin-top:5px; display:${fillStructure.displaySwitch}'>${fillStructure.switch1C}<\span>
                         </div>
                         <input type = "button" class = "button" value = "x" onclick = "document.getElementById('contMethod').style.display = 'none'; document.getElementById('splitter2').style.display = 'none'; document.getElementById('el').style.height = '60%'" style="float: right; margin-top:5px">
                         <hr style = "clear:both">
