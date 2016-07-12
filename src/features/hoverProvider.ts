@@ -75,7 +75,7 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
         for (let element in signature) {
             let re = new RegExp("\\(.*\\):\\s*.*", "g");
             let retValue = re.exec(signature[element].СтрокаПараметров) ? "Функция " : "Процедура ";
-            description.push({ language: "1C (BSL)", value: retValue + entry.name + signature[element].СтрокаПараметров });
+            description.push({ language: "bsl", value: retValue + entry.name + signature[element].СтрокаПараметров });
             // description.push("Параметры");
             for (let param in signature[element].Параметры) {
                 description.push("***" + param + "***: " + signature[element].Параметры[param]);
@@ -98,7 +98,7 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
         methodDescription = methodDescription + (arraySignature.fullRetState ? arraySignature.fullRetState : "");
         description.push(methodContext);
         description.push(methodDescription);
-        description.push({language: "1C (BSL)", value: (entry.isproc ? "Процедура " : "Функция ") + entry.name + arraySignature.paramsString + (arraySignature.strRetState ? ": " + arraySignature.strRetState : "")});
+        description.push({language: "bsl", value: (entry.isproc ? "Процедура " : "Функция ") + entry.name + arraySignature.paramsString + (arraySignature.strRetState ? ": " + arraySignature.strRetState : "")});
         for (let param in entry._method.Params) {
             let documentationParam = this._global.GetDocParam(arraySignature.description, entry._method.Params[param]);
             description.push("***" + entry._method.Params[param] + "***: " + documentationParam.descriptionParam);
