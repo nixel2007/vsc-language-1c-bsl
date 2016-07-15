@@ -21,8 +21,10 @@
       <dict>
         <key>name</key>
         <string>comment.line.double-slash.sdbl</string>
-        <key>match</key>
-        <string>(//.*)</string>
+        <key>begin</key>
+        <string>//</string>
+        <key>end</key>
+        <string>$</string>
       </dict>
       <dict>
         <key>name</key>
