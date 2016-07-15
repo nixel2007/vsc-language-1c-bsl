@@ -222,7 +222,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.expand_abbreviation", () => {
+    context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.expandAbbreviation", () => {
         let editor = vscode.window.activeTextEditor;
         if (!editor || !editor.selection.isEmpty) {
             vscode.commands.executeCommand("tab");

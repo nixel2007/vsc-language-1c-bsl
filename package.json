@@ -59,7 +59,7 @@
         "category": "Language 1C (BSL)"
       },
       {
-        "command": "language-1c-bsl.expand_abbreviation",
+        "command": "language-1c-bsl.expandAbbreviation",
         "title": "Expand abbrebiation",
         "category": "Language 1C (BSL)"
       },
@@ -120,7 +120,7 @@
         "when": "editorTextFocus && editorLangId == 'bsl'"
       },
       {
-        "command": "language-1c-bsl.expand_abbreviation",
+        "command": "language-1c-bsl.expandAbbreviation",
         "key": "tab",
         "mac": "tab",
         "when": "editorTextFocus && editorLangId == 'bsl'"
