@@ -14,6 +14,7 @@ import ReferenceProvider from "./features/referenceProvider";
 import SignatureHelpProvider from "./features/signatureHelpProvider";
 import HoverProvider from "./features/hoverProvider";
 import SyntaxHelper from "./features/syntaxHelper";
+import DocumentFormattingEditProvider from "./features/documentFormattingEditProvider";
 import * as vscAdapter from "./vscAdapter";
 import * as dynamicSnippets from "./features/dynamicSnippets";
 import * as tasksTemplate from "./features/tasksTemplate";
@@ -35,6 +36,8 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaseSymbolProvider(global)));
     context.subscriptions.push(vscode.languages.registerSignatureHelpProvider(BSL_MODE, new SignatureHelpProvider(global), "(", ","));
     context.subscriptions.push(vscode.languages.registerHoverProvider(BSL_MODE, new HoverProvider(global)));
+    context.subscriptions.push(vscode.languages.registerDocumentFormattingEditProvider(BSL_MODE, new DocumentFormattingEditProvider(global)));
+    context.subscriptions.push(vscode.languages.registerDocumentRangeFormattingEditProvider(BSL_MODE, new DocumentFormattingEditProvider(global)));
 
     let syntaxHelper = new SyntaxHelper(global);
     context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider("syntax-helper", syntaxHelper));
