@@ -3,7 +3,7 @@
   "displayName": "Language 1C (BSL)",
   "description": "Syntax highlighting for 1C:Enterprise 8.",
   "icon": "images/xDDIcon.png",
-  "version": "1.6.2",
+  "version": "1.7.0",
   "publisher": "xDrivenDevelopment",
   "galleryBanner": {
     "color": "#0000FF",
@@ -53,9 +53,14 @@
         "title": "Create tasks.json for current workspace",
         "category": "Language 1C (BSL)"
       },
-       {
+      {
         "command": "language-1c-bsl.dynamicSnippets",
         "title": "Show dynamic snippets list",
+        "category": "Language 1C (BSL)"
+      },
+      {
+        "command": "language-1c-bsl.expandAbbreviation",
+        "title": "Expand abbrebiation",
         "category": "Language 1C (BSL)"
       },
       {
@@ -113,18 +118,35 @@
         "key": "ctrl+q",
         "mac": "cmd+q",
         "when": "editorTextFocus && editorLangId == 'bsl'"
+      },
+      {
+        "command": "language-1c-bsl.expandAbbreviation",
+        "key": "tab",
+        "mac": "tab",
+        "when": "editorTextFocus && editorLangId == 'bsl'"
       }
     ],
     "languages": [
       {
         "id": "bsl",
-        "extensions": [ ".bsl", ".os" ],
-        "aliases": [ "1C (BSL)", "BSL" ]
+        "extensions": [
+          ".bsl",
+          ".os"
+        ],
+        "aliases": [
+          "1C (BSL)",
+          "BSL"
+        ]
       },
       {
         "id": "sdbl",
-        "extensions": [ ".query" ],
-        "aliases": [ "1C (Query)", "SDBL" ]
+        "extensions": [
+          ".query"
+        ],
+        "aliases": [
+          "1C (Query)",
+          "SDBL"
+        ]
       }
     ],
     "grammars": [
@@ -153,6 +175,7 @@
   "dependencies": {
     "filequeue": "^0.5.0",
     "iconv-lite": "^0.4.13",
+    "lodash.trimstart": "^4.4.0",
     "lokijs": "^1.3.16",
     "onec-syntaxparser": "0.1.9"
   }

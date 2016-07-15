@@ -168,7 +168,7 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                         methodDescription = methodDescription + "<p><b>Синтаксис:</b></p><p><span class='function_name'>" + descMethod + "</span><span class='parameter_variable'>()" + retValue + "</span></p>";
                     }
                 }
-                if (methodData["example"]) { methodDescription = methodDescription + "<h3 style='font-size: 1em;>Пример:</h3><p>" + methodData["example"] + "</p>"; }
+                if (methodData["example"]) { methodDescription = methodDescription + "<h3 style='font-size': 1em;>Пример:</h3><p>" + methodData["example"] + "</p>"; }
             }
         }
         let fillStructure = {
@@ -431,7 +431,7 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                         methodDescription = methodDescription + "</p>";
                     }
                 }
-                if (methodData["example"]) { methodDescription = methodDescription + "<h3 style='font-size: 1em;>Пример:</h3><p>" + methodData["example"] + "</p>"; }
+                if (methodData["example"]) { methodDescription = methodDescription + "<h3 style='font-size': 1em;>Пример:</h3><p>" + methodData["example"] + "</p>"; }
             }
         }
         let fillStructure = {
@@ -668,7 +668,7 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                                     depp = depp + "<p><b>Синтаксис:</b></p><p><span class='function_name'>" + strMethod + "</span><span class='parameter_variable'>()" + retValue + "</span></p>";
                                 }
                             }
-                            if (methodData["example"] && descContext === "description") { depp = depp + "<h3 style='font-size: 1em;>Пример:</h3><p>" + methodData["example"].replace(new RegExp("\\\\^\\\\&\\\\*","g"),'\\/').replace("^&%",'\\\\')+ "</p>";}
+                            if (methodData["example"] && descContext === "description") { depp = depp + "<h3 style='font-size': 1em;>Пример:</h3><p>" + methodData["example"].replace(new RegExp("\\\\^\\\\&\\\\*","g"),'\\/').replace("^&%",'\\\\')+ "</p>";}
                             return depp;
                         }
 

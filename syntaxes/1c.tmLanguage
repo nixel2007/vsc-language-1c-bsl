@@ -491,8 +491,10 @@
           <dict>
             <key>name</key>
             <string>comment.line.double-slash.bsl</string>
-            <key>match</key>
-            <string>(^\s*//.*$)</string>
+            <key>begin</key>
+            <string>^\s*//</string>
+            <key>end</key>
+            <string>$</string>
           </dict>
           <dict>
             <key>name</key>
@@ -519,8 +521,10 @@
           <dict>
             <key>name</key>
             <string>comment.line.double-slash.bsl</string>
-            <key>match</key>
-            <string>(//.*$)</string>
+            <key>begin</key>
+            <string>//</string>
+            <key>end</key>
+            <string>$</string>
           </dict>
           <dict>
             <key>name</key>
