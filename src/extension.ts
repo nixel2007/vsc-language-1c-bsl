@@ -100,7 +100,7 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
         let vscodePath = path.join(rootPath, ".vscode");
-        let promise = new Promise( (resolve, reject) => {
+        let promise = new Promise((resolve, reject) => {
             fs.stat(vscodePath, (err: NodeJS.ErrnoException, stats: fs.Stats) => {
                 if (err) {
                     fs.mkdir(vscodePath, (err) => {
@@ -108,14 +108,14 @@ export function activate(context: vscode.ExtensionContext) {
                             reject(err);
                         }
                         resolve();
-                    })
+                    });
                     return;
                 }
                 resolve();
-            });            
+            });
         });
-        
-        promise.then( (result) => {
+
+        promise.then((result) => {
             let tasksPath = path.join(vscodePath, "tasks.json");
             fs.stat(tasksPath, (err: NodeJS.ErrnoException, stats: fs.Stats) => {
                 if (err) {
@@ -126,12 +126,12 @@ export function activate(context: vscode.ExtensionContext) {
                         vscode.window.showInformationMessage("tasks.json was created");
                     });
                 } else {
-                    vscode.window.showInformationMessage("tasks.json already exists")
+                    vscode.window.showInformationMessage("tasks.json already exists");
                 }
             });
-        }).catch( (reason) => {
+        }).catch((reason) => {
             throw reason;
-        });        
+        });
     }));
 
     vscode.languages.setLanguageConfiguration("bsl", {
@@ -238,9 +238,9 @@ export function activate(context: vscode.ExtensionContext) {
                 for (let element in snippetsData) {
                     let snippet = snippetsData[element];
                     dynamicSnippetsCollection[element] = snippet;
-                }                
+                }
             } catch (error) {
-                console.error(error);    
+                console.error(error);
             }
         }
         let items = [];
@@ -299,7 +299,7 @@ export function activate(context: vscode.ExtensionContext) {
             for (let element in bslGlobals.structureGlobContext()["global"]) {
                 let segment = bslGlobals.structureGlobContext()["global"][element];
                 if (segment[globalMethod.name] !== undefined || segment[globalMethod.alias] !== undefined) {
-                    let target = (segment[globalMethod.name] !== undefined) ?  segment[globalMethod.name] : segment[globalMethod.alias];
+                    let target = (segment[globalMethod.name] !== undefined) ? segment[globalMethod.name] : segment[globalMethod.alias];
                     global.methodForDescription = { label: target, description: "1С/Глобальный контекст/" + element };
                     syntaxHelper.update(previewUri);
                     vscode.commands.executeCommand("vscode.previewHtml", previewUri, vscode.ViewColumn.Two).then((success) => {
@@ -313,7 +313,7 @@ export function activate(context: vscode.ExtensionContext) {
             for (let element in oscriptStdLib.globalContextOscript()) {
                 let segment = oscriptStdLib.globalContextOscript()[element];
                 if (segment["methods"][globalMethod.name] || segment["methods"][globalMethod.alias]) {
-                    let target = (segment["methods"][globalMethod.name] !== undefined) ?  segment["methods"][globalMethod.name] : segment["methods"][globalMethod.alias];
+                    let target = (segment["methods"][globalMethod.name] !== undefined) ? segment["methods"][globalMethod.name] : segment["methods"][globalMethod.alias];
                     global.methodForDescription = { label: target.name, description: "OneScript/Глобальный контекст/" + element };
                     syntaxHelper.update(previewUri);
                     vscode.commands.executeCommand("vscode.previewHtml", previewUri, vscode.ViewColumn.Two).then((success) => {

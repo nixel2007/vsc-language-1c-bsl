@@ -53,7 +53,7 @@
         "title": "Create tasks.json for current workspace",
         "category": "Language 1C (BSL)"
       },
-       {
+      {
         "command": "language-1c-bsl.dynamicSnippets",
         "title": "Show dynamic snippets list",
         "category": "Language 1C (BSL)"
@@ -118,13 +118,24 @@
     "languages": [
       {
         "id": "bsl",
-        "extensions": [ ".bsl", ".os" ],
-        "aliases": [ "1C (BSL)", "BSL" ]
+        "extensions": [
+          ".bsl",
+          ".os"
+        ],
+        "aliases": [
+          "1C (BSL)",
+          "BSL"
+        ]
       },
       {
         "id": "sdbl",
-        "extensions": [ ".query" ],
-        "aliases": [ "1C (Query)", "SDBL" ]
+        "extensions": [
+          ".query"
+        ],
+        "aliases": [
+          "1C (Query)",
+          "SDBL"
+        ]
       }
     ],
     "grammars": [
