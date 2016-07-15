@@ -466,9 +466,10 @@ function applyConfigToTextEditor(textEditor: vscode.TextEditor): any {
             && (textEditor.options.tabSize === defaultOptions.tabSize)) {
             textEditor.options.insertSpaces = newOptions.insertSpaces;
             textEditor.options.tabSize = newOptions.tabSize;
-        } else if (textEditor.options.insertSpaces === newOptions.insertSpaces && textEditor.options.tabSize === newOptions.tabSize) {
-            textEditor.options.insertSpaces = defaultOptions.insertSpaces;
-            textEditor.options.tabSize = defaultOptions.tabSize;
+            vscode.commands.executeCommand("workbench.action.editor.changeIndentation");
         }
+    } else if (textEditor.options.insertSpaces === newOptions.insertSpaces && textEditor.options.tabSize === newOptions.tabSize) {
+        textEditor.options.insertSpaces = defaultOptions.insertSpaces;
+        textEditor.options.tabSize = defaultOptions.tabSize;
     }
 }
