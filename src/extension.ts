@@ -222,6 +222,64 @@ export function activate(context: vscode.ExtensionContext) {
         }
     }));
 
+    context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.expand_abbreviation", () => {
+        let editor = vscode.window.activeTextEditor;
+        if (!editor || !editor.selection.isEmpty) {
+            vscode.commands.executeCommand("tab");
+            return;
+        }
+        let position = editor.selection.active;
+        if (position.character > 1) {
+            let char = editor.document.getText(new vscode.Range(
+                new vscode.Position(position.line, position.character - 2), position));
+            let textline = editor.document.getText(new vscode.Range(new vscode.Position(position.line, 0), (new vscode.Position(position.line, position.character - 2))));
+            let Regex = /([а-яё_\w]+\s?)$/i;
+            let ArrStrings = Regex.exec(textline);
+            if ((char === "++" || char === "--" || char === "+=" || char === "-=" || char === "*=" || char === "/=" || char === "%=") && editor.selection.isEmpty && ArrStrings != null) {
+                let word = ArrStrings[1];
+                editor.edit(function (editBuilder) {
+                    let postfix = undefined;
+                    switch (char) {
+                        case "++":
+                            postfix = " + 1;";
+                            break;
+                        case "--":
+                            postfix = " - 1;";
+                            break;
+                        case "+=":
+                            postfix = " + ";
+                            break;
+                        case "-=":
+                            postfix = " - ";
+                            break;
+                        case "*=":
+                            postfix = " * ";
+                            break;
+                        case "/=":
+                            postfix = " / ";
+                            break;
+                        case "%=":
+                            postfix = " % ";
+                            break;
+                    }
+                    editBuilder.replace(new vscode.Range(new vscode.Position(position.line, position.character - word.length - 2), position), word + " = " + word + postfix);
+                }).then(() => {
+                    let position = editor.selection.isReversed ? editor.selection.anchor : editor.selection.active;
+                    editor.selection = new vscode.Selection(position.line, position.character, position.line, position.character);
+                });
+            } else {
+                editor.edit(function (editBuilder) {
+                    editBuilder.insert(new vscode.Position(position.line, position.character), "\t");
+                });
+            }
+        } else {
+            editor.edit(function (editBuilder) {
+                editBuilder.insert(new vscode.Position(position.line, position.character), "\t");
+            });
+        }
+
+    }));
+
     context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.dynamicSnippets", () => {
         let editor = vscode.window.activeTextEditor;
         if (!editor || editor.selection.isEmpty) {

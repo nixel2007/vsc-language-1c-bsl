@@ -59,6 +59,11 @@
         "category": "Language 1C (BSL)"
       },
       {
+        "command": "language-1c-bsl.expand_abbreviation",
+        "title": "Expand abbrebiation",
+        "category": "Language 1C (BSL)"
+      },
+      {
         "command": "language-1c-bsl.syntaxHelper",
         "title": "Show syntax-helper",
         "category": "Language 1C (BSL)"
@@ -112,6 +117,12 @@
         "command": "language-1c-bsl.dynamicSnippets",
         "key": "ctrl+q",
         "mac": "cmd+q",
+        "when": "editorTextFocus && editorLangId == 'bsl'"
+      },
+      {
+        "command": "language-1c-bsl.expand_abbreviation",
+        "key": "tab",
+        "mac": "tab",
         "when": "editorTextFocus && editorLangId == 'bsl'"
       }
     ],
