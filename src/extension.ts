@@ -21,8 +21,6 @@ import * as tasksTemplate from "./features/tasksTemplate";
 import * as oscriptStdLib from "./features/oscriptStdLib";
 import * as bslGlobals from "./features/bslGlobals";
 
-let diagnosticCollection: vscode.DiagnosticCollection;
-
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
@@ -46,7 +44,6 @@ export function activate(context: vscode.ExtensionContext) {
     linter.activate(context.subscriptions);
 
     context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.update", () => {
-        let filename = vscode.window.activeTextEditor.document.fileName;
         global.updateCache();
     }));
 
@@ -60,11 +57,11 @@ export function activate(context: vscode.ExtensionContext) {
             let lineMethod = (positionStart.line > positionEnd.line) ? positionStart.line + 1 : positionEnd.line + 1;
             let re = /^(Процедура|Функция|procedure|function)\s*([\wа-яё]+)/im;
             for (let indexLine = lineMethod; indexLine >= 0; --indexLine) {
-                let MatchMethod = re.exec(editor.document.lineAt(indexLine).text);
-                if (MatchMethod === null) {
+                let matchMethod = re.exec(editor.document.lineAt(indexLine).text);
+                if (matchMethod === undefined) {
                     continue;
                 }
-                let isFunc = (MatchMethod[1].toLowerCase() === "function" || MatchMethod[1].toLowerCase() === "функция");
+                let isFunc = (matchMethod[1].toLowerCase() === "function" || matchMethod[1].toLowerCase() === "функция");
                 let comment = "";
                 let methodDescription = "";
                 if (aL === "en") {
@@ -73,7 +70,7 @@ export function activate(context: vscode.ExtensionContext) {
                     methodDescription = (isFunc) ? "Описание функции" : "Описание процедуры";
                 }
                 comment += "// <" + methodDescription + ">\n";
-                let params = global.getCacheLocal(editor.document.fileName, MatchMethod[2], editor.document.getText())[0]._method.Params;
+                let params = global.getCacheLocal(editor.document.fileName, matchMethod[2], editor.document.getText())[0]._method.Params;
                 if (params.length > 0) {
                     comment += "//\n";
                     comment += ((aL === "en") ? "// Parameters:\n" : "// Параметры:\n");
@@ -122,7 +119,7 @@ export function activate(context: vscode.ExtensionContext) {
             let tasksPath = path.join(vscodePath, "tasks.json");
             fs.stat(tasksPath, (err: NodeJS.ErrnoException, stats: fs.Stats) => {
                 if (err) {
-                    fs.writeFile(tasksPath, JSON.stringify(tasksTemplate.getTasksObject(), null, 4), (err: NodeJS.ErrnoException) => {
+                    fs.writeFile(tasksPath, JSON.stringify(tasksTemplate.getTasksObject(), undefined, 4), (err: NodeJS.ErrnoException) => {
                         if (err) {
                             throw err;
                         }
@@ -233,10 +230,10 @@ export function activate(context: vscode.ExtensionContext) {
             let char = editor.document.getText(new vscode.Range(
                 new vscode.Position(position.line, position.character - 2), position));
             let textline = editor.document.getText(new vscode.Range(new vscode.Position(position.line, 0), (new vscode.Position(position.line, position.character - 2))));
-            let Regex = /([а-яё_\w]+\s?)$/i;
-            let ArrStrings = Regex.exec(textline);
-            if ((char === "++" || char === "--" || char === "+=" || char === "-=" || char === "*=" || char === "/=" || char === "%=") && editor.selection.isEmpty && ArrStrings != null) {
-                let word = ArrStrings[1];
+            let regex = /([а-яё_\w]+\s?)$/i;
+            let arrStrings = regex.exec(textline);
+            if ((char === "++" || char === "--" || char === "+=" || char === "-=" || char === "*=" || char === "/=" || char === "%=") && editor.selection.isEmpty && arrStrings !== undefined) {
+                let word = arrStrings[1];
                 editor.edit(function (editBuilder) {
                     let postfix = undefined;
                     switch (char) {
@@ -261,6 +258,7 @@ export function activate(context: vscode.ExtensionContext) {
                         case "%=":
                             postfix = " % ";
                             break;
+                        default:
                     }
                     editBuilder.replace(new vscode.Range(new vscode.Position(position.line, position.character - word.length - 2), position), word + " = " + word + postfix);
                 }).then(() => {
@@ -344,6 +342,9 @@ export function activate(context: vscode.ExtensionContext) {
     let previewUriString = "syntax-helper://authority/Синтакс-Помощник";
     let previewUri = vscode.Uri.parse(previewUriString);
 
+    context.subscriptions.push(vscode.languages.registerOnTypeFormattingEditProvider(
+        BSL_MODE, new DocumentFormattingEditProvider(global), "и", "ы", "е", "а", "e", "n", "f", "o", "y", "t", "\n"));
+
     context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.syntaxHelper", () => {
         if (!vscode.window.activeTextEditor) {
             return;
@@ -354,7 +355,6 @@ export function activate(context: vscode.ExtensionContext) {
         let items = [];
         items.push({ label: "OneScript", description: "" });
         items.push({ label: "1C", description: "" });
-        let autocompleteLanguage: any = vscode.workspace.getConfiguration("language-1c-bsl")["languageAutocomplete"];
         let postfix = ""; // (autocompleteLanguage === "en") ? "_en" : "";
         if (vscode.window.activeTextEditor.document.fileName.endsWith(".bsl") && globalMethod) {
             for (let element in bslGlobals.structureGlobContext()["global"]) {
@@ -363,10 +363,7 @@ export function activate(context: vscode.ExtensionContext) {
                     let target = (segment[globalMethod.name] !== undefined) ? segment[globalMethod.name] : segment[globalMethod.alias];
                     global.methodForDescription = { label: target, description: "1С/Глобальный контекст/" + element };
                     syntaxHelper.update(previewUri);
-                    vscode.commands.executeCommand("vscode.previewHtml", previewUri, vscode.ViewColumn.Two).then((success) => {
-                    }, (reason) => {
-                        vscode.window.showErrorMessage(reason);
-                    });
+                    vscode.commands.executeCommand("vscode.previewHtml", previewUri, vscode.ViewColumn.Two);
                     return;
                 }
             }
@@ -377,10 +374,7 @@ export function activate(context: vscode.ExtensionContext) {
                     let target = (segment["methods"][globalMethod.name] !== undefined) ? segment["methods"][globalMethod.name] : segment["methods"][globalMethod.alias];
                     global.methodForDescription = { label: target.name, description: "OneScript/Глобальный контекст/" + element };
                     syntaxHelper.update(previewUri);
-                    vscode.commands.executeCommand("vscode.previewHtml", previewUri, vscode.ViewColumn.Two).then((success) => {
-                    }, (reason) => {
-                        vscode.window.showErrorMessage(reason);
-                    });
+                    vscode.commands.executeCommand("vscode.previewHtml", previewUri, vscode.ViewColumn.Two);
                     return;
                 }
             }
@@ -428,7 +422,6 @@ export function activate(context: vscode.ExtensionContext) {
             for (let elementSegment in bslGlobals.structureGlobContext()["global"]) {
                 let segment = bslGlobals.structureGlobContext()["global"][elementSegment];
                 for (let element in segment) {
-                    let method = segment[element];
                     items.push({ label: element, description: "1С/Глобальный контекст/" + elementSegment });
                 }
             }
@@ -440,7 +433,6 @@ export function activate(context: vscode.ExtensionContext) {
                         continue;
                     }
                     for (let element in class1C[sectionTitle]) {
-                        let method1С = class1C[sectionTitle][element];
                         items.push({ label: elementSegment + "." + element, description: "1С/Классы/" + elementSegment });
                     }
                 }
@@ -453,7 +445,6 @@ export function activate(context: vscode.ExtensionContext) {
                         continue;
                     }
                     for (let element in class1C[sectionTitle]) {
-                        let method1С = class1C[sectionTitle][element];
                         items.push({ label: elementSegment + "." + element, description: "1С/Системные перечисления/" + elementSegment });
                     }
                 }
@@ -462,7 +453,6 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
         // pick one
-        let currentLine = vscode.window.activeTextEditor.selection.active.line + 1;
         let options = {
             placeHolder: "Введите название метода",
             matchOnDescription: false
@@ -470,8 +460,7 @@ export function activate(context: vscode.ExtensionContext) {
         if (!global.syntaxFilled) {
             if (vscode.window.activeTextEditor.document.fileName.endsWith(".os")) {
                 global.methodForDescription = { label: "OneScript", description: "" };
-            }
-            else if (vscode.window.activeTextEditor.document.languageId === "bsl") {
+            } else if (vscode.window.activeTextEditor.document.languageId === "bsl") {
                 global.methodForDescription = { label: "1C", description: "" };
             }
             syntaxHelper.update(previewUri);
@@ -485,7 +474,8 @@ export function activate(context: vscode.ExtensionContext) {
                         syntaxHelper.update(previewUri);
                         vscode.commands.executeCommand("vscode.previewHtml", previewUri, vscode.ViewColumn.Two);
                     });
-                }, (reason) => {
+                },
+                (reason) => {
                     vscode.window.showErrorMessage(reason);
                 });
         } else {
@@ -511,7 +501,7 @@ function applyConfigToTextEditor(textEditor: vscode.TextEditor): any {
 
     if (!textEditor) {
         return;
-    };
+    }
     let newOptions: vscode.TextEditorOptions = {
         "insertSpaces": false,
         "tabSize": 4

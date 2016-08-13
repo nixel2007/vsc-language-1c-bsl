@@ -14,14 +14,14 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                 wordAtPosition = "";
             } else {
                 wordAtPosition = this._global.fullNameRecursor(wordAtPosition, document, wordPosition, true);
-                if (this._global.toreplaced[wordAtPosition.split(".")[0]] !== undefined) {
+                if (this._global.toreplaced[wordAtPosition.split(".")[0]]) {
                     let arrayName = wordAtPosition.split(".");
                     arrayName.splice(0, 1, this._global.toreplaced[arrayName[0]]);
                     wordAtPosition = arrayName.join(".");
                 }
             }
             if (this._global.globalfunctions[wordAtPosition.toLowerCase()]) {
-                return null;
+                return undefined;
             }
             let module = "";
             if (wordAtPosition.indexOf(".") > 0) {
@@ -31,7 +31,6 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                 module = dotArray.join(".");
                 // }
             }
-            let local: Array<any>;
             let d: Array<any> = new Array();
             if (module.length === 0) {
                 let source = document.getText();
@@ -73,23 +72,23 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                     bucket.push(result);
                 }
                 if (bucket.length === 1) {
-                    let location: vscode.Location = new vscode.Location(bucket[0].path,
-                        new vscode.Position(bucket[0].line, (bucket[0].isproc ? 9 : 7) + 1));
+                    let location: vscode.Location =
+                        new vscode.Location(bucket[0].path, new vscode.Position(bucket[0].line, (bucket[0].isproc ? 9 : 7) + 1));
                     return resolve(location);
                 } else if (bucket.length === 0) {
-                    return resolve(null);
+                    return resolve(undefined);
                 } else if (bucket.length > 1) {
                     let results: vscode.Location[] = Array<vscode.Location>();
                     for (let index = 0; index < bucket.length; index++) {
                         let element = bucket[index];
-                        let location: vscode.Location = new vscode.Location(bucket[index].path,
-                            new vscode.Position(bucket[index].line, (bucket[index].isproc ? 9 : 7) + 1));
+                        let location: vscode.Location =
+                            new vscode.Location(element.path, new vscode.Position(element.line, (element.isproc ? 9 : 7) + 1));
                         results.push(location);
                     }
                     return resolve(results);
                 }
             } else {
-                Promise.resolve(null);
+                Promise.resolve(undefined);
             }
         });
     }

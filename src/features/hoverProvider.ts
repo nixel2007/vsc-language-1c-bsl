@@ -5,15 +5,15 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
     public provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.Hover {
         if (!this._global.hoverTrue) {
             this._global.hoverTrue = true;
-            return null;
+            return undefined;
         }
         let wordRange = document.getWordRangeAtPosition(position);
         let word = document.getText(wordRange);
         if (word.split(" ").length > 1) {
-            return null;
+            return undefined;
         }
         if (document.getText(new vscode.Range(wordRange.end, new vscode.Position(wordRange.end.line, wordRange.end.character + 1))) !== "(") {
-            return null;
+            return undefined;
         }
         word = this._global.fullNameRecursor(word, document, wordRange, true);
         let entry = this._global.globalfunctions[word.toLowerCase()];
@@ -22,7 +22,7 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
             if (word.indexOf(".") > 0) {
                 let dotArray: Array<string> = word.split(".");
                 word = dotArray.pop();
-                if (this._global.toreplaced[dotArray[0]] !== undefined) {
+                if (this._global.toreplaced[dotArray[0]]) {
                     dotArray[0] = this._global.toreplaced[dotArray[0]];
                 }
                 module = dotArray.join(".");
@@ -38,7 +38,7 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
             //     entry = this._global.query(word, "", false, false);
             // }
             if (!entry || entry.length === 0) {
-                return null;
+                return undefined;
             } else if (module.length === 0) {
                entry = entry[0];
                return this.GetHover(entry, "Метод текущего модуля");
@@ -53,14 +53,14 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
                        return this.GetHover(hoverElement, "Метод из " + hoverElement.filename);
                    }
                }
-               return null;
+               return undefined;
            }
         }
         let description = [];
         let context = "1C";
         let signature = (!entry.signature) ? entry.oscript_signature : entry.signature;
         let descMethod = (!entry.description) ? entry.oscript_description : entry.description;
-        if (!descMethod) { return null; }
+        if (!descMethod) { return undefined; }
         if (!entry.description) {
             context = "OneScript";
         } else if (entry.oscript_signature) {

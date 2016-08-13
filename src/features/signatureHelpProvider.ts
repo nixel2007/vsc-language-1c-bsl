@@ -1,4 +1,4 @@
-import {SignatureHelpProvider, SignatureHelp, SignatureInformation, CancellationToken, TextDocument, Position, workspace} from "vscode";
+import {SignatureHelpProvider, SignatureHelp, SignatureInformation, CancellationToken, TextDocument, Position} from "vscode";
 import AbstractProvider from "./abstractProvider";
 
 let _NL = "\n".charCodeAt(0);
@@ -66,12 +66,12 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
 
         let paramCount = this.readArguments(iterator);
         if (paramCount < 0) {
-            return null;
+            return undefined;
         }
 
         let ident = this.readIdent(iterator);
         if (!ident) {
-            return null;
+            return undefined;
         }
 
         let entry = this._global.globalfunctions[ident.toLowerCase()];
@@ -80,7 +80,7 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
             if (ident.indexOf(".") > 0) {
                 let dotArray: Array<string> = ident.split(".");
                 ident = dotArray.pop();
-                if (this._global.toreplaced[dotArray[0]] !== undefined) {
+                if (this._global.toreplaced[dotArray[0]]) {
                     dotArray[0] = this._global.toreplaced[dotArray[0]];
                 }
                 module = dotArray.join(".");
@@ -96,7 +96,7 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
             //     entry = this._global.query(ident, "", false, false);
             // }
             if (!entry) {
-                return null;
+                return undefined;
             } else if (module.length === 0) {
                 entry = entry[0];
                 return this.GetSignature(entry, paramCount);
@@ -111,20 +111,20 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
                        return this.GetSignature(signatureElement, paramCount);
                    }
                }
-               return null;
+               return undefined;
             // }
             }
         }
         let signature = (!entry.signature) ? entry.oscript_signature : entry.signature;
-        if  (!signature) { return null; }
+        if  (!signature) { return undefined; }
         let ret = new SignatureHelp();
         for (let element in signature) {
             let paramsString = signature[element].СтрокаПараметров;
             let signatureInfo = new SignatureInformation(entry.name + paramsString, "");
 
             let re = /([\wа-яА-Я]+)\??:\s+[а-яА-Я\w_\.\|]+/g;
-            let match: RegExpExecArray = null;
-            while ((match = re.exec(paramsString)) !== null) {
+            let match: RegExpExecArray = undefined;
+            while ((match = re.exec(paramsString))) {
                 signatureInfo.parameters.push({ label: match[0], documentation: signature[element].Параметры[match[1]] });
             }
 
@@ -146,14 +146,14 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
             let signatureInfo = new SignatureInformation(entry.name + arraySignature.paramsString, "");
 
             let re = /([\wа-яА-Я]+)(:\s+[<а-яА-Я\w_\.>\|]+)?/g;
-            let match: RegExpExecArray = null;
-            while ((match = re.exec(arraySignature.paramsString)) !== null) {
+            let match: RegExpExecArray = undefined;
+            while ((match = re.exec(arraySignature.paramsString))) {
                 let documentationParam = this._global.GetDocParam(arraySignature.description, match[1]);
                 signatureInfo.parameters.push({ label: match[0] + (documentationParam.optional ? "?" : ""), documentation: documentationParam.descriptionParam });
             }
 
             if (entry._method.Params.length - 1 < paramCount) {
-                return null;
+                return undefined;
             }
 
             ret.signatures.push(signatureInfo);
@@ -162,7 +162,7 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
 
             return ret;
         } else {
-            return null;
+            return undefined;
         }
     }
 
@@ -196,6 +196,7 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
                         paramCount++;
                     }
                     break;
+                default:
             }
         }
         return -1;

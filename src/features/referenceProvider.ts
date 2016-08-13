@@ -8,7 +8,6 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
 
     private addReference(searchResult: any, results: vscode.Location[]): any {
         if (searchResult) {
-            let bucket = new Array<any>();
             for (let index = 0; index < searchResult.length; index++) {
                 let element = searchResult[index];
                 let result = {
@@ -41,7 +40,6 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
             let results: vscode.Location[] = Array<vscode.Location>();
 
             let source = document.getText();
-            let lines = (source.indexOf("\r\n") === -1) ? source.split("\n") : source.split("\r\n");
 
             if (document.isDirty) {
                 this._global.customUpdateCache(source, filename);
@@ -58,7 +56,7 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
                 let enTextAtPosition = undefined;
                 if (fullmodule.length !== 0) {
                     let arrName = filename.substr(vscode.workspace.rootPath.length).split("\\");
-                    if (this._global.toreplaced[arrName[arrName.length - 4]] !== undefined) {
+                    if (this._global.toreplaced[arrName[arrName.length - 4]]) {
                         enTextAtPosition = arrName[arrName.length - 4] + "." + arrName[arrName.length - 3] + "." + textAtPosition;
                     }
                     textAtPosition = fullmodule + "." + textAtPosition;
@@ -66,11 +64,11 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
                 }
                 d = this._global.dbcalls.get(textAtPosition);
                 if (enTextAtPosition) {
-                    let en_d = this._global.dbcalls.get(enTextAtPosition);
-                    if (en_d !== undefined && d === undefined) {
-                        d = en_d;
-                    } else if (en_d !== undefined && d !== undefined) {
-                        d = d.concat(en_d);
+                    let enD = this._global.dbcalls.get(enTextAtPosition);
+                    if (enD && !d) {
+                        d = enD;
+                    } else if (enD && d) {
+                        d = d.concat(enD);
                     }
                 }
                 res = this.addReference(d, results);

@@ -9,21 +9,21 @@ let FileQueue = require("filequeue");
 let fq = new FileQueue(500);
 
 export class Global {
-    cache: any;
-    db: any;
-    dbcalls: Map<string, Array<{}>>;
-    globalfunctions: any;
-    globalvariables: any;
-    keywords: any;
-    systemEnum: any;
-    classes: any;
-    toreplaced: any;
-    methodForDescription: any = undefined;
-    syntaxFilled: string = "";
-    hoverTrue: boolean = true;
+    public cache: any;
+    public db: any;
+    public dbcalls: Map<string, Array<{}>>;
+    public globalfunctions: any;
+    public globalvariables: any;
+    public keywords: any;
+    public systemEnum: any;
+    public classes: any;
+    public toreplaced: any;
+    public methodForDescription: any = undefined;
+    public syntaxFilled: string = "";
+    public hoverTrue: boolean = true;
     private cacheUpdates: boolean;
 
-    getCacheLocal(filename: string, word: string, source, update: boolean = false, allToEnd: boolean = true, fromFirst: boolean = true) {
+    public getCacheLocal(filename: string, word: string, source, update: boolean = false, allToEnd: boolean = true, fromFirst: boolean = true) {
         let suffix = allToEnd ? "" : "$";
         let prefix = fromFirst ? "^" : "";
         let querystring = { "name": { "$regex": new RegExp(prefix + word + suffix, "i") } };
@@ -31,10 +31,9 @@ export class Global {
         return entries;
     }
 
-    getRefsLocal(filename: string, source: string) {
+    public getRefsLocal(filename: string, source: string) {
         let parsesModule = new Parser().parse(source);
         let entries = parsesModule.getMethodsTable().find();
-        let count = 0;
         let collection = this.cache.addCollection(filename);
         this.updateReferenceCallsOld(collection, parsesModule.context.CallsPosition, "GlobalModuleText", filename);
         for (let y = 0; y < entries.length; ++y) {
@@ -44,7 +43,7 @@ export class Global {
         return collection;
     }
 
-    getReplaceMetadata() {
+    public getReplaceMetadata() {
         return {
             "AccountingRegisters": "РегистрыБухгалтерии",
             "AccumulationRegisters": "РегистрыНакопления",
@@ -67,7 +66,7 @@ export class Global {
         };
     }
 
-    getModuleForPath(fullpath: string, rootPath: string): any {
+    public getModuleForPath(fullpath: string, rootPath: string): any {
         let splitsymbol = "/";
         let moduleArray: Array<string> = fullpath.substr(rootPath.length + (rootPath.slice(-1) === "\\" ? 0 : 1)).split(splitsymbol);
         let moduleStr = "";
@@ -82,7 +81,7 @@ export class Global {
         return moduleStr;
     }
 
-    addtocachefiles(files: Array<string>, rootPath: string): any {
+    public addtocachefiles(files: Array<string>, rootPath: string): any {
         let filesLength = files.length;
         let substrIndex = (process.platform === "win32") ? 8 : 7;
         for (let i = 0; i < filesLength; ++i) {
@@ -98,7 +97,7 @@ export class Global {
                 let moduleStr = fullpath.endsWith(".bsl") ? this.getModuleForPath(fullpath, rootPath) : "";
                 source = source.replace(/\r\n?/g, "\n");
                 let parsesModule = new Parser().parse(source);
-                source = null;
+                source = undefined;
                 let entries = parsesModule.getMethodsTable().find();
                 if (i % 100 === 0) {
                     this.postMessage("Обновляем кэш файла № " + i + " из " + filesLength, 2000);
@@ -106,7 +105,7 @@ export class Global {
                 if (parsesModule.context.CallsPosition.length > 0) {
                     this.updateReferenceCalls(parsesModule.context.CallsPosition, "GlobalModuleText", fullpath);
                 }
-                parsesModule = null;
+                parsesModule = undefined;
                 for (let y = 0; y < entries.length; ++y) {
                     let item = entries[y];
                     let method = { name: item.name, endline: item.endline, context: item.context, isproc: item.isproc };
@@ -114,7 +113,7 @@ export class Global {
                         this.updateReferenceCalls(item._method.CallsPosition, method, fullpath);
                     }
                     let _method = { Params: item._method.Params, IsExport: item._method.IsExport };
-                    let newItem: MethodValue = {
+                    let newItem: IMethodValue = {
                         "name": String(item.name),
                         "isproc": Boolean(item.isproc),
                         "line": item.line,
@@ -135,7 +134,7 @@ export class Global {
         }
     }
 
-    updateCache(): any {
+    public updateCache(): any {
         let configuration = this.getConfiguration("language-1c-bsl");
         let basePath: string = String(this.getConfigurationKey(configuration, "rootPath"));
         let rootPath = this.getRootPath();
@@ -153,7 +152,7 @@ export class Global {
         }
     };
 
-    customUpdateCache(source: string, filename: string) {
+    public customUpdateCache(source: string, filename: string) {
         if (!this.cacheUpdates) {
             return;
         }
@@ -209,7 +208,7 @@ export class Global {
         }
     };
 
-    queryref(word: string, collection: any, local: boolean = false): any {
+    public queryref(word: string, collection: any, local: boolean = false): any {
         if (!collection) {
             return new Array();
         }
@@ -219,45 +218,8 @@ export class Global {
         return search;
     }
 
-    private updateReferenceCalls(calls: Array<any>, method: any, file: string): any {
-        for (let index = 0; index < calls.length; index++) {
-            let value = calls[index];
-            if (value.call.startsWith(".")) {
-                continue;
-            }
-            if (value.call.indexOf(".") === -1) {
-                continue;
-            }
-            let arrCalls = this.dbcalls.get(value.call);
-            if (!arrCalls) {
-                this.dbcalls.set(value.call, []);
-                arrCalls = this.dbcalls.get(value.call);
-            }
-            arrCalls.push({ filename: file, call: value.call, line: value.line, character: value.character, name: String(method.name) });
-        }
-    }
 
-    private updateReferenceCallsOld(collection: any, calls: Array<any>, method: any, file: string): any {
-        for (let index = 0; index < calls.length; index++) {
-            let value = calls[index];
-            if (value.call.startsWith(".")) {
-                continue;
-            }
-            let newItem: MethodValue = {
-                "name": String(method.name),
-                "filename": file,
-                "isproc": Boolean(method.isproc),
-                "call": value.call,
-                "context": method.context,
-                "line": value.line,
-                "character": value.character,
-                "endline": method.endline
-            };
-            collection.insert(newItem);
-        }
-    }
-
-    querydef(module: string, all: boolean = true, lazy: boolean = false): any {
+    public querydef(module: string, all: boolean = true, lazy: boolean = false): any {
         // Проверяем локальный кэш. 
         // Проверяем глобальный кэш на модули. 
         if (!this.cacheUpdates) {
@@ -271,7 +233,7 @@ export class Global {
         }
     }
 
-    query(word: string, module: string, all: boolean = true, lazy: boolean = false): any {
+    public query(word: string, module: string, all: boolean = true, lazy: boolean = false): any {
         let prefix = lazy ? "" : "^";
         let suffix = all ? "" : "$";
         let querystring = { "name": { "$regex": new RegExp(prefix + word + suffix, "i") } };
@@ -281,7 +243,7 @@ export class Global {
         let moduleRegexp = new RegExp("^" + module + "$", "i");
         function filterByModule(obj) {
             if (module && module.length > 0) {
-                if (moduleRegexp.exec(obj.module) != null) {
+                if (moduleRegexp.exec(obj.module) !== undefined) {
                     return true;
                 } else {
                     return false;
@@ -293,11 +255,11 @@ export class Global {
         return search;
     }
 
-    GetSignature(entry) {
+    public GetSignature(entry) {
         let description = entry.description.replace(/\/\//g, "");
         description = description.replace(new RegExp("[ ]+", "g"), " ");
         let retState = (new RegExp("^\\s*(Возвращаемое значение|Return value|Returns):?\\n\\s*([<\\wа-яА-Я\\.>]+)(.|\\n)*", "gm")).exec(description);
-        let strRetState = null;
+        let strRetState = undefined;
         if (retState) {
             strRetState = retState[2];
             description = description.substr(0, retState.index);
@@ -307,8 +269,8 @@ export class Global {
             let nameParam = entry._method.Params[element];
             paramsString = (paramsString === "(" ? paramsString : paramsString + ", ") + nameParam;
             let re = new RegExp("^\\s*(Параметры|Parameters)(.|\\n)*\\n\\s*" + nameParam + "\\s*(-|–)\\s*([<\\wа-яА-Я\\.>]+)", "gm");
-            let match: RegExpExecArray = null;
-            if ((match = re.exec(description)) !== null) {
+            let match: RegExpExecArray = re.exec(description);
+            if (match) {
                 paramsString = paramsString + ": " + match[4];
             }
         }
@@ -319,12 +281,12 @@ export class Global {
         return { description: description, paramsString: paramsString, strRetState: strRetState, fullRetState: (!retState) ? "" : retState[0] };
     }
 
-    GetDocParam(description: string, param) {
+    public GetDocParam(description: string, param) {
         let optional = false;
         let descriptionParam = "";
         let re = new RegExp("(Параметры|Parameters)(.|\\n)*\\n\\s*" + param + "\\s*(-|–)\\s*([<\\wа-яА-Я\\.>]+)\\s*-?\\s*((.|\\n)*)", "g");
-        let match: RegExpExecArray = null;
-        if ((match = re.exec(description)) !== null) {
+        let match: RegExpExecArray = re.exec(description);
+        if (match) {
             descriptionParam = match[5];
             let cast = (new RegExp("\\n\\s*[<\\wа-яА-Я\\.>]+\\s*(-|–)\\s*", "g")).exec(descriptionParam);
             if (cast) {
@@ -335,7 +297,7 @@ export class Global {
         return documentationParam;
     }
 
-    redefineMethods(adapter) {
+    public redefineMethods(adapter) {
         let methodsList = [
             "postMessage",
             "getConfiguration",
@@ -385,14 +347,14 @@ export class Global {
         let globalvariables = bslglobals.globalvariables();
         this.keywords = bslglobals.keywords()[autocompleteLanguage];
         for (let element in globalfunctions) {
-            let new_name = globalfunctions[element]["name" + postfix];
-            let new_element = {};
-            new_element["name"] = new_name;
-            new_element["alias"] = (postfix === "_en") ? globalfunctions[element]["name"] : globalfunctions[element]["name_en"];
-            new_element["description"] = globalfunctions[element].description;
-            new_element["signature"] = globalfunctions[element].signature;
-            new_element["returns"] = globalfunctions[element].returns;
-            this.globalfunctions[new_name.toLowerCase()] = new_element;
+            let newName = globalfunctions[element]["name" + postfix];
+            let newElement = {};
+            newElement["name"] = newName;
+            newElement["alias"] = (postfix === "_en") ? globalfunctions[element]["name"] : globalfunctions[element]["name_en"];
+            newElement["description"] = globalfunctions[element].description;
+            newElement["signature"] = globalfunctions[element].signature;
+            newElement["returns"] = globalfunctions[element].returns;
+            this.globalfunctions[newName.toLowerCase()] = newElement;
         }
         for (let element in oscriptStdLib.globalContextOscript()) {
             let segment = oscriptStdLib.globalContextOscript()[element];
@@ -402,26 +364,26 @@ export class Global {
                     globMethod["oscript_signature"] = { "default": { "СтрокаПараметров": segment["methods"][key].signature, "Параметры": segment["methods"][key].params } };
                     globMethod["oscript_description"] = segment["methods"][key].description;
                 } else {
-                    let new_element = {};
-                    let new_name = segment["methods"][key]["name" + postfix];
-                    new_element["name"] = new_name;
-                    new_element["alias"] = (postfix === "_en") ? segment["methods"][key]["name"] : segment["methods"][key]["name_en"];
-                    new_element["description"] = undefined;
-                    new_element["signature"] = undefined;
-                    new_element["returns"] = segment["methods"][key].returns;
-                    new_element["oscript_signature"] = { "default": { "СтрокаПараметров": segment["methods"][key].signature, "Параметры": segment["methods"][key].params } };
-                    new_element["oscript_description"] = segment["methods"][key].description;
-                    this.globalfunctions[new_name.toLowerCase()] = new_element;
+                    let newElement = {};
+                    let newName = segment["methods"][key]["name" + postfix];
+                    newElement["name"] = newName;
+                    newElement["alias"] = (postfix === "_en") ? segment["methods"][key]["name"] : segment["methods"][key]["name_en"];
+                    newElement["description"] = undefined;
+                    newElement["signature"] = undefined;
+                    newElement["returns"] = segment["methods"][key].returns;
+                    newElement["oscript_signature"] = { "default": { "СтрокаПараметров": segment["methods"][key].signature, "Параметры": segment["methods"][key].params } };
+                    newElement["oscript_description"] = segment["methods"][key].description;
+                    this.globalfunctions[newName.toLowerCase()] = newElement;
                 }
             }
         }
         for (let element in globalvariables) {
-            let new_name = globalvariables[element]["name" + postfix];
-            let new_element = {};
-            new_element["name"] = new_name;
-            new_element["alias"] = (postfix === "_en") ? globalvariables[element]["name"] : globalvariables[element]["name_en"];
-            new_element["description"] = globalvariables[element].description;
-            this.globalvariables[new_name.toLowerCase()] = new_element;
+            let newName = globalvariables[element]["name" + postfix];
+            let newElement = {};
+            newElement["name"] = newName;
+            newElement["alias"] = (postfix === "_en") ? globalvariables[element]["name"] : globalvariables[element]["name_en"];
+            newElement["description"] = globalvariables[element].description;
+            this.globalvariables[newName.toLowerCase()] = newElement;
         }
         for (let element in oscriptStdLib.globalContextOscript()) {
             let segment = oscriptStdLib.globalContextOscript()[element];
@@ -431,177 +393,215 @@ export class Global {
                     globVar["oscript_description"] = segment["properties"][key].description;
                     globVar["oscript_access"] = segment["properties"][key].access;
                 } else {
-                    let new_element = {};
-                    let new_name = segment["properties"][key]["name" + postfix];
-                    new_element["name"] = new_name;
-                    new_element["alias"] = (postfix === "_en") ? segment["properties"][key]["name"] : segment["properties"][key]["name_en"];
-                    new_element["description"] = undefined;
-                    new_element["oscript_description"] = segment["properties"][key].description;
-                    new_element["oscript_access"] = segment["properties"][key].access;
-                    this.globalvariables[new_name.toLowerCase()] = new_element;
+                    let newElement = {};
+                    let newName = segment["properties"][key]["name" + postfix];
+                    newElement["name"] = newName;
+                    newElement["alias"] = (postfix === "_en") ? segment["properties"][key]["name"] : segment["properties"][key]["name_en"];
+                    newElement["description"] = undefined;
+                    newElement["oscript_description"] = segment["properties"][key].description;
+                    newElement["oscript_access"] = segment["properties"][key].access;
+                    this.globalvariables[newName.toLowerCase()] = newElement;
                 }
             }
         }
         for (let element in bslglobals.systemEnum()) {
             let segment = bslglobals.systemEnum()[element];
-            let new_name = segment["name" + postfix];
-            let new_element = {};
-            new_element["name"] = new_name;
-            new_element["alias"] = (postfix === "_en") ? segment["name"] : segment["name_en"];
-            new_element["description"] = segment.description;
+            let newName = segment["name" + postfix];
+            let newElement = {};
+            newElement["name"] = newName;
+            newElement["alias"] = (postfix === "_en") ? segment["name"] : segment["name_en"];
+            newElement["description"] = segment.description;
             for (let key in segment["values"]) {
-                let new_name_values = segment["values"][key]["name" + postfix];
-                let element_values = {};
-                element_values["name"] = new_name;
-                element_values["alias"] = (postfix === "_en") ? segment["values"][key]["name"] : segment["values"][key]["name_en"];
-                element_values["description"] = segment.description;
-                new_element[new_name_values.toLowerCase()] = element_values;
+                let newNameValues = segment["values"][key]["name" + postfix];
+                let elementValues = {};
+                elementValues["name"] = newName;
+                elementValues["alias"] = (postfix === "_en") ? segment["values"][key]["name"] : segment["values"][key]["name_en"];
+                elementValues["description"] = segment.description;
+                newElement[newNameValues.toLowerCase()] = elementValues;
             }
-            this.systemEnum[new_name.toLowerCase()] = new_element;
+            this.systemEnum[newName.toLowerCase()] = newElement;
         }
         for (let element in oscriptStdLib.systemEnum()) {
             let segment = oscriptStdLib.systemEnum()[element];
-            let new_name = segment["name" + postfix];
-            if (this.systemEnum[new_name.toLowerCase()]) {
-                let find_enum = this.systemEnum[new_name.toLowerCase()];
-                find_enum["oscript_description"] = segment.description;
+            let newName = segment["name" + postfix];
+            if (this.systemEnum[newName.toLowerCase()]) {
+                let findEnum = this.systemEnum[newName.toLowerCase()];
+                findEnum["oscript_description"] = segment.description;
             } else {
-                let new_element = {};
-                new_element["name"] = new_name;
-                new_element["alias"] = (postfix === "_en") ? segment["name"] : segment["name_en"];
-                new_element["description"] = undefined;
-                new_element["oscript_description"] = segment.description;
+                let newElement = {};
+                newElement["name"] = newName;
+                newElement["alias"] = (postfix === "_en") ? segment["name"] : segment["name_en"];
+                newElement["description"] = undefined;
+                newElement["oscript_description"] = segment.description;
                 for (let key in segment["values"]) {
-                    let new_name_values = segment["values"][key]["name" + postfix];
-                    let element_values = {};
-                    element_values["name"] = new_name;
-                    element_values["alias"] = (postfix === "_en") ? segment["values"][key]["name"] : segment["values"][key]["name_en"];
-                    element_values["description"] = segment.description;
-                    new_element[new_name_values.toLowerCase()] = element_values;
+                    let newNameValues = segment["values"][key]["name" + postfix];
+                    let elementValues = {};
+                    elementValues["name"] = newName;
+                    elementValues["alias"] = (postfix === "_en") ? segment["values"][key]["name"] : segment["values"][key]["name_en"];
+                    elementValues["description"] = segment.description;
+                    newElement[newNameValues.toLowerCase()] = elementValues;
                 }
-            this.systemEnum[new_name.toLowerCase()] = new_element;
+                this.systemEnum[newName.toLowerCase()] = newElement;
             }
         }
         for (let element in bslglobals.classes()) {
             let segment = bslglobals.classes()[element];
-            let new_name = segment["name" + postfix];
-            let new_element = {};
-            new_element["name"] = new_name;
-            new_element["alias"] = (postfix === "_en") ? segment["name"] : segment["name_en"];
-            new_element["description"] = segment.description;
-            new_element["methods"] = (segment["methods"]) ? {} : undefined;
+            let newName = segment["name" + postfix];
+            let newElement = {};
+            newElement["name"] = newName;
+            newElement["alias"] = (postfix === "_en") ? segment["name"] : segment["name_en"];
+            newElement["description"] = segment.description;
+            newElement["methods"] = (segment["methods"]) ? {} : undefined;
             for (let key in segment["methods"]) {
-                let new_name_method = segment["methods"][key]["name" + postfix];
-                let new_method = {};
-                new_method["name"] = new_name;
-                new_method["alias"] = (postfix === "_en") ? segment["methods"][key]["name"] : segment["methods"][key]["name_en"];
-                new_method["description"] = segment["methods"][key].description;
-                new_element["methods"][new_name_method.toLowerCase()] = new_method;
+                let newNameMethod = segment["methods"][key]["name" + postfix];
+                let newMethod = {};
+                newMethod["name"] = newName;
+                newMethod["alias"] = (postfix === "_en") ? segment["methods"][key]["name"] : segment["methods"][key]["name_en"];
+                newMethod["description"] = segment["methods"][key].description;
+                newElement["methods"][newNameMethod.toLowerCase()] = newMethod;
             }
-            new_element["properties"] = (segment["properties"]) ? {} : undefined;
+            newElement["properties"] = (segment["properties"]) ? {} : undefined;
             for (let key in segment["properties"]) {
-                let new_name_prop = segment["properties"][key]["name" + postfix];
-                let new_prop = {};
-                new_prop["name"] = new_name;
-                new_prop["alias"] = (postfix === "_en") ? segment["properties"][key]["name"] : segment["properties"][key]["name_en"];
-                new_prop["description"] = segment["properties"][key].description;
-                new_element["properties"][new_name_prop.toLowerCase()] = new_prop;
+                let newNameProp = segment["properties"][key]["name" + postfix];
+                let newProp = {};
+                newProp["name"] = newName;
+                newProp["alias"] = (postfix === "_en") ? segment["properties"][key]["name"] : segment["properties"][key]["name_en"];
+                newProp["description"] = segment["properties"][key].description;
+                newElement["properties"][newNameProp.toLowerCase()] = newProp;
             }
-            new_element["constructors"] = (segment["constructors"]) ? {} : undefined;
+            newElement["constructors"] = (segment["constructors"]) ? {} : undefined;
             for (let key in segment["constructors"]) {
-                let new_cntr = {};
-                new_cntr["signature"] = segment["constructors"][key].signature;
-                new_cntr["description"] = segment["constructors"][key].description;
-                new_element["constructors"][key.toLowerCase()] = new_cntr;
+                let newCntr = {};
+                newCntr["signature"] = segment["constructors"][key].signature;
+                newCntr["description"] = segment["constructors"][key].description;
+                newElement["constructors"][key.toLowerCase()] = newCntr;
             }
-            this.classes[new_name.toLowerCase()] = new_element;
+            this.classes[newName.toLowerCase()] = newElement;
         }
         for (let element in oscriptStdLib.classesOscript()) {
             let segment = oscriptStdLib.classesOscript()[element];
-            let new_name = segment["name" + postfix];
-            if (this.classes[new_name.toLowerCase()]) {
-                let find_class = this.classes[new_name.toLowerCase()];
-                find_class["oscript_description"] = (segment.description) ? (segment.description) : find_class.description;
+            let newName = segment["name" + postfix];
+            if (this.classes[newName.toLowerCase()]) {
+                let findClass = this.classes[newName.toLowerCase()];
+                findClass["oscript_description"] = (segment.description) ? (segment.description) : findClass.description;
                 for (let key in segment["methods"]) {
-                    let find_method = segment["methods"][key];
-                    let name_method = find_method["name" + postfix];
-                    if (!find_method) {
-                        find_method = {};
-                        find_method["name"] = name_method;
-                        find_method["alias"] = (postfix === "_en") ? segment["methods"][key]["name"] : segment["methods"][key]["name_en"];
-                        find_method["description"] = undefined;
-                        find_method["oscript_description"] = segment["methods"][key]["description"];
-                        find_class["methods"][name_method.toLowerCase()] = find_method;
+                    let findMethod = segment["methods"][key];
+                    let nameMethod = findMethod["name" + postfix];
+                    if (!findMethod) {
+                        findMethod = {};
+                        findMethod["name"] = nameMethod;
+                        findMethod["alias"] = (postfix === "_en") ? segment["methods"][key]["name"] : segment["methods"][key]["name_en"];
+                        findMethod["description"] = undefined;
+                        findMethod["oscript_description"] = segment["methods"][key]["description"];
+                        findClass["methods"][nameMethod.toLowerCase()] = findMethod;
                     } else {
-                        find_method["oscript_description"] = segment["methods"][key]["description"];
+                        findMethod["oscript_description"] = segment["methods"][key]["description"];
                     }
                 }
                 for (let key in segment["properties"]) {
-                    let find_prop = segment["properties"][key];
-                    let name_prop = find_prop["name" + postfix];
-                    if (!find_prop) {
-                        find_prop = {};
-                        find_prop["name"] = name_prop;
-                        find_prop["alias"] = (postfix === "_en") ? segment["properties"][key]["name"] : segment["properties"][key]["name_en"];
-                        find_prop["description"] = undefined;
-                        find_prop["oscript_description"] = segment["properties"][key]["description"];
-                        find_class["properties"][name_prop.toLowerCase()] = find_prop;
+                    let findProp = segment["properties"][key];
+                    let nameProp = findProp["name" + postfix];
+                    if (!findProp) {
+                        findProp = {};
+                        findProp["name"] = nameProp;
+                        findProp["alias"] = (postfix === "_en") ? segment["properties"][key]["name"] : segment["properties"][key]["name_en"];
+                        findProp["description"] = undefined;
+                        findProp["oscript_description"] = segment["properties"][key]["description"];
+                        findClass["properties"][nameProp.toLowerCase()] = findProp;
                     } else {
-                        find_prop["oscript_description"] = segment["properties"][key]["description"];
+                        findProp["oscript_description"] = segment["properties"][key]["description"];
                     }
                 }
                 for (let key in segment["constructors"]) {
-                    let find_cntr = segment["constructors"][key];
-                    if (!find_cntr) {
-                        find_cntr = {};
-                        find_cntr["description"] = undefined;
-                        find_cntr["oscript_description"] = segment["constructors"][key]["description"];
-                        find_class["constructors"][key.toLowerCase()] = find_cntr;
+                    let findCntr = segment["constructors"][key];
+                    if (!findCntr) {
+                        findCntr = {};
+                        findCntr["description"] = undefined;
+                        findCntr["oscript_description"] = segment["constructors"][key]["description"];
+                        findClass["constructors"][key.toLowerCase()] = findCntr;
                     } else {
-                        find_cntr["oscript_description"] = segment["constructors"][key]["description"];
+                        findCntr["oscript_description"] = segment["constructors"][key]["description"];
                     }
                 }
             } else {
-                let new_element = {};
-                new_element["name"] = new_name;
-                new_element["alias"] = (postfix === "_en") ? segment["name"] : segment["name_en"];
-                new_element["description"] = undefined;
-                new_element["oscript_description"] = segment.description;
-                new_element["methods"] = (segment["methods"]) ? {} : undefined;
+                let newElement = {};
+                newElement["name"] = newName;
+                newElement["alias"] = (postfix === "_en") ? segment["name"] : segment["name_en"];
+                newElement["description"] = undefined;
+                newElement["oscript_description"] = segment.description;
+                newElement["methods"] = (segment["methods"]) ? {} : undefined;
                 for (let key in segment["methods"]) {
-                    let new_name_method = segment["methods"][key]["name" + postfix];
-                    let new_method = {};
-                    new_method["name"] = new_name;
-                    new_method["alias"] = (postfix === "_en") ? segment["methods"][key]["name"] : segment["methods"][key]["name_en"];
-                    new_method["description"] = undefined;
-                    new_method["oscript_description"] = segment["methods"][key].description;
-                    new_element["methods"][new_name_method.toLowerCase()] = new_method;
+                    let newNameMethod = segment["methods"][key]["name" + postfix];
+                    let newMethod = {};
+                    newMethod["name"] = newName;
+                    newMethod["alias"] = (postfix === "_en") ? segment["methods"][key]["name"] : segment["methods"][key]["name_en"];
+                    newMethod["description"] = undefined;
+                    newMethod["oscript_description"] = segment["methods"][key].description;
+                    newElement["methods"][newNameMethod.toLowerCase()] = newMethod;
                 }
-                new_element["properties"] = (segment["properties"]) ? {} : undefined;
+                newElement["properties"] = (segment["properties"]) ? {} : undefined;
                 for (let key in segment["properties"]) {
-                    let new_name_prop = segment["properties"][key]["name" + postfix];
-                    let new_prop = {};
-                    new_prop["name"] = new_name;
-                    new_prop["alias"] = (postfix === "_en") ? segment["properties"][key]["name"] : segment["properties"][key]["name_en"];
-                    new_prop["description"] = undefined;
-                    new_prop["oscript_description"] = segment["properties"][key].description;
-                    new_element["properties"][new_name_prop.toLowerCase()] = new_prop;
+                    let newNameProp = segment["properties"][key]["name" + postfix];
+                    let newProp = {};
+                    newProp["name"] = newName;
+                    newProp["alias"] = (postfix === "_en") ? segment["properties"][key]["name"] : segment["properties"][key]["name_en"];
+                    newProp["description"] = undefined;
+                    newProp["oscript_description"] = segment["properties"][key].description;
+                    newElement["properties"][newNameProp.toLowerCase()] = newProp;
                 }
-                new_element["constructors"] = (segment["constructors"]) ? {} : undefined;
+                newElement["constructors"] = (segment["constructors"]) ? {} : undefined;
                 for (let key in segment["constructors"]) {
-                    let new_cntr = {};
-                    new_cntr["signature"] = segment["constructors"][key].signature;
-                    new_cntr["description"] = undefined;
-                    new_cntr["oscript_description"] = segment["constructors"][key].description;
-                    new_element["constructors"][key.toLowerCase()] = new_cntr;
+                    let newCntr = {};
+                    newCntr["signature"] = segment["constructors"][key].signature;
+                    newCntr["description"] = undefined;
+                    newCntr["oscript_description"] = segment["constructors"][key].description;
+                    newElement["constructors"][key.toLowerCase()] = newCntr;
                 }
-                this.classes[new_name.toLowerCase()] = new_element;
+                this.classes[newName.toLowerCase()] = newElement;
             }
+        }
+    }
+
+    private updateReferenceCalls(calls: Array<any>, method: any, file: string): any {
+        for (let index = 0; index < calls.length; index++) {
+            let value = calls[index];
+            if (value.call.startsWith(".")) {
+                continue;
+            }
+            if (value.call.indexOf(".") === -1) {
+                continue;
+            }
+            let arrCalls = this.dbcalls.get(value.call);
+            if (!arrCalls) {
+                this.dbcalls.set(value.call, []);
+                arrCalls = this.dbcalls.get(value.call);
+            }
+            arrCalls.push({ filename: file, call: value.call, line: value.line, character: value.character, name: String(method.name) });
+        }
+    }
+
+    private updateReferenceCallsOld(collection: any, calls: Array<any>, method: any, file: string): any {
+        for (let index = 0; index < calls.length; index++) {
+            let value = calls[index];
+            if (value.call.startsWith(".")) {
+                continue;
+            }
+            let newItem: IMethodValue = {
+                "name": String(method.name),
+                "filename": file,
+                "isproc": Boolean(method.isproc),
+                "call": value.call,
+                "context": method.context,
+                "line": value.line,
+                "character": value.character,
+                "endline": method.endline
+            };
+            collection.insert(newItem);
         }
     }
 }
 
-interface MethodValue {
+interface IMethodValue {
     // Имя процедуры/функции'
     name: string;
     // Процедура = true, Функция = false

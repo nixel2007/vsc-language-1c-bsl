@@ -17,7 +17,7 @@ export default class GlobalworkspaseSymbolProvider extends AbstractProvider impl
             let element = d[index];
             let range = new vscode.Range(new vscode.Position(element.line, 0), new vscode.Position(element.line, 0));
             let result = new vscode.SymbolInformation(element.name, vscode.SymbolKind.Function,
-                range, vscode.Uri.file(element.filename));
+                                                      range, vscode.Uri.file(element.filename));
             bucket.push(result);
         }
         return Promise.resolve(bucket);

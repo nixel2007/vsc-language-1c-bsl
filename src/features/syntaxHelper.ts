@@ -45,6 +45,10 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
         }
     }
 
+    public update(uri: vscode.Uri) {
+        this._onDidChange.fire(uri);
+    }
+
     private Syntax1CDefault(textSyntax: string) {
         this._global.methodForDescription = undefined;
         let fillStructure = {
@@ -149,8 +153,8 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                 if (charSegment === "methods") {
                     if (methodData["signature"]) {
                         for (let element in methodData["signature"]) {
-                            let name_syntax = (element === "default") ? "" : " " + element;
-                            methodDescription = methodDescription + "<p><b>Синтаксис" + name_syntax + ":</b></p><p><span class='function_name'>" + descMethod + "</span><span class='parameter_variable'>" + methodData["signature"][element]["СтрокаПараметров"] + "</span></p>";
+                            let nameSyntax = (element === "default") ? "" : " " + element;
+                            methodDescription = methodDescription + "<p><b>Синтаксис" + nameSyntax + ":</b></p><p><span class='function_name'>" + descMethod + "</span><span class='parameter_variable'>" + methodData["signature"][element]["СтрокаПараметров"] + "</span></p>";
                             let header = false;
                             for (let param in methodData["signature"][element].Параметры) {
                                 if (header === false) {
@@ -291,7 +295,6 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
             let classOs = {};
             for (let indexMethod in segment["constructors"]) {
                 let helper = segment["constructors"][indexMethod];
-                let params = undefined;
                 let signature = { "default": { "СтрокаПараметров": helper["signature"], "Параметры": helper["params"] } };
                 let signature1C = undefined;
                 let description1C = undefined;
@@ -502,8 +505,8 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
         }
         fillStructure.globCont = globCont;
         fillStructure.classes = classes;
-        fillStructure.displaySwitch = "block",
-            fillStructure.onlyOs = `if (!segment[strSegment][elem].description1C && !segment[strSegment][elem].signature1C){
+        fillStructure.displaySwitch = "block";
+        fillStructure.onlyOs = `if (!segment[strSegment][elem].description1C && !segment[strSegment][elem].signature1C){
                                         onlyOs = "*";
                                     }`;
         return this.fillSyntax(fillStructure);
@@ -749,9 +752,5 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                     </div>
                     </div>
                 </body>`;
-    }
-
-    public update(uri: vscode.Uri) {
-        this._onDidChange.fire(uri);
     }
 }

@@ -1,18 +1,58 @@
 import * as vscode from "vscode";
 import AbstractProvider from "./abstractProvider";
 
-let trimStart = require("lodash.trimStart");
-
 export default class DocumentFormattingEditProvider extends AbstractProvider implements vscode.DocumentFormattingEditProvider, vscode.DocumentRangeFormattingEditProvider {
 
+    private indentWord = {
+        "процедура": true,
+        "procedure": true,
+        "функция": true,
+        "function": true,
+        "если": true,
+        "if": true,
+        "пока": true,
+        "while": true,
+        "для": true,
+        "for": true,
+        "попытка": true,
+        "try": true
+    };
+    private reindentWord = {
+        "конецпроцедуры": true,
+        "endprocedure": true,
+        "конецфункции": true,
+        "endfunction": true,
+        "конецесли": true,
+        "endif": true,
+        "конеццикла": true,
+        "enddo": true,
+        "конецпопытки": true,
+        "endtry": true
+    };
+    private unindentWord = {
+        "иначе": true,
+        "else": true,
+        "иначеесли": true,
+        "elseif": true,
+        "исключение": true,
+        "except": true
+    };
+
     public provideDocumentFormattingEdits(document: vscode.TextDocument, options: vscode.FormattingOptions, token: vscode.CancellationToken): vscode.TextEdit[] {
-        return this.format(document, null, options, token);
+        return this.format(document, undefined, options, token);
     }
 
     public provideDocumentRangeFormattingEdits(document: vscode.TextDocument, range: vscode.Range, options: vscode.FormattingOptions, token: vscode.CancellationToken): vscode.TextEdit[] {
         return this.format(document, range, options, token);
     }
 
+    public provideOnTypeFormattingEdits(document: vscode.TextDocument, position: vscode.Position, ch: string, options: vscode.FormattingOptions, token: vscode.CancellationToken): vscode.TextEdit[] {
+        let lineNumber = (ch === "\n") ? (position.line - 1) : position.line;
+        let firstWord = document.lineAt(lineNumber).text.toLowerCase().trim().split(/[^\wа-яё]/)[0];
+        if (this.reindentWord[firstWord] || this.unindentWord[firstWord]) {
+            return this.format(document, new vscode.Range(new vscode.Position(lineNumber - 1, 0), position), options, token);
+        }
+    }
 
     private format(document: vscode.TextDocument, range: vscode.Range, options: vscode.FormattingOptions, token: vscode.CancellationToken): vscode.TextEdit[] {
         const documentText = document.getText();
@@ -40,7 +80,6 @@ export default class DocumentFormattingEditProvider extends AbstractProvider imp
 
         let eol = this.getEOL(document);
 
-        let lineBreak = false;
         let indentLevel = initialIndentLevel;
         let indentValue: String;
         if (options.insertSpaces) {
@@ -51,49 +90,25 @@ export default class DocumentFormattingEditProvider extends AbstractProvider imp
 
         let editOperations: vscode.TextEdit[] = [];
         function addEdit(text: string, lineNumber: number) {
-            let replaceRange = new vscode.Range(document.lineAt(lineNumber).range.start, document.lineAt(lineNumber).range.end);
-            if (text !== "" && text !== indentValue.repeat(indentLevel) + trimStart(text)) {
-                editOperations.push(new vscode.TextEdit(replaceRange, indentValue.repeat(indentLevel) + text.trim()));
+            let oldIndent = /^\s*/.exec(text)[0];
+            if (oldIndent !== indentValue.repeat(indentLevel)) {
+                editOperations.push(vscode.TextEdit.replace(new vscode.Range(new vscode.Position(lineNumber, 0), new vscode.Position(lineNumber, oldIndent.length)), indentValue.repeat(indentLevel)));
             }
         }
 
         let arrayValue = value.split(new RegExp(eol));
         for (let key in arrayValue) {
             let element = arrayValue[key];
-            if (this.checkOperand(element, "Процедура")
-                || this.checkOperand(element, "Procedure")
-                || this.checkOperand(element, "Функция")
-                || this.checkOperand(element, "Function")
-                || this.checkOperand(element, "Если")
-                || this.checkOperand(element, "If")
-                || this.checkOperand(element, "Пока")
-                || this.checkOperand(element, "While")
-                || this.checkOperand(element, "Для")
-                || this.checkOperand(element, "For")
-                || this.checkOperand(element, "Попытка")
-                || this.checkOperand(element, "Try")) {
+            let firstWord = element.toLowerCase().trim().split(/[^\wа-яё]/)[0];
+            if (this.indentWord[firstWord]) {
                 addEdit(element, +key + range.start.line);
                 indentLevel++;
-            } else if (this.checkOperand(element, "КонецПроцедуры")
-                || this.checkOperand(element, "EndProcedure")
-                || this.checkOperand(element, "КонецФункции")
-                || this.checkOperand(element, "EndFunction")
-                || this.checkOperand(element, "КонецЕсли")
-                || this.checkOperand(element, "EndIf")
-                || this.checkOperand(element, "КонецЦикла")
-                || this.checkOperand(element, "EndDo")
-                || this.checkOperand(element, "КонецПопытки")
-                || this.checkOperand(element, "EndTry")) {
+            } else if (this.reindentWord[firstWord]) {
                 if (indentLevel !== 0) {
                     indentLevel--;
                 }
                 addEdit(element, +key + range.start.line);
-            } else if (this.checkOperand(element, "Иначе")
-                || this.checkOperand(element, "Else")
-                || this.checkOperand(element, "ИначеЕсли")
-                || this.checkOperand(element, "ElseIf")
-                || this.checkOperand(element, "Исключение")
-                || this.checkOperand(element, "Except")) {
+            } else if (this.unindentWord[firstWord]) {
                 if (indentLevel !== 0) {
                     indentLevel--;
                 }
@@ -103,12 +118,7 @@ export default class DocumentFormattingEditProvider extends AbstractProvider imp
                 addEdit(element, +key + range.start.line);
             }
         }
-
         return editOperations;
-    }
-
-    private checkOperand(text: String, operand: String): Boolean {
-        return text.toLowerCase().trim().split(/[^\wа-яё]/)[0] === operand.toLowerCase().trim();
     }
 
     private repeat(s: string, count: number): String {
@@ -147,7 +157,6 @@ export default class DocumentFormattingEditProvider extends AbstractProvider imp
             }
             return text.substr(from, to - from);
         }
-
         return "\n";
     }
 
@@ -155,4 +164,3 @@ export default class DocumentFormattingEditProvider extends AbstractProvider imp
         return "\r\n".indexOf(text.charAt(offset)) !== -1;
     }
 }
-
