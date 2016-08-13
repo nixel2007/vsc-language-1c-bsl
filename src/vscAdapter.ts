@@ -2,18 +2,18 @@ import * as vscode from "vscode";
 
 export function postMessage(description: string, interval?: number) {
     if (interval) {
-        vscode.window.setStatusBarMessage(description, interval);   
+        vscode.window.setStatusBarMessage(description, interval);
     } else {
         vscode.window.setStatusBarMessage(description);
     }
 
 }
 
-export function getConfiguration(section:string) {
+export function getConfiguration(section: string) {
     return vscode.workspace.getConfiguration(section);
 }
 
-export function getConfigurationKey(configuration:vscode.WorkspaceConfiguration, key: string) {
+export function getConfigurationKey(configuration: vscode.WorkspaceConfiguration, key: string) {
     return configuration.get(key);
 }
 
@@ -57,16 +57,17 @@ export function fullNameRecursor(word: string, document: vscode.TextDocument, ra
             }
             return result;
         } else {
-            result = word;
-            return result;
+            return word;
         }
     }
 
 export function findFilesForCache(searchPattern: string, rootPath: string) {
     let files = vscode.workspace.findFiles(searchPattern, "");
-    files.then((value) => {
-        this.addtocachefiles(value, rootPath);
-    }, (reason) => {
-        console.log(reason);
-    });
+    files.then(
+        (value) => {
+            this.addtocachefiles(value, rootPath);
+        },
+        (reason) => {
+            console.log(reason);
+        });
 }
