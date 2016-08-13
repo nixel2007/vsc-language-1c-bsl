@@ -58,7 +58,7 @@ export function activate(context: vscode.ExtensionContext) {
             let re = /^(Процедура|Функция|procedure|function)\s*([\wа-яё]+)/im;
             for (let indexLine = lineMethod; indexLine >= 0; --indexLine) {
                 let matchMethod = re.exec(editor.document.lineAt(indexLine).text);
-                if (matchMethod === undefined) {
+                if (!matchMethod) {
                     continue;
                 }
                 let isFunc = (matchMethod[1].toLowerCase() === "function" || matchMethod[1].toLowerCase() === "функция");
@@ -96,7 +96,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.createTasks", () => {
         let rootPath = vscode.workspace.rootPath;
-        if (rootPath === undefined) {
+        if (!rootPath) {
             return;
         }
         let vscodePath = path.join(rootPath, ".vscode");
@@ -203,7 +203,7 @@ export function activate(context: vscode.ExtensionContext) {
         if (!global.cache.getCollection(textEditor.document.fileName)) {
             global.getRefsLocal(textEditor.document.fileName, textEditor.document.getText());
         }
-        if (vscode.workspace.rootPath !== undefined) {
+        if (vscode.workspace.rootPath) {
             for (let index = 0; index < vscode.workspace.textDocuments.length; index++) {
                 let element = vscode.workspace.textDocuments[index];
                 if (element.isDirty && element.languageId === "bsl") {
@@ -214,7 +214,7 @@ export function activate(context: vscode.ExtensionContext) {
     }));
 
     context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(function (document: vscode.TextDocument) {
-        if (vscode.workspace.rootPath !== undefined) {
+        if (vscode.workspace.rootPath) {
             global.customUpdateCache(document.getText(), document.fileName);
         }
     }));
@@ -232,7 +232,7 @@ export function activate(context: vscode.ExtensionContext) {
             let textline = editor.document.getText(new vscode.Range(new vscode.Position(position.line, 0), (new vscode.Position(position.line, position.character - 2))));
             let regex = /([а-яё_\w]+\s?)$/i;
             let arrStrings = regex.exec(textline);
-            if ((char === "++" || char === "--" || char === "+=" || char === "-=" || char === "*=" || char === "/=" || char === "%=") && editor.selection.isEmpty && arrStrings !== undefined) {
+            if ((char === "++" || char === "--" || char === "+=" || char === "-=" || char === "*=" || char === "/=" || char === "%=") && editor.selection.isEmpty && arrStrings) {
                 let word = arrStrings[1];
                 editor.edit(function (editBuilder) {
                     let postfix = undefined;
@@ -359,8 +359,8 @@ export function activate(context: vscode.ExtensionContext) {
         if (vscode.window.activeTextEditor.document.fileName.endsWith(".bsl") && globalMethod) {
             for (let element in bslGlobals.structureGlobContext()["global"]) {
                 let segment = bslGlobals.structureGlobContext()["global"][element];
-                if (segment[globalMethod.name] !== undefined || segment[globalMethod.alias] !== undefined) {
-                    let target = (segment[globalMethod.name] !== undefined) ? segment[globalMethod.name] : segment[globalMethod.alias];
+                if (segment[globalMethod.name] || segment[globalMethod.alias]) {
+                    let target = (segment[globalMethod.name]) ? segment[globalMethod.name] : segment[globalMethod.alias];
                     global.methodForDescription = { label: target, description: "1С/Глобальный контекст/" + element };
                     syntaxHelper.update(previewUri);
                     vscode.commands.executeCommand("vscode.previewHtml", previewUri, vscode.ViewColumn.Two);
@@ -371,7 +371,7 @@ export function activate(context: vscode.ExtensionContext) {
             for (let element in oscriptStdLib.globalContextOscript()) {
                 let segment = oscriptStdLib.globalContextOscript()[element];
                 if (segment["methods"][globalMethod.name] || segment["methods"][globalMethod.alias]) {
-                    let target = (segment["methods"][globalMethod.name] !== undefined) ? segment["methods"][globalMethod.name] : segment["methods"][globalMethod.alias];
+                    let target = (segment["methods"][globalMethod.name]) ? segment["methods"][globalMethod.name] : segment["methods"][globalMethod.alias];
                     global.methodForDescription = { label: target.name, description: "OneScript/Глобальный контекст/" + element };
                     syntaxHelper.update(previewUri);
                     vscode.commands.executeCommand("vscode.previewHtml", previewUri, vscode.ViewColumn.Two);
