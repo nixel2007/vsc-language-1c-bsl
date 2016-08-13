@@ -46,6 +46,13 @@ export default class DocumentFormattingEditProvider extends AbstractProvider imp
         return this.format(document, range, options, token);
     }
 
+    public provideOnTypeFormattingEdits(document: vscode.TextDocument, position: vscode.Position, ch: string, options: vscode.FormattingOptions, token: vscode.CancellationToken): vscode.TextEdit[] {
+        let lineNumber = (ch === "\n") ? (position.line - 1) : position.line;
+        let firstWord = document.lineAt(lineNumber).text.toLowerCase().trim().split(/[^\wа-яё]/)[0];
+        if (this.reindentWord[firstWord] || this.unindentWord[firstWord]) {
+            return this.format(document, new vscode.Range(new vscode.Position(lineNumber - 1, 0), position), options, token);
+        }
+    }
 
     private format(document: vscode.TextDocument, range: vscode.Range, options: vscode.FormattingOptions, token: vscode.CancellationToken): vscode.TextEdit[] {
         const documentText = document.getText();
