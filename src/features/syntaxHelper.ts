@@ -74,7 +74,7 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
     private fillStructure1CSyntax(fillStructure) {
         let globCont = "";
         for (let element in bslGlobals.structureGlobContext()["global"]) {
-            globCont = globCont + `<li><a href="#" onclick="fillDescription(this)">${element}</a></li>`;
+            globCont = globCont + `<li><span class="a" onclick="fillDescription(this)">${element}</span></li>`;
         }
         fillStructure.globCont = globCont;
         let classes = "";
@@ -82,13 +82,13 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
         for (let segmentClass in bslGlobals.structureGlobContext()["classes"]) {
             classes = classes + "<h2 style='font-size: 1em;'><em>" + segmentClass + "</em></h2><ul>";
             for (let currentClass in bslGlobals.structureGlobContext()["classes"][segmentClass]) {
-                classes = classes + `<li><a href="#" onclick="fillDescription(this)">${currentClass + " / " + bslGlobals.classes()[currentClass]["name_en"]}</a></li>`;
+                classes = classes + `<li><span class="a" onclick="fillDescription(this)">${currentClass + " / " + bslGlobals.classes()[currentClass]["name_en"]}</span></li>`;
                 added[currentClass] = true;
                 if (bslGlobals.structureGlobContext()["classes"][segmentClass][currentClass] !== "") {
                     classes = classes + "<ul>";
                     for (let childClass in bslGlobals.structureGlobContext()["classes"][segmentClass][currentClass]) {
                         added[childClass] = true;
-                        classes = classes + `<li><a href="#" onclick="fillDescription(this)">${childClass + " / " + bslGlobals.classes()[childClass]["name_en"]}</a></li>`;
+                        classes = classes + `<li><span class="a" onclick="fillDescription(this)">${childClass + " / " + bslGlobals.classes()[childClass]["name_en"]}</span></li>`;
                     }
                     classes = classes + "</ul>";
                 }
@@ -100,13 +100,13 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
         for (let element in bslGlobals.classes()) {
             if (!added[element]) {
                 let alias = (bslGlobals.classes()[element]["name_en"] !== "") ? (" / " + bslGlobals.classes()[element]["name_en"]) : "";
-                classes = classes + `<li><a href="#" onclick="fillDescription(this)">${element + alias}</a></li>`;
+                classes = classes + `<li><span class="a" onclick="fillDescription(this)">${element + alias}</span></li>`;
             }
         }
         classes = classes + "</ul><h1 style='font-size: 1em;'>Системные перечисления</h1><ul>";
         for (let element in bslGlobals.systemEnum()) {
             let alias = (bslGlobals.systemEnum()[element]["name_en"] !== "") ? (" / " + bslGlobals.systemEnum()[element]["name_en"]) : "";
-            classes = classes + `<li><a href="#" onclick="fillDescription(this)">${element + alias}</a></li>`;
+            classes = classes + `<li><span class="a" onclick="fillDescription(this)">${element + alias}</span></li>`;
         }
         fillStructure.classes = classes + "</ul>";
         return this.fillSyntax(fillStructure);
@@ -355,7 +355,7 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                     onlyOs = "*";
                 }
                 let alias = (nameID === "constructor") ? "" : (segment[strSegment][elem]["alias"] !== "") ? (" / " + segment[strSegment][elem]["alias"]) : "";
-                segmentDescription = segmentDescription + "<li><a id = " + "'" + nameID + counter + "' " + "href='#' onclick='fill(this)'>" + elem + alias + "</a>" + onlyOs + "</li>";
+                segmentDescription = segmentDescription + "<li><span class='a' id = " + "'" + nameID + counter + "' " + " onclick='fill(this)'>" + elem + alias + "</span>" + onlyOs + "</li>";
             }
             segmentDescription = segmentDescription + "</ul>";
         }
@@ -410,7 +410,7 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                             methodData = this.oscriptMethods[descClass][key][item];
                             methodHeader = descMethod + (methodData["alias"] !== "" ? (" / " + methodData["alias"]) : "");
                             if (methodData["description1C"] || methodData["signature1C"]) {
-                                switch1C = "Описание OneScript<br/>(<a href='#' name = '" + key + "' onclick='switchDescription(this)' style='font-size:1em'>переключить<\a>)";
+                                switch1C = "Описание OneScript<br/>(<span class='a' name = '" + key + "' onclick='switchDescription(this)' style='font-size:1em'>переключить</span>)";
                             }
                             break;
                         }
@@ -458,7 +458,7 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
     private OscriptSyntax(fillStructure) {
         let globCont = "";
         for (let element in oscriptStdLib.globalContextOscript()) {
-            globCont = globCont + `<li><a href="#" onclick="fillDescription(this)">${element}</a></li>`;
+            globCont = globCont + `<li><span class="a" onclick="fillDescription(this)">${element}</span></li>`;
         }
         let classes = "";
         let added = {};
@@ -469,13 +469,13 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                 if (!bslGlobals.classes()[currentClass]) {
                     onlyOs = "*";
                 }
-                classes = classes + `<li><a href="#" onclick="fillDescription(this)">${currentClass + " / " + oscriptStdLib.classesOscript()[currentClass]["name_en"]}</a>${onlyOs}</li>`;
+                classes = classes + `<li><span class="a" onclick="fillDescription(this)">${currentClass + " / " + oscriptStdLib.classesOscript()[currentClass]["name_en"]}</span>${onlyOs}</li>`;
                 added[currentClass] = true;
                 if (oscriptStdLib.structureMenu()["classes"][segmentClass][currentClass] !== "") {
                     classes = classes + "<ul>";
                     for (let childClass in oscriptStdLib.structureMenu()["classes"][segmentClass][currentClass]) {
                         added[childClass] = true;
-                        classes = classes + `<li><a href="#" onclick="fillDescription(this)">${childClass + " / " + oscriptStdLib.classesOscript()[childClass]["name_en"]}</a></li>`;
+                        classes = classes + `<li><span class="a" onclick="fillDescription(this)">${childClass + " / " + oscriptStdLib.classesOscript()[childClass]["name_en"]}</span></li>`;
                     }
                     classes = classes + "</ul>";
                 }
@@ -491,7 +491,7 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                     onlyOs = "*";
                 }
                 let alias = (oscriptStdLib.classesOscript()[element]["name_en"] !== "") ? (" / " + oscriptStdLib.classesOscript()[element]["name_en"]) : "";
-                classes = classes + `<li><a href="#" onclick="fillDescription(this)">${element + alias}</a>${onlyOs}</li>`;
+                classes = classes + `<li><span class="a" onclick="fillDescription(this)">${element + alias}</span>${onlyOs}</li>`;
             }
         }
         classes = classes + "</ul><h1 style='font-size: 1em;'>Системные перечисления</h1><ul>";
@@ -501,7 +501,7 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                 onlyOs = "*";
             }
             let alias = (oscriptStdLib.systemEnum()[element]["name_en"] !== "") ? (" / " + oscriptStdLib.systemEnum()[element]["name_en"]) : "";
-            classes = classes + `<li><a href="#" onclick="fillDescription(this)">${element + alias}</a>${onlyOs}</li>`;
+            classes = classes + `<li><span class="a" onclick="fillDescription(this)">${element + alias}</span>${onlyOs}</li>`;
         }
         fillStructure.globCont = globCont;
         fillStructure.classes = classes;
@@ -515,11 +515,9 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
     private fillSyntax(fillStructure) {
         return `<head>
                     <style>
-                        .monaco-shell a {
-                            color: #6c6c6c
-                        } 
-                        a {
-                            color: #bbb
+                        .a {
+                            cursor: pointer;
+                            text-decoration: underline
                         } 
                         .button {
                             border: 0px;
@@ -576,7 +574,7 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                                     counter = counter + 1;
                                     var onlyOs = "";${fillStructure.onlyOs}
                                     var alias = (nameID === "constructor") ? "" : ((segment[strSegment][elem]["alias"]!=="")?(" / " + segment[strSegment][elem]["alias"]):"");
-                                    segmentDescription = segmentDescription + "<li><a id = "+"'" + nameID + counter + "' " + "href='#' onclick='fill(this)'>" + elem + alias + "</a>" + onlyOs + "</li>";
+                                    segmentDescription = segmentDescription + "<li><span class='a' id = "+"'" + nameID + counter + "' " + " onclick='fill(this)'>" + elem + alias + "</span>" + onlyOs + "</li>";
                                 }
                                 segmentDescription = segmentDescription+ "</ul>";
                             }
@@ -611,7 +609,7 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                             if (!methodData.description1C&&!methodData["Параметры1С"]){
                                 document.getElementById('desc').innerHTML = "Только для OneScript";
                                 } else {
-                                document.getElementById('desc').innerHTML =  "Описание OneScript<br/>(<a href='#' name = '"+charSegment + "' onclick='switchDescription(this)' style='font-size:1em'>переключить<\a>)";
+                                document.getElementById('desc').innerHTML =  "Описание OneScript<br/>(<span class='a' name = '"+charSegment + "' onclick='switchDescription(this)' style='font-size:1em'>переключить</span>)";
                                 }
                             document.getElementById('elMethod').innerHTML = depp;
                         }
@@ -636,10 +634,10 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                             let depp = "";
                             if (document.getElementById('desc').innerHTML.slice(0,11)==="Описание 1С") {
                                 depp = fillDescriptionData(methodData, depp, "description", "signature", "returns", strMethod, charSegment);
-                                document.getElementById('desc').innerHTML =  "Описание OneScript<br/>(<a href='#' name = '"+charSegment + "' onclick='switchDescription(this)' style='font-size:1em'>переключить<\a>)";
+                                document.getElementById('desc').innerHTML =  "Описание OneScript<br/>(<span class='a' name = '"+charSegment + "' onclick='switchDescription(this)' style='font-size:1em'>переключить</span>)";
                             } else {
                                 depp = fillDescriptionData(methodData, depp, "description1C", "signature1C", "returns1C", strMethod, charSegment);
-                                document.getElementById('desc').innerHTML =  "Описание 1С<br/>(<a href='#' name = '" + charSegment + "' onclick='switchDescription(this)' style='font-size:1em'>переключить<\a>)";
+                                document.getElementById('desc').innerHTML =  "Описание 1С<br/>(<span class='a' name = '" + charSegment + "' onclick='switchDescription(this)' style='font-size:1em'>переключить</span>)";
                             }
                             document.getElementById('elMethod').innerHTML = depp;
                         }
