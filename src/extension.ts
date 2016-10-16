@@ -165,6 +165,10 @@ export function activate(context: vscode.ExtensionContext) {
             {
                 beforeText: /^([^\|\"]|"[^\"]*")*\"[^\"]*$/,
                 action: { indentAction: vscode.IndentAction.None, appendText: "|" }
+            },
+            {
+                beforeText: /^.*\/\/.*$/,
+                action: { indentAction: vscode.IndentAction.None, appendText: "//" }
             }
         ]
     });
