@@ -132,7 +132,7 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
                 continue;
             }
             ret.signatures.push(signatureInfo);
-            // ret.activeSignature = 0;
+            ret.activeSignature = 0;
             ret.activeParameter = Math.min(paramCount, signatureInfo.parameters.length - 1);
 
         }
@@ -157,7 +157,7 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
             }
 
             ret.signatures.push(signatureInfo);
-            // ret.activeSignature = 0;
+            ret.activeSignature = 0;
             ret.activeParameter = Math.min(paramCount, signatureInfo.parameters.length - 1);
 
             return ret;
