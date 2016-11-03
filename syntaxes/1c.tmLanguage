@@ -514,7 +514,7 @@
       <key>query</key>
       <dict>
         <key>begin</key>
-        <string>(?i)(?&lt;=[^\wа-яё\.]|^)(Выбрать|Select(\s+Разрешенные|Allowed)?(\s+Различные|Distinct)?(\s+Первые|Top)?)(?=[^\wа-яё\.]|$)</string>
+        <string>(?i)(?&lt;=[^\wа-яё\.]|^)(Выбрать|Select(\s+Разрешенные|\s+Allowed)?(\s+Различные|\s+Distinct)?(\s+Первые|\s+Top)?)(?=[^\wа-яё\.]|$)</string>
         <key>beginCaptures</key>
         <dict>
           <key>1</key>
