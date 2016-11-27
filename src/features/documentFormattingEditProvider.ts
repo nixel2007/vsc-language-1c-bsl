@@ -4,6 +4,7 @@ import AbstractProvider from "./abstractProvider";
 export default class DocumentFormattingEditProvider extends AbstractProvider implements vscode.DocumentFormattingEditProvider, vscode.DocumentRangeFormattingEditProvider {
 
     private indentWord = {
+        "(": true,
         "процедура": true,
         "procedure": true,
         "функция": true,
@@ -18,6 +19,7 @@ export default class DocumentFormattingEditProvider extends AbstractProvider imp
         "try": true
     };
     private reindentWord = {
+        ")": true,
         "конецпроцедуры": true,
         "endprocedure": true,
         "конецфункции": true,
@@ -48,7 +50,7 @@ export default class DocumentFormattingEditProvider extends AbstractProvider imp
 
     public provideOnTypeFormattingEdits(document: vscode.TextDocument, position: vscode.Position, ch: string, options: vscode.FormattingOptions, token: vscode.CancellationToken): vscode.TextEdit[] {
         let lineNumber = (ch === "\n") ? (position.line - 1) : position.line;
-        let firstWord = document.lineAt(lineNumber).text.toLowerCase().trim().split(/[^\wа-яё]/)[0];
+        let firstWord = document.lineAt(lineNumber).text.toLowerCase().trim().split(/[^\wа-яё\(\)]/)[0];
         if (this.reindentWord[firstWord] || this.unindentWord[firstWord]) {
             return this.format(document, new vscode.Range(new vscode.Position(lineNumber - 1, 0), position), options, token);
         }
@@ -99,7 +101,7 @@ export default class DocumentFormattingEditProvider extends AbstractProvider imp
         let arrayValue = value.split(new RegExp(eol));
         for (let key in arrayValue) {
             let element = arrayValue[key];
-            let firstWord = element.toLowerCase().trim().split(/[^\wа-яё]/)[0];
+            let firstWord = element.toLowerCase().trim().split(/[^\wа-яё\(\)]/)[0];
             if (this.indentWord[firstWord]) {
                 addEdit(element, +key + range.start.line);
                 indentLevel++;

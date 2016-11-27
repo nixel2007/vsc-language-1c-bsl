@@ -1,0 +1,8 @@
+{
+    "extends": "tslint:latest",
+    "rules": {
+        "semicolon": [
+            "always"
+        ]
+    }
+}
