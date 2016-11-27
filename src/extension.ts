@@ -185,17 +185,30 @@ export function activate(context: vscode.ExtensionContext) {
         ]
     });
 
-    context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(function (textDocumentChangeEvent: vscode.TextDocumentChangeEvent) {
+    context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(async (textDocumentChangeEvent: vscode.TextDocumentChangeEvent) => {
         let editor = vscode.window.activeTextEditor;
+
+        if (editor.document.languageId !== "bsl") {
+            return;
+        }
+
+        let autoClosingBrackets = Boolean(vscode.workspace.getConfiguration("editor.autoClosingBrackets"));
         if (textDocumentChangeEvent.contentChanges[0].text.slice(-1) === "(") {
-            let point = textDocumentChangeEvent.contentChanges[0].range.start.character + textDocumentChangeEvent.contentChanges[0].text.length;
+            let contentChange = textDocumentChangeEvent.contentChanges[0];
+            let point = contentChange.range.start.character + contentChange.text.length;
             let position = new vscode.Position(editor.selection.active.line, point);
-            editor.edit(function (editBuilder) {
-                editBuilder.insert(new vscode.Position(position.line, position.character), ")");
-            }).then(function () {
-                vscode.commands.executeCommand("editor.action.triggerParameterHints");
-                vscode.window.activeTextEditor.selection = new vscode.Selection(position.line, position.character, position.line, position.character);
-            });
+            if (autoClosingBrackets) {
+                await editor.edit((editBuilder) => {
+                    editBuilder.insert(new vscode.Position(position.line, position.character), ")");
+                });
+            }
+            vscode.commands.executeCommand("editor.action.triggerParameterHints");
+            vscode.window.activeTextEditor.selection = new vscode.Selection(
+                position.line,
+                position.character,
+                position.line,
+                position.character
+            );
         }
     }));
 
