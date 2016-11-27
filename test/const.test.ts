@@ -7,10 +7,10 @@ import * as vscode from "vscode";
 import {BSL_MODE} from "../src/const";
 
 // Defines a Mocha test suite to group tests of similar kind together
-suite("Const Tests", () => {
+describe("Consts", () => {
 
     // Defines a Mocha unit test
-    test("Filter is correct", () => {
+    it("should work with correct language id", () => {
         assert.equal(BSL_MODE, "bsl");
     });
 });
