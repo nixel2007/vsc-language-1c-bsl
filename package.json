@@ -171,17 +171,17 @@
     ]
   },
   "devDependencies": {
-    "@types/mocha": "^2.2.32",
+    "@types/mocha": "^2.2.33",
     "@types/node": "^6.0.46",
     "@types/should": "^8.1.30",
     "mocha": "^2.3.3",
     "should": "^11.1.1",
-    "typescript": "^2.0.6",
+    "typescript": "^2.0.10",
     "vscode": "^1.0.3"
   },
   "dependencies": {
     "filequeue": "^0.5.0",
-    "iconv-lite": "^0.4.13",
+    "iconv-lite": "^0.4.15",
     "lokijs": "^1.4.1",
     "onec-syntaxparser": "0.1.9"
   }
