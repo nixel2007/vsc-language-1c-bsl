@@ -83,7 +83,7 @@ export function activate(context: vscode.ExtensionContext) {
                 if (isFunc) {
                     comment += "//\n";
                     comment += ((aL === "en") ? "//  Returns:\n" : "//  Возвращаемое значение:\n");
-                    comment += ((aL === "en") ? "//   <Type.Subtype>   - <returned value description>" : "//   <Тип.Вид>   - <описание возвращаемого значения>");
+                    comment += ((aL === "en") ? "//   <Type.Subtype> - <returned value description>" : "//   <Тип.Вид> - <описание возвращаемого значения>");
                     comment += "\n";
                 }
                 comment += "//\n";
