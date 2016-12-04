@@ -1,10 +1,12 @@
+.nyc_output/**
 .vscode/**
-typings/**
+.vscode-test/**
+coverage/**
 out/test/**
 test/**
 src/**
 **/*.map
 .gitignore
+.travis.yml
 tsconfig.json
-vsc-extension-quickstart.md
-screenshots/**
+tslint.json

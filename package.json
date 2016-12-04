@@ -3,7 +3,7 @@
   "displayName": "Language 1C (BSL)",
   "description": "Syntax highlighting for 1C:Enterprise 8.",
   "icon": "images/xDDIcon.png",
-  "version": "1.8.2",
+  "version": "1.8.3",
   "publisher": "xDrivenDevelopment",
   "galleryBanner": {
     "color": "#0000FF",
@@ -172,9 +172,8 @@
   },
   "devDependencies": {
     "@types/mocha": "^2.2.33",
-    "@types/node": "^6.0.46",
+    "@types/node": "^6.0.51",
     "@types/should": "^8.1.30",
-    "mocha": "^2.3.3",
     "should": "^11.1.1",
     "typescript": "^2.0.10",
     "vscode": "^1.0.3"

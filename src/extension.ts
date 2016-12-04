@@ -70,7 +70,7 @@ export function activate(context: vscode.ExtensionContext) {
                     methodDescription = (isFunc) ? "Описание функции" : "Описание процедуры";
                 }
                 comment += "// <" + methodDescription + ">\n";
-                let params = global.getCacheLocal(editor.document.fileName, matchMethod[2], editor.document.getText())[0]._method.Params;
+                let params = global.getCacheLocal(editor.document.fileName, matchMethod[2], editor.document.getText(), false, false)[0]._method.Params;
                 if (params.length > 0) {
                     comment += "//\n";
                     comment += ((aL === "en") ? "// Parameters:\n" : "// Параметры:\n");
@@ -83,7 +83,7 @@ export function activate(context: vscode.ExtensionContext) {
                 if (isFunc) {
                     comment += "//\n";
                     comment += ((aL === "en") ? "//  Returns:\n" : "//  Возвращаемое значение:\n");
-                    comment += ((aL === "en") ? "//   <Type.Subtype>   - <returned value description>" : "//   <Тип.Вид>   - <описание возвращаемого значения>");
+                    comment += ((aL === "en") ? "//   <Type.Subtype> - <returned value description>" : "//   <Тип.Вид> - <описание возвращаемого значения>");
                     comment += "\n";
                 }
                 comment += "//\n";
