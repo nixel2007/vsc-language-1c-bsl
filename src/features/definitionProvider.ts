@@ -21,7 +21,7 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                 }
             }
             if (this._global.globalfunctions[wordAtPosition.toLowerCase()]) {
-                return undefined;
+                return Promise.resolve(undefined);
             }
             let module = "";
             if (wordAtPosition.indexOf(".") > 0) {
