@@ -1,5 +1,8 @@
 
 /* tslint:disable:quotemark */
+/* tslint:disable:max-line-length */
+/* tslint:disable:object-literal-sort-keys */
+/* tslint:disable:trailing-comma */
 
 export function globalfunctions(): any {
     let data = {
@@ -4693,7 +4696,7 @@ export function globalvariables() {
 
 export function keywords() {
     return {
-        "ru": {
+        ru: {
             Процедура: {},
             Функция: {},
             Экспорт: {},
@@ -4728,7 +4731,7 @@ export function keywords() {
             ИЛИ: {},
             NULL: {}
         },
-        "en": {
+        en: {
             Procedure: {},
             Function: {},
             Export: {},
@@ -8816,7 +8819,7 @@ export function classes() {
 
 export function structureGlobContext() {
     return {
-        "global": {
+        global: {
             "Свойства": {
                 "WSСсылки": "",
                 "БиблиотекаКартинок": "",
@@ -9279,7 +9282,7 @@ export function structureGlobContext() {
                 "ПродолжитьВызов": ""
             }
         },
-        "classes": {
+        classes: {
             "Универсальные коллекции": {
                 "Массив": "",
                 "Соответствие": "",
@@ -9321,7 +9324,6 @@ export function structureGlobContext() {
         }
     };
 }
-
 
 export function systemEnum() {
     return {
