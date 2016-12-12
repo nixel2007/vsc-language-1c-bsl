@@ -4,7 +4,7 @@ import * as fs from "fs";
 import * as glob from "glob";
 import * as paths from "path";
 
-import * as istanbul from "istanbul";
+const istanbul = require("istanbul");
 const Mocha = require("mocha");
 const remapIstanbul = require("remap-istanbul");
 
