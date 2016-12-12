@@ -376,7 +376,7 @@ export function activate(context: vscode.ExtensionContext) {
         if (vscode.window.activeTextEditor.document.fileName.endsWith(".bsl") && globalMethod) {
             for (let element in bslGlobals.structureGlobContext()["global"]) {
                 let segment = bslGlobals.structureGlobContext()["global"][element];
-                if (segment[globalMethod.name] !== "" || segment[globalMethod.name] !== "") {
+                if (segment[globalMethod.name] === "" || segment[globalMethod.name] === "") {
                     // let target = (segment[globalMethod.name] === "") ? segment[globalMethod.name] : segment[globalMethod.alias];
                     global.methodForDescription = { label: globalMethod.name, description: "1С/Глобальный контекст/" + element };
                     syntaxHelper.update(previewUri);
