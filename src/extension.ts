@@ -387,7 +387,7 @@ export function activate(context: vscode.ExtensionContext) {
         } else if (vscode.window.activeTextEditor.document.fileName.endsWith(".os") && globalMethod) {
             for (let element in oscriptStdLib.globalContextOscript()) {
                 let segment = oscriptStdLib.globalContextOscript()[element];
-                if (segment["methods"][globalMethod.name] !== "" || segment["methods"][globalMethod.alias] !== "") {
+                if (segment["methods"][globalMethod.name] !== undefined || segment["methods"][globalMethod.alias] !== undefined) {
                     // let target = (segment["methods"][globalMethod.name] === "") ? segment["methods"][globalMethod.name] : segment["methods"][globalMethod.alias];
                     global.methodForDescription = { label: globalMethod.name, description: "OneScript/Глобальный контекст/" + element };
                     syntaxHelper.update(previewUri);
