@@ -410,7 +410,7 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                             methodData = this.oscriptMethods[descClass][key][item];
                             methodHeader = descMethod + (methodData["alias"] !== "" ? (" / " + methodData["alias"]) : "");
                             if (methodData["description1C"] || methodData["signature1C"]) {
-                                switch1C = "Описание OneScript<br/>(<span class='a' name = '" + key + "' onclick='switchDescription(this)' style='font-size:1em'>переключить</span>)";
+                                switch1C = "Описание OneScript<br/>(<span class='a' id = '" + key + "' onclick='switchDescription(this)' style='font-size:1em'>переключить</span>)";
                             }
                             break;
                         }
@@ -609,20 +609,20 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                             if (!methodData.description1C&&!methodData["Параметры1С"]){
                                 document.getElementById('desc').innerHTML = "Только для OneScript";
                                 } else {
-                                document.getElementById('desc').innerHTML =  "Описание OneScript<br/>(<span class='a' name = '"+charSegment + "' onclick='switchDescription(this)' style='font-size:1em'>переключить</span>)";
+                                document.getElementById('desc').innerHTML =  "Описание OneScript<br/>(<span class='a' id = '" + charSegment + "' onclick='switchDescription(this)' style='font-size:1em'>переключить</span>)";
                                 }
                             document.getElementById('elMethod').innerHTML = depp;
                         }
 
                         function switchDescription(elem) {
                             var charSegment = "";
-                            if (elem.name.slice(0,6)==="method"){
+                            if (elem.id.slice(0,6)==="method"){
                                 charSegment = "methods";
-                            } else if (elem.name.slice(0,8)==="properti"){
+                            } else if (elem.id.slice(0,8)==="properti"){
                                 charSegment = "properties";
-                            } else if (elem.name.slice(0,11)==="constructor"){
+                            } else if (elem.id.slice(0,11)==="constructor"){
                                 charSegment = "constructors";
-                            } else if (elem.name.slice(0,5)==="value"){
+                            } else if (elem.id.slice(0,5)==="value"){
                                 charSegment = "values";
                             }
                             var strMethod = document.getElementById('headerMethod').innerHTML.replace("<br>", "").replace(new RegExp('\\n[ ]*','m'),'').split(" / ")[0];
@@ -634,10 +634,10 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                             let depp = "";
                             if (document.getElementById('desc').innerHTML.slice(0,11)==="Описание 1С") {
                                 depp = fillDescriptionData(methodData, depp, "description", "signature", "returns", strMethod, charSegment);
-                                document.getElementById('desc').innerHTML =  "Описание OneScript<br/>(<span class='a' name = '"+charSegment + "' onclick='switchDescription(this)' style='font-size:1em'>переключить</span>)";
+                                document.getElementById('desc').innerHTML =  "Описание OneScript<br/>(<span class='a' id = '" + charSegment + "' onclick='switchDescription(this)' style='font-size:1em'>переключить</span>)";
                             } else {
                                 depp = fillDescriptionData(methodData, depp, "description1C", "signature1C", "returns1C", strMethod, charSegment);
-                                document.getElementById('desc').innerHTML =  "Описание 1С<br/>(<span class='a' name = '" + charSegment + "' onclick='switchDescription(this)' style='font-size:1em'>переключить</span>)";
+                                document.getElementById('desc').innerHTML =  "Описание 1С<br/>(<span class='a' id = '" + charSegment + "' onclick='switchDescription(this)' style='font-size:1em'>переключить</span>)";
                             }
                             document.getElementById('elMethod').innerHTML = depp;
                         }
