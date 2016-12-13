@@ -132,4 +132,18 @@ describe("Completion", () => {
         completion.kind.should.be.equal(vscode.CompletionItemKind.Keyword);
 
     }));
+
+    it("should show global enums after `=` sign", mAsync(async (done) => {
+
+        await addText("А = КодировкаТек");
+
+        const completionList = await getCompletionListFromCurrentPosition();
+        const completions = completionList.items;
+
+        completions.should.matchAny((value: vscode.CompletionItem) => {
+            value.should.has.a.key("label").which.is.equal("КодировкаТекста");
+            value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Enum);
+        });
+
+    }));
 });
