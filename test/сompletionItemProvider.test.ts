@@ -175,4 +175,19 @@ describe("Completion", () => {
         completion.kind.should.be.equal(vscode.CompletionItemKind.Function);
 
     }));
+
+    it("should show metadata", mAsync(async (done) => {
+
+        await addText("Документы.");
+
+        const completionList = await getCompletionListFromCurrentPosition();
+        const completions = completionList.items;
+
+        completions.should.have.length(1);
+
+        const completion = completions[0];
+        completion.label.should.be.equal("Document");
+        completion.kind.should.be.equal(vscode.CompletionItemKind.Class);
+
+    }));
 });
