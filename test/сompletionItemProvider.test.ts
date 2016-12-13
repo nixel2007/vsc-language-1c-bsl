@@ -83,4 +83,20 @@ describe("Completion", () => {
         completion.kind.should.be.equal(vscode.SymbolKind.Namespace);
 
     }));
+
+    it("should show info about function with several signatures", mAsync(async (done) => {
+
+        await addText("ЗаписатьXML");
+
+        const completionList = await getCompletionListFromCurrentPosition();
+        const completions = completionList.items;
+
+        completions.should.has.length(1);
+
+        const completion = completions[0];
+        completion.label.should.be.equal("ЗаписатьXML");
+        completion.detail.should.match(/.*\d вариантa синтаксиса.*/gm);
+        completion.kind.should.be.equal(vscode.SymbolKind.Namespace);
+
+    }));
 });
