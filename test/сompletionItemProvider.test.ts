@@ -69,4 +69,24 @@ describe("Completion", () => {
 
     }));
 
+    it("should show public methods from configuration module", mAsync(async (done) => {
+
+        await addText("CommonModule.");
+
+        const position = vscode.window.activeTextEditor.selection.anchor;
+
+        const completionList = await vscode.commands.executeCommand<vscode.CompletionList>(
+            "vscode.executeCompletionItemProvider",
+            textDocument.uri,
+            position
+        );
+        const completions = completionList.items;
+
+        completions.should.has.length(1);
+
+        const completion = completions[0];
+        completion.label.should.be.equal("ЭкспортнаяПроцедура");
+        completion.kind.should.be.equal(vscode.SymbolKind.Namespace);
+
+    }));
 });
