@@ -51,7 +51,7 @@ describe("Completion", () => {
 
         const messageFunction = completions[0];
         messageFunction.label.should.be.equal("Сообщить");
-        messageFunction.kind.should.be.equal(vscode.SymbolKind.Namespace);
+        messageFunction.kind.should.be.equal(vscode.CompletionItemKind.Function);
         messageFunction.insertText.should.be.equal("Сообщить(");
 
     }));
@@ -68,7 +68,8 @@ describe("Completion", () => {
 
         const completion = completions[0];
         completion.label.should.be.equal("МояПроцедура");
-        completion.kind.should.be.equal(vscode.SymbolKind.File);
+        // TODO: There should be a Function
+        completion.kind.should.be.equal(vscode.CompletionItemKind.Text);
 
     }));
 
@@ -83,7 +84,7 @@ describe("Completion", () => {
 
         const completion = completions[0];
         completion.label.should.be.equal("ЭкспортнаяПроцедура");
-        completion.kind.should.be.equal(vscode.SymbolKind.Namespace);
+        completion.kind.should.be.equal(vscode.CompletionItemKind.Function);
 
     }));
 
@@ -99,7 +100,7 @@ describe("Completion", () => {
         const completion = completions[0];
         completion.label.should.be.equal("ЗаписатьXML");
         completion.detail.should.match(/.*\d вариантa синтаксиса.*/gm);
-        completion.kind.should.be.equal(vscode.SymbolKind.Namespace);
+        completion.kind.should.be.equal(vscode.CompletionItemKind.Function);
 
     }));
 });
