@@ -103,4 +103,19 @@ describe("Completion", () => {
         completion.kind.should.be.equal(vscode.CompletionItemKind.Function);
 
     }));
+
+    it("should show global variables", mAsync(async (done) => {
+
+        await addText("БиблиотекаКарт");
+
+        const completionList = await getCompletionListFromCurrentPosition();
+        const completions = completionList.items;
+
+        completions.should.has.length(1);
+
+        const completion = completions[0];
+        completion.label.should.be.equal("БиблиотекаКартинок");
+        completion.kind.should.be.equal(vscode.CompletionItemKind.Variable);
+
+    }));
 });
