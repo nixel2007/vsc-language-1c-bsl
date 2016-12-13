@@ -64,7 +64,7 @@ describe("Completion", () => {
         const completionList = await getCompletionListFromCurrentPosition();
         const completions = completionList.items;
 
-        completions.should.has.length(1);
+        completions.should.have.length(1);
 
         const completion = completions[0];
         completion.label.should.be.equal("МояПроцедура");
@@ -79,7 +79,7 @@ describe("Completion", () => {
         const completionList = await getCompletionListFromCurrentPosition();
         const completions = completionList.items;
 
-        completions.should.has.length(1);
+        completions.should.have.length(1);
 
         const completion = completions[0];
         completion.label.should.be.equal("ЭкспортнаяПроцедура");
@@ -94,7 +94,7 @@ describe("Completion", () => {
         const completionList = await getCompletionListFromCurrentPosition();
         const completions = completionList.items;
 
-        completions.should.has.length(1);
+        completions.should.have.length(1);
 
         const completion = completions[0];
         completion.label.should.be.equal("ЗаписатьXML");
@@ -110,7 +110,7 @@ describe("Completion", () => {
         const completionList = await getCompletionListFromCurrentPosition();
         const completions = completionList.items;
 
-        completions.should.has.length(1);
+        completions.should.have.length(1);
 
         const completion = completions[0];
         completion.label.should.be.equal("БиблиотекаКартинок");
@@ -125,7 +125,7 @@ describe("Completion", () => {
         const completionList = await getCompletionListFromCurrentPosition();
         const completions = completionList.items;
 
-        completions.should.has.length(1);
+        completions.should.have.length(1);
 
         const completion = completions[0];
         completion.label.should.be.equal("ВызватьИсключение");
