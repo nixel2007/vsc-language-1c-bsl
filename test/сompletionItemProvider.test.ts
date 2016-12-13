@@ -161,6 +161,20 @@ describe("Completion", () => {
 
     }));
 
+    xit("should show global enums values", mAsync(async (done) => {
+
+        await addText("КодировкаТекста.");
+
+        const completionList = await getCompletionListFromCurrentPosition();
+        const completions = completionList.items;
+
+        completions.should.matchAny((value: vscode.CompletionItem) => {
+            value.should.has.a.key("label").which.is.equal("ANSI");
+            value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Value);
+        });
+
+    }));
+
     it("should show global classes after `= New`", mAsync(async (done) => {
 
         await addText("А = Новый ТаблицаЗ");
