@@ -177,9 +177,9 @@
     "@types/should": "^8.1.30",
     "decache": "^4.1.0",
     "istanbul": "^0.4.5",
-    "remap-istanbul": "^0.7.0",
-    "should": "^11.1.1",
-    "typescript": "^2.0.10",
+    "remap-istanbul": "^0.8.0",
+    "should": "^11.1.2",
+    "typescript": "^2.1.4",
     "vscode": "^1.0.3"
   },
   "dependencies": {
