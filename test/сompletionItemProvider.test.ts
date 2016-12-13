@@ -160,4 +160,19 @@ describe("Completion", () => {
         });
 
     }));
+
+    it("should show methods in manager module", mAsync(async (done) => {
+
+        await addText("Документы.Document.");
+
+        const completionList = await getCompletionListFromCurrentPosition();
+        const completions = completionList.items;
+
+        completions.should.have.length(1);
+
+        const completion = completions[0];
+        completion.label.should.be.equal("ПроцедураМодуляМенеджера");
+        completion.kind.should.be.equal(vscode.CompletionItemKind.Function);
+
+    }));
 });
