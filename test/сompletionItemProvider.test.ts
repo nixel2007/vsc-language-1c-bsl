@@ -12,6 +12,18 @@ const globals = new Global(vscAdapter);
 
 let textDocument: vscode.TextDocument;
 
+async function getCompletionListFromCurrentPosition(): Promise<vscode.CompletionList> {
+    const position = vscode.window.activeTextEditor.selection.anchor;
+
+    const completionList = await vscode.commands.executeCommand<vscode.CompletionList>(
+        "vscode.executeCompletionItemProvider",
+        textDocument.uri,
+        position
+    );
+
+    return completionList;
+}
+
 // Defines a Mocha test suite to group tests of similar kind together
 describe("Completion", () => {
 
@@ -20,7 +32,7 @@ describe("Completion", () => {
         textDocument = await newTextDocument(uriEmptyFile);
     }));
 
-    beforeEach( mAsync(async (done) => {
+    beforeEach(mAsync(async (done) => {
         await addText("\n");
     }));
 
@@ -29,13 +41,7 @@ describe("Completion", () => {
 
         await addText("Сообщи");
 
-        const position = vscode.window.activeTextEditor.selection.anchor;
-
-        const completionList = await vscode.commands.executeCommand<vscode.CompletionList>(
-            "vscode.executeCompletionItemProvider",
-            textDocument.uri,
-            position
-        );
+        const completionList = await getCompletionListFromCurrentPosition();
         const completions = completionList.items;
 
         completions.should.have.length(1, "wrong completions length");
@@ -52,13 +58,7 @@ describe("Completion", () => {
         await addText("Процедура МояПроцедура() КонецПроцедуры\n");
         await addText("Мояп");
 
-        const position = vscode.window.activeTextEditor.selection.anchor;
-
-        const completionList = await vscode.commands.executeCommand<vscode.CompletionList>(
-            "vscode.executeCompletionItemProvider",
-            textDocument.uri,
-            position
-        );
+        const completionList = await getCompletionListFromCurrentPosition();
         const completions = completionList.items;
 
         completions.should.has.length(1);
@@ -73,13 +73,7 @@ describe("Completion", () => {
 
         await addText("CommonModule.");
 
-        const position = vscode.window.activeTextEditor.selection.anchor;
-
-        const completionList = await vscode.commands.executeCommand<vscode.CompletionList>(
-            "vscode.executeCompletionItemProvider",
-            textDocument.uri,
-            position
-        );
+        const completionList = await getCompletionListFromCurrentPosition();
         const completions = completionList.items;
 
         completions.should.has.length(1);
