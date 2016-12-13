@@ -118,4 +118,19 @@ describe("Completion", () => {
         completion.kind.should.be.equal(vscode.CompletionItemKind.Variable);
 
     }));
+
+    it("should show global keywords", mAsync(async (done) => {
+
+        await addText("ВызватьИск");
+
+        const completionList = await getCompletionListFromCurrentPosition();
+        const completions = completionList.items;
+
+        completions.should.has.length(1);
+
+        const completion = completions[0];
+        completion.label.should.be.equal("ВызватьИсключение");
+        completion.kind.should.be.equal(vscode.CompletionItemKind.Keyword);
+
+    }));
 });
