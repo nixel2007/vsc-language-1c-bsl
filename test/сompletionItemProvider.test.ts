@@ -9,7 +9,6 @@ import { Global } from "../src/global";
 import * as vscAdapter from "../src/vscAdapter";
 
 const globals = new Global(vscAdapter);
-const provider = new CompletionItemProvider(globals);
 
 let textDocument: vscode.TextDocument;
 
@@ -26,13 +25,18 @@ describe("Completion", () => {
     }));
 
     // Defines a Mocha unit test
-    it("should show completion with global functions", mAsync(async (done) => {
+    it("should show global functions", mAsync(async (done) => {
 
         await addText("Сообщи");
 
         const position = vscode.window.activeTextEditor.selection.anchor;
 
-        const completions = await provider.provideCompletionItems(textDocument, position, null);
+        const completionList = await vscode.commands.executeCommand<vscode.CompletionList>(
+            "vscode.executeCompletionItemProvider",
+            textDocument.uri,
+            position
+        );
+        const completions = completionList.items;
 
         completions.should.have.length(1, "wrong completions length");
 
@@ -43,14 +47,19 @@ describe("Completion", () => {
 
     }));
 
-    it("should show completion with functions in document", mAsync(async (done) => {
+    it("should show functions in document", mAsync(async (done) => {
 
         await addText("Процедура МояПроцедура() КонецПроцедуры\n");
         await addText("Мояп");
 
         const position = vscode.window.activeTextEditor.selection.anchor;
 
-        const completions = await provider.provideCompletionItems(textDocument, position, null);
+        const completionList = await vscode.commands.executeCommand<vscode.CompletionList>(
+            "vscode.executeCompletionItemProvider",
+            textDocument.uri,
+            position
+        );
+        const completions = completionList.items;
 
         completions.should.has.length(1);
 
