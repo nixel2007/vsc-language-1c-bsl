@@ -146,4 +146,18 @@ describe("Completion", () => {
         });
 
     }));
+
+    it("should show global classes after `= New`", mAsync(async (done) => {
+
+        await addText("А = Новый ТаблицаЗ");
+
+        const completionList = await getCompletionListFromCurrentPosition();
+        const completions = completionList.items;
+
+        completions.should.matchAny((value: vscode.CompletionItem) => {
+            value.should.has.a.key("label").which.is.equal("ТаблицаЗначений");
+            value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Class);
+        });
+
+    }));
 });
