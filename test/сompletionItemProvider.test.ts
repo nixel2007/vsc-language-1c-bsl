@@ -58,7 +58,7 @@ describe("Completion", () => {
 
     it("should show functions in document", mAsync(async (done) => {
 
-        await addText("Процедура МояПроцедура() КонецПроцедуры\n");
+        await addText("Процедура МояПроцедура()\n\nКонецПроцедуры\n");
         await addText("Мояп");
 
         const completionList = await getCompletionListFromCurrentPosition();
@@ -68,8 +68,7 @@ describe("Completion", () => {
 
         const completion = completions[0];
         completion.label.should.be.equal("МояПроцедура");
-        // TODO: There should be a Function
-        completion.kind.should.be.equal(vscode.CompletionItemKind.Text);
+        completion.kind.should.be.equal(vscode.CompletionItemKind.Function);
 
     }));
 
