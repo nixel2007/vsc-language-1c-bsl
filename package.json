@@ -180,6 +180,7 @@
     "istanbul": "^0.4.5",
     "remap-istanbul": "^0.8.0",
     "should": "^11.1.2",
+    "tslint": "^4.0.2",
     "typescript": "^2.1.4",
     "vscode": "^1.0.3"
   },
