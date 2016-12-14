@@ -218,4 +218,25 @@ describe("Completion", () => {
         completion.kind.should.be.equal(vscode.CompletionItemKind.Class);
 
     }));
+
+    it("should show metadata from part of classname", mAsync(async (done) => {
+
+        await addText("Докум");
+
+        const completionList = await getCompletionListFromCurrentPosition();
+        const completions = completionList.items;
+
+        completions.length.should.be.greaterThan(1);
+
+        completions.should.matchAny((value: vscode.CompletionItem) => {
+            value.should.has.a.key("label").which.is.equal("Документы");
+            value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Variable);
+        });
+
+        completions.should.matchAny((value: vscode.CompletionItem) => {
+            value.should.has.a.key("label").which.is.equal("Документы.Document");
+            value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.File);
+        });
+
+    }));
 });
