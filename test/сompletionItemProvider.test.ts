@@ -204,6 +204,21 @@ describe("Completion", () => {
 
     }));
 
+    it("should show work with en-keywords", mAsync(async (done) => {
+
+        await addText("Documents.Document.");
+
+        const completionList = await getCompletionListFromCurrentPosition();
+        const completions = completionList.items;
+
+        completions.should.have.length(1);
+
+        const completion = completions[0];
+        completion.label.should.be.equal("ПроцедураМодуляМенеджера");
+        completion.kind.should.be.equal(vscode.CompletionItemKind.Function);
+
+    }));
+    
     it("should show metadata", mAsync(async (done) => {
 
         await addText("Документы.");
