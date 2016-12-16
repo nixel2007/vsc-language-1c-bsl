@@ -12,6 +12,8 @@ prop='version'
 
 jsonval
 
+export SONARQUBE_SKIPPED=false
+
 if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
   sonar-scanner \
       -Dsonar.host.url=http://sonar,silverbulleters.org \
