@@ -29,6 +29,7 @@ cache:
     - '$HOME/.sonar/cache'
 
 script:
+  - export SONARQUBE_SKIPPED=false
   - ./travis.sh 
 
 after_script:
