@@ -14,8 +14,8 @@ jsonval
 
 if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
   sonar-scanner \
-      -Dsonar.host.url=http://sonar,silverbulleters.org \
-      -Dsonar.analysis.mode=preview \
+      -Dsonar.host.url=http://sonar.silverbulleters.org \
+      -Dsonar.analysis.mode=issues \
       -Dsonar.github.pullRequest=$TRAVIS_PULL_REQUEST \
       -Dsonar.github.repository=$TRAVIS_REPO_SLUG \
       -Dsonar.github.oauth=$GITHUB_TOKEN \
