@@ -19,11 +19,13 @@ if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
       -Dsonar.github.pullRequest=$TRAVIS_PULL_REQUEST \
       -Dsonar.github.repository=$TRAVIS_REPO_SLUG \
       -Dsonar.github.oauth=$GITHUB_TOKEN \
-      -Dsonar.login=$SONAR_OAUTH
+      -Dsonar.login=$SONAR_OAUTH \
+      -Dsonar.scanner.skip=false
 
 elif [ "$TRAVIS_BRANCH" == "develop" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   sonar-scanner \
       -Dsonar.host.url=http://sonar.silverbulleters.org \
       -Dsonar.login=$SONAR_OAUTH \
-      -Dsonar.projectVersion=$version
+      -Dsonar.projectVersion=$version\
+      -Dsonar.scanner.skip=false
 fi
