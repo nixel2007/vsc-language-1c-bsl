@@ -147,7 +147,7 @@ describe("Completion", () => {
 
     }));
 
-    xit("should show global enums values `=` sign", mAsync(async (done) => {
+    it("should show global enums values `=` sign", mAsync(async (done) => {
 
         await addText("А = КодировкаТекста.");
 
@@ -156,12 +156,12 @@ describe("Completion", () => {
 
         completions.should.matchAny((value: vscode.CompletionItem) => {
             value.should.has.a.key("label").which.is.equal("ANSI");
-            value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Value);
+            value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Enum);
         });
 
     }));
 
-    xit("should show global enums values", mAsync(async (done) => {
+    it("should show global enums values", mAsync(async (done) => {
 
         await addText("КодировкаТекста.");
 
@@ -170,7 +170,7 @@ describe("Completion", () => {
 
         completions.should.matchAny((value: vscode.CompletionItem) => {
             value.should.has.a.key("label").which.is.equal("ANSI");
-            value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Value);
+            value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Enum);
         });
 
     }));

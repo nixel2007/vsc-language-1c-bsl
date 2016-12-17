@@ -411,13 +411,14 @@ export class Global {
             newElement["name"] = newName;
             newElement["alias"] = (postfix === "_en") ? segment["name"] : segment["name_en"];
             newElement["description"] = segment.description;
+            newElement["values"] = [];
             for (let key in segment["values"]) {
                 let newNameValues = segment["values"][key]["name" + postfix];
                 let elementValues = {};
                 elementValues["name"] = newName;
                 elementValues["alias"] = (postfix === "_en") ? segment["values"][key]["name"] : segment["values"][key]["name_en"];
                 elementValues["description"] = segment.description;
-                newElement[newNameValues.toLowerCase()] = elementValues;
+                newElement["values"].push(elementValues);
             }
             this.systemEnum[newName.toLowerCase()] = newElement;
         }
@@ -432,6 +433,7 @@ export class Global {
                 newElement["name"] = newName;
                 newElement["alias"] = (postfix === "_en") ? segment["name"] : segment["name_en"];
                 newElement["description"] = undefined;
+                newElement["values"] = [];
                 newElement["oscript_description"] = segment.description;
                 for (let key in segment["values"]) {
                     let newNameValues = segment["values"][key]["name" + postfix];
@@ -439,7 +441,7 @@ export class Global {
                     elementValues["name"] = newName;
                     elementValues["alias"] = (postfix === "_en") ? segment["values"][key]["name"] : segment["values"][key]["name_en"];
                     elementValues["description"] = segment.description;
-                    newElement[newNameValues.toLowerCase()] = elementValues;
+                    newElement["values"].push(elementValues);
                 }
                 this.systemEnum[newName.toLowerCase()] = newElement;
             }

@@ -12,7 +12,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
             let bucket = new Array<vscode.CompletionItem>();
             if (position.character > 0) {
                 let char = document.getText(new vscode.Range(
-                                            new vscode.Position(position.line, position.character - 1), position));
+                    new vscode.Position(position.line, position.character - 1), position));
                 if (char === "." && position.character > 1) {
                     bucket = this.getDotComplection(document, position);
                     return resolve(bucket);
@@ -121,16 +121,16 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
     private getAllWords(word: string, source: string, completions: vscode.CompletionItem[]): vscode.CompletionItem[] {
         let wordMatch = this.getRegExp(word);
         for (let S = source.split(/[^а-яёА-ЯЁ_a-zA-Z]+/), _ = 0; _ < S.length; _++) {
-        let sourceWord: string = S[_].trim();
-        if (!this.added[sourceWord.toLowerCase()] && sourceWord.length > 5 && wordMatch.exec(sourceWord)) {
-            if (sourceWord === word) {
-                continue;
+            let sourceWord: string = S[_].trim();
+            if (!this.added[sourceWord.toLowerCase()] && sourceWord.length > 5 && wordMatch.exec(sourceWord)) {
+                if (sourceWord === word) {
+                    continue;
+                }
+                this.added[sourceWord.toLowerCase()] = true;
+                let completion = new vscode.CompletionItem(sourceWord);
+                completion.kind = vscode.CompletionItemKind.Text;
+                completions.push(completion);
             }
-            this.added[sourceWord.toLowerCase()] = true;
-            let completion = new vscode.CompletionItem(sourceWord);
-            completion.kind = vscode.CompletionItemKind.Text;
-            completions.push(completion);
-        }
         }
         return completions;
     }
@@ -211,7 +211,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
         return completions;
     }
 
-    private getDotComplection(document: vscode.TextDocument, position: vscode.Position ): vscode.CompletionItem[] {
+    private getDotComplection(document: vscode.TextDocument, position: vscode.Position): vscode.CompletionItem[] {
         let result = new Array<vscode.CompletionItem>();
         let basePosition = new vscode.Position(position.line, position.character - 2);
         let wordRange = document.getWordRangeAtPosition(basePosition);
@@ -225,6 +225,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
             }
             let queryResult: Array<any> = this._global.querydef(wordAtPosition + "\\.");
             result = this.customDotComplection(queryResult, wordAtPosition, result);
+            this.checkSystemEnums(wordAtPosition, result);
             // Получим все общие модули, у которых не заканчивается на точку.
             queryResult = this._global.querydef(wordAtPosition, false, false);
             for (let index = 0; index < queryResult.length; index++) {
@@ -283,6 +284,21 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
             }
         }
         return result;
+    }
+
+    private checkSystemEnums(wordAtPosition: string, result): void {
+        let systemEnums = this._global.systemEnum;
+        for (let key in systemEnums) {
+            let systemEnum = systemEnums[key];
+            if (wordAtPosition.toLowerCase() === systemEnum.name.toLowerCase() ||
+                wordAtPosition.toLowerCase === systemEnum.alias.toLowerCase()) {
+                let values = systemEnum.values;
+                for (let value of values) {
+                let item: vscode.CompletionItem = new vscode.CompletionItem(value.alias, vscode.CompletionItemKind.Enum);
+                result.push(item);
+                }
+            }
+        }
     }
 
 }
