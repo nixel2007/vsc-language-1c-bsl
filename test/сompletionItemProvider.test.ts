@@ -171,6 +171,7 @@ describe("Completion", () => {
         completions.should.matchAny((value: vscode.CompletionItem) => {
             value.should.has.a.key("label").which.is.equal("ANSI");
             value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Enum);
+            value.should.has.a.key("documentation").which.match(/ANSI/);
         });
 
     }));

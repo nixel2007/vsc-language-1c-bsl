@@ -417,7 +417,7 @@ export class Global {
                 let elementValues = {};
                 elementValues["name"] = newName;
                 elementValues["alias"] = (postfix === "_en") ? segment["values"][key]["name"] : segment["values"][key]["name_en"];
-                elementValues["description"] = segment.description;
+                elementValues["description"] = segment["values"][key].description;
                 newElement["values"].push(elementValues);
             }
             this.systemEnum[newName.toLowerCase()] = newElement;
@@ -440,7 +440,7 @@ export class Global {
                     let elementValues = {};
                     elementValues["name"] = newName;
                     elementValues["alias"] = (postfix === "_en") ? segment["values"][key]["name"] : segment["values"][key]["name_en"];
-                    elementValues["description"] = segment.description;
+                    elementValues["description"] = segment["values"][key].description;
                     newElement["values"].push(elementValues);
                 }
                 this.systemEnum[newName.toLowerCase()] = newElement;

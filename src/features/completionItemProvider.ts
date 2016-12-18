@@ -294,8 +294,9 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                 wordAtPosition.toLowerCase === systemEnum.alias.toLowerCase()) {
                 let values = systemEnum.values;
                 for (let value of values) {
-                let item: vscode.CompletionItem = new vscode.CompletionItem(value.alias, vscode.CompletionItemKind.Enum);
-                result.push(item);
+                    let item: vscode.CompletionItem = new vscode.CompletionItem(value.alias, vscode.CompletionItemKind.Enum);
+                    item.documentation = value.description;
+                    result.push(item);
                 }
             }
         }
