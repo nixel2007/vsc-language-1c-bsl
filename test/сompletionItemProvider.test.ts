@@ -250,7 +250,7 @@ describe("Completion", () => {
         completion.kind.should.be.equal(vscode.CompletionItemKind.Function);
 
     }));
-    
+
     it("should show metadata", mAsync(async (done) => {
 
         await addText("Документы.");
