@@ -100,8 +100,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                             word = arrayName.join(".");
                         }
                         let queryResult: Array<any> = this._global.querydef(word);
-                        let arrayCompletion = new Array<vscode.CompletionItem>();
-                        bucket.concat(this.customDotComplection(queryResult, word, arrayCompletion));
+                        this.customDotComplection(queryResult, word, bucket);
                     }
                     return resolve(bucket);
                 } else {

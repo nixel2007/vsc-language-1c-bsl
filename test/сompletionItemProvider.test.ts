@@ -221,6 +221,21 @@ describe("Completion", () => {
 
     }));
 
+    it("should find methods in manager module by part of the method name", mAsync(async (done) => {
+
+        await addText("Документы.Document.ПроцедураМодуляМен");
+
+        const completionList = await getCompletionListFromCurrentPosition();
+        const completions = completionList.items;
+
+        completions.should.have.length(1);
+
+        const completion = completions[0];
+        completion.label.should.be.equal("ПроцедураМодуляМенеджера");
+        completion.kind.should.be.equal(vscode.CompletionItemKind.Function);
+
+    }));
+
     it("should show work with en-keywords", mAsync(async (done) => {
 
         await addText("Documents.Document.");
