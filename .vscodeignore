@@ -8,5 +8,7 @@ src/**
 **/*.map
 .gitignore
 .travis.yml
+coverconfig.json
+sonar-project.properties
 tsconfig.json
 tslint.json

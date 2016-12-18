@@ -1,12 +1,16 @@
 sudo: false
 
-os:
-  - osx
-  - linux
+dist: trusty
 
 language: node_js
 node_js:
   - "node"
+
+addons:
+  sonarqube: true
+
+jdk:
+  - oraclejdk8
 
 before_install: 
   - if [ $TRAVIS_OS_NAME == "linux" ]; then 
@@ -19,8 +23,14 @@ install:
   - npm install
   - npm run vscode:prepublish
 
+cache:
+  directories:
+    - '$HOME/.m2/repository'
+    - '$HOME/.sonar/cache'
+
 script:
-  - npm test --silent 
+  - export SONARQUBE_SKIPPED=false
+  - ./travis.sh 
 
 after_script:
   - bash <(curl -s https://codecov.io/bash)
