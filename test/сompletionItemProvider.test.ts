@@ -30,6 +30,7 @@ describe("Completion", () => {
     before(mAsync(async (done) => {
         const uriEmptyFile = vscode.Uri.file(path.join(fixturePath, "emptyFile.bsl"));
         textDocument = await newTextDocument(uriEmptyFile);
+        await globals.waitForCacheUpdate();
     }));
 
     beforeEach(mAsync(async (done) => {
@@ -147,21 +148,21 @@ describe("Completion", () => {
 
     }));
 
-    xit("should show global enums values `=` sign", mAsync(async (done) => {
+    it("should show global enums", mAsync(async (done) => {
 
-        await addText("А = КодировкаТекста.");
+        await addText("КодировкаТ");
 
         const completionList = await getCompletionListFromCurrentPosition();
         const completions = completionList.items;
 
         completions.should.matchAny((value: vscode.CompletionItem) => {
-            value.should.has.a.key("label").which.is.equal("ANSI");
-            value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Value);
+            value.should.has.a.key("label").which.is.equal("КодировкаТекста");
+            value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Enum);
         });
 
     }));
 
-    xit("should show global enums values", mAsync(async (done) => {
+    it("should show global enums values", mAsync(async (done) => {
 
         await addText("КодировкаТекста.");
 
@@ -170,7 +171,23 @@ describe("Completion", () => {
 
         completions.should.matchAny((value: vscode.CompletionItem) => {
             value.should.has.a.key("label").which.is.equal("ANSI");
-            value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Value);
+            value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Enum);
+            value.should.has.a.key("documentation").which.match(/ANSI/);
+        });
+
+    }));
+
+    it("should show part of global enums values", mAsync(async (done) => {
+
+        await addText("КодировкаТекста.An");
+
+        const completionList = await getCompletionListFromCurrentPosition();
+        const completions = completionList.items;
+
+        completions.should.matchAny((value: vscode.CompletionItem) => {
+            value.should.has.a.key("label").which.is.equal("ANSI");
+            value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Enum);
+            value.should.has.a.key("documentation").which.match(/ANSI/);
         });
 
     }));
@@ -204,6 +221,21 @@ describe("Completion", () => {
 
     }));
 
+    it("should find methods in manager module by part of the method name", mAsync(async (done) => {
+
+        await addText("Документы.Document.ПроцедураМодуляМен");
+
+        const completionList = await getCompletionListFromCurrentPosition();
+        const completions = completionList.items;
+
+        completions.should.have.length(1);
+
+        const completion = completions[0];
+        completion.label.should.be.equal("ПроцедураМодуляМенеджера");
+        completion.kind.should.be.equal(vscode.CompletionItemKind.Function);
+
+    }));
+
     it("should show work with en-keywords", mAsync(async (done) => {
 
         await addText("Documents.Document.");
@@ -218,7 +250,7 @@ describe("Completion", () => {
         completion.kind.should.be.equal(vscode.CompletionItemKind.Function);
 
     }));
-    
+
     it("should show metadata", mAsync(async (done) => {
 
         await addText("Документы.");
