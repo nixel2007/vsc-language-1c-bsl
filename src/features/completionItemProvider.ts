@@ -214,8 +214,8 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                 let full = completionDict[name];
                 let completion = new vscode.CompletionItem(full.name);
                 completion.kind = vscode.CompletionItemKind.Enum;
-                if (full["description"]) {
-                    completion.documentation = full["description"];
+                if (full.description) {
+                    completion.documentation = full.description;
                 }
                 completions.push(completion);
                 this.added[name.toLowerCase()] = true;
@@ -309,6 +309,9 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
         }
         let systemEnums = this._global.systemEnum;
         for (let key in systemEnums) {
+            if (!systemEnums.hasOwnProperty(key)) {
+                continue;
+            }
             let systemEnum = systemEnums[key];
             if (enumName.toLowerCase() === systemEnum.name.toLowerCase() ||
                 enumName.toLowerCase === systemEnum.alias.toLowerCase()) {
@@ -319,7 +322,10 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                             continue;
                         }
                     }
-                    let item: vscode.CompletionItem = new vscode.CompletionItem(value.alias, vscode.CompletionItemKind.Enum);
+                    let item: vscode.CompletionItem = new vscode.CompletionItem(
+                        value.alias,
+                        vscode.CompletionItemKind.Enum
+                    );
                     item.documentation = value.description;
                     result.push(item);
                 }
