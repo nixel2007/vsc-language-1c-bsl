@@ -91,6 +91,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                             });
                         }
                     } else {
+                        this.checkSystemEnums(word, bucket);
                         let arrayObjectName = word.split(".").slice(0, -1);
                         word = arrayObjectName.join(".");
                         if (this._global.toreplaced[word.split(".")[0]]) {
@@ -100,7 +101,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                         }
                         let queryResult: Array<any> = this._global.querydef(word);
                         let arrayCompletion = new Array<vscode.CompletionItem>();
-                        bucket = this.customDotComplection(queryResult, word, arrayCompletion);
+                        bucket.concat(this.customDotComplection(queryResult, word, arrayCompletion));
                     }
                     return resolve(bucket);
                 } else {
@@ -300,13 +301,25 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
     }
 
     private checkSystemEnums(wordAtPosition: string, result): void {
+        let enumName = wordAtPosition;
+        let wordsArray = wordAtPosition.split(".");
+        let wordMatch;
+        if (wordsArray.length > 1) {
+            enumName = wordsArray[0];
+            wordMatch = this.getRegExp(wordsArray[1]);
+        }
         let systemEnums = this._global.systemEnum;
         for (let key in systemEnums) {
             let systemEnum = systemEnums[key];
-            if (wordAtPosition.toLowerCase() === systemEnum.name.toLowerCase() ||
-                wordAtPosition.toLowerCase === systemEnum.alias.toLowerCase()) {
+            if (enumName.toLowerCase() === systemEnum.name.toLowerCase() ||
+                enumName.toLowerCase === systemEnum.alias.toLowerCase()) {
                 let values = systemEnum.values;
                 for (let value of values) {
+                    if (wordMatch) {
+                        if (!wordMatch.exec(value.alias)) {
+                            continue;
+                        }
+                    }
                     let item: vscode.CompletionItem = new vscode.CompletionItem(value.alias, vscode.CompletionItemKind.Enum);
                     item.documentation = value.description;
                     result.push(item);
