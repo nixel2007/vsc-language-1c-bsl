@@ -30,6 +30,7 @@ describe("Completion", () => {
     before(mAsync(async (done) => {
         const uriEmptyFile = vscode.Uri.file(path.join(fixturePath, "emptyFile.bsl"));
         textDocument = await newTextDocument(uriEmptyFile);
+        await globals.waitForCacheUpdate();
     }));
 
     beforeEach(mAsync(async (done) => {

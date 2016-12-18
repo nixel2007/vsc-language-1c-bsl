@@ -81,6 +81,17 @@ export class Global {
         return moduleStr;
     }
 
+    public async waitForCacheUpdate() {
+        
+        return new Promise( (callback) => {
+            if (this.cacheUpdates) {
+                Promise.resolve(undefined);
+            }
+            setTimeout(callback, 100)}
+        );
+
+    }    
+    
     public addtocachefiles(files: Array<string>, rootPath: string): any {
         let filesLength = files.length;
         let substrIndex = (process.platform === "win32") ? 8 : 7;
