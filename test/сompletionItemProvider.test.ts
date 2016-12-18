@@ -147,15 +147,15 @@ describe("Completion", () => {
 
     }));
 
-    it("should show global enums values `=` sign", mAsync(async (done) => {
+    it("should show global enums", mAsync(async (done) => {
 
-        await addText("А = КодировкаТекста.");
+        await addText("КодировкаТ");
 
         const completionList = await getCompletionListFromCurrentPosition();
         const completions = completionList.items;
 
         completions.should.matchAny((value: vscode.CompletionItem) => {
-            value.should.has.a.key("label").which.is.equal("ANSI");
+            value.should.has.a.key("label").which.is.equal("КодировкаТекста");
             value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Enum);
         });
 

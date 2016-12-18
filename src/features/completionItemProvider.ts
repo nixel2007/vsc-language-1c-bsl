@@ -208,6 +208,19 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                 this.added[name.toLowerCase()] = true;
             }
         }
+        completionDict = this._global.systemEnum;
+        for (let name in completionDict) {
+            if (wordMatch.exec(name)) {
+                let full = completionDict[name];
+                let completion = new vscode.CompletionItem(full.name);
+                completion.kind = vscode.CompletionItemKind.Enum;
+                if (full["description"]) {
+                    completion.documentation = full["description"];
+                }
+                completions.push(completion);
+                this.added[name.toLowerCase()] = true;
+            }
+        }
         return completions;
     }
 
