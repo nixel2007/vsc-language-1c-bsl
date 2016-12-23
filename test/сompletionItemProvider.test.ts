@@ -4,7 +4,6 @@ import * as vscode from "vscode";
 
 import { addText, fixturePath, mAsync, newTextDocument } from "./helpers";
 
-import CompletionItemProvider from "../src/features/completionItemProvider";
 import { Global } from "../src/global";
 import * as vscAdapter from "../src/vscAdapter";
 
