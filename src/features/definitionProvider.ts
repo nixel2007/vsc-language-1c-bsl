@@ -2,10 +2,15 @@ import * as vscode from "vscode";
 import AbstractProvider from "./abstractProvider";
 
 export default class GlobalDefinitionProvider extends AbstractProvider implements vscode.DefinitionProvider {
-    public provideDefinition(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Thenable<vscode.Location> {
+    public provideDefinition(
+        document: vscode.TextDocument,
+        position: vscode.Position,
+        token: vscode.CancellationToken
+    ): Thenable<vscode.Location[]> {
         let word = document.getText(document.getWordRangeAtPosition(position)).split(/\r?\n/)[0];
         this._global.hoverTrue = false;
         return new Promise((resolve, reject) => {
+            let result: vscode.Location[] = [];
             let added = {};
             let filename = document.fileName;
             let wordPosition = document.getWordRangeAtPosition(position);
@@ -21,7 +26,7 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                 }
             }
             if (this._global.globalfunctions[wordAtPosition.toLowerCase()]) {
-                return Promise.resolve(undefined);
+                return resolve(result);
             }
             let module = "";
             if (wordAtPosition.indexOf(".") > 0) {
@@ -31,7 +36,7 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                 module = dotArray.join(".");
                 // }
             }
-            let d: Array<any> = new Array();
+            let d: any[] = new Array();
             if (module.length === 0) {
                 let source = document.getText();
                 d = this._global.getCacheLocal(filename, wordAtPosition, source, false, false);
@@ -52,8 +57,7 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
             }
             if (d) {
                 let bucket = new Array<any>();
-                for (let index = 0; index < d.length; index++) {
-                    let element = d[index];
+                for (let element of d) {
                     if (module.length !== 0 && element._method.IsExport === false) {
                         continue;
                     }
@@ -61,35 +65,15 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                     //     continue;
                     // }
                     added[element.name] = true;
-                    let moduleDescription = (module && module.length > 0) ? module + "." : "";
-                    let result = {
-                        "path": (element.filename) ? vscode.Uri.file(element.filename) : document.uri,
-                        "line": element.line,
-                        "description": element.description,
-                        "label": moduleDescription + element.name,
-                        "isproc": element.isproc
-                    };
-                    bucket.push(result);
+                    let location =
+                            new vscode.Location(
+                                (element.filename) ? vscode.Uri.file(element.filename) : document.uri,
+                                new vscode.Position(element.line, (element.isproc ? 9 : 7) + 1)
+                            );
+                    result.push(location);
                 }
-                if (bucket.length === 1) {
-                    let location: vscode.Location =
-                        new vscode.Location(bucket[0].path, new vscode.Position(bucket[0].line, (bucket[0].isproc ? 9 : 7) + 1));
-                    return resolve(location);
-                } else if (bucket.length === 0) {
-                    return resolve(undefined);
-                } else if (bucket.length > 1) {
-                    let results: vscode.Location[] = Array<vscode.Location>();
-                    for (let index = 0; index < bucket.length; index++) {
-                        let element = bucket[index];
-                        let location: vscode.Location =
-                            new vscode.Location(element.path, new vscode.Position(element.line, (element.isproc ? 9 : 7) + 1));
-                        results.push(location);
-                    }
-                    return resolve(results);
-                }
-            } else {
-                Promise.resolve(undefined);
             }
+            return resolve(result);
         });
     }
 }
