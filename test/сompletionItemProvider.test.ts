@@ -257,10 +257,10 @@ describe("Completion", () => {
         const completionList = await getCompletionListFromCurrentPosition();
         const completions = completionList.items;
 
-        completions.should.have.length(1);
+        completions.should.have.length(2);
 
         const completion = completions[0];
-        completion.label.should.be.equal("Document");
+        completion.label.should.be.equal("Definition");
         completion.kind.should.be.equal(vscode.CompletionItemKind.Class);
 
     }));
