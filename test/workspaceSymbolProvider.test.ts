@@ -11,7 +11,7 @@ const globals = new Global(vscAdapter);
 
 let textDocument: vscode.TextDocument;
 
-describe("Document symbols", () => {
+describe("Workspace symbols", () => {
 
     before(mAsync(async (done) => {
         const uriEmptyFile = vscode.Uri.file(
