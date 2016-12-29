@@ -367,7 +367,7 @@ export class Global {
             if (this.cacheUpdates) {
                 Promise.resolve(undefined);
             }
-            setTimeout(callback, 100);
+            setTimeout(callback, 1000);
         });
     }
 
@@ -529,7 +529,7 @@ export class Global {
         let moduleRegexp = new RegExp("^" + module + "$", "i");
         function filterByModule(obj) {
             if (module && module.length > 0) {
-                if (moduleRegexp.exec(obj.module) !== undefined) {
+                if (moduleRegexp.exec(obj.module) !== null) {
                     return true;
                 } else {
                     return false;
