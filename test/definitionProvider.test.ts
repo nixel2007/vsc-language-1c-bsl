@@ -7,19 +7,21 @@ import { addText, fixturePath, mAsync, newTextDocument } from "./helpers";
 import { Global } from "../src/global";
 import * as vscAdapter from "../src/vscAdapter";
 
-const globals = new Global(vscAdapter);
+const globals = Global.create(vscAdapter);
 
 let textDocument: vscode.TextDocument;
 
 describe("Definitions", () => {
 
-    before(mAsync(async (done) => {
+    before(async function (done) {
+        this.timeout(10000);
         const uriEmptyFile = vscode.Uri.file(
             path.join(fixturePath, "emptyFile.bsl")
         );
         textDocument = await newTextDocument(uriEmptyFile);
         await globals.waitForCacheUpdate();
-    }));
+        done();
+    });
 
     beforeEach(mAsync(async (done) => {
         await vscode.window.activeTextEditor.edit((editBuilder: vscode.TextEditorEdit) => {

@@ -9,6 +9,16 @@ let FileQueue = require("filequeue");
 let fq = new FileQueue(500);
 
 export class Global {
+
+    public static create(adapter?: any): Global {
+        if (!Global.instance) {
+           Global.instance = new Global(adapter);
+        }
+        return Global.instance;
+    }
+
+    private static instance: Global;
+
     public cache: any;
     public db: any;
     public dbcalls: Map<string, Array<{}>>;
