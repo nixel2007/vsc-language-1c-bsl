@@ -367,7 +367,7 @@ export class Global {
             if (this.cacheUpdates) {
                 Promise.resolve(undefined);
             }
-            setTimeout(callback, 1000);
+            setTimeout(callback, 100);
         });
     }
 
