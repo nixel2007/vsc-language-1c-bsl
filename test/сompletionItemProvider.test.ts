@@ -4,11 +4,10 @@ import * as vscode from "vscode";
 
 import { addText, fixturePath, mAsync, newTextDocument } from "./helpers";
 
-import CompletionItemProvider from "../src/features/completionItemProvider";
 import { Global } from "../src/global";
 import * as vscAdapter from "../src/vscAdapter";
 
-const globals = new Global(vscAdapter);
+const globals = Global.create(vscAdapter);
 
 let textDocument: vscode.TextDocument;
 
@@ -258,10 +257,10 @@ describe("Completion", () => {
         const completionList = await getCompletionListFromCurrentPosition();
         const completions = completionList.items;
 
-        completions.should.have.length(1);
+        completions.should.have.length(2);
 
         const completion = completions[0];
-        completion.label.should.be.equal("Document");
+        completion.label.should.be.equal("Definition");
         completion.kind.should.be.equal(vscode.CompletionItemKind.Class);
 
     }));

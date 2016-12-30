@@ -9,6 +9,16 @@ let FileQueue = require("filequeue");
 let fq = new FileQueue(500);
 
 export class Global {
+
+    public static create(adapter?: any): Global {
+        if (!Global.instance) {
+           Global.instance = new Global(adapter);
+        }
+        return Global.instance;
+    }
+
+    private static instance: Global;
+
     public cache: any;
     public db: any;
     public dbcalls: Map<string, Array<{}>>;
@@ -529,7 +539,7 @@ export class Global {
         let moduleRegexp = new RegExp("^" + module + "$", "i");
         function filterByModule(obj) {
             if (module && module.length > 0) {
-                if (moduleRegexp.exec(obj.module) !== undefined) {
+                if (moduleRegexp.exec(obj.module) !== null) {
                     return true;
                 } else {
                     return false;

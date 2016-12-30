@@ -25,7 +25,7 @@ import * as bslGlobals from "./features/bslGlobals";
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
-    const global = new Global(vscAdapter);
+    const global = Global.create(vscAdapter);
 
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(BSL_MODE, new CompletionItemProvider(global), ".", "="));
     context.subscriptions.push(vscode.languages.registerDefinitionProvider(BSL_MODE, new DefinitionProvider(global)));
