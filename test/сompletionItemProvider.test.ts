@@ -7,7 +7,7 @@ import { addText, fixturePath, mAsync, newTextDocument } from "./helpers";
 import { Global } from "../src/global";
 import * as vscAdapter from "../src/vscAdapter";
 
-const globals = Global.create(vscAdapter);;
+const globals = Global.create(vscAdapter);
 
 let textDocument: vscode.TextDocument;
 
