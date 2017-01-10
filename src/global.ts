@@ -1,3 +1,4 @@
+import * as cp from "cross-spawn";
 import * as path from "path";
 
 import * as bslglobals from "./features/bslGlobals";
@@ -447,6 +448,34 @@ export class Global {
             this.dbcalls = new Map();
             let searchPattern = basePath !== "" ? basePath.substr(2) + "/**" : "**/*.{bsl,os}";
             this.findFilesForCache(searchPattern, rootPath);
+
+            const args: string[] = [];
+            args.push("get");
+            args.push("lib.system");
+
+            let options = {
+                cwd: path.dirname(rootPath),
+                env: process.env
+            };
+            let result = "";
+            const oscript_config = cp.spawn("oscript-config", args, options);
+            oscript_config.stderr.on("data", (buffer) => {
+                result += buffer.toString();
+            });
+            oscript_config.stdout.on("data", (buffer) => {
+                result += buffer.toString();
+            });
+            oscript_config.on("close", () => {
+                try {
+                    result = result.trim();
+                    let lines = result.split(/\r?\n/);
+                    for (const line of lines) {
+                        this.findFilesForCache("**/*.{bsl,os}", line);
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            });
         }
     };
 

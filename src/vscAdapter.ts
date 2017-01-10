@@ -1,3 +1,4 @@
+import * as glob from "glob";
 import * as vscode from "vscode";
 
 export function postMessage(description: string, interval?: number) {
@@ -62,12 +63,18 @@ export function fullNameRecursor(word: string, document: vscode.TextDocument, ra
     }
 
 export function findFilesForCache(searchPattern: string, rootPath: string) {
-    let files = vscode.workspace.findFiles(searchPattern, "");
-    files.then(
-        (value) => {
-            this.addtocachefiles(value, rootPath);
-        },
-        (reason) => {
-            console.log(reason);
-        });
+    let globOptions: glob.IOptions = {};
+    globOptions.dot = true;
+    globOptions.cwd = rootPath;
+    globOptions.nocase = true;
+    // glob >=7.0.0 contains this property
+    // tslint:disable-next-line:no-string-literal
+    globOptions["absolute"] = true;
+    glob(searchPattern, globOptions, (err, files) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+        this.addtocachefiles(files, rootPath);
+    });
 }

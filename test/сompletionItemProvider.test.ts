@@ -285,4 +285,19 @@ describe("Completion", () => {
         });
 
     }));
+
+    it.only("should show completion on oscript libraries", mAsync(async (done) => {
+
+        await addText("СтроковыеФ");
+
+        const completionList = await getCompletionListFromCurrentPosition();
+        const completions = completionList.items;
+
+        completions.should.have.length(1);
+
+        const completion = completions[0];
+        completion.label.should.be.equal("СтроковыеФункции");
+        completion.kind.should.be.equal(vscode.CompletionItemKind.Module);
+
+    }));
 });
