@@ -104,7 +104,7 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
                for (let i = 0; i < entry.length; i++) {
                    let signatureElement = entry[i];
                    let arrayFilename = signatureElement.filename.split("/");
-                   if (arrayFilename[arrayFilename.length - 4] !== "CommonModules" && !signatureElement.filename.endsWith("ManagerModule.bsl")) {
+                   if (!signatureElement.oscriptLib && arrayFilename[arrayFilename.length - 4] !== "CommonModules" && !signatureElement.filename.endsWith("ManagerModule.bsl")) {
                        continue;
                    }
                    if (signatureElement._method.IsExport) {
