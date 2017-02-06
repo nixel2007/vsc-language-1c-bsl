@@ -286,7 +286,7 @@ describe("Completion", () => {
 
     }));
 
-    it.only("should show completion on oscript libraries", mAsync(async (done) => {
+    it("should show completion of oscript modules", mAsync(async (done) => {
 
         await addText("СтроковыеФ");
 
@@ -297,7 +297,22 @@ describe("Completion", () => {
 
         const completion = completions[0];
         completion.label.should.be.equal("СтроковыеФункции");
-        completion.kind.should.be.equal(vscode.CompletionItemKind.Module);
+        completion.kind.should.be.equal(vscode.CompletionItemKind.Class);
+
+    }));
+
+    it("should show completion of functions in oscript modules", mAsync(async (done) => {
+
+        await addText("СтроковыеФункции.");
+
+        const completionList = await getCompletionListFromCurrentPosition();
+        const completions = completionList.items;
+
+        completions.should.matchAny((value: vscode.CompletionItem) => {
+            value.should.has.a.key("label").which.is.equal("РазложитьСтрокуВМассивПодстрок");
+            value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Function);
+            value.should.has.a.key("documentation").which.match(/Разбивает строку/);
+        });
 
     }));
 });
