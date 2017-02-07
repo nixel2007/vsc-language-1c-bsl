@@ -61,85 +61,88 @@ class BackwardIterator {
 
 export default class GlobalSignatureHelpProvider extends AbstractProvider implements SignatureHelpProvider {
 
-    public provideSignatureHelp(document: TextDocument, position: Position, token: CancellationToken): SignatureHelp {
-        let iterator = new BackwardIterator(document, position.character - 1, position.line);
+    public provideSignatureHelp(document: TextDocument, position: Position, token: CancellationToken): Thenable<SignatureHelp> {
+        
+        return new Promise((resolve, reject) => {
+            let iterator = new BackwardIterator(document, position.character - 1, position.line);
 
-        let paramCount = this.readArguments(iterator);
-        if (paramCount < 0) {
-            return undefined;
-        }
-
-        let ident = this.readIdent(iterator);
-        if (!ident) {
-            return undefined;
-        }
-
-        let entry = this._global.globalfunctions[ident.toLowerCase()];
-        if (!entry) {
-            let module = "";
-            if (ident.indexOf(".") > 0) {
-                let dotArray: Array<string> = ident.split(".");
-                ident = dotArray.pop();
-                if (this._global.toreplaced[dotArray[0]]) {
-                    dotArray[0] = this._global.toreplaced[dotArray[0]];
-                }
-                module = dotArray.join(".");
+            let paramCount = this.readArguments(iterator);
+            if (paramCount < 0) {
+                return resolve(undefined);
             }
-            if (module.length === 0) {
-                let source = document.getText();
-                entry = this._global.getCacheLocal(document.fileName, ident, source, false, false);
-            } else {
-                entry = this._global.query(ident, module, false, false);
+
+            let ident = this.readIdent(iterator);
+            if (!ident) {
+                return resolve(undefined);
             }
-            // Показ сигнатур по имени функции
-            // if (entry.length === 0) {
-            //     entry = this._global.query(ident, "", false, false);
-            // }
+
+            let entry = this._global.globalfunctions[ident.toLowerCase()];
             if (!entry) {
-                return undefined;
-            } else if (module.length === 0) {
-                entry = entry[0];
-                return this.GetSignature(entry, paramCount);
-            } else {
-               for (let i = 0; i < entry.length; i++) {
-                   let signatureElement = entry[i];
-                   let arrayFilename = signatureElement.filename.split("/");
-                   if (!signatureElement.oscriptLib && arrayFilename[arrayFilename.length - 4] !== "CommonModules" && !signatureElement.filename.endsWith("ManagerModule.bsl")) {
-                       continue;
-                   }
-                   if (signatureElement._method.IsExport) {
-                       return this.GetSignature(signatureElement, paramCount);
-                   }
-               }
-               return undefined;
-            // }
+                let module = "";
+                if (ident.indexOf(".") > 0) {
+                    let dotArray: Array<string> = ident.split(".");
+                    ident = dotArray.pop();
+                    if (this._global.toreplaced[dotArray[0]]) {
+                        dotArray[0] = this._global.toreplaced[dotArray[0]];
+                    }
+                    module = dotArray.join(".");
+                }
+                if (module.length === 0) {
+                    let source = document.getText();
+                    entry = this._global.getCacheLocal(document.fileName, ident, source, false, false);
+                } else {
+                    entry = this._global.query(ident, module, false, false);
+                }
+                // Показ сигнатур по имени функции
+                // if (entry.length === 0) {
+                //     entry = this._global.query(ident, "", false, false);
+                // }
+                if (!entry) {
+                    return resolve(undefined);
+                } else if (module.length === 0) {
+                    entry = entry[0];
+                    return resolve(this.GetSignature(entry, paramCount));
+                } else {
+                    for (let i = 0; i < entry.length; i++) {
+                        let signatureElement = entry[i];
+                        let arrayFilename = signatureElement.filename.split("/");
+                        if (!signatureElement.oscriptLib && arrayFilename[arrayFilename.length - 4] !== "CommonModules" && !signatureElement.filename.endsWith("ManagerModule.bsl")) {
+                            continue;
+                        }
+                        if (signatureElement._method.IsExport) {
+                            return resolve(this.GetSignature(signatureElement, paramCount));
+                        }
+                    }
+                    return resolve(undefined);
+                    // }
+                }
             }
-        }
-        let signature = (!entry.signature) ? entry.oscript_signature : entry.signature;
-        if  (!signature) { return undefined; }
-        let ret = new SignatureHelp();
-        for (let element in signature) {
-            let paramsString = signature[element].СтрокаПараметров;
-            let signatureInfo = new SignatureInformation(entry.name + paramsString, "");
+            let signature = (!entry.signature) ? entry.oscript_signature : entry.signature;
+            if (!signature) { return resolve(undefined); }
+            let ret = new SignatureHelp();
+            for (let element in signature) {
+                let paramsString = signature[element].СтрокаПараметров;
+                let signatureInfo = new SignatureInformation(entry.name + paramsString, "");
 
-            let re = /([\wа-яА-Я]+)\??:\s+[а-яА-Я\w_\.\|]+/g;
-            let match: RegExpExecArray = undefined;
-            while ((match = re.exec(paramsString))) {
-                signatureInfo.parameters.push({ label: match[0], documentation: signature[element].Параметры[match[1]] });
+                let re = /([\wа-яА-Я]+)\??:\s+[а-яА-Я\w_\.\|]+/g;
+                let match: RegExpExecArray = undefined;
+                while ((match = re.exec(paramsString))) {
+                    signatureInfo.parameters.push({ label: match[0], documentation: signature[element].Параметры[match[1]] });
+                }
+
+                if (signatureInfo.parameters.length - 1 < paramCount) {
+                    continue;
+                }
+                ret.signatures.push(signatureInfo);
+                ret.activeSignature = 0;
+                ret.activeParameter = Math.min(paramCount, signatureInfo.parameters.length - 1);
+
             }
-
-            if (signatureInfo.parameters.length - 1 < paramCount) {
-                continue;
-            }
-            ret.signatures.push(signatureInfo);
-            ret.activeSignature = 0;
-            ret.activeParameter = Math.min(paramCount, signatureInfo.parameters.length - 1);
-
-        }
-        return ret;
+            return resolve(ret);
+        });    
     }
 
-    private GetSignature(entry, paramCount) {
+    private GetSignature(entry, paramCount): SignatureHelp {
         if (entry._method.Params.length !== 0) {
             let arraySignature = this._global.GetSignature(entry);
             let ret = new SignatureHelp();
