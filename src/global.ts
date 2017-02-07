@@ -754,51 +754,64 @@ export class Global {
                 }
             }
             const packageDef = result["package-def"];
+            let modules = [];
+            let classes = [];
             if (packageDef.hasOwnProperty("module")) {
-                let modules;
                 if (packageDef.module instanceof Array) {
-                    modules = packageDef.module;
+                    for (const module of packageDef.module) {
+                        modules.push(module)
+                    }
                 } else {
-                    modules = Array.of(packageDef.module);
+                    modules.push(packageDef.module);
                 }
-                for (const module of modules) {
-                    const fullpath = path.join(path.dirname(libConfig), module.$.file);
-                    fq.readFile(fullpath, { encoding: "utf8" }, (err, source) => {
-                        if (err) {
-                            throw err;
-                        }
-                        let moduleStr = module.$.name;
-                        source = source.replace(/\r\n?/g, "\n");
-                        let parsesModule = new Parser().parse(source);
-                        source = undefined;
-                        let entries = parsesModule.getMethodsTable().find();
-                        // if (parsesModule.context.CallsPosition.length > 0) {
-                        //     this.updateReferenceCalls(parsesModule.context.CallsPosition, "GlobalModuleText", fullpath);
+            }
+            if (packageDef.hasOwnProperty("class")) {
+                if (packageDef.class instanceof Array) {
+                    for (const clazz of packageDef.class) {
+                        classes.push(clazz)
+                    }
+                } else {
+                    classes.push(packageDef.class);
+                }
+            }       
+            // TODO: Пока обрабатываем классы так же как модули
+            modules = modules.concat(classes);
+            for (const module of modules) {
+                const fullpath = path.join(path.dirname(libConfig), module.$.file);
+                fq.readFile(fullpath, { encoding: "utf8" }, (err, source) => {
+                    if (err) {
+                        throw err;
+                    }
+                    let moduleStr = module.$.name;
+                    source = source.replace(/\r\n?/g, "\n");
+                    let parsesModule = new Parser().parse(source);
+                    source = undefined;
+                    let entries = parsesModule.getMethodsTable().find();
+                    // if (parsesModule.context.CallsPosition.length > 0) {
+                    //     this.updateReferenceCalls(parsesModule.context.CallsPosition, "GlobalModuleText", fullpath);
+                    // }
+                    parsesModule = undefined;
+                    for (let item of entries) {
+                        let method = { name: item.name, endline: item.endline, context: item.context, isproc: item.isproc };
+                        // if (item._method.CallsPosition.length > 0) {
+                        //     this.updateReferenceCalls(item._method.CallsPosition, method, fullpath);
                         // }
-                        parsesModule = undefined;
-                        for (let item of entries) {
-                            let method = { name: item.name, endline: item.endline, context: item.context, isproc: item.isproc };
-                            // if (item._method.CallsPosition.length > 0) {
-                            //     this.updateReferenceCalls(item._method.CallsPosition, method, fullpath);
-                            // }
-                            let _method = { Params: item._method.Params, IsExport: item._method.IsExport };
-                            let newItem: IMethodValue = {
-                                name: String(item.name),
-                                isproc: Boolean(item.isproc),
-                                line: item.line,
-                                endline: item.endline,
-                                context: item.context,
-                                _method,
-                                filename: fullpath,
-                                module: moduleStr,
-                                description: item.description,
-                                oscriptLib: true
-                            };
-                            this.db.insert(newItem);
-                        }
-                    });
-                    
-                }
+                        let _method = { Params: item._method.Params, IsExport: item._method.IsExport };
+                        let newItem: IMethodValue = {
+                            name: String(item.name),
+                            isproc: Boolean(item.isproc),
+                            line: item.line,
+                            endline: item.endline,
+                            context: item.context,
+                            _method,
+                            filename: fullpath,
+                            module: moduleStr,
+                            description: item.description,
+                            oscriptLib: true
+                        };
+                        this.db.insert(newItem);
+                    }
+                });
             }
         }
     }
