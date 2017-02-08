@@ -19,7 +19,7 @@ describe("Signature", () => {
         await globals.waitForCacheUpdate();
     }));
 
-    it.only("should be showed on methods of oscript library", mAsync(async (done) => {
+    it.skip("should be showed on methods of oscript library", mAsync(async (done) => {
 
         await addText("#Использовать strings\n");
         await addText("\n");

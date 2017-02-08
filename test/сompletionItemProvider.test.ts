@@ -286,7 +286,7 @@ describe("Completion", () => {
 
     }));
 
-    it("should show completion of oscript modules", mAsync(async (done) => {
+    it.skip("should show completion of oscript modules", mAsync(async (done) => {
 
         await addText("СтроковыеФ");
 
@@ -301,7 +301,7 @@ describe("Completion", () => {
 
     }));
 
-    it("should show completion of functions in oscript modules", mAsync(async (done) => {
+    it.skip("should show completion of functions in oscript modules", mAsync(async (done) => {
 
         await addText("СтроковыеФункции.");
 
