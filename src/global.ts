@@ -462,6 +462,13 @@ export class Global {
             };
             let result = "";
             const oscriptConfig = cp.spawn("oscript-config", args, options);
+            oscriptConfig.on("error", (error) => {
+                if (error.toString().indexOf("ENOENT") > 0) {
+                    console.log("oscript-config isn't found. Is it installed?")
+                } else {
+                    console.error(error);
+                }
+            });
             oscriptConfig.stderr.on("data", (buffer) => {
                 result += buffer.toString();
             });
