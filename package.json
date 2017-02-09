@@ -177,7 +177,6 @@
     "@types/node": "^7.0.5",
     "@types/should": "^8.1.30",
     "cross-env": "^3.1.4",
-    "cross-spawn": "^5.0.1",
     "decache": "^4.1.0",
     "istanbul": "^0.4.5",
     "remap-istanbul": "^0.9.0",
@@ -187,6 +186,7 @@
     "vscode": "^1.0.3"
   },
   "dependencies": {
+    "cross-spawn": "^5.0.1",
     "filequeue": "^0.5.0",
     "fs-promise": "^1.0.0",
     "glob": "^7.1.1",
