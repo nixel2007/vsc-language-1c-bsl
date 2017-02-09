@@ -2,7 +2,7 @@ import * as path from "path";
 import "should";
 import * as vscode from "vscode";
 
-import { fixturePath, mAsync, newTextDocument } from "./helpers";
+import { addText, fixturePath, mAsync, newTextDocument } from "./helpers";
 
 import { Global } from "../src/global";
 import * as vscAdapter from "../src/vscAdapter";
@@ -77,6 +77,32 @@ describe("Hover", () => {
         hover.contents[0].should.startWith("Метод глобального контекста");
         hover.contents[2].should.has.a.key("value").which.startWith("Процедура Сообщить(");
         hover.contents[3].should.startWith("***ТекстСообщения***");
+
+    }));
+
+    it.skip("should be showed on functions of oscript libraries", mAsync(async (done) => {
+
+        const uriEmptyFile = vscode.Uri.file(path.join(fixturePath, "emptyFile.bsl"));
+        textDocument = await newTextDocument(uriEmptyFile);
+
+        await addText("#Использовать strings\n");
+        await addText("\n");
+        await addText("СтроковыеФункции.РазложитьСтрокуВМассивПодстрок(\"\", \"\")");
+        
+        const position = new vscode.Position(2, 40);
+
+        const hovers = await vscode.commands.executeCommand<vscode.Hover[]>(
+            "vscode.executeHoverProvider",
+            textDocument.uri,
+            position
+        );
+
+        hovers.should.has.length(1);
+
+        let hover = hovers[0];
+        // hover.contents[0].should.startWith("Метод глобального контекста");
+        // hover.contents[2].should.has.a.key("value").which.startWith("Функция РазложитьСтрокуВМассивПодстрок(");
+        // hover.contents[3].should.startWith("***ТекстСообщения***");
 
     }));
 });

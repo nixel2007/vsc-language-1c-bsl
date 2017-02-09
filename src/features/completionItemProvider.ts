@@ -247,7 +247,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                     continue;
                 }
                 let arrayFilename = element.filename.split("/");
-                if (arrayFilename[arrayFilename.length - 4] !== "CommonModules" && !element.filename.endsWith("ManagerModule.bsl")) {
+                if (!element.oscriptLib && arrayFilename[arrayFilename.length - 4] !== "CommonModules" && !element.filename.endsWith("ManagerModule.bsl")) {
                     continue;
                 }
                 let item: vscode.CompletionItem = new vscode.CompletionItem(element.name);

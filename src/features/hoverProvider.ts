@@ -46,7 +46,7 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
                for (let i = 0; i < entry.length; i++) {
                    let hoverElement = entry[i];
                    let arrayFilename = hoverElement.filename.split("/");
-                   if (arrayFilename[arrayFilename.length - 4] !== "CommonModules" && !hoverElement.filename.endsWith("ManagerModule.bsl")) {
+                   if (!hoverElement.oscriptLib && arrayFilename[arrayFilename.length - 4] !== "CommonModules" && !hoverElement.filename.endsWith("ManagerModule.bsl")) {
                        continue;
                    }
                    if (hoverElement._method.IsExport) {
