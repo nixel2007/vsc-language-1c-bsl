@@ -1,3 +1,6 @@
+import * as cp from "cross-spawn";
+import * as fs from "fs-promise";
+import * as glob from "glob";
 import * as path from "path";
 
 import * as bslglobals from "./features/bslGlobals";
@@ -6,6 +9,7 @@ import * as oscriptStdLib from "./features/oscriptStdLib";
 let loki = require("lokijs");
 let Parser = require("onec-syntaxparser");
 let FileQueue = require("filequeue");
+let xml2js = require("xml2js");
 let fq = new FileQueue(500);
 
 export class Global {
@@ -447,6 +451,54 @@ export class Global {
             this.dbcalls = new Map();
             let searchPattern = basePath !== "" ? basePath.substr(2) + "/**" : "**/*.{bsl,os}";
             this.findFilesForCache(searchPattern, rootPath);
+
+            const args: string[] = [];
+            args.push("get");
+            args.push("lib.system");
+
+            let options = {
+                cwd: path.dirname(rootPath),
+                env: process.env
+            };
+            let result = "";
+            const oscriptConfig = cp.spawn("oscript-config", args, options);
+            oscriptConfig.on("error", (error) => {
+                if (error.toString().indexOf("ENOENT") > 0) {
+                    console.log("oscript-config isn't found. Is it installed?")
+                } else {
+                    console.error(error);
+                }
+            });
+            oscriptConfig.stderr.on("data", (buffer) => {
+                result += buffer.toString();
+            });
+            oscriptConfig.stdout.on("data", (buffer) => {
+                result += buffer.toString();
+            });
+            oscriptConfig.on("close", () => {
+                try {
+                    result = result.trim();
+                    let lines = result.split(/\r?\n/);
+                    const libSearchPattern = "**/lib.config";
+                    for (const line of lines) {
+                        let globOptions: glob.IOptions = {};
+                        globOptions.nocase = true;
+                        globOptions.cwd = line;
+                        // glob >=7.0.0 contains this property
+                        // tslint:disable-next-line:no-string-literal
+                        globOptions["absolute"] = true;
+                        glob(libSearchPattern, globOptions, (err, files) => {
+                            if (err) {
+                                console.error(err);
+                                return;
+                            }
+                            this.addOscriptLibrariesToCache(files);
+                        });
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            });
         }
     };
 
@@ -687,6 +739,101 @@ export class Global {
             collection.insert(newItem);
         }
     }
+
+    private async addOscriptLibrariesToCache(files: string[]) {
+        for (const libConfig of files) {
+            let data;
+            try {
+                data = await fs.readFile(libConfig);
+            } catch (err) {
+                if (err) {
+                    console.log(err);
+                    continue;
+                }
+            }
+            let result;
+            try {
+                result = await this.xml2json(data);
+            } catch (err) {
+                if (err) {
+                    console.log(err);
+                    continue;
+                }
+            }
+            const packageDef = result["package-def"];
+            let modules = [];
+            let classes = [];
+            if (packageDef.hasOwnProperty("module")) {
+                if (packageDef.module instanceof Array) {
+                    for (const module of packageDef.module) {
+                        modules.push(module)
+                    }
+                } else {
+                    modules.push(packageDef.module);
+                }
+            }
+            if (packageDef.hasOwnProperty("class")) {
+                if (packageDef.class instanceof Array) {
+                    for (const clazz of packageDef.class) {
+                        classes.push(clazz)
+                    }
+                } else {
+                    classes.push(packageDef.class);
+                }
+            }       
+            // TODO: Пока обрабатываем классы так же как модули
+            modules = modules.concat(classes);
+            for (const module of modules) {
+                const fullpath = path.join(path.dirname(libConfig), module.$.file);
+                fq.readFile(fullpath, { encoding: "utf8" }, (err, source) => {
+                    if (err) {
+                        throw err;
+                    }
+                    let moduleStr = module.$.name;
+                    source = source.replace(/\r\n?/g, "\n");
+                    let parsesModule = new Parser().parse(source);
+                    source = undefined;
+                    let entries = parsesModule.getMethodsTable().find();
+                    // if (parsesModule.context.CallsPosition.length > 0) {
+                    //     this.updateReferenceCalls(parsesModule.context.CallsPosition, "GlobalModuleText", fullpath);
+                    // }
+                    parsesModule = undefined;
+                    for (let item of entries) {
+                        let method = { name: item.name, endline: item.endline, context: item.context, isproc: item.isproc };
+                        // if (item._method.CallsPosition.length > 0) {
+                        //     this.updateReferenceCalls(item._method.CallsPosition, method, fullpath);
+                        // }
+                        let _method = { Params: item._method.Params, IsExport: item._method.IsExport };
+                        let newItem: IMethodValue = {
+                            name: String(item.name),
+                            isproc: Boolean(item.isproc),
+                            line: item.line,
+                            endline: item.endline,
+                            context: item.context,
+                            _method,
+                            filename: fullpath,
+                            module: moduleStr,
+                            description: item.description,
+                            oscriptLib: true
+                        };
+                        this.db.insert(newItem);
+                    }
+                });
+            }
+        }
+    }
+
+    private async xml2json(xml: string) {
+        return new Promise((resolve, reject) => {
+            const xml2jsParser = new xml2js.Parser();
+            xml2jsParser.parseString(xml, function (err, json) {
+                if (err)
+                    reject(err);
+                else
+                    resolve(json);
+            });
+        });
+    }
 }
 
 interface IMethodValue {
@@ -707,6 +854,5 @@ interface IMethodValue {
     call?: string;
     character?: number;
     _method?: {};
+    oscriptLib?: boolean;
 }
-
-/// <reference path="node.d.ts" />

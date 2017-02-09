@@ -285,4 +285,34 @@ describe("Completion", () => {
         });
 
     }));
+
+    it.skip("should show completion of oscript modules", mAsync(async (done) => {
+
+        await addText("СтроковыеФ");
+
+        const completionList = await getCompletionListFromCurrentPosition();
+        const completions = completionList.items;
+
+        completions.should.have.length(1);
+
+        const completion = completions[0];
+        completion.label.should.be.equal("СтроковыеФункции");
+        completion.kind.should.be.equal(vscode.CompletionItemKind.Class);
+
+    }));
+
+    it.skip("should show completion of functions in oscript modules", mAsync(async (done) => {
+
+        await addText("СтроковыеФункции.");
+
+        const completionList = await getCompletionListFromCurrentPosition();
+        const completions = completionList.items;
+
+        completions.should.matchAny((value: vscode.CompletionItem) => {
+            value.should.has.a.key("label").which.is.equal("РазложитьСтрокуВМассивПодстрок");
+            value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Function);
+            value.should.has.a.key("documentation").which.match(/Разбивает строку/);
+        });
+
+    }));
 });

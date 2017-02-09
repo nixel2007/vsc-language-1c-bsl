@@ -45,7 +45,7 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                 if (d.length > 1) {
                     for (let k = 0; k < d.length; k++) {
                         let arrayFilename = d[k].filename.split("/");
-                        if (arrayFilename[arrayFilename.length - 4] === "CommonModules" || d[k].filename.endsWith("ManagerModule.bsl")) {
+                        if (!d[k].oscriptLib && arrayFilename[arrayFilename.length - 4] === "CommonModules" || d[k].filename.endsWith("ManagerModule.bsl")) {
                             d = [d[k]];
                             break;
                         }
