@@ -27,7 +27,7 @@ describe("Signature", () => {
 
         await addText("#Использовать strings\n");
         await addText("\n");
-        await addText("СтроковыеФункции.РазложитьСтрокуВМассивПодстрок");
+        await addText("СтроковыеФункции.РазложитьСтрокуВМассивПодстрок(");
         const position = vscode.window.activeTextEditor.selection.anchor;
 
         const signatureHelp = await vscode.commands.executeCommand<vscode.SignatureHelp>(
