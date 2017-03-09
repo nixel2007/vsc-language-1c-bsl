@@ -24,7 +24,9 @@ async function getCompletionListFromCurrentPosition(): Promise<vscode.Completion
 }
 
 // Defines a Mocha test suite to group tests of similar kind together
-describe("Completion", () => {
+describe("Completion", function () {
+
+    this.timeout(10000);
 
     before(mAsync(async (done) => {
         const uriEmptyFile = vscode.Uri.file(path.join(fixturePath, "emptyFile.bsl"));
