@@ -284,12 +284,12 @@ export function activate(context: vscode.ExtensionContext) {
                 });
             } else {
                 editor.edit(function (editBuilder) {
-                    editBuilder.insert(new vscode.Position(position.line, position.character), "\t");
+                    vscode.commands.executeCommand("tab");
                 });
             }
         } else {
             editor.edit(function (editBuilder) {
-                editBuilder.insert(new vscode.Position(position.line, position.character), "\t");
+                vscode.commands.executeCommand("tab");
             });
         }
 
