@@ -2,7 +2,7 @@ import * as path from "path";
 import "should";
 import * as vscode from "vscode";
 
-import { fixturePath, mAsync, newTextDocument } from "./helpers";
+import { clearActiveTextEditor, fixturePath, mAsync, newTextDocument } from "./helpers";
 
 import { Global } from "../src/global";
 import * as vscAdapter from "../src/vscAdapter";
@@ -19,6 +19,10 @@ describe("Workspace symbols", () => {
         );
         textDocument = await newTextDocument(uriEmptyFile);
         await globals.waitForCacheUpdate();
+    }));
+
+    beforeEach(mAsync(async (done) => {
+        await clearActiveTextEditor();
     }));
 
     it("should show functions in workspace", mAsync(async (done) => {

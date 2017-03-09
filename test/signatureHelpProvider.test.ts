@@ -2,7 +2,7 @@ import * as path from "path";
 import "should";
 import * as vscode from "vscode";
 
-import { addText, fixturePath, mAsync, newTextDocument } from "./helpers";
+import { addText, clearActiveTextEditor, fixturePath, mAsync, newTextDocument } from "./helpers";
 
 import { Global } from "../src/global";
 import * as vscAdapter from "../src/vscAdapter";
@@ -19,7 +19,11 @@ describe("Signature", () => {
         await globals.waitForCacheUpdate();
     }));
 
-    it.skip("should be showed on methods of oscript library", mAsync(async (done) => {
+    beforeEach(mAsync(async (done) => {
+        await clearActiveTextEditor();
+    }));
+    
+    it("should be showed on methods of oscript library", mAsync(async (done) => {
 
         await addText("#Использовать strings\n");
         await addText("\n");

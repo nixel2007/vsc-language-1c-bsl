@@ -2,7 +2,7 @@ import * as path from "path";
 import "should";
 import * as vscode from "vscode";
 
-import { addText, fixturePath, mAsync, newTextDocument } from "./helpers";
+import { addText, clearActiveTextEditor, fixturePath, mAsync, newTextDocument } from "./helpers";
 
 import { Global } from "../src/global";
 import * as vscAdapter from "../src/vscAdapter";
@@ -33,10 +33,7 @@ describe("Completion", () => {
     }));
 
     beforeEach(mAsync(async (done) => {
-        await vscode.window.activeTextEditor.edit((editBuilder: vscode.TextEditorEdit) => {
-            const range = new vscode.Range(new vscode.Position(0, 0), vscode.window.activeTextEditor.selection.anchor);
-            editBuilder.delete(range);
-        });
+        await clearActiveTextEditor();
     }));
 
     // Defines a Mocha unit test

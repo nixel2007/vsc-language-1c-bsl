@@ -25,3 +25,11 @@ export async function addText(text: string) {
         textEditorEdit.insert(vscode.window.activeTextEditor.selection.anchor, text);
     });
 }
+
+export async function clearActiveTextEditor() {
+    await vscode.window.activeTextEditor.edit((editBuilder: vscode.TextEditorEdit) => {
+        const range
+            = new vscode.Range(new vscode.Position(0, 0), vscode.window.activeTextEditor.selection.anchor);
+        editBuilder.delete(range);
+    });
+}
