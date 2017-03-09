@@ -16,7 +16,7 @@ export class Global {
 
     public static create(adapter?: any): Global {
         if (!Global.instance) {
-           Global.instance = new Global(adapter);
+            Global.instance = new Global(adapter);
         }
         return Global.instance;
     }
@@ -35,7 +35,8 @@ export class Global {
     public methodForDescription: any = undefined;
     public syntaxFilled: string = "";
     public hoverTrue: boolean = true;
-    private cacheUpdates: boolean;
+    private bslCacheUpdated: boolean;
+    private oscriptCacheUpdated: boolean;
 
     constructor(adapter?: any) {
         if (adapter) {
@@ -46,11 +47,10 @@ export class Global {
         let postfix = (autocompleteLanguage === "en") ? "_en" : "";
         this.toreplaced = this.getReplaceMetadata();
         this.cache = new loki("gtags.json");
-        this.cacheUpdates = false;
         this.globalfunctions = {};
         this.globalvariables = {};
         this.systemEnum = {};
-        this. classes = {};
+        this.classes = {};
         let globalfunctions = bslglobals.globalfunctions();
         let globalvariables = bslglobals.globalvariables();
         this.keywords = bslglobals.keywords()[autocompleteLanguage];
@@ -377,14 +377,17 @@ export class Global {
     }
 
     public async waitForCacheUpdate() {
-        return new Promise( (callback) => {
-            if (this.cacheUpdates) {
-                Promise.resolve(undefined);
-            }
-            setTimeout(callback, 100);
-        });
+        while (!this.cacheUpdated()) {
+            await this.delay(100);
+        }
     }
 
+    private delay(milliseconds: number) {
+        return new Promise<void>(resolve => {
+            setTimeout(resolve, milliseconds);
+        });
+    }
+    
     public addtocachefiles(files: string[], rootPath: string): any {
         let filesLength = files.length;
         let substrIndex = (process.platform === "win32") ? 8 : 7;
@@ -431,20 +434,23 @@ export class Global {
                 }
                 if (i === filesLength - 1) {
                     this.postMessage("Кэш обновлен");
-                    this.cacheUpdates = true;
+                    this.bslCacheUpdated = true;
                 }
             });
         }
     }
 
     public updateCache(): any {
+        this.bslCacheUpdated = false;
+        this.oscriptCacheUpdated = false;
+
         let configuration = this.getConfiguration("language-1c-bsl");
         let basePath: string = String(this.getConfigurationKey(configuration, "rootPath"));
         let rootPath = this.getRootPath();
         if (rootPath) {
             this.postMessage("Запущено заполнение кеша", 3000);
             rootPath = path.join(rootPath, basePath);
-            if (this.cache.getCollection ("ValueTable")) {
+            if (this.cache.getCollection("ValueTable")) {
                 this.cache.removeCollection("ValueTable");
             }
             this.db = this.cache.addCollection("ValueTable");
@@ -503,7 +509,7 @@ export class Global {
     };
 
     public customUpdateCache(source: string, filename: string) {
-        if (!this.cacheUpdates) {
+        if (!this.cacheUpdated()) {
             return;
         }
         let configuration = this.getConfiguration("language-1c-bsl");
@@ -570,7 +576,7 @@ export class Global {
     public querydef(module: string, all: boolean = true, lazy: boolean = false): any {
         // Проверяем локальный кэш. 
         // Проверяем глобальный кэш на модули. 
-        if (!this.cacheUpdates) {
+        if (!this.cacheUpdated()) {
             return new Array();
         } else {
             let prefix = lazy ? "" : "^";
@@ -673,18 +679,18 @@ export class Global {
             "fullNameRecursor",
             "findFilesForCache"
         ];
-        methodsList.forEach( (element) => {
+        methodsList.forEach((element) => {
             if (adapter.hasOwnProperty(element)) {
                 this[element] = adapter[element];
             }
         });
     }
 
-    public postMessage(description: string, interval?: number) {}
+    public postMessage(description: string, interval?: number) { }
 
-    public getConfiguration(section: string) {}
+    public getConfiguration(section: string) { }
 
-    public getConfigurationKey(configuration, key: string) {}
+    public getConfigurationKey(configuration, key: string) { }
 
     public getRootPath(): string {
         return "";
@@ -694,8 +700,12 @@ export class Global {
         return "";
     }
 
-    public findFilesForCache(searchPattern: string, rootPath: string) {}
-    
+    public findFilesForCache(searchPattern: string, rootPath: string) { }
+
+    private cacheUpdated(): boolean {
+        return this.bslCacheUpdated && this.oscriptCacheUpdated;
+    }
+
     private updateReferenceCalls(calls: any[], method: any, file: string): any {
         for (let value of calls) {
             if (value.call.startsWith(".")) {
@@ -780,7 +790,7 @@ export class Global {
                 } else {
                     classes.push(packageDef.class);
                 }
-            }       
+            }
             // TODO: Пока обрабатываем классы так же как модули
             modules = modules.concat(classes);
             for (const module of modules) {
@@ -821,6 +831,7 @@ export class Global {
                 });
             }
         }
+        this.oscriptCacheUpdated = true;
     }
 
     private async xml2json(xml: string) {
