@@ -80,7 +80,7 @@ describe("Hover", () => {
 
     }));
 
-    it.skip("should be showed on functions of oscript libraries", mAsync(async (done) => {
+    it("should be showed on functions of oscript libraries", mAsync(async (done) => {
 
         const uriEmptyFile = vscode.Uri.file(path.join(fixturePath, "emptyFile.bsl"));
         textDocument = await newTextDocument(uriEmptyFile);
