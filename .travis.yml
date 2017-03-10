@@ -18,7 +18,7 @@ before_install:
       sh -e /etc/init.d/xvfb start;
       sleep 3;
     fi
-  - wget -O os.deb http://oscript.io/downloads/latest/deb
+  - wget -O os.deb http://oscript.io/downloads/night-build/deb
   - sudo apt-get install mono-complete mono-devel
   - sudo dpkg -i os.deb; sudo apt install -f
   - oscript
