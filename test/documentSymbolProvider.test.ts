@@ -2,7 +2,7 @@ import * as path from "path";
 import "should";
 import * as vscode from "vscode";
 
-import { fixturePath, mAsync, newTextDocument } from "./helpers";
+import { fixturePath, newTextDocument } from "./helpers";
 
 import { Global } from "../src/global";
 import * as vscAdapter from "../src/vscAdapter";
@@ -13,7 +13,7 @@ let textDocument: vscode.TextDocument;
 
 describe("Document symbols", () => {
 
-    before(mAsync(async (done) => {
+    before(async () => {
         const uriEmptyFile = vscode.Uri.file(
             path.join(fixturePath, "CommonModules", "CommonModule", "Ext", "Module.bsl")
         );
@@ -21,7 +21,7 @@ describe("Document symbols", () => {
         await globals.waitForCacheUpdate();
     }));
 
-    it("should show functions from current document", mAsync(async (done) => {
+    it("should show functions from current document", async () => {
 
         const symbolInformation = await vscode.commands.executeCommand<vscode.SymbolInformation[]>(
             "vscode.executeDocumentSymbolProvider",
@@ -33,6 +33,6 @@ describe("Document symbols", () => {
             value.should.has.a.key("kind").which.is.equal(vscode.SymbolKind.Function);
         });
 
-    }));
+    });
 
 });
