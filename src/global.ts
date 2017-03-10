@@ -29,7 +29,7 @@ export class Global {
     public globalfunctions: IGlobalFunctions;
     public globalvariables: IGlobalVariables;
     public keywords: any;
-    public systemEnum: any;
+    public systemEnum: ISystemEnums;
     public classes: any;
     public toreplaced: any;
     public methodForDescription: any = undefined;
@@ -49,7 +49,7 @@ export class Global {
         this.cache = new loki("gtags.json");
         this.globalfunctions = {} as IGlobalFunctions;
         this.globalvariables = {} as IGlobalVariables;
-        this.systemEnum = {};
+        this.systemEnum = {} as ISystemEnums;
         this.classes = {};
         const globalfunctions: IGlobalFunctions = bslglobals.globalfunctions();
         const globalvariables: IGlobalVariables = bslglobals.globalvariables();
@@ -137,60 +137,60 @@ export class Global {
                 }
             }
         }
-        let systemEnum = bslglobals.systemEnum();
-        for (let element in systemEnum) {
+        let systemEnum: ISystemEnums = bslglobals.systemEnum();
+        for (const element in systemEnum) {
             if (!systemEnum.hasOwnProperty(element)) {
                 continue;
             }
-            let segment = systemEnum[element];
-            let newName = segment["name" + postfix];
-            let newElement = {};
-            newElement["name"] = newName;
-            newElement["alias"] = (postfix === "_en") ? segment["name"] : segment["name_en"];
-            newElement["description"] = segment.description;
-            newElement["values"] = [];
-            let values = segment["values"];
-            for (let key in values) {
+            const segment = systemEnum[element];
+            const newName = segment["name" + postfix];
+            const newElement: ISystemEnum = {} as ISystemEnum;
+            newElement.name = newName;
+            newElement.alias = (postfix === "_en") ? segment.name : segment.name_en;
+            newElement.description = segment.description;
+            newElement.values = [];
+            const values = segment.values;
+            for (const key in values) {
                 if (!values.hasOwnProperty(key)) {
                     continue;
                 }
-                let newNameValues = values[key]["name" + postfix];
-                let elementValues = {};
-                elementValues["name"] = newName;
-                elementValues["alias"] = (postfix === "_en") ? values[key]["name"] : values[key]["name_en"];
-                elementValues["description"] = values[key].description;
-                newElement["values"].push(elementValues);
+                const newNameValues = values[key]["name" + postfix];
+                const elementValue: ISystemEnumValue = {} as ISystemEnumValue;
+                elementValue.name = newName;
+                elementValue.alias = (postfix === "_en") ? values[key].name : values[key].name_en;
+                elementValue.description = values[key].description;
+                newElement.values.push(elementValue);
             }
             this.systemEnum[newName.toLowerCase()] = newElement;
         }
         systemEnum = oscriptStdLib.systemEnum();
-        for (let element in systemEnum) {
+        for (const element in systemEnum) {
             if (!systemEnum.hasOwnProperty(element)) {
                 continue;
             }
-            let segment = systemEnum[element];
-            let newName = segment["name" + postfix];
+            const segment = systemEnum[element];
+            const newName = segment["name" + postfix];
             if (this.systemEnum[newName.toLowerCase()]) {
-                let findEnum = this.systemEnum[newName.toLowerCase()];
-                findEnum["oscript_description"] = segment.description;
+                const findEnum = this.systemEnum[newName.toLowerCase()];
+                findEnum.oscript_description = segment.description;
             } else {
-                let newElement = {};
-                newElement["name"] = newName;
-                newElement["alias"] = (postfix === "_en") ? segment["name"] : segment["name_en"];
-                newElement["description"] = undefined;
-                newElement["values"] = [];
-                newElement["oscript_description"] = segment.description;
-                let values = segment["values"];
-                for (let key in values) {
+                const newElement: ISystemEnum = {} as ISystemEnum;
+                newElement.name = newName;
+                newElement.alias = (postfix === "_en") ? segment.name : segment.name_en;
+                newElement.description = undefined;
+                newElement.values = [];
+                newElement.oscript_description = segment.description;
+                const values = segment.values;
+                for (const key in values) {
                     if (!values.hasOwnProperty(key)) {
                         continue;
                     }
-                    let newNameValues = values[key]["name" + postfix];
-                    let elementValues = {};
-                    elementValues["name"] = newName;
-                    elementValues["alias"] = (postfix === "_en") ? values[key]["name"] : values[key]["name_en"];
-                    elementValues["description"] = values[key].description;
-                    newElement["values"].push(elementValues);
+                    const newNameValues = values[key]["name" + postfix];
+                    const elementValue: ISystemEnumValue = {} as ISystemEnumValue;
+                    elementValue.name = newName;
+                    elementValue.alias = (postfix === "_en") ? values[key].name : values[key].name_en;
+                    elementValue.description = values[key].description;
+                    newElement.values.push(elementValue);
                 }
                 this.systemEnum[newName.toLowerCase()] = newElement;
             }
@@ -951,4 +951,24 @@ interface IGlobalVariable {
     alias: string;
     oscript_description?: string;
     oscript_access?: string;
+}
+
+interface ISystemEnums {
+    [index: string]: ISystemEnum;
+}
+
+interface ISystemEnum {
+    name: string;
+    name_en: string;
+    alias: string;
+    description: string;
+    oscript_description: string;
+    values: ISystemEnumValue[];
+}
+
+interface ISystemEnumValue {
+    name: string;
+    name_en: string;
+    alias: string;
+    description: string;
 }
