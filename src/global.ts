@@ -26,11 +26,11 @@ export class Global {
     public cache: any;
     public db: any;
     public dbcalls: Map<string, Array<{}>>;
-    public globalfunctions: IGlobalFunctions;
+    public globalfunctions: IMethods;
     public globalvariables: IGlobalVariables;
     public keywords: any;
     public systemEnum: ISystemEnums;
-    public classes: any;
+    public classes: IClasses;
     public toreplaced: any;
     public methodForDescription: any = undefined;
     public syntaxFilled: string = "";
@@ -47,18 +47,18 @@ export class Global {
         const postfix = (autocompleteLanguage === "en") ? "_en" : "";
         this.toreplaced = this.getReplaceMetadata();
         this.cache = new loki("gtags.json");
-        this.globalfunctions = {} as IGlobalFunctions;
+        this.globalfunctions = {} as IMethods;
         this.globalvariables = {} as IGlobalVariables;
         this.systemEnum = {} as ISystemEnums;
-        this.classes = {};
-        const globalfunctions: IGlobalFunctions = bslglobals.globalfunctions();
+        this.classes = {} as IClasses;
+        const globalfunctions: IMethods = bslglobals.globalfunctions();
         const globalvariables: IGlobalVariables = bslglobals.globalvariables();
         this.keywords = bslglobals.keywords()[autocompleteLanguage];
         // tslint:disable-next-line:forin
         for (const key in globalfunctions) {
             const globalFunction = globalfunctions[key];
             const newName = globalFunction["name" + postfix];
-            const newElement: IGlobalFunction = {} as IGlobalFunction;
+            const newElement: IMethod = {} as IMethod;
             newElement.name = newName;
             newElement.alias = (postfix === "_en") ? globalFunction.name : globalFunction.name_en;
             newElement.description = globalFunction.description;
@@ -83,7 +83,7 @@ export class Global {
                     };
                     globMethod.oscript_description = method.description;
                 } else {
-                    const newElement: IGlobalFunction = {} as IGlobalFunction;
+                    const newElement: IMethod = {} as IMethod;
                     const newName = method["name" + postfix];
                     newElement.name = newName;
                     newElement.alias = (postfix === "_en") ? method.name : method.name_en;
@@ -195,122 +195,146 @@ export class Global {
                 this.systemEnum[newName.toLowerCase()] = newElement;
             }
         }
-        let classes = bslglobals.classes();
-        for (let element in classes) {
+        const classes: IClasses = bslglobals.classes();
+        for (const element in classes) {
             if (!classes.hasOwnProperty(element)) {
                 continue;
             }
-            let segment = classes[element];
-            let newName = segment["name" + postfix];
-            let newElement = {};
-            newElement["name"] = newName;
-            newElement["alias"] = (postfix === "_en") ? segment["name"] : segment["name_en"];
-            newElement["description"] = segment.description;
-            newElement["methods"] = (segment["methods"]) ? {} : undefined;
-            for (let key in segment["methods"]) {
-                let newNameMethod = segment["methods"][key]["name" + postfix];
-                let newMethod = {};
-                newMethod["name"] = newName;
-                newMethod["alias"] = (postfix === "_en") ? segment["methods"][key]["name"] : segment["methods"][key]["name_en"];
-                newMethod["description"] = segment["methods"][key].description;
-                newElement["methods"][newNameMethod.toLowerCase()] = newMethod;
+            const segment = classes[element];
+            const newName = segment["name" + postfix];
+            const newElement: IClass = {} as IClass;
+            newElement.name = newName;
+            newElement.alias = (postfix === "_en") ? segment.name : segment.name_en;
+            newElement.description = segment.description;
+            newElement.methods = (segment.methods) ? {} : undefined;
+            // tslint:disable-next-line:forin
+            for (const key in segment.methods) {
+                const method = segment.methods[key];
+                const newNameMethod = method["name" + postfix];
+                const newMethod: IMethod = {} as IMethod;
+                newMethod.name = newName;
+                newMethod.alias = (postfix === "_en") ? method.name : method.name_en;
+                newMethod.description = method.description;
+                newElement.methods[newNameMethod.toLowerCase()] = newMethod;
             }
-            newElement["properties"] = (segment["properties"]) ? {} : undefined;
-            for (let key in segment["properties"]) {
-                let newNameProp = segment["properties"][key]["name" + postfix];
-                let newProp = {};
-                newProp["name"] = newName;
-                newProp["alias"] = (postfix === "_en") ? segment["properties"][key]["name"] : segment["properties"][key]["name_en"];
-                newProp["description"] = segment["properties"][key].description;
-                newElement["properties"][newNameProp.toLowerCase()] = newProp;
+            newElement.properties = (segment.properties) ? {} : undefined;
+            // tslint:disable-next-line:forin
+            for (const key in segment.properties) {
+                const property = segment.properties[key];
+                const newNameProp = property["name" + postfix];
+                const newProp: IPropertyDefinition = {} as IPropertyDefinition;
+                newProp.name = newName;
+                newProp.alias = (postfix === "_en") ? property.name : property.name_en;
+                newProp.description = property.description;
+                newElement.properties[newNameProp.toLowerCase()] = newProp;
             }
-            newElement["constructors"] = (segment["constructors"]) ? {} : undefined;
-            for (let key in segment["constructors"]) {
-                let newCntr = {};
-                newCntr["signature"] = segment["constructors"][key].signature;
-                newCntr["description"] = segment["constructors"][key].description;
-                newElement["constructors"][key.toLowerCase()] = newCntr;
+            newElement.constructors = (segment.constructors) ? {} : undefined;
+            // tslint:disable-next-line:forin
+            for (const key in segment.constructors) {
+                const constructor = segment.constructors[key];
+                const newCntr: IConstructorDefinition = {} as IConstructorDefinition;
+                newCntr.signature = constructor.signature;
+                newCntr.description = constructor.description;
+                newElement.constructors[key.toLowerCase()] = newCntr;
             }
             this.classes[newName.toLowerCase()] = newElement;
         }
-        for (let element in oscriptStdLib.classesOscript()) {
-            let segment = oscriptStdLib.classesOscript()[element];
-            let newName = segment["name" + postfix];
+        const classesOscript: IClasses = oscriptStdLib.classesOscript();
+        for (const element in classesOscript) {
+            if (!classesOscript.hasOwnProperty(element)) {
+                continue;
+            }
+            const segment = classesOscript[element];
+            const newName = segment["name" + postfix];
             if (this.classes[newName.toLowerCase()]) {
-                let findClass = this.classes[newName.toLowerCase()];
-                findClass["oscript_description"] = (segment.description) ? (segment.description) : findClass.description;
-                for (let key in segment["methods"]) {
-                    let findMethod = segment["methods"][key];
-                    let nameMethod = findMethod["name" + postfix];
+                const findClass = this.classes[newName.toLowerCase()];
+                findClass.oscript_description = (segment.description) ? (segment.description) : findClass.description;
+                // tslint:disable-next-line:forin
+                for (const key in segment.methods) {
+                    let findMethod = segment.methods[key];
+                    const nameMethod = findMethod["name" + postfix];
+                    // TODO: Тут происходит что-то странное
                     if (!findMethod) {
-                        findMethod = {};
-                        findMethod["name"] = nameMethod;
-                        findMethod["alias"] = (postfix === "_en") ? segment["methods"][key]["name"] : segment["methods"][key]["name_en"];
-                        findMethod["description"] = undefined;
-                        findMethod["oscript_description"] = segment["methods"][key]["description"];
-                        findClass["methods"][nameMethod.toLowerCase()] = findMethod;
+                        findMethod = {} as IMethod;
+                        findMethod.name = nameMethod;
+                        findMethod.alias = (postfix === "_en")
+                            ? segment.methods[key].name
+                            : segment.methods[key].name_en;
+                        findMethod.description = undefined;
+                        findMethod.oscript_description = segment.methods[key].description;
+                        findClass.methods[nameMethod.toLowerCase()] = findMethod;
                     } else {
-                        findMethod["oscript_description"] = segment["methods"][key]["description"];
+                        findMethod.oscript_description = segment.methods[key].description;
                     }
                 }
-                for (let key in segment["properties"]) {
-                    let findProp = segment["properties"][key];
-                    let nameProp = findProp["name" + postfix];
+                // tslint:disable-next-line:forin
+                for (const key in segment.properties) {
+                    let findProp = segment.properties[key];
+                    const nameProp = findProp["name" + postfix];
+                    // TODO: Тут происходит что-то странное
                     if (!findProp) {
-                        findProp = {};
-                        findProp["name"] = nameProp;
-                        findProp["alias"] = (postfix === "_en") ? segment["properties"][key]["name"] : segment["properties"][key]["name_en"];
-                        findProp["description"] = undefined;
-                        findProp["oscript_description"] = segment["properties"][key]["description"];
-                        findClass["properties"][nameProp.toLowerCase()] = findProp;
+                        findProp = {} as IPropertyDefinition;
+                        findProp.name = nameProp;
+                        findProp.alias = (postfix === "_en")
+                            ? segment.properties[key].name
+                            : segment.properties[key].name_en;
+                        findProp.description = undefined;
+                        findProp.oscript_description = segment.properties[key].description;
+                        findClass.properties[nameProp.toLowerCase()] = findProp;
                     } else {
-                        findProp["oscript_description"] = segment["properties"][key]["description"];
+                        findProp.oscript_description = segment.properties[key].description;
                     }
                 }
-                for (let key in segment["constructors"]) {
-                    let findCntr = segment["constructors"][key];
+                // tslint:disable-next-line:forin
+                for (const key in segment.constructors) {
+                    let findCntr = segment.constructors[key];
                     if (!findCntr) {
-                        findCntr = {};
-                        findCntr["description"] = undefined;
-                        findCntr["oscript_description"] = segment["constructors"][key]["description"];
-                        findClass["constructors"][key.toLowerCase()] = findCntr;
+                        findCntr = {} as IConstructorDefinition;
+                        findCntr.description = undefined;
+                        findCntr.oscript_description = segment.constructors[key].description;
+                        findClass.constructors[key.toLowerCase()] = findCntr;
                     } else {
-                        findCntr["oscript_description"] = segment["constructors"][key]["description"];
+                        findCntr.oscript_description = segment.constructors[key].description;
                     }
                 }
             } else {
-                let newElement = {};
-                newElement["name"] = newName;
-                newElement["alias"] = (postfix === "_en") ? segment["name"] : segment["name_en"];
-                newElement["description"] = undefined;
-                newElement["oscript_description"] = segment.description;
-                newElement["methods"] = (segment["methods"]) ? {} : undefined;
-                for (let key in segment["methods"]) {
-                    let newNameMethod = segment["methods"][key]["name" + postfix];
-                    let newMethod = {};
-                    newMethod["name"] = newName;
-                    newMethod["alias"] = (postfix === "_en") ? segment["methods"][key]["name"] : segment["methods"][key]["name_en"];
-                    newMethod["description"] = undefined;
-                    newMethod["oscript_description"] = segment["methods"][key].description;
-                    newElement["methods"][newNameMethod.toLowerCase()] = newMethod;
+                const newElement: IClass = {} as IClass;
+                newElement.name = newName;
+                newElement.alias = (postfix === "_en") ? segment.name : segment.name_en;
+                newElement.description = undefined;
+                newElement.oscript_description = segment.description;
+                newElement.methods = (segment.methods) ? {} : undefined;
+                // tslint:disable-next-line:forin
+                for (const key in segment.methods) {
+                    const newNameMethod = segment.methods[key]["name" + postfix];
+                    const newMethod: IMethod = {} as IMethod;
+                    newMethod.name = newName;
+                    newMethod.alias = (postfix === "_en") ? segment.methods[key].name : segment.methods[key].name_en;
+                    newMethod.description = undefined;
+                    newMethod.oscript_description = segment.methods[key].description;
+                    newElement.methods[newNameMethod.toLowerCase()] = newMethod;
                 }
-                newElement["properties"] = (segment["properties"]) ? {} : undefined;
-                for (let key in segment["properties"]) {
-                    let newNameProp = segment["properties"][key]["name" + postfix];
-                    let newProp = {};
-                    newProp["name"] = newName;
-                    newProp["alias"] = (postfix === "_en") ? segment["properties"][key]["name"] : segment["properties"][key]["name_en"];
-                    newProp["description"] = undefined;
-                    newProp["oscript_description"] = segment["properties"][key].description;
-                    newElement["properties"][newNameProp.toLowerCase()] = newProp;
+                newElement.properties = (segment.properties) ? {} : undefined;
+                // tslint:disable-next-line:forin
+                for (const key in segment.properties) {
+                    const newNameProp = segment.properties[key]["name" + postfix];
+                    const newProp: IPropertyDefinition = {} as IPropertyDefinition;
+                    newProp.name = newName;
+                    newProp.alias = (postfix === "_en")
+                        ? segment.properties[key].name
+                        : segment.properties[key].name_en;
+                    newProp.description = undefined;
+                    newProp.oscript_description = segment.properties[key].description;
+                    newElement.properties[newNameProp.toLowerCase()] = newProp;
                 }
-                newElement["constructors"] = (segment["constructors"]) ? {} : undefined;
-                for (let key in segment["constructors"]) {
-                    let newCntr = {};
-                    newCntr["signature"] = segment["constructors"][key].signature;
-                    newCntr["description"] = undefined;
-                    newCntr["oscript_description"] = segment["constructors"][key].description;
-                    newElement["constructors"][key.toLowerCase()] = newCntr;
+                newElement.constructors = (segment.constructors) ? {} : undefined;
+                // tslint:disable-next-line:forin
+                for (const key in segment.constructors) {
+                    const newCntr: IConstructorDefinition = {} as IConstructorDefinition;
+                    newCntr.signature = segment.constructors[key].signature;
+                    newCntr.description = undefined;
+                    newCntr.oscript_description = segment.constructors[key].description;
+                    newElement.constructors[key.toLowerCase()] = newCntr;
                 }
                 this.classes[newName.toLowerCase()] = newElement;
             }
@@ -876,11 +900,11 @@ interface IMethodValue {
     oscriptLib?: boolean;
 }
 
-interface IGlobalFunctions {
-    [index: string]: IGlobalFunction;
+interface IMethods {
+    [index: string]: IMethod;
 }
 
-interface IGlobalFunction {
+interface IMethod {
     name: string;
     name_en: string;
     alias: string;
@@ -896,7 +920,7 @@ interface ISignatureCollection {
     [index: string]: ISignatureDefinition;
 }
 
-interface ISignatureDefinition{
+interface ISignatureDefinition {
     СтрокаПараметров: string;
     Параметры: ISignatureParameters;
 }
@@ -911,22 +935,24 @@ interface IOscriptGlobalContext {
 
 interface IOscriptSegment {
     description?: string;
-    properties?: IOscriptPropertyDefinitions;
+    properties?: IPropertyDefinitions;
     methods?: IOscriptFunctionDefinitions;
 }
 
-interface IOscriptPropertyDefinitions {
-    [index: string]: IOscriptPropertyDefinition;
+interface IPropertyDefinitions {
+    [index: string]: IPropertyDefinition;
 }
 
 interface IOscriptFunctionDefinitions {
     [index: string]: IOscriptFunctionDefinition;
 }
 
-interface IOscriptPropertyDefinition {
+interface IPropertyDefinition {
     name: string;
     name_en: string;
+    alias: string;
     description: string;
+    oscript_description: string;
     access: string;
 }
 
@@ -936,7 +962,7 @@ interface IOscriptFunctionDefinition {
     description: string;
     signature: string;
     returns: string;
-    params: ISignatureParameters;
+    params?: ISignatureParameters;
     example?: string;
 }
 
@@ -971,4 +997,30 @@ interface ISystemEnumValue {
     name_en: string;
     alias: string;
     description: string;
+}
+
+interface IClasses {
+    [index: string]: IClass;
+}
+
+interface IClass {
+    name: string;
+    name_en: string;
+    alias: string;
+    description: string;
+    oscript_description: string;
+    methods?: IMethods;
+    properties?: IPropertyDefinitions;
+    constructors?: IConstructorDefinitions;
+}
+
+interface IConstructorDefinitions {
+    [index: string]: IConstructorDefinition;
+}
+
+interface IConstructorDefinition {
+    description: string;
+    signature: string;
+    oscript_description: string;
+    params?: ISignatureParameters;
 }

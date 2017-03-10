@@ -4769,7 +4769,7 @@ export function keywords() {
     };
 }
 
-export function classes() {
+export function classes(): any {
     return {
         "COMОбъект": {
             name: 'COMОбъект',
@@ -9325,7 +9325,7 @@ export function structureGlobContext() {
     };
 }
 
-export function systemEnum() {
+export function systemEnum(): any {
     return {
         "КодировкаТекста": {
             name: 'КодировкаТекста',
