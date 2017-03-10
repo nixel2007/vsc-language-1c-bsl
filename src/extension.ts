@@ -216,7 +216,6 @@ export function activate(context: vscode.ExtensionContext) {
         if (!textEditor) {
             return;
         }
-        applyConfigToTextEditor(textEditor);
         if (!global.cache.getCollection(textEditor.document.fileName)) {
             global.getRefsLocal(textEditor.document.fileName, textEditor.document.getText());
         }
@@ -284,12 +283,12 @@ export function activate(context: vscode.ExtensionContext) {
                 });
             } else {
                 editor.edit(function (editBuilder) {
-                    editBuilder.insert(new vscode.Position(position.line, position.character), "\t");
+                    vscode.commands.executeCommand("tab");
                 });
             }
         } else {
             editor.edit(function (editBuilder) {
-                editBuilder.insert(new vscode.Position(position.line, position.character), "\t");
+                vscode.commands.executeCommand("tab");
             });
         }
 
@@ -508,36 +507,8 @@ export function activate(context: vscode.ExtensionContext) {
     }));
 
     if (vscode.window.activeTextEditor) {
-        applyConfigToTextEditor(vscode.window.activeTextEditor);
         global.getRefsLocal(vscode.window.activeTextEditor.document.fileName, vscode.window.activeTextEditor.document.getText());
     }
     global.updateCache();
 }
 
-function applyConfigToTextEditor(textEditor: vscode.TextEditor): any {
-
-    if (!textEditor) {
-        return;
-    }
-    let newOptions: vscode.TextEditorOptions = {
-        "insertSpaces": false,
-        "tabSize": 4
-    };
-
-    let defaultOptions: vscode.TextEditorOptions = {
-        "insertSpaces": Boolean(vscode.workspace.getConfiguration("editor").get("insertSpaces")),
-        "tabSize": Number(vscode.workspace.getConfiguration("editor").get("tabSize"))
-    };
-
-    if (vscode.languages.match(BSL_MODE, textEditor.document)) {
-        if (textEditor.options.insertSpaces === defaultOptions.insertSpaces
-            && (textEditor.options.tabSize === defaultOptions.tabSize)) {
-            textEditor.options.insertSpaces = newOptions.insertSpaces;
-            textEditor.options.tabSize = newOptions.tabSize;
-            vscode.commands.executeCommand("workbench.action.editor.changeIndentation");
-        }
-    } else if (textEditor.options.insertSpaces === newOptions.insertSpaces && textEditor.options.tabSize === newOptions.tabSize) {
-        textEditor.options.insertSpaces = defaultOptions.insertSpaces;
-        textEditor.options.tabSize = defaultOptions.tabSize;
-    }
-}

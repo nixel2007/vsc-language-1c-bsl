@@ -1,17 +1,6 @@
 import * as path from "path";
 import * as vscode from "vscode";
 
-export function mAsync(fn) {
-    return async (done) => {
-        try {
-            await fn();
-            done();
-        } catch (err) {
-            done(err);
-        }
-    };
-};
-
 export const fixturePath = path.join(__dirname, "..", "..", "test", "fixtures");
 
 export async function newTextDocument(uri: vscode.Uri): Promise<vscode.TextDocument> {

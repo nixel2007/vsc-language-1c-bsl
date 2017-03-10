@@ -2,7 +2,7 @@ import * as path from "path";
 import "should";
 import * as vscode from "vscode";
 
-import { clearActiveTextEditor, fixturePath, mAsync, newTextDocument } from "./helpers";
+import { clearActiveTextEditor, fixturePath, newTextDocument } from "./helpers";
 
 import { Global } from "../src/global";
 import * as vscAdapter from "../src/vscAdapter";
@@ -13,19 +13,19 @@ let textDocument: vscode.TextDocument;
 
 describe("Workspace symbols", () => {
 
-    before(mAsync(async (done) => {
+    before(async () => {
         const uriEmptyFile = vscode.Uri.file(
             path.join(fixturePath, "emptyFile.bsl")
         );
         textDocument = await newTextDocument(uriEmptyFile);
         await globals.waitForCacheUpdate();
-    }));
+    });
 
-    beforeEach(mAsync(async (done) => {
+    beforeEach(async () => {
         await clearActiveTextEditor();
-    }));
+    });
 
-    it("should show functions in workspace", mAsync(async (done) => {
+    it("should show functions in workspace", async () => {
 
         const symbolInformation = await vscode.commands.executeCommand<vscode.SymbolInformation[]>(
             "vscode.executeWorkspaceSymbolProvider",
@@ -38,6 +38,6 @@ describe("Workspace symbols", () => {
             value.location.uri.path.should.endWith("CommonModules/CommonModule/Ext/Module.bsl");
         });
 
-    }));
+    });
 
 });

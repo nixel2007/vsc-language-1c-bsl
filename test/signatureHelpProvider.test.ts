@@ -2,7 +2,7 @@ import * as path from "path";
 import "should";
 import * as vscode from "vscode";
 
-import { addText, clearActiveTextEditor, fixturePath, mAsync, newTextDocument } from "./helpers";
+import { addText, clearActiveTextEditor, fixturePath, newTextDocument } from "./helpers";
 
 import { Global } from "../src/global";
 import * as vscAdapter from "../src/vscAdapter";
@@ -13,17 +13,17 @@ let textDocument: vscode.TextDocument;
 
 describe("Signature", () => {
 
-    before(mAsync(async (done) => {
+    before(async () => {
         const uriFile = vscode.Uri.file(path.join(fixturePath, "emptyFile.bsl"));
         textDocument = await newTextDocument(uriFile);
         await globals.waitForCacheUpdate();
-    }));
+    });
 
-    beforeEach(mAsync(async (done) => {
+    beforeEach(async () => {
         await clearActiveTextEditor();
-    }));
+    });
     
-    it("should be showed on methods of oscript library", mAsync(async (done) => {
+    it("should be showed on methods of oscript library", async () => {
 
         await addText("#Использовать strings\n");
         await addText("\n");
@@ -39,6 +39,6 @@ describe("Signature", () => {
 
         signatureHelp.should.not.be.undefined();
 
-    }));
+    });
 
 });

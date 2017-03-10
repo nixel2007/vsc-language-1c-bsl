@@ -2,7 +2,7 @@ import * as path from "path";
 import "should";
 import * as vscode from "vscode";
 
-import { addText, clearActiveTextEditor, fixturePath, mAsync, newTextDocument } from "./helpers";
+import { addText, clearActiveTextEditor, fixturePath, newTextDocument } from "./helpers";
 
 import { Global } from "../src/global";
 import * as vscAdapter from "../src/vscAdapter";
@@ -28,18 +28,18 @@ describe("Completion", function () {
 
     this.timeout(10000);
 
-    before(mAsync(async (done) => {
+    before(async () => {
         const uriEmptyFile = vscode.Uri.file(path.join(fixturePath, "emptyFile.bsl"));
         textDocument = await newTextDocument(uriEmptyFile);
         await globals.waitForCacheUpdate();
-    }));
+    });
 
-    beforeEach(mAsync(async (done) => {
+    beforeEach(async () => {
         await clearActiveTextEditor();
-    }));
+    });
 
     // Defines a Mocha unit test
-    it("should show global functions", mAsync(async (done) => {
+    it("should show global functions", async () => {
 
         await addText("Сообщи");
 
@@ -53,9 +53,9 @@ describe("Completion", function () {
         messageFunction.kind.should.be.equal(vscode.CompletionItemKind.Function);
         messageFunction.insertText.should.be.equal("Сообщить(");
 
-    }));
+    });
 
-    it("should show functions in document", mAsync(async (done) => {
+    it("should show functions in document", async () => {
 
         await addText("Процедура МояПроцедура()\n\nКонецПроцедуры\n");
         await addText("Мояп");
@@ -69,9 +69,9 @@ describe("Completion", function () {
         completion.label.should.be.equal("МояПроцедура");
         completion.kind.should.be.equal(vscode.CompletionItemKind.Function);
 
-    }));
+    });
 
-    it("should show public methods from configuration module", mAsync(async (done) => {
+    it("should show public methods from configuration module", async () => {
 
         await addText("CommonModule.");
 
@@ -84,9 +84,9 @@ describe("Completion", function () {
         completion.label.should.be.equal("ЭкспортнаяПроцедура");
         completion.kind.should.be.equal(vscode.CompletionItemKind.Function);
 
-    }));
+    });
 
-    it("should show info about function with several signatures", mAsync(async (done) => {
+    it("should show info about function with several signatures", async () => {
 
         await addText("ЗаписатьXML");
 
@@ -100,9 +100,9 @@ describe("Completion", function () {
         completion.detail.should.match(/.*\d вариантa синтаксиса.*/gm);
         completion.kind.should.be.equal(vscode.CompletionItemKind.Function);
 
-    }));
+    });
 
-    it("should show global variables", mAsync(async (done) => {
+    it("should show global variables", async () => {
 
         await addText("БиблиотекаКарт");
 
@@ -115,9 +115,9 @@ describe("Completion", function () {
         completion.label.should.be.equal("БиблиотекаКартинок");
         completion.kind.should.be.equal(vscode.CompletionItemKind.Variable);
 
-    }));
+    });
 
-    it("should show global keywords", mAsync(async (done) => {
+    it("should show global keywords", async () => {
 
         await addText("ВызватьИск");
 
@@ -130,9 +130,9 @@ describe("Completion", function () {
         completion.label.should.be.equal("ВызватьИсключение");
         completion.kind.should.be.equal(vscode.CompletionItemKind.Keyword);
 
-    }));
+    });
 
-    it("should show global enums after `=` sign", mAsync(async (done) => {
+    it("should show global enums after `=` sign", async () => {
 
         await addText("А = КодировкаТек");
 
@@ -144,9 +144,9 @@ describe("Completion", function () {
             value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Enum);
         });
 
-    }));
+    });
 
-    it("should show global enums", mAsync(async (done) => {
+    it("should show global enums", async () => {
 
         await addText("КодировкаТ");
 
@@ -158,9 +158,9 @@ describe("Completion", function () {
             value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Enum);
         });
 
-    }));
+    });
 
-    it("should show global enums values", mAsync(async (done) => {
+    it("should show global enums values", async () => {
 
         await addText("КодировкаТекста.");
 
@@ -173,9 +173,9 @@ describe("Completion", function () {
             value.should.has.a.key("documentation").which.match(/ANSI/);
         });
 
-    }));
+    });
 
-    it("should show part of global enums values", mAsync(async (done) => {
+    it("should show part of global enums values", async () => {
 
         await addText("КодировкаТекста.An");
 
@@ -188,9 +188,9 @@ describe("Completion", function () {
             value.should.has.a.key("documentation").which.match(/ANSI/);
         });
 
-    }));
+    });
 
-    it("should show global classes after `= New`", mAsync(async (done) => {
+    it("should show global classes after `= New`", async () => {
 
         await addText("А = Новый ТаблицаЗ");
 
@@ -202,9 +202,9 @@ describe("Completion", function () {
             value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Class);
         });
 
-    }));
+    });
 
-    it("should show methods in manager module", mAsync(async (done) => {
+    it("should show methods in manager module", async () => {
 
         await addText("Документы.Document.");
 
@@ -217,9 +217,9 @@ describe("Completion", function () {
         completion.label.should.be.equal("ПроцедураМодуляМенеджера");
         completion.kind.should.be.equal(vscode.CompletionItemKind.Function);
 
-    }));
+    });
 
-    it("should find methods in manager module by part of the method name", mAsync(async (done) => {
+    it("should find methods in manager module by part of the method name", async () => {
 
         await addText("Документы.Document.ПроцедураМодуляМен");
 
@@ -232,9 +232,9 @@ describe("Completion", function () {
         completion.label.should.be.equal("ПроцедураМодуляМенеджера");
         completion.kind.should.be.equal(vscode.CompletionItemKind.Function);
 
-    }));
+    });
 
-    it("should show work with en-keywords", mAsync(async (done) => {
+    it("should show work with en-keywords", async () => {
 
         await addText("Documents.Document.");
 
@@ -247,9 +247,9 @@ describe("Completion", function () {
         completion.label.should.be.equal("ПроцедураМодуляМенеджера");
         completion.kind.should.be.equal(vscode.CompletionItemKind.Function);
 
-    }));
+    });
 
-    it("should show metadata", mAsync(async (done) => {
+    it("should show metadata", async () => {
 
         await addText("Документы.");
 
@@ -262,9 +262,9 @@ describe("Completion", function () {
         completion.label.should.be.equal("Definition");
         completion.kind.should.be.equal(vscode.CompletionItemKind.Class);
 
-    }));
+    });
 
-    it("should show metadata from part of classname", mAsync(async (done) => {
+    it("should show metadata from part of classname", async () => {
 
         await addText("Докум");
 
@@ -283,9 +283,9 @@ describe("Completion", function () {
             value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.File);
         });
 
-    }));
+    });
 
-    it("should show completion of oscript modules", mAsync(async (done) => {
+    it("should show completion of oscript modules", async () => {
 
         await addText("СтроковыеФ");
 
@@ -298,9 +298,9 @@ describe("Completion", function () {
         completion.label.should.be.equal("СтроковыеФункции");
         completion.kind.should.be.equal(vscode.CompletionItemKind.Class);
 
-    }));
+    });
 
-    it("should show completion of functions in oscript modules", mAsync(async (done) => {
+    it("should show completion of functions in oscript modules", async () => {
 
         await addText("СтроковыеФункции.");
 
@@ -313,5 +313,5 @@ describe("Completion", function () {
             value.should.has.a.key("documentation").which.match(/Разбивает строку/);
         });
 
-    }));
+    });
 });
