@@ -194,7 +194,7 @@
   "dependencies": {
     "cross-spawn": "^5.0.1",
     "filequeue": "^0.5.0",
-    "fs-promise": "^1.0.0",
+    "fs-promise": "^2.0.0",
     "glob": "^7.1.1",
     "iconv-lite": "^0.4.15",
     "lokijs": "^1.4.2",
