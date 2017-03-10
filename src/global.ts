@@ -27,7 +27,7 @@ export class Global {
     public db: any;
     public dbcalls: Map<string, Array<{}>>;
     public globalfunctions: IGlobalFunctions;
-    public globalvariables: any;
+    public globalvariables: IGlobalVariables;
     public keywords: any;
     public systemEnum: any;
     public classes: any;
@@ -48,11 +48,11 @@ export class Global {
         this.toreplaced = this.getReplaceMetadata();
         this.cache = new loki("gtags.json");
         this.globalfunctions = {} as IGlobalFunctions;
-        this.globalvariables = {};
+        this.globalvariables = {} as IGlobalVariables;
         this.systemEnum = {};
         this.classes = {};
         const globalfunctions: IGlobalFunctions = bslglobals.globalfunctions();
-        const globalvariables = bslglobals.globalvariables();
+        const globalvariables: IGlobalVariables = bslglobals.globalvariables();
         this.keywords = bslglobals.keywords()[autocompleteLanguage];
         // tslint:disable-next-line:forin
         for (const key in globalfunctions) {
@@ -102,35 +102,37 @@ export class Global {
                 }
             }
         }
-        for (let element in globalvariables) {
+        for (const element in globalvariables) {
             if (!globalvariables.hasOwnProperty(element)) {
                 continue;
             }
-            let newName = globalvariables[element]["name" + postfix];
-            let newElement = {};
-            newElement["name"] = newName;
-            newElement["alias"] = (postfix === "_en") ? globalvariables[element]["name"] : globalvariables[element]["name_en"];
-            newElement["description"] = globalvariables[element].description;
+            const newName = globalvariables[element]["name" + postfix];
+            const newElement: IGlobalVariable = {} as IGlobalVariable;
+            newElement.name = newName;
+            newElement.alias = (postfix === "_en") ? globalvariables[element].name : globalvariables[element].name_en;
+            newElement.description = globalvariables[element].description;
             this.globalvariables[newName.toLowerCase()] = newElement;
         }
-        for (let element in globalContextOscript) {
+        for (const element in globalContextOscript) {
             if (!globalContextOscript.hasOwnProperty(element)) {
                 continue;
             }
-            let segment = oscriptStdLib.globalContextOscript()[element];
-            for (let key in segment["properties"]) {
-                if (this.globalvariables[segment["properties"][key]["name" + postfix].toLowerCase()]) {
-                    let globVar = this.globalvariables[segment["properties"][key]["name" + postfix].toLowerCase()];
-                    globVar["oscript_description"] = segment["properties"][key].description;
-                    globVar["oscript_access"] = segment["properties"][key].access;
+            const segment = globalContextOscript[element];
+            for (const key in segment.properties) {
+                if (this.globalvariables[segment.properties[key]["name" + postfix].toLowerCase()]) {
+                    const globVar = this.globalvariables[segment.properties[key]["name" + postfix].toLowerCase()];
+                    globVar.oscript_description = segment.properties[key].description;
+                    globVar.oscript_access = segment.properties[key].access;
                 } else {
-                    let newElement = {};
-                    let newName = segment["properties"][key]["name" + postfix];
-                    newElement["name"] = newName;
-                    newElement["alias"] = (postfix === "_en") ? segment["properties"][key]["name"] : segment["properties"][key]["name_en"];
-                    newElement["description"] = undefined;
-                    newElement["oscript_description"] = segment["properties"][key].description;
-                    newElement["oscript_access"] = segment["properties"][key].access;
+                    const newElement: IGlobalVariable = {} as IGlobalVariable;
+                    const newName = segment.properties[key]["name" + postfix];
+                    newElement.name = newName;
+                    newElement.alias = (postfix === "_en")
+                        ? segment.properties[key].name
+                        : segment.properties[key].name_en;
+                    newElement.description = undefined;
+                    newElement.oscript_description = segment.properties[key].description;
+                    newElement.oscript_access = segment.properties[key].access;
                     this.globalvariables[newName.toLowerCase()] = newElement;
                 }
             }
@@ -938,4 +940,15 @@ interface IOscriptFunctionDefinition {
     example?: string;
 }
 
+interface IGlobalVariables {
+    [index: string]: IGlobalVariable;
+}
 
+interface IGlobalVariable {
+    name: string;
+    name_en: string;
+    description: string;
+    alias: string;
+    oscript_description?: string;
+    oscript_access?: string;
+}

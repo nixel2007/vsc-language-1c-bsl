@@ -4379,7 +4379,7 @@ export function globalfunctions(): any {
     return data;
 }
 
-export function globalvariables() {
+export function globalvariables(): any {
     return {
         "WSСсылки": {
             name: 'WSСсылки',
