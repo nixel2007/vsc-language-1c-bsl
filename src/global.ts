@@ -66,32 +66,38 @@ export class Global {
             newElement.returns = globalFunction.returns;
             this.globalfunctions[newName.toLowerCase()] = newElement;
         }
-        let globalContextOscript = oscriptStdLib.globalContextOscript();
-        for (let element in globalContextOscript) {
-            if (!globalContextOscript.hasOwnProperty(element)) {
-                continue;
-            }
-            let segment = globalContextOscript[element];
-            for (let key in segment["methods"]) {
-                if (this.globalfunctions[segment["methods"][key]["name" + postfix].toLowerCase()]) {
-                    let globMethod = this.globalfunctions[segment["methods"][key]["name" + postfix].toLowerCase()];
-                    globMethod["oscript_signature"] = {
-                        "default": {
-                            "СтрокаПараметров": segment["methods"][key].signature,
-                            "Параметры": segment["methods"][key].params
+        const globalContextOscript: IOscriptGlobalContext = oscriptStdLib.globalContextOscript();
+        // tslint:disable-next-line:forin
+        for (const segmentKey in globalContextOscript) {
+            const segmentMethods = globalContextOscript[segmentKey].methods;
+            // tslint:disable-next-line:forin
+            for (const methodKey in segmentMethods) {
+                const method = segmentMethods[methodKey];
+                if (this.globalfunctions[method["name" + postfix].toLowerCase()]) {
+                    const globMethod = this.globalfunctions[method["name" + postfix].toLowerCase()];
+                    globMethod.oscript_signature = {
+                        default: {
+                            СтрокаПараметров: method.signature,
+                            Параметры: method.params
                         }
                     };
-                    globMethod["oscript_description"] = segment["methods"][key].description;
+                    globMethod.oscript_description = method.description;
                 } else {
-                    let newElement = {};
-                    let newName = segment["methods"][key]["name" + postfix];
-                    newElement["name"] = newName;
-                    newElement["alias"] = (postfix === "_en") ? segment["methods"][key]["name"] : segment["methods"][key]["name_en"];
-                    newElement["description"] = undefined;
-                    newElement["signature"] = undefined;
-                    newElement["returns"] = segment["methods"][key].returns;
-                    newElement["oscript_signature"] = { "default": { "СтрокаПараметров": segment["methods"][key].signature, "Параметры": segment["methods"][key].params } };
-                    newElement["oscript_description"] = segment["methods"][key].description;
+                    const newElement: IGlobalFunction = {} as IGlobalFunction;
+                    const newName = method["name" + postfix];
+                    newElement.name = newName;
+                    newElement.alias = (postfix === "_en") ? method.name : method.name_en;
+                    newElement.description = undefined;
+                    newElement.signature = undefined;
+                    newElement.returns = method.returns;
+                    newElement.oscript_signature =
+                        {
+                            default: {
+                                СтрокаПараметров: method.signature,
+                                Параметры: method.params
+                            }
+                        };
+                    newElement.oscript_description = method.description;
                     this.globalfunctions[newName.toLowerCase()] = newElement;
                 }
             }
@@ -896,3 +902,40 @@ interface ISignatureDefinition{
 interface ISignatureParameters {
     [index: string]: string;
 }
+
+interface IOscriptGlobalContext {
+    [index: string]: IOscriptSegment;
+}
+
+interface IOscriptSegment {
+    description?: string;
+    properties?: IOscriptPropertyDefinitions;
+    methods?: IOscriptFunctionDefinitions;
+}
+
+interface IOscriptPropertyDefinitions {
+    [index: string]: IOscriptPropertyDefinition;
+}
+
+interface IOscriptFunctionDefinitions {
+    [index: string]: IOscriptFunctionDefinition;
+}
+
+interface IOscriptPropertyDefinition {
+    name: string;
+    name_en: string;
+    description: string;
+    access: string;
+}
+
+interface IOscriptFunctionDefinition {
+    name: string;
+    name_en: string;
+    description: string;
+    signature: string;
+    returns: string;
+    params: ISignatureParameters;
+    example?: string;
+}
+
+
