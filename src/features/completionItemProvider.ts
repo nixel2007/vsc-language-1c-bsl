@@ -138,13 +138,13 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
     private getGlobals(word: string, returns = false): vscode.CompletionItem[] {
         let completions: Array<vscode.CompletionItem> = new Array<vscode.CompletionItem>();
         let wordMatch = this.getRegExp(word);
-        let completionDict = this._global.globalfunctions;
-        for (let name in completionDict) {
+        let completionDictFunctions = this._global.globalfunctions;
+        for (let name in completionDictFunctions) {
             if (wordMatch.exec(name)) {
-                if (returns && !completionDict[name].returns) {
+                if (returns && !completionDictFunctions[name].returns) {
                     continue;
                 }
-                let full = completionDict[name];
+                let full = completionDictFunctions[name];
                 if (vscode.window.activeTextEditor.document.fileName.endsWith(".bsl") && !full.description) {
                     continue;
                 } else if (vscode.window.activeTextEditor.document.fileName.endsWith(".os") && !full.oscript_signature) {
@@ -177,10 +177,10 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                 this.added[name] = true;
             }
         }
-        completionDict = this._global.globalvariables;
-        for (let name in completionDict) {
+        const completionDictVariables = this._global.globalvariables;
+        for (let name in completionDictVariables) {
             if (wordMatch.exec(name)) {
-                let full = completionDict[name];
+                let full = completionDictVariables[name];
                 if (vscode.window.activeTextEditor.document.fileName.endsWith(".bsl") && full.oscript_access) {
                     continue;
                 } else if (vscode.window.activeTextEditor.document.fileName.endsWith(".os") && !full.oscript_access) {
@@ -195,10 +195,10 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                 this.added[name] = true;
             }
         }
-        completionDict = this._global.keywords;
-        for (let name in completionDict) {
+        const completionDictKeywords = this._global.keywords;
+        for (let name in completionDictKeywords) {
             if (wordMatch.exec(name)) {
-                let full = completionDict[name];
+                let full = completionDictKeywords[name];
                 let completion = new vscode.CompletionItem(name);
                 completion.kind = vscode.CompletionItemKind.Keyword;
                 if (full["description"]) {
@@ -208,10 +208,10 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                 this.added[name.toLowerCase()] = true;
             }
         }
-        completionDict = this._global.systemEnum;
-        for (let name in completionDict) {
+        const completionDictSystemEnum = this._global.systemEnum;
+        for (let name in completionDictSystemEnum) {
             if (wordMatch.exec(name)) {
-                let full = completionDict[name];
+                let full = completionDictSystemEnum[name];
                 let completion = new vscode.CompletionItem(full.name);
                 completion.kind = vscode.CompletionItemKind.Enum;
                 if (full.description) {
