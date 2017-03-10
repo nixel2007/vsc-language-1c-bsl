@@ -5,7 +5,7 @@
 /* tslint:disable:trailing-comma */
 
 export function globalfunctions(): any {
-    let data = {
+    const data = {
         "ACos": {
             name: 'ACos',
             name_en: 'ACos',

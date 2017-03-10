@@ -28,7 +28,7 @@ export class Global {
     public dbcalls: Map<string, any[]>;
     public globalfunctions: IMethods;
     public globalvariables: IGlobalVariables;
-    public keywords: any;
+    public keywords: IKeywordsForLanguage;
     public systemEnum: ISystemEnums;
     public classes: IClasses;
     public toreplaced: any;
@@ -1043,4 +1043,13 @@ interface IConstructorDefinition {
     signature: string;
     oscript_description: string;
     params?: ISignatureParameters;
+}
+
+interface IKeywords {
+    ru: IKeywordsForLanguage;
+    en: IKeywordsForLanguage;
+}
+
+interface IKeywordsForLanguage {
+    [index: string]: {};
 }
