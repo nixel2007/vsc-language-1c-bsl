@@ -6,11 +6,11 @@ import * as path from "path";
 import * as bslglobals from "./features/bslGlobals";
 import * as oscriptStdLib from "./features/oscriptStdLib";
 
-let loki = require("lokijs");
-let Parser = require("onec-syntaxparser");
-let FileQueue = require("filequeue");
-let xml2js = require("xml2js");
-let fq = new FileQueue(500);
+import loki = require("lokijs");
+import Parser = require("onec-syntaxparser");
+import FileQueue = require("filequeue");
+import xml2js = require("xml2js");
+const fq = new FileQueue(500);
 
 export class Global {
 
@@ -26,7 +26,7 @@ export class Global {
     public cache: any;
     public db: any;
     public dbcalls: Map<string, Array<{}>>;
-    public globalfunctions: any;
+    public globalfunctions: IGlobalFunctions;
     public globalvariables: any;
     public keywords: any;
     public systemEnum: any;
@@ -42,29 +42,28 @@ export class Global {
         if (adapter) {
             this.redefineMethods(adapter);
         }
-        let configuration = this.getConfiguration("language-1c-bsl");
-        let autocompleteLanguage: any = this.getConfigurationKey(configuration, "languageAutocomplete");
-        let postfix = (autocompleteLanguage === "en") ? "_en" : "";
+        const configuration = this.getConfiguration("language-1c-bsl");
+        const autocompleteLanguage: any = this.getConfigurationKey(configuration, "languageAutocomplete");
+        const postfix = (autocompleteLanguage === "en") ? "_en" : "";
         this.toreplaced = this.getReplaceMetadata();
         this.cache = new loki("gtags.json");
-        this.globalfunctions = {};
+        this.globalfunctions = {} as IGlobalFunctions;
         this.globalvariables = {};
         this.systemEnum = {};
         this.classes = {};
-        let globalfunctions = bslglobals.globalfunctions();
-        let globalvariables = bslglobals.globalvariables();
+        const globalfunctions: IGlobalFunctions = bslglobals.globalfunctions();
+        const globalvariables = bslglobals.globalvariables();
         this.keywords = bslglobals.keywords()[autocompleteLanguage];
-        for (let element in globalfunctions) {
-            if (!globalfunctions.hasOwnProperty(element)) {
-                continue;
-            }
-            let newName = globalfunctions[element]["name" + postfix];
-            let newElement = {};
-            newElement["name"] = newName;
-            newElement["alias"] = (postfix === "_en") ? globalfunctions[element]["name"] : globalfunctions[element]["name_en"];
-            newElement["description"] = globalfunctions[element].description;
-            newElement["signature"] = globalfunctions[element].signature;
-            newElement["returns"] = globalfunctions[element].returns;
+        // tslint:disable-next-line:forin
+        for (const key in globalfunctions) {
+            const globalFunction = globalfunctions[key];
+            const newName = globalFunction["name" + postfix];
+            const newElement: IGlobalFunction = {} as IGlobalFunction;
+            newElement.name = newName;
+            newElement.alias = (postfix === "_en") ? globalFunction.name : globalFunction.name_en;
+            newElement.description = globalFunction.description;
+            newElement.signature = globalFunction.signature;
+            newElement.returns = globalFunction.returns;
             this.globalfunctions[newName.toLowerCase()] = newElement;
         }
         let globalContextOscript = oscriptStdLib.globalContextOscript();
@@ -382,12 +381,7 @@ export class Global {
         }
     }
 
-    private delay(milliseconds: number) {
-        return new Promise<void>(resolve => {
-            setTimeout(resolve, milliseconds);
-        });
-    }
-    
+
     public addtocachefiles(files: string[], rootPath: string): any {
         let filesLength = files.length;
         let substrIndex = (process.platform === "win32") ? 8 : 7;
@@ -702,6 +696,12 @@ export class Global {
 
     public findFilesForCache(searchPattern: string, rootPath: string) { }
 
+    private delay(milliseconds: number) {
+        return new Promise<void>((resolve) => {
+            setTimeout(resolve, milliseconds);
+        });
+    }
+
     private cacheUpdated(): boolean {
         return this.bslCacheUpdated && this.oscriptCacheUpdated;
     }
@@ -866,4 +866,33 @@ interface IMethodValue {
     character?: number;
     _method?: {};
     oscriptLib?: boolean;
+}
+
+interface IGlobalFunctions {
+    [index: string]: IGlobalFunction;
+}
+
+interface IGlobalFunction {
+    name: string;
+    name_en: string;
+    alias: string;
+    description: string;
+    signature: ISignatureCollection;
+    returns: string;
+    oscript_description?: string;
+    oscript_signature?: ISignatureCollection;
+}
+
+interface ISignatureCollection {
+    default: ISignatureDefinition;
+    [index: string]: ISignatureDefinition;
+}
+
+interface ISignatureDefinition{
+    СтрокаПараметров: string;
+    Параметры: ISignatureParameters;
+}
+
+interface ISignatureParameters {
+    [index: string]: string;
 }
