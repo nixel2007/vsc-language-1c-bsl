@@ -933,6 +933,7 @@ interface IMethod {
     returns: string;
     oscript_description?: string;
     oscript_signature?: ISignatureCollection;
+    oscript_access?: boolean;
 }
 
 interface ISignatureCollection {

@@ -4694,7 +4694,7 @@ export function globalvariables(): any {
     };
 }
 
-export function keywords() {
+export function keywords(): any {
     return {
         ru: {
             Процедура: {},
