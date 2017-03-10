@@ -1,4 +1,4 @@
-sudo: false
+sudo: required
 
 dist: trusty
 
@@ -18,6 +18,12 @@ before_install:
       sh -e /etc/init.d/xvfb start;
       sleep 3;
     fi
+  - wget -O os.deb http://oscript.io/downloads/latest/deb
+  - sudo apt-get install mono-complete mono-devel
+  - sudo dpkg -i os.deb; sudo apt install -f
+  - oscript
+  - sudo opm update opm
+  - sudo opm install oscript-config
 
 install: 
   - npm install
