@@ -83,7 +83,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                                 if (this.added[(fullName).toLowerCase()] !== true) {
                                     const item = new vscode.CompletionItem(fullName);
                                     item.documentation = description;
-                                    item.kind = vscode.CompletionItemKind.File;
+                                    item.kind = vscode.CompletionItemKind.Module;
                                     bucket.push(item);
                                     this.added[(fullName).toLowerCase()] = true;
                                 }

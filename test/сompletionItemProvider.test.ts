@@ -280,7 +280,7 @@ describe("Completion", function () {
 
         completions.should.matchAny((value: vscode.CompletionItem) => {
             value.should.has.a.key("label").which.is.equal("Документы.Document");
-            value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.File);
+            value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Module);
         });
 
     });
@@ -296,7 +296,7 @@ describe("Completion", function () {
 
         const completion = completions[0];
         completion.label.should.be.equal("СтроковыеФункции");
-        completion.kind.should.be.equal(vscode.CompletionItemKind.Class);
+        completion.kind.should.be.equal(vscode.CompletionItemKind.Module);
 
     });
 
