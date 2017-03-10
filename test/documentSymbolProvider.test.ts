@@ -19,7 +19,7 @@ describe("Document symbols", () => {
         );
         textDocument = await newTextDocument(uriEmptyFile);
         await globals.waitForCacheUpdate();
-    }));
+    });
 
     it("should show functions from current document", async () => {
 

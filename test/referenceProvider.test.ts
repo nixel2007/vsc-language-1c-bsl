@@ -19,7 +19,7 @@ describe("References", () => {
         );
         textDocument = await newTextDocument(uriFile);
         await globals.waitForCacheUpdate();
-    }));
+    });
 
     it("should be showed on export methods", async () => {
 
