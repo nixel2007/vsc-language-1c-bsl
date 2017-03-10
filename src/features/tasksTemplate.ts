@@ -1,63 +1,63 @@
 export function getTasksObject(): any {
   return {
-    "version": "0.1.0",
-    "command": "oscript",
-    "isShellCommand": true,
-    "showOutput": "silent",
-    "args": [
+    version: "0.1.0",
+    command: "oscript",
+    isShellCommand: true,
+    showOutput: "silent",
+    args: [
       "-encoding=utf-8"
     ],
-    "tasks": [
+    tasks: [
       {
-        "taskName": "OneScript: compile",
-        "args": [
+        taskName: "OneScript: compile",
+        args: [
           "-compile",
           "${file}"
         ],
-        "echoCommand": true,
-        "showOutput": "always",
-        "suppressTaskName": true,
-        "isBuildCommand": false
+        echoCommand: true,
+        showOutput: "always",
+        suppressTaskName: true,
+        isBuildCommand: false
       },
       {
-        "taskName": "OneScript: check",
-        "args": [
+        taskName: "OneScript: check",
+        args: [
           "-check",
           "${file}"
         ],
-        "echoCommand": true,
-        "showOutput": "always",
-        "suppressTaskName": true,
-        "isBuildCommand": false
+        echoCommand: true,
+        showOutput: "always",
+        suppressTaskName: true,
+        isBuildCommand: false
       },
       {
-        "taskName": "OneScript: make",
-        "args": [
+        taskName: "OneScript: make",
+        args: [
           "-make",
           "${file}",
           "${fileBasename}.exe"
         ],
-        "echoCommand": true,
-        "showOutput": "always",
-        "suppressTaskName": true,
-        "isBuildCommand": false
+        echoCommand: true,
+        showOutput: "always",
+        suppressTaskName: true,
+        isBuildCommand: false
       },
       {
-        "taskName": "OneScript: run",
-        "args": [
+        taskName: "OneScript: run",
+        args: [
           "${file}"
         ],
-        "echoCommand": true,
-        "showOutput": "always",
-        "suppressTaskName": true,
-        "isBuildCommand": true,
-        "problemMatcher": {
-          "fileLocation": "absolute",
-          "pattern": {
-            "regexp": "{Модуль\\s+(.+)\\s\\/\\s.*:\\s+(\\d+)\\s+\\/\\s+([^{]*)",
-            "file": 1,
-            "location": 2,
-            "message": 3
+        echoCommand: true,
+        showOutput: "always",
+        suppressTaskName: true,
+        isBuildCommand: true,
+        problemMatcher: {
+          fileLocation: "absolute",
+          pattern: {
+            regexp: "{Модуль\\s+(.+)\\s\\/\\s.*:\\s+(\\d+)\\s+\\/\\s+([^{]*)",
+            file: 1,
+            location: 2,
+            message: 3
           }
         }
       }

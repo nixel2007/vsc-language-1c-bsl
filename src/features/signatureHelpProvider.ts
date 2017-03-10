@@ -1,28 +1,28 @@
 import {SignatureHelpProvider, SignatureHelp, SignatureInformation, CancellationToken, TextDocument, Position} from "vscode";
 import AbstractProvider from "./abstractProvider";
 
-let _NL = "\n".charCodeAt(0);
-let _TAB = "\t".charCodeAt(0);
-let _WSB = " ".charCodeAt(0);
-let _LBracket = "[".charCodeAt(0);
-let _RBracket = "]".charCodeAt(0);
-let _LCurly = "{".charCodeAt(0);
-let _RCurly = "}".charCodeAt(0);
-let _LParent = "(".charCodeAt(0);
-let _RParent = ")".charCodeAt(0);
-let _Comma = ",".charCodeAt(0);
-let _Quote = "'".charCodeAt(0);
-let _DQuote = "\"".charCodeAt(0);
-let _USC = "_".charCodeAt(0);
-let _a = "a".charCodeAt(0);
-let _z = "z".charCodeAt(0);
-let _A = "A".charCodeAt(0);
-let _Z = "Z".charCodeAt(0);
-let _0 = "0".charCodeAt(0);
-let _9 = "9".charCodeAt(0);
-let _Dot = ".".charCodeAt(0);
+const _NL = "\n".charCodeAt(0);
+const _TAB = "\t".charCodeAt(0);
+const _WSB = " ".charCodeAt(0);
+const _LBracket = "[".charCodeAt(0);
+const _RBracket = "]".charCodeAt(0);
+const _LCurly = "{".charCodeAt(0);
+const _RCurly = "}".charCodeAt(0);
+const _LParent = "(".charCodeAt(0);
+const _RParent = ")".charCodeAt(0);
+const _Comma = ",".charCodeAt(0);
+const _Quote = "'".charCodeAt(0);
+const _DQuote = "\"".charCodeAt(0);
+const _USC = "_".charCodeAt(0);
+const _a = "a".charCodeAt(0);
+const _z = "z".charCodeAt(0);
+const _A = "A".charCodeAt(0);
+const _Z = "Z".charCodeAt(0);
+const _0 = "0".charCodeAt(0);
+const _9 = "9".charCodeAt(0);
+const _Dot = ".".charCodeAt(0);
 
-let BOF = 0;
+const BOF = 0;
 
 class BackwardIterator {
     private lineNumber: number;
@@ -52,7 +52,7 @@ class BackwardIterator {
             this.lineNumber = -1;
             return BOF;
         }
-        let ch = this.line.charCodeAt(this.offset);
+        const ch = this.line.charCodeAt(this.offset);
         this.offset--;
         return ch;
     }
@@ -64,9 +64,9 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
     public provideSignatureHelp(document: TextDocument, position: Position, token: CancellationToken): Thenable<SignatureHelp> {
         
         return new Promise((resolve, reject) => {
-            let iterator = new BackwardIterator(document, position.character - 1, position.line);
+            const iterator = new BackwardIterator(document, position.character - 1, position.line);
 
-            let paramCount = this.readArguments(iterator);
+            const paramCount = this.readArguments(iterator);
             if (paramCount < 0) {
                 return resolve(undefined);
             }
@@ -77,10 +77,11 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
             }
 
             let entry = this._global.globalfunctions[ident.toLowerCase()];
+            let entries;
             if (!entry) {
                 let module = "";
                 if (ident.indexOf(".") > 0) {
-                    let dotArray: Array<string> = ident.split(".");
+                    const dotArray: string[] = ident.split(".");
                     ident = dotArray.pop();
                     if (this._global.toreplaced[dotArray[0]]) {
                         dotArray[0] = this._global.toreplaced[dotArray[0]];
@@ -88,24 +89,24 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
                     module = dotArray.join(".");
                 }
                 if (module.length === 0) {
-                    let source = document.getText();
-                    entry = this._global.getCacheLocal(document.fileName, ident, source, false, false);
+                    const source = document.getText();
+                    entries = this._global.getCacheLocal(document.fileName, ident, source, false, false);
                 } else {
-                    entry = this._global.query(ident, module, false, false);
+                    entries = this._global.query(ident, module, false, false);
                 }
                 // Показ сигнатур по имени функции
                 // if (entry.length === 0) {
                 //     entry = this._global.query(ident, "", false, false);
                 // }
-                if (!entry) {
+                if (!entry && entries.length === 0) {
                     return resolve(undefined);
                 } else if (module.length === 0) {
-                    entry = entry[0];
+                    entry = entries[0];
                     return resolve(this.GetSignature(entry, paramCount));
                 } else {
-                    for (let i = 0; i < entry.length; i++) {
-                        let signatureElement = entry[i];
-                        let arrayFilename = signatureElement.filename.split("/");
+                    for (let i = 0; i < entries.length; i++) {
+                        const signatureElement = entries[i];
+                        const arrayFilename = signatureElement.filename.split("/");
                         if (!signatureElement.oscriptLib && arrayFilename[arrayFilename.length - 4] !== "CommonModules" && !signatureElement.filename.endsWith("ManagerModule.bsl")) {
                             continue;
                         }
@@ -117,15 +118,15 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
                     // }
                 }
             }
-            let signature = (!entry.signature) ? entry.oscript_signature : entry.signature;
+            const signature = (!entry.signature) ? entry.oscript_signature : entry.signature;
             if (!signature) { return resolve(undefined); }
-            let ret = new SignatureHelp();
-            for (let element in signature) {
-                let paramsString = signature[element].СтрокаПараметров;
-                let signatureInfo = new SignatureInformation(entry.name + paramsString, "");
+            const ret = new SignatureHelp();
+            for (const element in signature) {
+                const paramsString = signature[element].СтрокаПараметров;
+                const signatureInfo = new SignatureInformation(entry.name + paramsString, "");
 
-                let re = /([\wа-яА-Я]+)\??:\s+[а-яА-Я\w_\.\|]+/g;
-                let match: RegExpExecArray = undefined;
+                const re = /([\wа-яА-Я]+)\??:\s+[а-яА-Я\w_\.\|]+/g;
+                let match: RegExpExecArray;
                 while ((match = re.exec(paramsString))) {
                     signatureInfo.parameters.push({ label: match[0], documentation: signature[element].Параметры[match[1]] });
                 }
@@ -139,19 +140,19 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
 
             }
             return resolve(ret);
-        });    
+        });
     }
 
     private GetSignature(entry, paramCount): SignatureHelp {
         if (entry._method.Params.length !== 0) {
-            let arraySignature = this._global.GetSignature(entry);
-            let ret = new SignatureHelp();
-            let signatureInfo = new SignatureInformation(entry.name + arraySignature.paramsString, "");
+            const arraySignature = this._global.GetSignature(entry);
+            const ret = new SignatureHelp();
+            const signatureInfo = new SignatureInformation(entry.name + arraySignature.paramsString, "");
 
-            let re = /([\wа-яА-Я]+)(:\s+[<а-яА-Я\w_\.>\|]+)?/g;
-            let match: RegExpExecArray = undefined;
+            const re = /([\wа-яА-Я]+)(:\s+[<а-яА-Я\w_\.>\|]+)?/g;
+            let match: RegExpExecArray;
             while ((match = re.exec(arraySignature.paramsString))) {
-                let documentationParam = this._global.GetDocParam(arraySignature.description, match[1]);
+                const documentationParam = this._global.GetDocParam(arraySignature.description, match[1]);
                 signatureInfo.parameters.push({ label: match[0] + (documentationParam.optional ? "?" : ""), documentation: documentationParam.descriptionParam });
             }
 
@@ -175,7 +176,7 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
         let curlyNesting = 0;
         let paramCount = 0;
         while (iterator.hasNext()) {
-            let ch = iterator.next();
+            const ch = iterator.next();
             switch (ch) {
                 case _LParent:
                     parentNesting--;
@@ -222,7 +223,7 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
         let identStarted = false;
         let ident = "";
         while (iterator.hasNext()) {
-            let ch = iterator.next();
+            const ch = iterator.next();
             if (!identStarted && (ch === _WSB || ch === _TAB || ch === _NL)) {
                 continue;
             }
