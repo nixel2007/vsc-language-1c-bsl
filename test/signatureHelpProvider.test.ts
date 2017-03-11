@@ -22,7 +22,7 @@ describe("Signature", () => {
     beforeEach(async () => {
         await clearActiveTextEditor();
     });
-    
+
     it("should be showed on methods of oscript library", async () => {
 
         await addText("#Использовать strings\n");
