@@ -5,7 +5,7 @@
 /* tslint:disable:trailing-comma */
 
 export function globalfunctions(): any {
-    let data = {
+    const data = {
         "ACos": {
             name: 'ACos',
             name_en: 'ACos',
@@ -4379,7 +4379,7 @@ export function globalfunctions(): any {
     return data;
 }
 
-export function globalvariables() {
+export function globalvariables(): any {
     return {
         "WSСсылки": {
             name: 'WSСсылки',
@@ -4694,7 +4694,7 @@ export function globalvariables() {
     };
 }
 
-export function keywords() {
+export function keywords(): any {
     return {
         ru: {
             Процедура: {},
@@ -4769,7 +4769,7 @@ export function keywords() {
     };
 }
 
-export function classes() {
+export function classes(): any {
     return {
         "COMОбъект": {
             name: 'COMОбъект',
@@ -9325,7 +9325,7 @@ export function structureGlobContext() {
     };
 }
 
-export function systemEnum() {
+export function systemEnum(): any {
     return {
         "КодировкаТекста": {
             name: 'КодировкаТекста',

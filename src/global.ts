@@ -6,17 +6,17 @@ import * as path from "path";
 import * as bslglobals from "./features/bslGlobals";
 import * as oscriptStdLib from "./features/oscriptStdLib";
 
-let loki = require("lokijs");
-let Parser = require("onec-syntaxparser");
-let FileQueue = require("filequeue");
-let xml2js = require("xml2js");
-let fq = new FileQueue(500);
+import loki = require("lokijs");
+import Parser = require("onec-syntaxparser");
+import FileQueue = require("filequeue");
+import xml2js = require("xml2js");
+const fq = new FileQueue(500);
 
 export class Global {
 
     public static create(adapter?: any): Global {
         if (!Global.instance) {
-           Global.instance = new Global(adapter);
+            Global.instance = new Global(adapter);
         }
         return Global.instance;
     }
@@ -25,285 +25,315 @@ export class Global {
 
     public cache: any;
     public db: any;
-    public dbcalls: Map<string, Array<{}>>;
-    public globalfunctions: any;
-    public globalvariables: any;
-    public keywords: any;
-    public systemEnum: any;
-    public classes: any;
+    public dbcalls: Map<string, any[]>;
+    public globalfunctions: IMethods;
+    public globalvariables: IGlobalVariables;
+    public keywords: IKeywordsForLanguage;
+    public systemEnum: ISystemEnums;
+    public classes: IClasses;
     public toreplaced: any;
     public methodForDescription: any = undefined;
     public syntaxFilled: string = "";
     public hoverTrue: boolean = true;
-    private cacheUpdates: boolean;
+    private bslCacheUpdated: boolean;
+    private oscriptCacheUpdated: boolean;
 
     constructor(adapter?: any) {
         if (adapter) {
             this.redefineMethods(adapter);
         }
-        let configuration = this.getConfiguration("language-1c-bsl");
-        let autocompleteLanguage: any = this.getConfigurationKey(configuration, "languageAutocomplete");
-        let postfix = (autocompleteLanguage === "en") ? "_en" : "";
+        const configuration = this.getConfiguration("language-1c-bsl");
+        const autocompleteLanguage: any = this.getConfigurationKey(configuration, "languageAutocomplete");
+        const postfix = (autocompleteLanguage === "en") ? "_en" : "";
         this.toreplaced = this.getReplaceMetadata();
         this.cache = new loki("gtags.json");
-        this.cacheUpdates = false;
-        this.globalfunctions = {};
-        this.globalvariables = {};
-        this.systemEnum = {};
-        this. classes = {};
-        let globalfunctions = bslglobals.globalfunctions();
-        let globalvariables = bslglobals.globalvariables();
+        this.globalfunctions = {} as IMethods;
+        this.globalvariables = {} as IGlobalVariables;
+        this.systemEnum = {} as ISystemEnums;
+        this.classes = {} as IClasses;
+        const globalfunctions: IMethods = bslglobals.globalfunctions();
+        const globalvariables: IGlobalVariables = bslglobals.globalvariables();
         this.keywords = bslglobals.keywords()[autocompleteLanguage];
-        for (let element in globalfunctions) {
-            if (!globalfunctions.hasOwnProperty(element)) {
-                continue;
-            }
-            let newName = globalfunctions[element]["name" + postfix];
-            let newElement = {};
-            newElement["name"] = newName;
-            newElement["alias"] = (postfix === "_en") ? globalfunctions[element]["name"] : globalfunctions[element]["name_en"];
-            newElement["description"] = globalfunctions[element].description;
-            newElement["signature"] = globalfunctions[element].signature;
-            newElement["returns"] = globalfunctions[element].returns;
+        // tslint:disable-next-line:forin
+        for (const key in globalfunctions) {
+            const globalFunction = globalfunctions[key];
+            const newName = globalFunction["name" + postfix];
+            const newElement: IMethod = {} as IMethod;
+            newElement.name = newName;
+            newElement.alias = (postfix === "_en") ? globalFunction.name : globalFunction.name_en;
+            newElement.description = globalFunction.description;
+            newElement.signature = globalFunction.signature;
+            newElement.returns = globalFunction.returns;
             this.globalfunctions[newName.toLowerCase()] = newElement;
         }
-        let globalContextOscript = oscriptStdLib.globalContextOscript();
-        for (let element in globalContextOscript) {
-            if (!globalContextOscript.hasOwnProperty(element)) {
-                continue;
-            }
-            let segment = globalContextOscript[element];
-            for (let key in segment["methods"]) {
-                if (this.globalfunctions[segment["methods"][key]["name" + postfix].toLowerCase()]) {
-                    let globMethod = this.globalfunctions[segment["methods"][key]["name" + postfix].toLowerCase()];
-                    globMethod["oscript_signature"] = {
-                        "default": {
-                            "СтрокаПараметров": segment["methods"][key].signature,
-                            "Параметры": segment["methods"][key].params
+        const globalContextOscript: IOscriptGlobalContext = oscriptStdLib.globalContextOscript();
+        // tslint:disable-next-line:forin
+        for (const segmentKey in globalContextOscript) {
+            const segmentMethods = globalContextOscript[segmentKey].methods;
+            // tslint:disable-next-line:forin
+            for (const methodKey in segmentMethods) {
+                const method = segmentMethods[methodKey];
+                if (this.globalfunctions[method["name" + postfix].toLowerCase()]) {
+                    const globMethod = this.globalfunctions[method["name" + postfix].toLowerCase()];
+                    globMethod.oscript_signature = {
+                        default: {
+                            СтрокаПараметров: method.signature,
+                            Параметры: method.params
                         }
                     };
-                    globMethod["oscript_description"] = segment["methods"][key].description;
+                    globMethod.oscript_description = method.description;
                 } else {
-                    let newElement = {};
-                    let newName = segment["methods"][key]["name" + postfix];
-                    newElement["name"] = newName;
-                    newElement["alias"] = (postfix === "_en") ? segment["methods"][key]["name"] : segment["methods"][key]["name_en"];
-                    newElement["description"] = undefined;
-                    newElement["signature"] = undefined;
-                    newElement["returns"] = segment["methods"][key].returns;
-                    newElement["oscript_signature"] = { "default": { "СтрокаПараметров": segment["methods"][key].signature, "Параметры": segment["methods"][key].params } };
-                    newElement["oscript_description"] = segment["methods"][key].description;
+                    const newElement: IMethod = {} as IMethod;
+                    const newName = method["name" + postfix];
+                    newElement.name = newName;
+                    newElement.alias = (postfix === "_en") ? method.name : method.name_en;
+                    newElement.description = undefined;
+                    newElement.signature = undefined;
+                    newElement.returns = method.returns;
+                    newElement.oscript_signature = {
+                        default: {
+                            СтрокаПараметров: method.signature,
+                            Параметры: method.params
+                        }
+                    };
+                    newElement.oscript_description = method.description;
                     this.globalfunctions[newName.toLowerCase()] = newElement;
                 }
             }
         }
-        for (let element in globalvariables) {
+        for (const element in globalvariables) {
             if (!globalvariables.hasOwnProperty(element)) {
                 continue;
             }
-            let newName = globalvariables[element]["name" + postfix];
-            let newElement = {};
-            newElement["name"] = newName;
-            newElement["alias"] = (postfix === "_en") ? globalvariables[element]["name"] : globalvariables[element]["name_en"];
-            newElement["description"] = globalvariables[element].description;
+            const newName = globalvariables[element]["name" + postfix];
+            const newElement: IGlobalVariable = {} as IGlobalVariable;
+            newElement.name = newName;
+            newElement.alias = (postfix === "_en") ? globalvariables[element].name : globalvariables[element].name_en;
+            newElement.description = globalvariables[element].description;
             this.globalvariables[newName.toLowerCase()] = newElement;
         }
-        for (let element in globalContextOscript) {
+        for (const element in globalContextOscript) {
             if (!globalContextOscript.hasOwnProperty(element)) {
                 continue;
             }
-            let segment = oscriptStdLib.globalContextOscript()[element];
-            for (let key in segment["properties"]) {
-                if (this.globalvariables[segment["properties"][key]["name" + postfix].toLowerCase()]) {
-                    let globVar = this.globalvariables[segment["properties"][key]["name" + postfix].toLowerCase()];
-                    globVar["oscript_description"] = segment["properties"][key].description;
-                    globVar["oscript_access"] = segment["properties"][key].access;
+            const segment = globalContextOscript[element];
+            for (const key in segment.properties) {
+                if (this.globalvariables[segment.properties[key]["name" + postfix].toLowerCase()]) {
+                    const globVar = this.globalvariables[segment.properties[key]["name" + postfix].toLowerCase()];
+                    globVar.oscript_description = segment.properties[key].description;
+                    globVar.oscript_access = segment.properties[key].access;
                 } else {
-                    let newElement = {};
-                    let newName = segment["properties"][key]["name" + postfix];
-                    newElement["name"] = newName;
-                    newElement["alias"] = (postfix === "_en") ? segment["properties"][key]["name"] : segment["properties"][key]["name_en"];
-                    newElement["description"] = undefined;
-                    newElement["oscript_description"] = segment["properties"][key].description;
-                    newElement["oscript_access"] = segment["properties"][key].access;
+                    const newElement: IGlobalVariable = {} as IGlobalVariable;
+                    const newName = segment.properties[key]["name" + postfix];
+                    newElement.name = newName;
+                    newElement.alias = (postfix === "_en")
+                        ? segment.properties[key].name
+                        : segment.properties[key].name_en;
+                    newElement.description = undefined;
+                    newElement.oscript_description = segment.properties[key].description;
+                    newElement.oscript_access = segment.properties[key].access;
                     this.globalvariables[newName.toLowerCase()] = newElement;
                 }
             }
         }
-        let systemEnum = bslglobals.systemEnum();
-        for (let element in systemEnum) {
+        let systemEnum: ISystemEnums = bslglobals.systemEnum();
+        for (const element in systemEnum) {
             if (!systemEnum.hasOwnProperty(element)) {
                 continue;
             }
-            let segment = systemEnum[element];
-            let newName = segment["name" + postfix];
-            let newElement = {};
-            newElement["name"] = newName;
-            newElement["alias"] = (postfix === "_en") ? segment["name"] : segment["name_en"];
-            newElement["description"] = segment.description;
-            newElement["values"] = [];
-            let values = segment["values"];
-            for (let key in values) {
+            const segment = systemEnum[element];
+            const newName = segment["name" + postfix];
+            const newElement: ISystemEnum = {} as ISystemEnum;
+            newElement.name = newName;
+            newElement.alias = (postfix === "_en") ? segment.name : segment.name_en;
+            newElement.description = segment.description;
+            newElement.values = [];
+            const values = segment.values;
+            for (const key in values) {
                 if (!values.hasOwnProperty(key)) {
                     continue;
                 }
-                let newNameValues = values[key]["name" + postfix];
-                let elementValues = {};
-                elementValues["name"] = newName;
-                elementValues["alias"] = (postfix === "_en") ? values[key]["name"] : values[key]["name_en"];
-                elementValues["description"] = values[key].description;
-                newElement["values"].push(elementValues);
+                const newNameValues = values[key]["name" + postfix];
+                const elementValue: ISystemEnumValue = {} as ISystemEnumValue;
+                elementValue.name = newName;
+                elementValue.alias = (postfix === "_en") ? values[key].name : values[key].name_en;
+                elementValue.description = values[key].description;
+                newElement.values.push(elementValue);
             }
             this.systemEnum[newName.toLowerCase()] = newElement;
         }
         systemEnum = oscriptStdLib.systemEnum();
-        for (let element in systemEnum) {
+        for (const element in systemEnum) {
             if (!systemEnum.hasOwnProperty(element)) {
                 continue;
             }
-            let segment = systemEnum[element];
-            let newName = segment["name" + postfix];
+            const segment = systemEnum[element];
+            const newName = segment["name" + postfix];
             if (this.systemEnum[newName.toLowerCase()]) {
-                let findEnum = this.systemEnum[newName.toLowerCase()];
-                findEnum["oscript_description"] = segment.description;
+                const findEnum = this.systemEnum[newName.toLowerCase()];
+                findEnum.oscript_description = segment.description;
             } else {
-                let newElement = {};
-                newElement["name"] = newName;
-                newElement["alias"] = (postfix === "_en") ? segment["name"] : segment["name_en"];
-                newElement["description"] = undefined;
-                newElement["values"] = [];
-                newElement["oscript_description"] = segment.description;
-                let values = segment["values"];
-                for (let key in values) {
+                const newElement: ISystemEnum = {} as ISystemEnum;
+                newElement.name = newName;
+                newElement.alias = (postfix === "_en") ? segment.name : segment.name_en;
+                newElement.description = undefined;
+                newElement.values = [];
+                newElement.oscript_description = segment.description;
+                const values = segment.values;
+                for (const key in values) {
                     if (!values.hasOwnProperty(key)) {
                         continue;
                     }
-                    let newNameValues = values[key]["name" + postfix];
-                    let elementValues = {};
-                    elementValues["name"] = newName;
-                    elementValues["alias"] = (postfix === "_en") ? values[key]["name"] : values[key]["name_en"];
-                    elementValues["description"] = values[key].description;
-                    newElement["values"].push(elementValues);
+                    const newNameValues = values[key]["name" + postfix];
+                    const elementValue: ISystemEnumValue = {} as ISystemEnumValue;
+                    elementValue.name = newName;
+                    elementValue.alias = (postfix === "_en") ? values[key].name : values[key].name_en;
+                    elementValue.description = values[key].description;
+                    newElement.values.push(elementValue);
                 }
                 this.systemEnum[newName.toLowerCase()] = newElement;
             }
         }
-        let classes = bslglobals.classes();
-        for (let element in classes) {
+        const classes: IClasses = bslglobals.classes();
+        for (const element in classes) {
             if (!classes.hasOwnProperty(element)) {
                 continue;
             }
-            let segment = classes[element];
-            let newName = segment["name" + postfix];
-            let newElement = {};
-            newElement["name"] = newName;
-            newElement["alias"] = (postfix === "_en") ? segment["name"] : segment["name_en"];
-            newElement["description"] = segment.description;
-            newElement["methods"] = (segment["methods"]) ? {} : undefined;
-            for (let key in segment["methods"]) {
-                let newNameMethod = segment["methods"][key]["name" + postfix];
-                let newMethod = {};
-                newMethod["name"] = newName;
-                newMethod["alias"] = (postfix === "_en") ? segment["methods"][key]["name"] : segment["methods"][key]["name_en"];
-                newMethod["description"] = segment["methods"][key].description;
-                newElement["methods"][newNameMethod.toLowerCase()] = newMethod;
+            const segment = classes[element];
+            const newName = segment["name" + postfix];
+            const newElement: IClass = {} as IClass;
+            newElement.name = newName;
+            newElement.alias = (postfix === "_en") ? segment.name : segment.name_en;
+            newElement.description = segment.description;
+            newElement.methods = (segment.methods) ? {} : undefined;
+            // tslint:disable-next-line:forin
+            for (const key in segment.methods) {
+                const method = segment.methods[key];
+                const newNameMethod = method["name" + postfix];
+                const newMethod: IMethod = {} as IMethod;
+                newMethod.name = newName;
+                newMethod.alias = (postfix === "_en") ? method.name : method.name_en;
+                newMethod.description = method.description;
+                newElement.methods[newNameMethod.toLowerCase()] = newMethod;
             }
-            newElement["properties"] = (segment["properties"]) ? {} : undefined;
-            for (let key in segment["properties"]) {
-                let newNameProp = segment["properties"][key]["name" + postfix];
-                let newProp = {};
-                newProp["name"] = newName;
-                newProp["alias"] = (postfix === "_en") ? segment["properties"][key]["name"] : segment["properties"][key]["name_en"];
-                newProp["description"] = segment["properties"][key].description;
-                newElement["properties"][newNameProp.toLowerCase()] = newProp;
+            newElement.properties = (segment.properties) ? {} : undefined;
+            // tslint:disable-next-line:forin
+            for (const key in segment.properties) {
+                const property = segment.properties[key];
+                const newNameProp = property["name" + postfix];
+                const newProp: IPropertyDefinition = {} as IPropertyDefinition;
+                newProp.name = newName;
+                newProp.alias = (postfix === "_en") ? property.name : property.name_en;
+                newProp.description = property.description;
+                newElement.properties[newNameProp.toLowerCase()] = newProp;
             }
-            newElement["constructors"] = (segment["constructors"]) ? {} : undefined;
-            for (let key in segment["constructors"]) {
-                let newCntr = {};
-                newCntr["signature"] = segment["constructors"][key].signature;
-                newCntr["description"] = segment["constructors"][key].description;
-                newElement["constructors"][key.toLowerCase()] = newCntr;
+            newElement.constructors = (segment.constructors) ? {} : undefined;
+            // tslint:disable-next-line:forin
+            for (const key in segment.constructors) {
+                const constructor = segment.constructors[key];
+                const newCntr: IConstructorDefinition = {} as IConstructorDefinition;
+                newCntr.signature = constructor.signature;
+                newCntr.description = constructor.description;
+                newElement.constructors[key.toLowerCase()] = newCntr;
             }
             this.classes[newName.toLowerCase()] = newElement;
         }
-        for (let element in oscriptStdLib.classesOscript()) {
-            let segment = oscriptStdLib.classesOscript()[element];
-            let newName = segment["name" + postfix];
+        const classesOscript: IClasses = oscriptStdLib.classesOscript();
+        for (const element in classesOscript) {
+            if (!classesOscript.hasOwnProperty(element)) {
+                continue;
+            }
+            const segment = classesOscript[element];
+            const newName = segment["name" + postfix];
             if (this.classes[newName.toLowerCase()]) {
-                let findClass = this.classes[newName.toLowerCase()];
-                findClass["oscript_description"] = (segment.description) ? (segment.description) : findClass.description;
-                for (let key in segment["methods"]) {
-                    let findMethod = segment["methods"][key];
-                    let nameMethod = findMethod["name" + postfix];
+                const findClass = this.classes[newName.toLowerCase()];
+                findClass.oscript_description = (segment.description) ? (segment.description) : findClass.description;
+                // tslint:disable-next-line:forin
+                for (const key in segment.methods) {
+                    let findMethod = segment.methods[key];
+                    const nameMethod = findMethod["name" + postfix];
+                    // TODO: Тут происходит что-то странное
                     if (!findMethod) {
-                        findMethod = {};
-                        findMethod["name"] = nameMethod;
-                        findMethod["alias"] = (postfix === "_en") ? segment["methods"][key]["name"] : segment["methods"][key]["name_en"];
-                        findMethod["description"] = undefined;
-                        findMethod["oscript_description"] = segment["methods"][key]["description"];
-                        findClass["methods"][nameMethod.toLowerCase()] = findMethod;
+                        findMethod = {} as IMethod;
+                        findMethod.name = nameMethod;
+                        findMethod.alias = (postfix === "_en")
+                            ? segment.methods[key].name
+                            : segment.methods[key].name_en;
+                        findMethod.description = undefined;
+                        findMethod.oscript_description = segment.methods[key].description;
+                        findClass.methods[nameMethod.toLowerCase()] = findMethod;
                     } else {
-                        findMethod["oscript_description"] = segment["methods"][key]["description"];
+                        findMethod.oscript_description = segment.methods[key].description;
                     }
                 }
-                for (let key in segment["properties"]) {
-                    let findProp = segment["properties"][key];
-                    let nameProp = findProp["name" + postfix];
+                // tslint:disable-next-line:forin
+                for (const key in segment.properties) {
+                    let findProp = segment.properties[key];
+                    const nameProp = findProp["name" + postfix];
+                    // TODO: Тут происходит что-то странное
                     if (!findProp) {
-                        findProp = {};
-                        findProp["name"] = nameProp;
-                        findProp["alias"] = (postfix === "_en") ? segment["properties"][key]["name"] : segment["properties"][key]["name_en"];
-                        findProp["description"] = undefined;
-                        findProp["oscript_description"] = segment["properties"][key]["description"];
-                        findClass["properties"][nameProp.toLowerCase()] = findProp;
+                        findProp = {} as IPropertyDefinition;
+                        findProp.name = nameProp;
+                        findProp.alias = (postfix === "_en")
+                            ? segment.properties[key].name
+                            : segment.properties[key].name_en;
+                        findProp.description = undefined;
+                        findProp.oscript_description = segment.properties[key].description;
+                        findClass.properties[nameProp.toLowerCase()] = findProp;
                     } else {
-                        findProp["oscript_description"] = segment["properties"][key]["description"];
+                        findProp.oscript_description = segment.properties[key].description;
                     }
                 }
-                for (let key in segment["constructors"]) {
-                    let findCntr = segment["constructors"][key];
+                // tslint:disable-next-line:forin
+                for (const key in segment.constructors) {
+                    let findCntr = segment.constructors[key];
                     if (!findCntr) {
-                        findCntr = {};
-                        findCntr["description"] = undefined;
-                        findCntr["oscript_description"] = segment["constructors"][key]["description"];
-                        findClass["constructors"][key.toLowerCase()] = findCntr;
+                        findCntr = {} as IConstructorDefinition;
+                        findCntr.description = undefined;
+                        findCntr.oscript_description = segment.constructors[key].description;
+                        findClass.constructors[key.toLowerCase()] = findCntr;
                     } else {
-                        findCntr["oscript_description"] = segment["constructors"][key]["description"];
+                        findCntr.oscript_description = segment.constructors[key].description;
                     }
                 }
             } else {
-                let newElement = {};
-                newElement["name"] = newName;
-                newElement["alias"] = (postfix === "_en") ? segment["name"] : segment["name_en"];
-                newElement["description"] = undefined;
-                newElement["oscript_description"] = segment.description;
-                newElement["methods"] = (segment["methods"]) ? {} : undefined;
-                for (let key in segment["methods"]) {
-                    let newNameMethod = segment["methods"][key]["name" + postfix];
-                    let newMethod = {};
-                    newMethod["name"] = newName;
-                    newMethod["alias"] = (postfix === "_en") ? segment["methods"][key]["name"] : segment["methods"][key]["name_en"];
-                    newMethod["description"] = undefined;
-                    newMethod["oscript_description"] = segment["methods"][key].description;
-                    newElement["methods"][newNameMethod.toLowerCase()] = newMethod;
+                const newElement: IClass = {} as IClass;
+                newElement.name = newName;
+                newElement.alias = (postfix === "_en") ? segment.name : segment.name_en;
+                newElement.description = undefined;
+                newElement.oscript_description = segment.description;
+                newElement.methods = (segment.methods) ? {} : undefined;
+                // tslint:disable-next-line:forin
+                for (const key in segment.methods) {
+                    const newNameMethod = segment.methods[key]["name" + postfix];
+                    const newMethod: IMethod = {} as IMethod;
+                    newMethod.name = newName;
+                    newMethod.alias = (postfix === "_en") ? segment.methods[key].name : segment.methods[key].name_en;
+                    newMethod.description = undefined;
+                    newMethod.oscript_description = segment.methods[key].description;
+                    newElement.methods[newNameMethod.toLowerCase()] = newMethod;
                 }
-                newElement["properties"] = (segment["properties"]) ? {} : undefined;
-                for (let key in segment["properties"]) {
-                    let newNameProp = segment["properties"][key]["name" + postfix];
-                    let newProp = {};
-                    newProp["name"] = newName;
-                    newProp["alias"] = (postfix === "_en") ? segment["properties"][key]["name"] : segment["properties"][key]["name_en"];
-                    newProp["description"] = undefined;
-                    newProp["oscript_description"] = segment["properties"][key].description;
-                    newElement["properties"][newNameProp.toLowerCase()] = newProp;
+                newElement.properties = (segment.properties) ? {} : undefined;
+                // tslint:disable-next-line:forin
+                for (const key in segment.properties) {
+                    const newNameProp = segment.properties[key]["name" + postfix];
+                    const newProp: IPropertyDefinition = {} as IPropertyDefinition;
+                    newProp.name = newName;
+                    newProp.alias = (postfix === "_en")
+                        ? segment.properties[key].name
+                        : segment.properties[key].name_en;
+                    newProp.description = undefined;
+                    newProp.oscript_description = segment.properties[key].description;
+                    newElement.properties[newNameProp.toLowerCase()] = newProp;
                 }
-                newElement["constructors"] = (segment["constructors"]) ? {} : undefined;
-                for (let key in segment["constructors"]) {
-                    let newCntr = {};
-                    newCntr["signature"] = segment["constructors"][key].signature;
-                    newCntr["description"] = undefined;
-                    newCntr["oscript_description"] = segment["constructors"][key].description;
-                    newElement["constructors"][key.toLowerCase()] = newCntr;
+                newElement.constructors = (segment.constructors) ? {} : undefined;
+                // tslint:disable-next-line:forin
+                for (const key in segment.constructors) {
+                    const newCntr: IConstructorDefinition = {} as IConstructorDefinition;
+                    newCntr.signature = segment.constructors[key].signature;
+                    newCntr.description = undefined;
+                    newCntr.oscript_description = segment.constructors[key].description;
+                    newElement.constructors[key.toLowerCase()] = newCntr;
                 }
                 this.classes[newName.toLowerCase()] = newElement;
             }
@@ -318,19 +348,19 @@ export class Global {
         allToEnd: boolean = true,
         fromFirst: boolean = true
     ) {
-        let suffix = allToEnd ? "" : "$";
-        let prefix = fromFirst ? "^" : "";
-        let querystring = { "name": { "$regex": new RegExp(prefix + word + suffix, "i") } };
-        let entries = new Parser().parse(source).getMethodsTable().find(querystring);
+        const suffix = allToEnd ? "" : "$";
+        const prefix = fromFirst ? "^" : "";
+        const querystring = { name: { $regex: new RegExp(prefix + word + suffix, "i") } };
+        const entries = new Parser().parse(source).getMethodsTable().find(querystring);
         return entries;
     }
 
     public getRefsLocal(filename: string, source: string) {
-        let parsesModule = new Parser().parse(source);
-        let entries = parsesModule.getMethodsTable().find();
-        let collection = this.cache.addCollection(filename);
+        const parsesModule = new Parser().parse(source);
+        const entries = parsesModule.getMethodsTable().find();
+        const collection = this.cache.addCollection(filename);
         this.updateReferenceCallsOld(collection, parsesModule.context.CallsPosition, "GlobalModuleText", filename);
-        for (let item of entries) {
+        for (const item of entries) {
             this.updateReferenceCallsOld(collection, item._method.CallsPosition, item, filename);
         }
         return collection;
@@ -360,12 +390,12 @@ export class Global {
     }
 
     public getModuleForPath(fullpath: string, rootPath: string): any {
-        let splitsymbol = "/";
-        let moduleArray: string[] = fullpath.substr(
+        const splitsymbol = "/";
+        const moduleArray: string[] = fullpath.substr(
             rootPath.length + (rootPath.slice(-1) === "\\" ? 0 : 1)
         ).split(splitsymbol);
         let moduleStr = "";
-        let hierarchy = moduleArray.length;
+        const hierarchy = moduleArray.length;
         if (hierarchy > 3) {
             if (moduleArray[hierarchy - 4].startsWith("CommonModules")) {
                 moduleStr = moduleArray[hierarchy - 3];
@@ -377,17 +407,14 @@ export class Global {
     }
 
     public async waitForCacheUpdate() {
-        return new Promise( (callback) => {
-            if (this.cacheUpdates) {
-                Promise.resolve(undefined);
-            }
-            setTimeout(callback, 100);
-        });
+        while (!this.cacheUpdated()) {
+            await this.delay(100);
+        }
     }
 
     public addtocachefiles(files: string[], rootPath: string): any {
-        let filesLength = files.length;
-        let substrIndex = (process.platform === "win32") ? 8 : 7;
+        const filesLength = files.length;
+        const substrIndex = (process.platform === "win32") ? 8 : 7;
         for (let i = 0; i < filesLength; ++i) {
             let fullpath = files[i].toString();
             fullpath = decodeURIComponent(fullpath);
@@ -398,11 +425,11 @@ export class Global {
                 if (err) {
                     throw err;
                 }
-                let moduleStr = fullpath.endsWith(".bsl") ? this.getModuleForPath(fullpath, rootPath) : "";
+                const moduleStr = fullpath.endsWith(".bsl") ? this.getModuleForPath(fullpath, rootPath) : "";
                 source = source.replace(/\r\n?/g, "\n");
                 let parsesModule = new Parser().parse(source);
                 source = undefined;
-                let entries = parsesModule.getMethodsTable().find();
+                const entries = parsesModule.getMethodsTable().find();
                 if (i % 100 === 0) {
                     this.postMessage("Обновляем кэш файла № " + i + " из " + filesLength, 2000);
                 }
@@ -410,19 +437,27 @@ export class Global {
                     this.updateReferenceCalls(parsesModule.context.CallsPosition, "GlobalModuleText", fullpath);
                 }
                 parsesModule = undefined;
-                for (let item of entries) {
-                    let method = { name: item.name, endline: item.endline, context: item.context, isproc: item.isproc };
+                for (const item of entries) {
+                    const method = {
+                        name: item.name,
+                        endline: item.endline,
+                        context: item.context,
+                        isproc: item.isproc
+                    };
                     if (item._method.CallsPosition.length > 0) {
                         this.updateReferenceCalls(item._method.CallsPosition, method, fullpath);
                     }
-                    let _method = { Params: item._method.Params, IsExport: item._method.IsExport };
-                    let newItem: IMethodValue = {
+                    const dbMethod = {
+                        Params: item._method.Params,
+                        IsExport: item._method.IsExport
+                    };
+                    const newItem: IMethodValue = {
                         name: String(item.name),
                         isproc: Boolean(item.isproc),
                         line: item.line,
                         endline: item.endline,
                         context: item.context,
-                        _method,
+                        _method: dbMethod,
                         filename: fullpath,
                         module: moduleStr,
                         description: item.description
@@ -431,32 +466,35 @@ export class Global {
                 }
                 if (i === filesLength - 1) {
                     this.postMessage("Кэш обновлен");
-                    this.cacheUpdates = true;
+                    this.bslCacheUpdated = true;
                 }
             });
         }
     }
 
     public updateCache(): any {
-        let configuration = this.getConfiguration("language-1c-bsl");
-        let basePath: string = String(this.getConfigurationKey(configuration, "rootPath"));
+        this.bslCacheUpdated = false;
+        this.oscriptCacheUpdated = false;
+
+        const configuration = this.getConfiguration("language-1c-bsl");
+        const basePath: string = String(this.getConfigurationKey(configuration, "rootPath"));
         let rootPath = this.getRootPath();
         if (rootPath) {
             this.postMessage("Запущено заполнение кеша", 3000);
             rootPath = path.join(rootPath, basePath);
-            if (this.cache.getCollection ("ValueTable")) {
+            if (this.cache.getCollection("ValueTable")) {
                 this.cache.removeCollection("ValueTable");
             }
             this.db = this.cache.addCollection("ValueTable");
             this.dbcalls = new Map();
-            let searchPattern = basePath !== "" ? basePath.substr(2) + "/**" : "**/*.{bsl,os}";
+            const searchPattern = basePath !== "" ? basePath.substr(2) + "/**" : "**/*.{bsl,os}";
             this.findFilesForCache(searchPattern, rootPath);
 
             const args: string[] = [];
             args.push("get");
             args.push("lib.system");
 
-            let options = {
+            const options = {
                 cwd: path.dirname(rootPath),
                 env: process.env
             };
@@ -464,7 +502,7 @@ export class Global {
             const oscriptConfig = cp.spawn("oscript-config", args, options);
             oscriptConfig.on("error", (error) => {
                 if (error.toString().indexOf("ENOENT") > 0) {
-                    console.log("oscript-config isn't found. Is it installed?")
+                    console.log("oscript-config isn't found. Is it installed?");
                 } else {
                     console.error(error);
                 }
@@ -478,10 +516,10 @@ export class Global {
             oscriptConfig.on("close", () => {
                 try {
                     result = result.trim();
-                    let lines = result.split(/\r?\n/);
+                    const lines = result.split(/\r?\n/);
                     const libSearchPattern = "**/lib.config";
                     for (const line of lines) {
-                        let globOptions: glob.IOptions = {};
+                        const globOptions: glob.IOptions = {};
                         globOptions.nocase = true;
                         globOptions.cwd = line;
                         // glob >=7.0.0 contains this property
@@ -503,33 +541,32 @@ export class Global {
     };
 
     public customUpdateCache(source: string, filename: string) {
-        if (!this.cacheUpdates) {
+        if (!this.cacheUpdated()) {
             return;
         }
-        let configuration = this.getConfiguration("language-1c-bsl");
-        let basePath: string = String(this.getConfigurationKey(configuration, "rootPath"));
-        let rootPath = path.join(this.getRootPath(), basePath);
-        let fullpath = filename.replace(/\\/g, "/");
-        let methodArray = this.db.find({ filename: { $eq: fullpath } });
-        for (let index = 0; index < methodArray.length; index++) {
-            let element = methodArray[index];
-            this.db.remove(element["$loki"]);
+        const configuration = this.getConfiguration("language-1c-bsl");
+        const basePath: string = String(this.getConfigurationKey(configuration, "rootPath"));
+        const rootPath = path.join(this.getRootPath(), basePath);
+        const fullpath = filename.replace(/\\/g, "/");
+        const methodArray = this.db.find({ filename: { $eq: fullpath } });
+        for (const element of methodArray) {
+            this.db.remove(element.$loki);
         }
-        let parsesModule = new Parser().parse(source);
-        let moduleStr = this.getModuleForPath(fullpath, rootPath);
-        let entries = parsesModule.getMethodsTable().find();
-        for (let value of this.cache.getCollection(filename).data) {
+        const parsesModule = new Parser().parse(source);
+        const moduleStr = this.getModuleForPath(fullpath, rootPath);
+        const entries = parsesModule.getMethodsTable().find();
+        for (const value of this.cache.getCollection(filename).data) {
             if (value.call.startsWith(".")) {
                 continue;
             }
             if (value.call.indexOf(".") === -1) {
                 continue;
             }
-            let arrCalls = this.dbcalls.get(value.call);
+            const arrCalls = this.dbcalls.get(value.call);
             if (arrCalls) {
                 for (let k = arrCalls.length - 1; k >= 0; --k) {
-                    let it = arrCalls[k];
-                    if (it["filename"] === fullpath) {
+                    const it = arrCalls[k];
+                    if (it.filename === fullpath) {
                         arrCalls.splice(k, 1);
                     }
                 }
@@ -538,16 +575,16 @@ export class Global {
         this.cache.removeCollection(filename);
         this.getRefsLocal(filename, source);
         this.updateReferenceCalls(parsesModule.context.CallsPosition, "GlobalModuleText", fullpath);
-        for (let item of entries) {
+        for (const item of entries) {
             this.updateReferenceCalls(item._method.CallsPosition, item, fullpath);
-            let _method = { Params: item._method.Params, IsExport: item._method.IsExport };
-            let newItem = {
+            const method = { Params: item._method.Params, IsExport: item._method.IsExport };
+            const newItem = {
                 name: String(item.name),
                 isproc: Boolean(item.isproc),
                 line: item.line,
                 endline: item.endline,
                 context: item.context,
-                _method,
+                _method: method,
                 filename: fullpath,
                 module: moduleStr,
                 description: item.description
@@ -560,35 +597,44 @@ export class Global {
         if (!collection) {
             return new Array();
         }
-        let prefix = local ? "" : ".";
-        let querystring = { call: { $regex: new RegExp(prefix + word + "$", "i") } };
-        let search = collection.chain().find(querystring).simplesort("name").data();
+        const prefix = local ? "" : ".";
+        const querystring = { call: { $regex: new RegExp(prefix + word + "$", "i") } };
+        const search = collection.chain().find(querystring).simplesort("name").data();
         return search;
     }
 
-
     public querydef(module: string, all: boolean = true, lazy: boolean = false): any {
-        // Проверяем локальный кэш. 
-        // Проверяем глобальный кэш на модули. 
-        if (!this.cacheUpdates) {
+        // Проверяем локальный кэш.
+        // Проверяем глобальный кэш на модули.
+        if (!this.cacheUpdated()) {
             return new Array();
         } else {
-            let prefix = lazy ? "" : "^";
-            let suffix = all ? "" : "$";
-            let querystring = { module: { $regex: new RegExp(prefix + module + suffix, "i") } };
-            let search = this.db.chain().find(querystring).simplesort("name").data();
+            const prefix = lazy ? "" : "^";
+            const suffix = all ? "" : "$";
+            const querystring = {
+                module: {
+                    $regex: new RegExp(prefix + module + suffix, "i")
+                }
+            };
+            const search = this.db.chain().find(querystring).simplesort("name").data();
             return search;
         }
     }
 
     public query(word: string, module: string, all: boolean = true, lazy: boolean = false): any {
-        let prefix = lazy ? "" : "^";
-        let suffix = all ? "" : "$";
-        let querystring = { name: { $regex: new RegExp(prefix + word + suffix, "i") } };
+        const prefix = lazy ? "" : "^";
+        const suffix = all ? "" : "$";
+        const querystring: any = {
+            name: {
+                $regex: new RegExp(prefix + word + suffix, "i")
+            }
+        };
         if (module && module.length > 0) {
-            querystring["module"] = { $regex: new RegExp("^" + module + "", "i") };
+            querystring.module = {
+                $regex: new RegExp("^" + module + "", "i")
+            };
         }
-        let moduleRegexp = new RegExp("^" + module + "$", "i");
+        const moduleRegexp = new RegExp("^" + module + "$", "i");
         function filterByModule(obj) {
             if (module && module.length > 0) {
                 if (moduleRegexp.exec(obj.module) !== null) {
@@ -599,36 +645,36 @@ export class Global {
             }
             return true;
         }
-        let search = this.db.chain().find(querystring).where(filterByModule).simplesort("name").data();
+        const search = this.db.chain().find(querystring).where(filterByModule).simplesort("name").data();
         return search;
     }
 
     public GetSignature(entry) {
         let description = entry.description.replace(/\/\//g, "");
         description = description.replace(new RegExp("[ ]+", "g"), " ");
-        let regExp = new RegExp(
+        const regExp = new RegExp(
             "^\\s*(Возвращаемое значение|Return value|Returns):?\\n\\s*([<\\wа-яА-Я\\.>]+)(.|\\n)*",
             "gm"
         );
-        let retState = regExp.exec(description);
-        let strRetState = undefined;
+        const retState = regExp.exec(description);
+        let strRetState;
         if (retState) {
             strRetState = retState[2];
             description = description.substr(0, retState.index);
         }
         let paramsString = "(";
-        let params = entry._method.Params;
-        for (let element in params) {
+        const params = entry._method.Params;
+        for (const element in params) {
             if (!params.hasOwnProperty(element)) {
                 continue;
             }
-            let nameParam = params[element];
+            const nameParam = params[element];
             paramsString = (paramsString === "(" ? paramsString : paramsString + ", ") + nameParam;
-            let re = new RegExp(
+            const re = new RegExp(
                 "^\\s*(Параметры|Parameters)(.|\\n)*\\n\\s*" + nameParam + "\\s*(-|–)\\s*([<\\wа-яА-Я\\.>]+)",
                 "gm"
             );
-            let match: RegExpExecArray = re.exec(description);
+            const match: RegExpExecArray = re.exec(description);
             if (match) {
                 paramsString = paramsString + ": " + match[4];
             }
@@ -646,26 +692,26 @@ export class Global {
     }
 
     public GetDocParam(description: string, param) {
-        let optional = false;
+        const optional = false;
         let descriptionParam = "";
-        let re = new RegExp(
+        const re = new RegExp(
             "(Параметры|Parameters)(.|\\n)*\\n\\s*" + param + "\\s*(-|–)\\s*([<\\wа-яА-Я\\.>]+)\\s*-?\\s*((.|\\n)*)",
             "g"
         );
-        let match: RegExpExecArray = re.exec(description);
+        const match: RegExpExecArray = re.exec(description);
         if (match) {
             descriptionParam = match[5];
-            let cast = (new RegExp("\\n\\s*[<\\wа-яА-Я\\.>]+\\s*(-|–)\\s*", "g")).exec(descriptionParam);
+            const cast = (new RegExp("\\n\\s*[<\\wа-яА-Я\\.>]+\\s*(-|–)\\s*", "g")).exec(descriptionParam);
             if (cast) {
                 descriptionParam = descriptionParam.substr(0, cast.index);
             }
         }
-        let documentationParam = { optional, descriptionParam };
+        const documentationParam = { optional, descriptionParam };
         return documentationParam;
     }
 
     public redefineMethods(adapter) {
-        let methodsList = [
+        const methodsList = [
             "postMessage",
             "getConfiguration",
             "getConfigurationKey",
@@ -673,18 +719,18 @@ export class Global {
             "fullNameRecursor",
             "findFilesForCache"
         ];
-        methodsList.forEach( (element) => {
+        methodsList.forEach((element) => {
             if (adapter.hasOwnProperty(element)) {
                 this[element] = adapter[element];
             }
         });
     }
 
-    public postMessage(description: string, interval?: number) {}
+    public postMessage(description: string, interval?: number) { }
 
-    public getConfiguration(section: string) {}
+    public getConfiguration(section: string) { }
 
-    public getConfigurationKey(configuration, key: string) {}
+    public getConfigurationKey(configuration, key: string) { }
 
     public getRootPath(): string {
         return "";
@@ -694,10 +740,20 @@ export class Global {
         return "";
     }
 
-    public findFilesForCache(searchPattern: string, rootPath: string) {}
-    
+    public findFilesForCache(searchPattern: string, rootPath: string) { }
+
+    private delay(milliseconds: number) {
+        return new Promise<void>((resolve) => {
+            setTimeout(resolve, milliseconds);
+        });
+    }
+
+    private cacheUpdated(): boolean {
+        return this.bslCacheUpdated && this.oscriptCacheUpdated;
+    }
+
     private updateReferenceCalls(calls: any[], method: any, file: string): any {
-        for (let value of calls) {
+        for (const value of calls) {
             if (value.call.startsWith(".")) {
                 continue;
             }
@@ -722,11 +778,11 @@ export class Global {
     }
 
     private updateReferenceCallsOld(collection: any, calls: any[], method: any, file: string): any {
-        for (let value of calls) {
+        for (const value of calls) {
             if (value.call.startsWith(".")) {
                 continue;
             }
-            let newItem: IMethodValue = {
+            const newItem: IMethodValue = {
                 name: String(method.name),
                 filename: file,
                 isproc: Boolean(method.isproc),
@@ -762,11 +818,11 @@ export class Global {
             }
             const packageDef = result["package-def"];
             let modules = [];
-            let classes = [];
+            const classes = [];
             if (packageDef.hasOwnProperty("module")) {
                 if (packageDef.module instanceof Array) {
                     for (const module of packageDef.module) {
-                        modules.push(module)
+                        modules.push(module);
                     }
                 } else {
                     modules.push(packageDef.module);
@@ -775,12 +831,12 @@ export class Global {
             if (packageDef.hasOwnProperty("class")) {
                 if (packageDef.class instanceof Array) {
                     for (const clazz of packageDef.class) {
-                        classes.push(clazz)
+                        classes.push(clazz);
                     }
                 } else {
                     classes.push(packageDef.class);
                 }
-            }       
+            }
             // TODO: Пока обрабатываем классы так же как модули
             modules = modules.concat(classes);
             for (const module of modules) {
@@ -789,28 +845,33 @@ export class Global {
                     if (err) {
                         throw err;
                     }
-                    let moduleStr = module.$.name;
+                    const moduleStr = module.$.name;
                     source = source.replace(/\r\n?/g, "\n");
                     let parsesModule = new Parser().parse(source);
                     source = undefined;
-                    let entries = parsesModule.getMethodsTable().find();
+                    const entries = parsesModule.getMethodsTable().find();
                     // if (parsesModule.context.CallsPosition.length > 0) {
                     //     this.updateReferenceCalls(parsesModule.context.CallsPosition, "GlobalModuleText", fullpath);
                     // }
                     parsesModule = undefined;
-                    for (let item of entries) {
-                        let method = { name: item.name, endline: item.endline, context: item.context, isproc: item.isproc };
+                    for (const item of entries) {
+                        const method = {
+                            name: item.name,
+                            endline: item.endline,
+                            context: item.context,
+                            isproc: item.isproc
+                        };
                         // if (item._method.CallsPosition.length > 0) {
                         //     this.updateReferenceCalls(item._method.CallsPosition, method, fullpath);
                         // }
-                        let _method = { Params: item._method.Params, IsExport: item._method.IsExport };
-                        let newItem: IMethodValue = {
+                        const dbMethod = { Params: item._method.Params, IsExport: item._method.IsExport };
+                        const newItem: IMethodValue = {
                             name: String(item.name),
                             isproc: Boolean(item.isproc),
                             line: item.line,
                             endline: item.endline,
                             context: item.context,
-                            _method,
+                            _method: dbMethod,
                             filename: fullpath,
                             module: moduleStr,
                             description: item.description,
@@ -821,16 +882,18 @@ export class Global {
                 });
             }
         }
+        this.oscriptCacheUpdated = true;
     }
 
     private async xml2json(xml: string) {
         return new Promise((resolve, reject) => {
             const xml2jsParser = new xml2js.Parser();
-            xml2jsParser.parseString(xml, function (err, json) {
-                if (err)
+            xml2jsParser.parseString(xml, (err, json) => {
+                if (err) {
                     reject(err);
-                else
+                } else {
                     resolve(json);
+                }
             });
         });
     }
@@ -855,4 +918,139 @@ interface IMethodValue {
     character?: number;
     _method?: {};
     oscriptLib?: boolean;
+}
+
+interface IMethods {
+    [index: string]: IMethod;
+}
+
+interface IMethod {
+    name: string;
+    name_en: string;
+    alias: string;
+    description: string;
+    signature: ISignatureCollection;
+    returns: string;
+    oscript_description?: string;
+    oscript_signature?: ISignatureCollection;
+    oscript_access?: boolean;
+}
+
+interface ISignatureCollection {
+    default: ISignatureDefinition;
+    [index: string]: ISignatureDefinition;
+}
+
+interface ISignatureDefinition {
+    СтрокаПараметров: string;
+    Параметры: ISignatureParameters;
+}
+
+interface ISignatureParameters {
+    [index: string]: string;
+}
+
+interface IOscriptGlobalContext {
+    [index: string]: IOscriptSegment;
+}
+
+interface IOscriptSegment {
+    description?: string;
+    properties?: IPropertyDefinitions;
+    methods?: IOscriptFunctionDefinitions;
+}
+
+interface IPropertyDefinitions {
+    [index: string]: IPropertyDefinition;
+}
+
+interface IOscriptFunctionDefinitions {
+    [index: string]: IOscriptFunctionDefinition;
+}
+
+interface IPropertyDefinition {
+    name: string;
+    name_en: string;
+    alias: string;
+    description: string;
+    oscript_description: string;
+    access: string;
+}
+
+interface IOscriptFunctionDefinition {
+    name: string;
+    name_en: string;
+    description: string;
+    signature: string;
+    returns: string;
+    params?: ISignatureParameters;
+    example?: string;
+}
+
+interface IGlobalVariables {
+    [index: string]: IGlobalVariable;
+}
+
+interface IGlobalVariable {
+    name: string;
+    name_en: string;
+    description: string;
+    alias: string;
+    oscript_description?: string;
+    oscript_access?: string;
+}
+
+interface ISystemEnums {
+    [index: string]: ISystemEnum;
+}
+
+interface ISystemEnum {
+    name: string;
+    name_en: string;
+    alias: string;
+    description: string;
+    oscript_description: string;
+    values: ISystemEnumValue[];
+}
+
+interface ISystemEnumValue {
+    name: string;
+    name_en: string;
+    alias: string;
+    description: string;
+}
+
+interface IClasses {
+    [index: string]: IClass;
+}
+
+interface IClass {
+    name: string;
+    name_en: string;
+    alias: string;
+    description: string;
+    oscript_description: string;
+    methods?: IMethods;
+    properties?: IPropertyDefinitions;
+    constructors?: IConstructorDefinitions;
+}
+
+interface IConstructorDefinitions {
+    [index: string]: IConstructorDefinition;
+}
+
+interface IConstructorDefinition {
+    description: string;
+    signature: string;
+    oscript_description: string;
+    params?: ISignatureParameters;
+}
+
+interface IKeywords {
+    ru: IKeywordsForLanguage;
+    en: IKeywordsForLanguage;
+}
+
+interface IKeywordsForLanguage {
+    [index: string]: {};
 }

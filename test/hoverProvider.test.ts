@@ -2,7 +2,7 @@ import * as path from "path";
 import "should";
 import * as vscode from "vscode";
 
-import { addText, fixturePath, newTextDocument } from "./helpers";
+import { addText, clearActiveTextEditor, fixturePath, newTextDocument } from "./helpers";
 
 import { Global } from "../src/global";
 import * as vscAdapter from "../src/vscAdapter";
@@ -80,10 +80,11 @@ describe("Hover", () => {
 
     });
 
-    it.skip("should be showed on functions of oscript libraries", async () => {
+    it("should be showed on functions of oscript libraries", async () => {
 
         const uriEmptyFile = vscode.Uri.file(path.join(fixturePath, "emptyFile.bsl"));
         textDocument = await newTextDocument(uriEmptyFile);
+        await clearActiveTextEditor();
 
         await addText("#Использовать strings\n");
         await addText("\n");

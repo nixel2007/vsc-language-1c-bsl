@@ -886,7 +886,7 @@ export function globalContextOscript(): any {
     return data;
 }
 
-export function classesOscript() {
+export function classesOscript(): any {
     let data = {
         "БуферДвоичныхДанных" : {
             "name" : "БуферДвоичныхДанных",
@@ -4824,7 +4824,7 @@ export function classesOscript() {
     return data;
 }
 
-export function systemEnum() {
+export function systemEnum(): any {
     return {
         "КодировкаТекста" : {
             name : 'КодировкаТекста',

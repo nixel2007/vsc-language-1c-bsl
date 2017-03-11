@@ -2,7 +2,7 @@ import * as path from "path";
 import "should";
 import * as vscode from "vscode";
 
-import { addText, fixturePath, newTextDocument } from "./helpers";
+import { addText, clearActiveTextEditor, fixturePath, newTextDocument } from "./helpers";
 
 import { Global } from "../src/global";
 import * as vscAdapter from "../src/vscAdapter";
@@ -24,7 +24,10 @@ async function getCompletionListFromCurrentPosition(): Promise<vscode.Completion
 }
 
 // Defines a Mocha test suite to group tests of similar kind together
-describe("Completion", () => {
+// tslint:disable-next-line:only-arrow-functions
+describe("Completion", function() {
+
+    this.timeout(10000);
 
     before(async () => {
         const uriEmptyFile = vscode.Uri.file(path.join(fixturePath, "emptyFile.bsl"));
@@ -33,10 +36,7 @@ describe("Completion", () => {
     });
 
     beforeEach(async () => {
-        await vscode.window.activeTextEditor.edit((editBuilder: vscode.TextEditorEdit) => {
-            const range = new vscode.Range(new vscode.Position(0, 0), vscode.window.activeTextEditor.selection.anchor);
-            editBuilder.delete(range);
-        });
+        await clearActiveTextEditor();
     });
 
     // Defines a Mocha unit test
@@ -79,11 +79,10 @@ describe("Completion", () => {
         const completionList = await getCompletionListFromCurrentPosition();
         const completions = completionList.items;
 
-        completions.should.have.length(1);
-
-        const completion = completions[0];
-        completion.label.should.be.equal("ЭкспортнаяПроцедура");
-        completion.kind.should.be.equal(vscode.CompletionItemKind.Function);
+        completions.should.matchAny((value: vscode.CompletionItem) => {
+            value.should.has.a.key("label").which.is.equal("ЭкспортнаяПроцедура");
+            value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Function);
+        });
 
     });
 
@@ -212,11 +211,10 @@ describe("Completion", () => {
         const completionList = await getCompletionListFromCurrentPosition();
         const completions = completionList.items;
 
-        completions.should.have.length(1);
-
-        const completion = completions[0];
-        completion.label.should.be.equal("ПроцедураМодуляМенеджера");
-        completion.kind.should.be.equal(vscode.CompletionItemKind.Function);
+        completions.should.matchAny((value: vscode.CompletionItem) => {
+            value.should.has.a.key("label").which.is.equal("ПроцедураМодуляМенеджера");
+            value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Function);
+        });
 
     });
 
@@ -242,11 +240,10 @@ describe("Completion", () => {
         const completionList = await getCompletionListFromCurrentPosition();
         const completions = completionList.items;
 
-        completions.should.have.length(1);
-
-        const completion = completions[0];
-        completion.label.should.be.equal("ПроцедураМодуляМенеджера");
-        completion.kind.should.be.equal(vscode.CompletionItemKind.Function);
+        completions.should.matchAny((value: vscode.CompletionItem) => {
+            value.should.has.a.key("label").which.is.equal("ПроцедураМодуляМенеджера");
+            value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Function);
+        });
 
     });
 
@@ -257,11 +254,10 @@ describe("Completion", () => {
         const completionList = await getCompletionListFromCurrentPosition();
         const completions = completionList.items;
 
-        completions.should.have.length(2);
-
-        const completion = completions[0];
-        completion.label.should.be.equal("Definition");
-        completion.kind.should.be.equal(vscode.CompletionItemKind.Class);
+        completions.should.matchAny((value: vscode.CompletionItem) => {
+            value.should.has.a.key("label").which.is.equal("Definition");
+            value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Class);
+        });
 
     });
 
@@ -281,27 +277,26 @@ describe("Completion", () => {
 
         completions.should.matchAny((value: vscode.CompletionItem) => {
             value.should.has.a.key("label").which.is.equal("Документы.Document");
-            value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.File);
+            value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Module);
         });
 
     });
 
-    it.skip("should show completion of oscript modules", async () => {
+    it("should show completion of oscript modules", async () => {
 
         await addText("СтроковыеФ");
 
         const completionList = await getCompletionListFromCurrentPosition();
         const completions = completionList.items;
 
-        completions.should.have.length(1);
-
-        const completion = completions[0];
-        completion.label.should.be.equal("СтроковыеФункции");
-        completion.kind.should.be.equal(vscode.CompletionItemKind.Class);
+        completions.should.matchAny((value: vscode.CompletionItem) => {
+            value.should.has.a.key("label").which.is.equal("СтроковыеФункции");
+            value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Module);
+        });
 
     });
 
-    it.skip("should show completion of functions in oscript modules", async () => {
+    it("should show completion of functions in oscript modules", async () => {
 
         await addText("СтроковыеФункции.");
 
