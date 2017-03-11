@@ -79,11 +79,10 @@ describe("Completion", function () {
         const completionList = await getCompletionListFromCurrentPosition();
         const completions = completionList.items;
 
-        completions.should.have.length(1);
-
-        const completion = completions[0];
-        completion.label.should.be.equal("ЭкспортнаяПроцедура");
-        completion.kind.should.be.equal(vscode.CompletionItemKind.Function);
+        completions.should.matchAny((value: vscode.CompletionItem) => {
+            value.should.has.a.key("label").which.is.equal("ЭкспортнаяПроцедура");
+            value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Function);
+        });
 
     });
 
@@ -212,11 +211,10 @@ describe("Completion", function () {
         const completionList = await getCompletionListFromCurrentPosition();
         const completions = completionList.items;
 
-        completions.should.have.length(1);
-
-        const completion = completions[0];
-        completion.label.should.be.equal("ПроцедураМодуляМенеджера");
-        completion.kind.should.be.equal(vscode.CompletionItemKind.Function);
+        completions.should.matchAny((value: vscode.CompletionItem) => {
+            value.should.has.a.key("label").which.is.equal("ПроцедураМодуляМенеджера");
+            value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Function);
+        });
 
     });
 
@@ -242,11 +240,10 @@ describe("Completion", function () {
         const completionList = await getCompletionListFromCurrentPosition();
         const completions = completionList.items;
 
-        completions.should.have.length(1);
-
-        const completion = completions[0];
-        completion.label.should.be.equal("ПроцедураМодуляМенеджера");
-        completion.kind.should.be.equal(vscode.CompletionItemKind.Function);
+        completions.should.matchAny((value: vscode.CompletionItem) => {
+            value.should.has.a.key("label").which.is.equal("ПроцедураМодуляМенеджера");
+            value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Function);
+        });
 
     });
 
@@ -257,11 +254,10 @@ describe("Completion", function () {
         const completionList = await getCompletionListFromCurrentPosition();
         const completions = completionList.items;
 
-        completions.should.have.length(2);
-
-        const completion = completions[0];
-        completion.label.should.be.equal("Definition");
-        completion.kind.should.be.equal(vscode.CompletionItemKind.Class);
+        completions.should.matchAny((value: vscode.CompletionItem) => {
+            value.should.has.a.key("label").which.is.equal("Definition");
+            value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Class);
+        });
 
     });
 
@@ -293,11 +289,10 @@ describe("Completion", function () {
         const completionList = await getCompletionListFromCurrentPosition();
         const completions = completionList.items;
 
-        completions.should.have.length(1);
-
-        const completion = completions[0];
-        completion.label.should.be.equal("СтроковыеФункции");
-        completion.kind.should.be.equal(vscode.CompletionItemKind.Module);
+        completions.should.matchAny((value: vscode.CompletionItem) => {
+            value.should.has.a.key("label").which.is.equal("СтроковыеФункции");
+            value.should.has.a.key("kind").which.is.equal(vscode.CompletionItemKind.Module);
+        });
 
     });
 

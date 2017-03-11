@@ -23,6 +23,7 @@ before_install:
   - sudo dpkg -i os.deb; sudo apt install -f
   - oscript
   - sudo opm update opm
+  - sudo opm install strings
   - sudo opm install oscript-config
 
 install: 
