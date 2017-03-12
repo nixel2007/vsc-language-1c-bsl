@@ -170,11 +170,11 @@
       }
     ],
     "configurationDefaults": {
-        "[bsl]": {
-          "editor.insertSpaces": false,
-          "editor.tabSize": 4
-        }
-    }  
+      "[bsl]": {
+        "editor.insertSpaces": false,
+        "editor.tabSize": 4
+      }
+    }
   },
   "devDependencies": {
     "@types/fs-promise": "^1.0.1",
