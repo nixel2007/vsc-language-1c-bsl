@@ -172,7 +172,7 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                         methodDescription = methodDescription + "<p><b>Синтаксис:</b></p><p><span class='function_name'>" + descMethod + "</span><span class='parameter_variable'>()" + retValue + "</span></p>";
                     }
                 }
-                if (methodData["example"]) { methodDescription = methodDescription + "<h3 style='font-size': 1em;>Пример:</h3><p>" + methodData["example"] + "</p>"; }
+                if (methodData["example"]) { methodDescription = methodDescription + "<p><b>Пример:</b></p><p>" + methodData["example"] + "</p>"; }
             }
         }
         let fillStructure = {
@@ -263,15 +263,17 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
             for (let indexMethod in segment["properties"]) {
                 let helper = segment["properties"][indexMethod];
                 let access = (helper["access"]) ? (helper["access"]) : undefined;
+                let example = undefined;
                 let description1C = undefined;
                 let helper1C = undefined;
                 if (context === "OneScript") {
+                    example = (helper["example"]) ? (helper["example"]) : undefined;
                     helper1C = (globalContext) ? bslGlobals.globalvariables()[indexMethod] : (segment1C) ? (segment1C["properties"] ? segment1C["properties"][indexMethod] : undefined) : undefined;
                     if (helper1C && helper1C["description"]) {
                         description1C = helper1C.description;
                     }
                 }
-                variableGlobalContext[indexMethod] = { description: helper.description, alias: helper.name_en, "Доступ": access, description1C };
+                variableGlobalContext[indexMethod] = { description: helper.description, alias: helper.name_en, "Доступ": access, example, description1C };
             }
             segmentChar["properties"] = variableGlobalContext;
         }
@@ -434,7 +436,7 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                         methodDescription = methodDescription + "</p>";
                     }
                 }
-                if (methodData["example"]) { methodDescription = methodDescription + "<h3 style='font-size': 1em;>Пример:</h3><p>" + methodData["example"] + "</p>"; }
+                if (methodData["example"]) { methodDescription = methodDescription + "<p><b>Пример:</b></p><p>" + methodData["example"] + "</p>"; }
             }
         }
         let fillStructure = {
@@ -669,7 +671,7 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                                     depp = depp + "<p><b>Синтаксис:</b></p><p><span class='function_name'>" + strMethod + "</span><span class='parameter_variable'>()" + retValue + "</span></p>";
                                 }
                             }
-                            if (methodData["example"] && descContext === "description") { depp = depp + "<h3 style='font-size': 1em;>Пример:</h3><p>" + methodData["example"].replace(new RegExp("\\\\^\\\\&\\\\*","g"),'\\/').replace("^&%",'\\\\')+ "</p>";}
+                            if (methodData["example"] && descContext === "description") { depp = depp + "<p><b>Пример:</b></p><p>" + methodData["example"].replace(new RegExp("\\\\^\\\\&\\\\*","g"),'\\/').replace("^&%",'\\\\')+ "</p>";}
                             return depp;
                         }
 
