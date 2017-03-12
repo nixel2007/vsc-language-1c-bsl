@@ -67,9 +67,22 @@
       {
         "command": "language-1c-bsl.syntaxHelper",
         "title": "Show syntax-helper",
-        "category": "Language 1C (BSL)"
+        "category": "Language 1C (BSL)",
+        "icon": {
+          "light": "./images/preview-darkgray.svg",
+          "dark": "./images/preview-lightgray.svg"
+        }
       }
     ],
+    "menus": {
+      "editor/title": [
+        {
+          "when": "resourceLangId == bsl",
+          "command": "language-1c-bsl.syntaxHelper",
+          "group": "navigation"
+        }
+      ]
+    },
     "configuration": {
       "title": "Language 1C (BSL) configuration",
       "properties": {

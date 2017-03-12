@@ -4,7 +4,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
 import { BSL_MODE } from "./const";
-import {Global} from "./global";
+import { Global } from "./global";
 import CompletionItemProvider from "./features/completionItemProvider";
 import DefinitionProvider from "./features/definitionProvider";
 import LintProvider from "./features/lintProvider";
@@ -187,8 +187,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(async (textDocumentChangeEvent: vscode.TextDocumentChangeEvent) => {
         let editor = vscode.window.activeTextEditor;
-
-        if (editor.document.languageId !== "bsl") {
+        if (!editor || editor.document.languageId !== "bsl") {
             return;
         }
 
@@ -362,17 +361,17 @@ export function activate(context: vscode.ExtensionContext) {
         BSL_MODE, new DocumentFormattingEditProvider(global), "и", "ы", "е", "а", "e", "n", "f", "o", "y", "t", "\n"));
 
     context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.syntaxHelper", () => {
-        if (!vscode.window.activeTextEditor) {
-            return;
+        let globalMethod = undefined;
+        if (vscode.window.activeTextEditor) {
+            let word = vscode.window.activeTextEditor.document.getText(vscode.window.activeTextEditor.document.getWordRangeAtPosition(vscode.window.activeTextEditor.selection.active));
+            globalMethod = global.globalfunctions[word.toLowerCase()];
         }
-        let word = vscode.window.activeTextEditor.document.getText(vscode.window.activeTextEditor.document.getWordRangeAtPosition(vscode.window.activeTextEditor.selection.active));
-        let globalMethod = global.globalfunctions[word.toLowerCase()];
         // push the items
         let items = [];
         items.push({ label: "OneScript", description: "" });
         items.push({ label: "1C", description: "" });
         let postfix = ""; // (autocompleteLanguage === "en") ? "_en" : "";
-        if (vscode.window.activeTextEditor.document.fileName.endsWith(".bsl") && globalMethod) {
+        if (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.fileName.endsWith(".bsl") && globalMethod) {
             for (let element in bslGlobals.structureGlobContext()["global"]) {
                 let segment = bslGlobals.structureGlobContext()["global"][element];
                 if (segment[globalMethod.name] === "" || segment[globalMethod.name] === "") {
@@ -383,7 +382,7 @@ export function activate(context: vscode.ExtensionContext) {
                     return;
                 }
             }
-        } else if (vscode.window.activeTextEditor.document.fileName.endsWith(".os") && globalMethod) {
+        } else if (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.fileName.endsWith(".os") && globalMethod) {
             for (let element in oscriptStdLib.globalContextOscript()) {
                 let segment = oscriptStdLib.globalContextOscript()[element];
                 if (segment["methods"][globalMethod.name] !== undefined || segment["methods"][globalMethod.alias] !== undefined) {
@@ -394,7 +393,7 @@ export function activate(context: vscode.ExtensionContext) {
                     return;
                 }
             }
-        } else if (vscode.window.activeTextEditor.document.fileName.endsWith(".os")) {
+        } else if (!vscode.window.activeTextEditor || vscode.window.activeTextEditor.document.fileName.endsWith(".os")) {
             for (let element in oscriptStdLib.globalContextOscript()) {
                 let segment = oscriptStdLib.globalContextOscript()[element];
                 for (let sectionTitle in segment) {
@@ -434,7 +433,7 @@ export function activate(context: vscode.ExtensionContext) {
                 }
             }
 
-        } else if (vscode.window.activeTextEditor.document.languageId === "bsl") {
+        } else if (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.languageId === "bsl") {
             for (let elementSegment in bslGlobals.structureGlobContext()["global"]) {
                 let segment = bslGlobals.structureGlobContext()["global"][elementSegment];
                 for (let element in segment) {
@@ -480,20 +479,7 @@ export function activate(context: vscode.ExtensionContext) {
                 global.methodForDescription = { label: "1C", description: "" };
             }
             syntaxHelper.update(previewUri);
-            vscode.commands.executeCommand("vscode.previewHtml", previewUri, vscode.ViewColumn.Two).then(
-                (success) => {
-                    vscode.window.showQuickPick(items, options).then(function (selection) {
-                        if (typeof selection === "undefined") {
-                            return;
-                        }
-                        global.methodForDescription = selection;
-                        syntaxHelper.update(previewUri);
-                        vscode.commands.executeCommand("vscode.previewHtml", previewUri, vscode.ViewColumn.Two);
-                    });
-                },
-                (reason) => {
-                    vscode.window.showErrorMessage(reason);
-                });
+            vscode.commands.executeCommand("vscode.previewHtml", previewUri, vscode.ViewColumn.Two);
         } else {
             vscode.window.showQuickPick(items, options).then(function (selection) {
                 if (typeof selection === "undefined") {
