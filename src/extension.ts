@@ -165,10 +165,6 @@ export function activate(context: vscode.ExtensionContext) {
             {
                 beforeText: /^([^\|\"]|"[^\"]*")*\"[^\"]*$/,
                 action: { indentAction: vscode.IndentAction.None, appendText: "|" }
-            },
-            {
-                beforeText: /^.*\/\/.*$/,
-                action: { indentAction: vscode.IndentAction.None, appendText: "//" }
             }
         ]
     });
@@ -208,6 +204,28 @@ export function activate(context: vscode.ExtensionContext) {
                 position.line,
                 position.character
             );
+        }
+}));
+
+    context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.addComment", () => {
+        let editor = vscode.window.activeTextEditor;
+        if (!editor || !editor.selection.isEmpty || editor.document.languageId !== "bsl") {
+            return;
+        }
+        let position = editor.selection.active;
+
+        let line = editor.document.lineAt(position.line);
+        let indent = editor.document.getText(new vscode.Range(line.lineNumber, 0, line.lineNumber, line.firstNonWhitespaceCharacterIndex));
+
+
+        if (line.text.match(/^\s*\/\/.*$/)) {
+            editor.edit(function (editBuilder) {
+                editBuilder.insert(new vscode.Position(position.line, position.character), "\n" + indent + "//");
+            });
+        } else {
+            editor.edit(function (editBuilder) {
+                editBuilder.insert(new vscode.Position(position.line, position.character), "\n" + indent);
+            });
         }
     }));
 

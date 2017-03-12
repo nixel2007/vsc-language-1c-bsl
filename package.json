@@ -65,6 +65,11 @@
         "category": "Language 1C (BSL)"
       },
       {
+        "command": "language-1c-bsl.addComment",
+        "title": "Add comment",
+        "category": "Language 1C (BSL)"
+      },
+      {
         "command": "language-1c-bsl.syntaxHelper",
         "title": "Show syntax-helper",
         "category": "Language 1C (BSL)",
@@ -80,6 +85,12 @@
           "when": "resourceLangId == bsl",
           "command": "language-1c-bsl.syntaxHelper",
           "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "language-1c-bsl.addComment",
+          "when": "false"
         }
       ]
     },
@@ -137,6 +148,12 @@
         "command": "language-1c-bsl.expandAbbreviation",
         "key": "tab",
         "mac": "tab",
+        "when": "editorTextFocus && editorLangId == 'bsl'"
+      },
+      {
+        "command": "language-1c-bsl.addComment",
+        "key": "shift+enter",
+        "mac": "shift+enter",
         "when": "editorTextFocus && editorLangId == 'bsl'"
       }
     ],
