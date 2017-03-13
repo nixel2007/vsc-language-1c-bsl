@@ -54,7 +54,6 @@ export class Global {
         const globalfunctions: IMethods = bslglobals.globalfunctions();
         const globalvariables: IGlobalVariables = bslglobals.globalvariables();
         this.keywords = bslglobals.keywords()[autocompleteLanguage];
-        // tslint:disable-next-line:forin
         for (const key in globalfunctions) {
             const globalFunction = globalfunctions[key];
             const newName = globalFunction["name" + postfix];
@@ -67,10 +66,8 @@ export class Global {
             this.globalfunctions[newName.toLowerCase()] = newElement;
         }
         const globalContextOscript: IOscriptGlobalContext = oscriptStdLib.globalContextOscript();
-        // tslint:disable-next-line:forin
         for (const segmentKey in globalContextOscript) {
             const segmentMethods = globalContextOscript[segmentKey].methods;
-            // tslint:disable-next-line:forin
             for (const methodKey in segmentMethods) {
                 const method = segmentMethods[methodKey];
                 if (this.globalfunctions[method["name" + postfix].toLowerCase()]) {
@@ -206,7 +203,6 @@ export class Global {
             newElement.alias = (postfix === "_en") ? segment.name : segment.name_en;
             newElement.description = segment.description;
             newElement.methods = (segment.methods) ? {} : undefined;
-            // tslint:disable-next-line:forin
             for (const key in segment.methods) {
                 const method = segment.methods[key];
                 const newNameMethod = method["name" + postfix];
@@ -217,7 +213,6 @@ export class Global {
                 newElement.methods[newNameMethod.toLowerCase()] = newMethod;
             }
             newElement.properties = (segment.properties) ? {} : undefined;
-            // tslint:disable-next-line:forin
             for (const key in segment.properties) {
                 const property = segment.properties[key];
                 const newNameProp = property["name" + postfix];
@@ -228,7 +223,6 @@ export class Global {
                 newElement.properties[newNameProp.toLowerCase()] = newProp;
             }
             newElement.constructors = (segment.constructors) ? {} : undefined;
-            // tslint:disable-next-line:forin
             for (const key in segment.constructors) {
                 const constructor = segment.constructors[key];
                 const newCntr: IConstructorDefinition = {} as IConstructorDefinition;
@@ -248,7 +242,6 @@ export class Global {
             if (this.classes[newName.toLowerCase()]) {
                 const findClass = this.classes[newName.toLowerCase()];
                 findClass.oscript_description = (segment.description) ? (segment.description) : findClass.description;
-                // tslint:disable-next-line:forin
                 for (const key in segment.methods) {
                     let findMethod = segment.methods[key];
                     const nameMethod = findMethod["name" + postfix];
@@ -266,7 +259,6 @@ export class Global {
                         findMethod.oscript_description = segment.methods[key].description;
                     }
                 }
-                // tslint:disable-next-line:forin
                 for (const key in segment.properties) {
                     let findProp = segment.properties[key];
                     const nameProp = findProp["name" + postfix];
@@ -284,7 +276,6 @@ export class Global {
                         findProp.oscript_description = segment.properties[key].description;
                     }
                 }
-                // tslint:disable-next-line:forin
                 for (const key in segment.constructors) {
                     let findCntr = segment.constructors[key];
                     if (!findCntr) {
@@ -303,7 +294,6 @@ export class Global {
                 newElement.description = undefined;
                 newElement.oscript_description = segment.description;
                 newElement.methods = (segment.methods) ? {} : undefined;
-                // tslint:disable-next-line:forin
                 for (const key in segment.methods) {
                     const newNameMethod = segment.methods[key]["name" + postfix];
                     const newMethod: IMethod = {} as IMethod;
@@ -314,7 +304,6 @@ export class Global {
                     newElement.methods[newNameMethod.toLowerCase()] = newMethod;
                 }
                 newElement.properties = (segment.properties) ? {} : undefined;
-                // tslint:disable-next-line:forin
                 for (const key in segment.properties) {
                     const newNameProp = segment.properties[key]["name" + postfix];
                     const newProp: IPropertyDefinition = {} as IPropertyDefinition;
@@ -327,7 +316,6 @@ export class Global {
                     newElement.properties[newNameProp.toLowerCase()] = newProp;
                 }
                 newElement.constructors = (segment.constructors) ? {} : undefined;
-                // tslint:disable-next-line:forin
                 for (const key in segment.constructors) {
                     const newCntr: IConstructorDefinition = {} as IConstructorDefinition;
                     newCntr.signature = segment.constructors[key].signature;
