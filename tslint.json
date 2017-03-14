@@ -7,6 +7,10 @@
         "object-literal-sort-keys": false,
         "trailing-comma": [
             false
-        ]
+        ],
+        "no-console": [
+            "log"
+        ],
+        "forin": false
     }
 }

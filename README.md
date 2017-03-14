@@ -8,6 +8,7 @@
 [![Dependency Status](https://gemnasium.com/badges/github.com/xDrivenDevelopment/vsc-language-1c-bsl.svg)](https://gemnasium.com/github.com/xDrivenDevelopment/vsc-language-1c-bsl)
 [![codecov](https://codecov.io/gh/xDrivenDevelopment/vsc-language-1c-bsl/branch/develop/graph/badge.svg)](https://codecov.io/gh/xDrivenDevelopment/vsc-language-1c-bsl)
 [![SonarQube Tech Debt](https://img.shields.io/sonar/https/sonar.silverbulleters.org/vsc-language-1c-bsl/tech_debt.svg)](https://sonar.silverbulleters.org/dashboard?id=vsc-language-1c-bsl)
+[![Greenkeeper badge](https://badges.greenkeeper.io/xDrivenDevelopment/vsc-language-1c-bsl.svg)](https://greenkeeper.io/)
 
 Добавляет подсветку встроенного языка 1С:Предпрятие 8 файлам \*.bsl и \*.os - синтаксис `1C (BSL)`.  
 Добавляет подсветку текста запросов языка запросов 1С: внутри текста модуля или отдельно - синтаксис `1C (Query)`.

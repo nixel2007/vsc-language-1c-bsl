@@ -2,7 +2,7 @@ import * as path from "path";
 import "should";
 import * as vscode from "vscode";
 
-import { addText, fixturePath, mAsync, newTextDocument } from "./helpers";
+import { addText, clearActiveTextEditor, fixturePath, newTextDocument } from "./helpers";
 
 import { Global } from "../src/global";
 import * as vscAdapter from "../src/vscAdapter";
@@ -13,24 +13,20 @@ let textDocument: vscode.TextDocument;
 
 describe("Definitions", () => {
 
-    before(async function (done) {
+    before(async function () {
         this.timeout(10000);
         const uriEmptyFile = vscode.Uri.file(
             path.join(fixturePath, "emptyFile.bsl")
         );
         textDocument = await newTextDocument(uriEmptyFile);
         await globals.waitForCacheUpdate();
-        done();
     });
 
-    beforeEach(mAsync(async (done) => {
-        await vscode.window.activeTextEditor.edit((editBuilder: vscode.TextEditorEdit) => {
-            const range = new vscode.Range(new vscode.Position(0, 0), vscode.window.activeTextEditor.selection.anchor);
-            editBuilder.delete(range);
-        });
-    }));
+    beforeEach(async () => {
+        await clearActiveTextEditor();
+    });
 
-    it("should be available on manager's module call", mAsync(async (done) => {
+    it("should be available on manager's module call", async () => {
 
         await addText("Документы.Definition.ПроцедураМодуляМенеджера");
 
@@ -47,9 +43,9 @@ describe("Definitions", () => {
         let location = locations[0];
         location.uri.path.should.endWith("Documents/Definition/Ext/ManagerModule.bsl");
 
-    }));
+    });
 
-    it("should not crash on find only non-public methods", mAsync(async (done) => {
+    it("should not crash on find only non-public methods", async () => {
 
         await addText("НеЭкспортная");
 
@@ -63,9 +59,9 @@ describe("Definitions", () => {
 
         locations.should.have.length(0);
 
-    }));
+    });
 
-    it("should not open global functions", mAsync(async (done) => {
+    it("should not open global functions", async () => {
 
         await addText("Сообщить");
 
@@ -79,6 +75,6 @@ describe("Definitions", () => {
 
         locations.should.have.length(0);
 
-    }));
+    });
 
 });
