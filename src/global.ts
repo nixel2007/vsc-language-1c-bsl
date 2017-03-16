@@ -464,6 +464,9 @@ export class Global {
         this.bslCacheUpdated = false;
         this.oscriptCacheUpdated = false;
 
+        this.db = this.cache.addCollection("ValueTable");
+        this.dbcalls = new Map();
+
         const configuration = this.getConfiguration("language-1c-bsl");
         const basePath: string = String(this.getConfigurationKey(configuration, "rootPath"));
         let rootPath = this.getRootPath();
@@ -473,59 +476,60 @@ export class Global {
             if (this.cache.getCollection("ValueTable")) {
                 this.cache.removeCollection("ValueTable");
             }
-            this.db = this.cache.addCollection("ValueTable");
-            this.dbcalls = new Map();
             const searchPattern = basePath !== "" ? basePath.substr(2) + "/**" : "**/*.{bsl,os}";
             this.findFilesForCache(searchPattern, rootPath);
-
-            const args: string[] = [];
-            args.push("get");
-            args.push("lib.system");
-
-            const options = {
-                cwd: path.dirname(rootPath),
-                env: process.env
-            };
-            let result = "";
-            const oscriptConfig = cp.spawn("oscript-config", args, options);
-            oscriptConfig.on("error", (error) => {
-                if (error.toString().indexOf("ENOENT") > 0) {
-                    console.log("oscript-config isn't found. Is it installed?");
-                } else {
-                    console.error(error);
-                }
-            });
-            oscriptConfig.stderr.on("data", (buffer) => {
-                result += buffer.toString();
-            });
-            oscriptConfig.stdout.on("data", (buffer) => {
-                result += buffer.toString();
-            });
-            oscriptConfig.on("close", () => {
-                try {
-                    result = result.trim();
-                    const lines = result.split(/\r?\n/);
-                    const libSearchPattern = "**/lib.config";
-                    for (const line of lines) {
-                        const globOptions: glob.IOptions = {};
-                        globOptions.nocase = true;
-                        globOptions.cwd = line;
-                        // glob >=7.0.0 contains this property
-                        // tslint:disable-next-line:no-string-literal
-                        globOptions["absolute"] = true;
-                        glob(libSearchPattern, globOptions, (err, files) => {
-                            if (err) {
-                                console.error(err);
-                                return;
-                            }
-                            this.addOscriptLibrariesToCache(files);
-                        });
-                    }
-                } catch (e) {
-                    console.error(e);
-                }
-            });
+        } else {
+            this.bslCacheUpdated = true;
         }
+
+        const args: string[] = [];
+        args.push("get");
+        args.push("lib.system");
+
+        const cwd = rootPath ? path.dirname(rootPath) : path.dirname("");
+        const options = {
+            cwd,
+            env: process.env
+        };
+        let result = "";
+        const oscriptConfig = cp.spawn("oscript-config", args, options);
+        oscriptConfig.on("error", (error) => {
+            if (error.toString().indexOf("ENOENT") > 0) {
+                console.log("oscript-config isn't found. Is it installed?");
+            } else {
+                console.error(error);
+            }
+        });
+        oscriptConfig.stderr.on("data", (buffer) => {
+            result += buffer.toString();
+        });
+        oscriptConfig.stdout.on("data", (buffer) => {
+            result += buffer.toString();
+        });
+        oscriptConfig.on("close", () => {
+            try {
+                result = result.trim();
+                const lines = result.split(/\r?\n/);
+                const libSearchPattern = "**/lib.config";
+                for (const line of lines) {
+                    const globOptions: glob.IOptions = {};
+                    globOptions.nocase = true;
+                    globOptions.cwd = line;
+                    // glob >=7.0.0 contains this property
+                    // tslint:disable-next-line:no-string-literal
+                    globOptions["absolute"] = true;
+                    glob(libSearchPattern, globOptions, (err, files) => {
+                        if (err) {
+                            console.error(err);
+                            return;
+                        }
+                        this.addOscriptLibrariesToCache(files);
+                    });
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        });
     };
 
     public customUpdateCache(source: string, filename: string) {
