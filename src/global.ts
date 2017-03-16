@@ -467,15 +467,16 @@ export class Global {
         this.db = this.cache.addCollection("ValueTable");
         this.dbcalls = new Map();
 
+        if (this.cache.getCollection("ValueTable")) {
+            this.cache.removeCollection("ValueTable");
+        }
+
         const configuration = this.getConfiguration("language-1c-bsl");
         const basePath: string = String(this.getConfigurationKey(configuration, "rootPath"));
         let rootPath = this.getRootPath();
         if (rootPath) {
             this.postMessage("Запущено заполнение кеша", 3000);
             rootPath = path.join(rootPath, basePath);
-            if (this.cache.getCollection("ValueTable")) {
-                this.cache.removeCollection("ValueTable");
-            }
             const searchPattern = basePath !== "" ? basePath.substr(2) + "/**" : "**/*.{bsl,os}";
             this.findFilesForCache(searchPattern, rootPath);
         } else {
