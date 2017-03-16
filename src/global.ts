@@ -464,12 +464,13 @@ export class Global {
         this.bslCacheUpdated = false;
         this.oscriptCacheUpdated = false;
 
-        this.db = this.cache.addCollection("ValueTable");
-        this.dbcalls = new Map();
-
         if (this.cache.getCollection("ValueTable")) {
             this.cache.removeCollection("ValueTable");
         }
+
+        this.db = this.cache.addCollection("ValueTable");
+        this.dbcalls = new Map();
+
 
         const configuration = this.getConfiguration("language-1c-bsl");
         const basePath: string = String(this.getConfigurationKey(configuration, "rootPath"));
