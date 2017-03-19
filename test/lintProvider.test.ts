@@ -24,7 +24,7 @@ describe("Linter", () => {
         await globals.waitForCacheUpdate();
     });
 
-    it.only("should show errors on oscript-files", async () => {
+    it("should show errors on oscript-files", async () => {
 
         linter.doBsllint(textDocument);
         const diagnosticData: vscode.Diagnostic[] = await linter.getDiagnosticData(uriFile);
