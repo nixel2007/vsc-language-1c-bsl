@@ -2,8 +2,11 @@ import * as vscode from "vscode";
 import AbstractProvider from "./abstractProvider";
 
 export default class GlobalCompletionItemProvider extends AbstractProvider implements vscode.CompletionItemProvider {
-    public added: Object;
-    public provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Thenable<vscode.CompletionItem[]> {
+    public added: object;
+    public provideCompletionItems(
+        document: vscode.TextDocument,
+        position: vscode.Position,
+        token: vscode.CancellationToken): Thenable<vscode.CompletionItem[]> {
 
         this.added = {};
 
@@ -16,8 +19,15 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                     bucket = this.getDotComplection(document, position);
                     return resolve(bucket);
                 } else if (!char.match(/[/\()"':,.;<>~!@#$%^&*|+=\[\]{}`?\…-\s\n\t]/)) {
-                    let word = document.getText(new vscode.Range(document.getWordRangeAtPosition(position).start, position));
-                    word = this._global.fullNameRecursor(word, document, document.getWordRangeAtPosition(position), true);
+                    let word = document.getText(
+                        new vscode.Range(document.getWordRangeAtPosition(position).start, position)
+                    );
+                    word = this._global.fullNameRecursor(
+                        word,
+                        document,
+                        document.getWordRangeAtPosition(position),
+                        true
+                    );
                     let result: any[];
                     if (word.indexOf(".") === -1) {
                         if (document.getText(new vscode.Range(new vscode.Position(position.line, 0), position)).match(/.*=\s*[\wа-яё]+$/i)) {
@@ -73,7 +83,9 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                             bucket = this.getAllWords(word, document.getText(), bucket);
                             result = this._global.querydef(word);
                             result.forEach((value, index, array) => {
-                                const moduleDescription = (value.module && value.module.length > 0) ? value.module + "." : "";
+                                const moduleDescription = (value.module && value.module.length > 0)
+                                    ? value.module + "."
+                                    : "";
                                 let fullName = moduleDescription + value.name;
                                 let description = value.description;
                                 if (moduleDescription.length > 0) {
@@ -119,8 +131,9 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
 
     private getAllWords(word: string, source: string, completions: vscode.CompletionItem[]): vscode.CompletionItem[] {
         const wordMatch = this.getRegExp(word);
-        for (let S = source.split(/[^а-яёА-ЯЁ_a-zA-Z]+/), _ = 0; _ < S.length; _++) {
-            const sourceWord: string = S[_].trim();
+        const S = source.split(/[^а-яёА-ЯЁ_a-zA-Z]+/);
+        for (let sourceWord of S) {
+            sourceWord = sourceWord.trim();
             if (!this.added[sourceWord.toLowerCase()] && sourceWord.length > 5 && wordMatch.exec(sourceWord)) {
                 if (sourceWord === word) {
                     continue;
@@ -226,7 +239,12 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
         const wordRange = document.getWordRangeAtPosition(basePosition);
         if (wordRange) {
             let wordAtPosition = document.getText(document.getWordRangeAtPosition(basePosition));
-            wordAtPosition = this._global.fullNameRecursor(wordAtPosition, document, document.getWordRangeAtPosition(basePosition), true);
+            wordAtPosition = this._global.fullNameRecursor(
+                wordAtPosition,
+                document,
+                document.getWordRangeAtPosition(basePosition),
+                true
+            );
             if (this._global.toreplaced[wordAtPosition.split(".")[0]]) {
                 const arrayName = wordAtPosition.split(".");
                 arrayName.splice(0, 1, this._global.toreplaced[arrayName[0]]);
@@ -237,13 +255,12 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
             this.checkSystemEnums(wordAtPosition, result);
             // Получим все общие модули, у которых не заканчивается на точку.
             queryResult = this._global.querydef(wordAtPosition, false, false);
-            for (let index = 0; index < queryResult.length; index++) {
-                const element = queryResult[index];
+            for (const element of queryResult) {
                 if (!element._method.IsExport) {
                     continue;
                 }
                 const arrayFilename = element.filename.split("/");
-                if (!element.oscriptLib && arrayFilename[arrayFilename.length - 4] !== "CommonModules" && !element.filename.endsWith("ManagerModule.bsl")) {
+                if (!element.oscriptLib && !this.isModuleAccessable(element.filename)) {
                     continue;
                 }
                 const item: vscode.CompletionItem = new vscode.CompletionItem(element.name);
@@ -262,8 +279,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
 
     private customDotComplection(queryResult, wordAtPosition, result) {
         const metadata = {};
-        for (let index = 0; index < queryResult.length; index++) {
-            const element = queryResult[index];
+        for (const element of queryResult) {
             if (element.module) {
                 const moduleArray = element.module.split(".");
                 if ((moduleArray.length > 1) && wordAtPosition.indexOf(".") === -1) {
@@ -278,8 +294,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                     if (!element._method.IsExport) {
                         continue;
                     }
-                    const arrayFilename = element.filename.split("/");
-                    if (arrayFilename[arrayFilename.length - 4] !== "CommonModules" && !element.filename.endsWith("ManagerModule.bsl")) {
+                    if (!this.isModuleAccessable(element.filename)) {
                         continue;
                     }
                     const item: vscode.CompletionItem = new vscode.CompletionItem(element.name);
@@ -293,6 +308,11 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
             }
         }
         return result;
+    }
+
+    private isModuleAccessable(filename: string): boolean {
+        const arrayFilename = filename.split("/");
+        return arrayFilename[arrayFilename.length - 4] === "CommonModules" || filename.endsWith("ManagerModule.bsl");
     }
 
     private checkSystemEnums(wordAtPosition: string, result): void {
