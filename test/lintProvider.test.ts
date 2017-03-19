@@ -32,10 +32,10 @@ describe("Linter", () => {
         diagnosticData.should.matchAny((value: vscode.Diagnostic) => {
             value.message.should.be.equal("Неизвестный символ: Б");
             const range = value.range;
-            range.end.line.should.be.is.equal(1);
+            range.end.line.should.be.equal(1);
             range.end.character.should.be.equal(6);
-            range.start.line.should.be.is.equal(1);
-            range.start.character.should.be.which.is.equal(0);
+            range.start.line.should.be.equal(1);
+            range.start.character.should.be.equal(0);
         });
 
     });
