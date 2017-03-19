@@ -29,8 +29,8 @@ describe("Linter", () => {
         linter.doBsllint(textDocument);
         const diagnosticData: vscode.Diagnostic[] = await linter.getDiagnosticData(uriFile);
 
-        diagnosticData.should.matchAny((value: vscode.CompletionItem) => {
-            value.should.has.a.key("message").which.is.equal("Неизвестный символ: Б");
+        diagnosticData.should.matchAny((value: vscode.Diagnostic) => {
+            value.message.should.be.equal("Неизвестный символ: Б");
             const range = value.range;
             range.end.line.should.be.is.equal(1);
             range.end.character.should.be.equal(6);
