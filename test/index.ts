@@ -151,6 +151,7 @@ class CoverageRunner {
         // Only report coverage if the process is exiting successfully
         process.on("exit", (code) => {
             self.reportCoverage();
+            process.exitCode = code;
         });
     }
 

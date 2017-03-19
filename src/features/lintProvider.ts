@@ -8,13 +8,14 @@ import { BSL_MODE } from "../const";
 
 export default class LintProvider {
 
-    private commandId: string;
-    private args: Array<string>;
-    private diagnosticCollection: vscode.DiagnosticCollection;
-    private statusBarItem: vscode.StatusBarItem;
+    private commandId: string = this.getCommandId();
+    private args: string[] = ["-encoding=utf-8", "-check"];
+    private diagnosticCollection: vscode.DiagnosticCollection =
+        vscode.languages.createDiagnosticCollection("OneScript Linter");
+    private statusBarItem: vscode.StatusBarItem =
+        vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
 
     public activate(subscriptions: vscode.Disposable[]) {
-        this.diagnosticCollection = vscode.languages.createDiagnosticCollection();
         vscode.workspace.onDidOpenTextDocument(this.doBsllint, this, subscriptions);
         vscode.workspace.onDidCloseTextDocument(
             (textDocument) => {
@@ -23,11 +24,6 @@ export default class LintProvider {
             undefined,
             subscriptions);
         vscode.workspace.onDidSaveTextDocument(this.doBsllint, this);
-        if (!this.statusBarItem) {
-            this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
-        }
-        this.args = ["-encoding=utf-8", "-check"];
-        this.commandId = this.getCommandId();
         vscode.workspace.textDocuments.forEach(this.doBsllint, this);
     }
 
@@ -105,6 +101,19 @@ export default class LintProvider {
         });
 
     };
+
+    public async getDiagnosticData(uri: vscode.Uri) {
+        while (this.diagnosticCollection.get(uri) === undefined) {
+            await this.delay(100);
+        }
+        return this.diagnosticCollection.get(uri);
+    }
+
+    private delay(milliseconds: number) {
+        return new Promise<void>((resolve) => {
+            setTimeout(resolve, milliseconds);
+        });
+    }
 
     private getCommandId(): string {
         let command = "";
