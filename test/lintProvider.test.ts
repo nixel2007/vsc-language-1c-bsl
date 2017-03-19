@@ -29,13 +29,14 @@ describe("Linter", () => {
         linter.doBsllint(textDocument);
         const diagnosticData: vscode.Diagnostic[] = await linter.getDiagnosticData(uriFile);
 
-        diagnosticData.should.has.length(1);
-        diagnosticData[0].should.has.a.key("message").which.is.equal("Неизвестный символ: Б");
-        const range = diagnosticData[0].range;
-        range.end.line.should.be.is.equal(1);
-        range.end.character.should.be.equal(6);
-        range.start.line.should.be.is.equal(1);
-        range.start.character.should.be.which.is.equal(0);
+        diagnosticData.should.matchAny((value: vscode.CompletionItem) => {
+            value.should.has.a.key("message").which.is.equal("Неизвестный символ: Б");
+            const range = value.range;
+            range.end.line.should.be.is.equal(1);
+            range.end.character.should.be.equal(6);
+            range.start.line.should.be.is.equal(1);
+            range.start.character.should.be.which.is.equal(0);
+        });
 
     });
 
