@@ -215,7 +215,7 @@
     "cross-env": "^3.1.4",
     "decache": "^4.1.0",
     "istanbul": "^0.4.5",
-    "remap-istanbul": "^0.9.0",
+    "remap-istanbul": "^0.9.5",
     "should": "^11.2.0",
     "tslint": "^4.4.2",
     "typescript": "^2.2.1",
