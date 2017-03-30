@@ -217,7 +217,7 @@
     "istanbul": "^0.4.5",
     "remap-istanbul": "^0.9.5",
     "should": "^11.2.0",
-    "tslint": "^4.4.2",
+    "tslint": "^5.0.0",
     "typescript": "^2.2.1",
     "vscode": "^1.0.3"
   },
