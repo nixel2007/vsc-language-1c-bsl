@@ -1,4 +1,4 @@
-import {SignatureHelpProvider, SignatureHelp, SignatureInformation, CancellationToken, TextDocument, Position} from "vscode";
+import {CancellationToken, Position, SignatureHelp, SignatureHelpProvider, SignatureInformation, TextDocument} from "vscode";
 import AbstractProvider from "./abstractProvider";
 
 const _NL = "\n".charCodeAt(0);
@@ -62,7 +62,7 @@ class BackwardIterator {
 export default class GlobalSignatureHelpProvider extends AbstractProvider implements SignatureHelpProvider {
 
     public provideSignatureHelp(document: TextDocument, position: Position, token: CancellationToken): Thenable<SignatureHelp> {
-        
+
         return new Promise((resolve, reject) => {
             const iterator = new BackwardIterator(document, position.character - 1, position.line);
 

@@ -49,8 +49,8 @@ export default class DocumentFormattingEditProvider extends AbstractProvider imp
     }
 
     public provideOnTypeFormattingEdits(document: vscode.TextDocument, position: vscode.Position, ch: string, options: vscode.FormattingOptions, token: vscode.CancellationToken): vscode.TextEdit[] {
-        let lineNumber = (ch === "\n") ? (position.line - 1) : position.line;
-        let firstWord = document.lineAt(lineNumber).text.toLowerCase().trim().split(/[^\wа-яё\(\)]/)[0];
+        const lineNumber = (ch === "\n") ? (position.line - 1) : position.line;
+        const firstWord = document.lineAt(lineNumber).text.toLowerCase().trim().split(/[^\wа-яё\(\)]/)[0];
         if (this.reindentWord[firstWord] || this.unindentWord[firstWord]) {
             return this.format(document, new vscode.Range(new vscode.Position(lineNumber - 1, 0), position), options, token);
         }
@@ -62,11 +62,11 @@ export default class DocumentFormattingEditProvider extends AbstractProvider imp
         let value: string;
         let rangeOffset: number;
         if (range) {
-            let startPosition = new vscode.Position(range.start.line, 0);
+            const startPosition = new vscode.Position(range.start.line, 0);
             rangeOffset = document.offsetAt(startPosition);
 
             let endOffset = document.offsetAt(new vscode.Position(range.end.line + 1, 0));
-            let endLineStart = document.offsetAt(new vscode.Position(range.end.line, 0));
+            const endLineStart = document.offsetAt(new vscode.Position(range.end.line, 0));
             while (endOffset > endLineStart && this.isEOL(documentText, endOffset - 1)) {
                 endOffset--;
             }
@@ -80,28 +80,28 @@ export default class DocumentFormattingEditProvider extends AbstractProvider imp
             rangeOffset = 0;
         }
 
-        let eol = this.getEOL(document);
+        const eol = this.getEOL(document);
 
         let indentLevel = initialIndentLevel;
-        let indentValue: String;
+        let indentValue: string;
         if (options.insertSpaces) {
-            indentValue = this.repeat(" ", options.tabSize);
+            indentValue = this.repeat(" ", options.tabSize).toString();
         } else {
             indentValue = "\t";
         }
 
-        let editOperations: vscode.TextEdit[] = [];
+        const editOperations: vscode.TextEdit[] = [];
         function addEdit(text: string, lineNumber: number) {
-            let oldIndent = /^\s*/.exec(text)[0];
+            const oldIndent = /^\s*/.exec(text)[0];
             if (oldIndent !== indentValue.repeat(indentLevel)) {
                 editOperations.push(vscode.TextEdit.replace(new vscode.Range(new vscode.Position(lineNumber, 0), new vscode.Position(lineNumber, oldIndent.length)), indentValue.repeat(indentLevel)));
             }
         }
 
-        let arrayValue = value.split(new RegExp(eol));
-        for (let key in arrayValue) {
-            let element = arrayValue[key];
-            let firstWord = element.toLowerCase().trim().split(/[^\wа-яё\(\)]/)[0];
+        const arrayValue = value.split(new RegExp(eol));
+        for (const key in arrayValue) {
+            const element = arrayValue[key];
+            const firstWord = element.toLowerCase().trim().split(/[^\wа-яё\(\)]/)[0];
             if (this.indentWord[firstWord]) {
                 addEdit(element, +key + range.start.line);
                 indentLevel++;
@@ -123,7 +123,7 @@ export default class DocumentFormattingEditProvider extends AbstractProvider imp
         return editOperations;
     }
 
-    private repeat(s: string, count: number): String {
+    private repeat(s: string, count: number): string {
         let result = "";
         for (let i = 0; i < count; i++) {
             result += s;
@@ -134,9 +134,9 @@ export default class DocumentFormattingEditProvider extends AbstractProvider imp
     private computeIndentLevel(content: string, offset: number, options: vscode.FormattingOptions): number {
         let i = 0;
         let nChars = 0;
-        let tabSize = options.tabSize || 4;
+        const tabSize = options.tabSize || 4;
         while (i < content.length) {
-            let ch = content.charAt(i);
+            const ch = content.charAt(i);
             if (ch === " ") {
                 nChars++;
             } else if (ch === "\t") {
@@ -150,9 +150,9 @@ export default class DocumentFormattingEditProvider extends AbstractProvider imp
     }
 
     private getEOL(document: vscode.TextDocument): string {
-        let text = document.getText();
+        const text = document.getText();
         if (document.lineCount > 1) {
-            let to = document.offsetAt(new vscode.Position(1, 0));
+            const to = document.offsetAt(new vscode.Position(1, 0));
             let from = to;
             while (from > 0 && this.isEOL(text, from - 1)) {
                 from--;
@@ -162,7 +162,7 @@ export default class DocumentFormattingEditProvider extends AbstractProvider imp
         return "\n";
     }
 
-    private isEOL(text: string, offset: number): Boolean {
+    private isEOL(text: string, offset: number): boolean {
         return "\r\n".indexOf(text.charAt(offset)) !== -1;
     }
 }
