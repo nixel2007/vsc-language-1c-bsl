@@ -35,11 +35,11 @@ export function fullNameRecursor(word: string, document: vscode.TextDocument, ra
         } else {
             newRange = new vscode.Range(new vscode.Position(range.end.line, range.end.character), new vscode.Position(range.end.line, range.end.character + plus));
         }
-        let dot = document.getText(newRange);
+        const dot = document.getText(newRange);
         if (dot.endsWith(".")) {
             let newPosition: vscode.Position;
             if (left) {
-                let leftWordRange: vscode.Range = document.getWordRangeAtPosition(newRange.start);
+                const leftWordRange: vscode.Range = document.getWordRangeAtPosition(newRange.start);
                 if (leftWordRange !== undefined) {
                     result = document.getText(leftWordRange) + "." + word;
                     if (leftWordRange !== undefined && leftWordRange.start.character > 1) {
@@ -53,7 +53,7 @@ export function fullNameRecursor(word: string, document: vscode.TextDocument, ra
                 newPosition = new vscode.Position(newRange.end.line, newRange.end.character + 2);
             }
             if (document.getText(new vscode.Range(new vscode.Position(newPosition.line, newPosition.character + 1), newPosition)) === ".") {
-                let newWord = document.getWordRangeAtPosition(newPosition);
+                const newWord = document.getWordRangeAtPosition(newPosition);
                 return document.getText(newWord) + "." + result;
             }
             return result;
@@ -63,7 +63,7 @@ export function fullNameRecursor(word: string, document: vscode.TextDocument, ra
     }
 
 export function findFilesForCache(searchPattern: string, rootPath: string) {
-    let globOptions: glob.IOptions = {};
+    const globOptions: glob.IOptions = {};
     globOptions.dot = true;
     globOptions.cwd = rootPath;
     globOptions.nocase = true;

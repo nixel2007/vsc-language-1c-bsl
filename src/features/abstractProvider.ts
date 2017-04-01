@@ -1,5 +1,5 @@
-import {Global} from "../global";
 import {Disposable} from "vscode";
+import {Global} from "../global";
 
 export default class AbstractProvider {
 

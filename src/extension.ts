@@ -98,8 +98,7 @@ export function activate(context: vscode.ExtensionContext) {
                     comment += "//\n";
                     comment += ((aL === "en") ? "// Parameters:\n" : "// Параметры:\n");
                 }
-                for (let index = 0; index < params.length; index++) {
-                    const element = params[index];
+                for (const element of params) {
                     comment += "//   " + element + ((aL === "en") ? " - <Type.Subtype> - <parameter description>" : " - <Тип.Вид> - <описание параметра>");
                     comment += "\n";
                 }
@@ -250,7 +249,6 @@ export function activate(context: vscode.ExtensionContext) {
             )
         );
 
-
         if (line.text.match(/^\s*\/\/.*$/)) {
             editor.edit((editBuilder) => {
                 editBuilder.insert(new vscode.Position(position.line, position.character), "\n" + indent + "//");
@@ -270,8 +268,7 @@ export function activate(context: vscode.ExtensionContext) {
             global.getRefsLocal(textEditor.document.fileName, textEditor.document.getText());
         }
         if (vscode.workspace.rootPath) {
-            for (let index = 0; index < vscode.workspace.textDocuments.length; index++) {
-                const element = vscode.workspace.textDocuments[index];
+            for (const element of vscode.workspace.textDocuments) {
                 if (element.isDirty && element.languageId === "bsl") {
                     global.customUpdateCache(element.getText(), element.fileName);
                 }
@@ -279,7 +276,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     }));
 
-    context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(function (document: vscode.TextDocument) {
+    context.subscriptions.push(vscode.workspace.onDidSaveTextDocument( (document: vscode.TextDocument) => {
         if (vscode.workspace.rootPath) {
             global.customUpdateCache(document.getText(), document.fileName);
         }
@@ -305,8 +302,8 @@ export function activate(context: vscode.ExtensionContext) {
             const arrStrings = regex.exec(textline);
             if ((char === "++" || char === "--" || char === "+=" || char === "-=" || char === "*=" || char === "/=" || char === "%=") && editor.selection.isEmpty && arrStrings) {
                 const word = arrStrings[1];
-                editor.edit(function (editBuilder) {
-                    let postfix = undefined;
+                editor.edit( (editBuilder) => {
+                    let postfix;
                     switch (char) {
                         case "++":
                             postfix = " + 1;";
@@ -342,12 +339,14 @@ export function activate(context: vscode.ExtensionContext) {
                         word + " = " + word + postfix
                     );
                 }).then(() => {
-                    const position = editor.selection.isReversed ? editor.selection.anchor : editor.selection.active;
+                    const newPosition = editor.selection.isReversed
+                        ? editor.selection.anchor
+                        : editor.selection.active;
                     editor.selection = new vscode.Selection(
-                        position.line,
-                        position.character,
-                        position.line,
-                        position.character
+                        newPosition.line,
+                        newPosition.character,
+                        newPosition.line,
+                        newPosition.character
                     );
                 });
             } else {
@@ -374,7 +373,7 @@ export function activate(context: vscode.ExtensionContext) {
             dynamicSnippetsCollection[element] = snippet;
         }
         const configuration = vscode.workspace.getConfiguration("language-1c-bsl");
-        const userDynamicSnippetsList: Array<string> = configuration.get("dynamicSnippets", []);
+        const userDynamicSnippetsList: string[] = configuration.get("dynamicSnippets", []);
         for (const index in userDynamicSnippetsList) {
             try {
                 const userDynamicSnippetsString = fs.readFileSync(userDynamicSnippetsList[index], "utf-8");
@@ -391,7 +390,7 @@ export function activate(context: vscode.ExtensionContext) {
         for (const element in dynamicSnippetsCollection) {
             const snippet = dynamicSnippetsCollection[element];
             const description = (element === snippet.description) ? "" : snippet.description;
-            items.push({ label: element, description: description });
+            items.push({ label: element, description });
         }
 
         vscode.window.showQuickPick(items).then((selection) => {
@@ -572,7 +571,7 @@ export function activate(context: vscode.ExtensionContext) {
             syntaxHelper.update(previewUri);
             vscode.commands.executeCommand("vscode.previewHtml", previewUri, vscode.ViewColumn.Two);
         } else {
-            vscode.window.showQuickPick(items, options).then(function (selection) {
+            vscode.window.showQuickPick(items, options).then( (selection) => {
                 if (typeof selection === "undefined") {
                     return;
                 }
@@ -591,4 +590,3 @@ export function activate(context: vscode.ExtensionContext) {
     }
     global.updateCache();
 }
-

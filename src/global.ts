@@ -471,7 +471,6 @@ export class Global {
         this.db = this.cache.addCollection("ValueTable");
         this.dbcalls = new Map();
 
-
         const configuration = this.getConfiguration("language-1c-bsl");
         const basePath: string = String(this.getConfigurationKey(configuration, "rootPath"));
         let rootPath = this.getRootPath();

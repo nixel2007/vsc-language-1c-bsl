@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import AbstractProvider from "./abstractProvider";
 import * as oscriptStdLib from "./oscriptStdLib";
-import * as bslGlobals from"./bslGlobals";
+import * as bslGlobals from "./bslGlobals";
 
 export default class TextDocumentContentProvider extends AbstractProvider implements vscode.TextDocumentContentProvider {
     private _onDidChange = new vscode.EventEmitter<vscode.Uri>();
@@ -13,7 +13,7 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
         if (!this._global.methodForDescription) {
             return;
         }
-        let word = this._global.methodForDescription.label;
+        const word = this._global.methodForDescription.label;
         let textSyntax = "";
         if (this._global.syntaxFilled === "") {
             if (vscode.window.activeTextEditor.document.fileName.endsWith(".os")) {
@@ -51,7 +51,7 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
 
     private Syntax1CDefault(textSyntax: string) {
         this._global.methodForDescription = undefined;
-        let fillStructure = {
+        const fillStructure = {
             globalHeader: "Синтакс-Помощник 1С",
             textSyntax,
             descClass: "",
@@ -73,20 +73,20 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
 
     private fillStructure1CSyntax(fillStructure) {
         let globCont = "";
-        for (let element in bslGlobals.structureGlobContext()["global"]) {
+        for (const element in bslGlobals.structureGlobContext()["global"]) {
             globCont = globCont + `<li><span class="a" onclick="fillDescription(this)">${element}</span></li>`;
         }
         fillStructure.globCont = globCont;
         let classes = "";
-        let added = {};
-        for (let segmentClass in bslGlobals.structureGlobContext()["classes"]) {
+        const added = {};
+        for (const segmentClass in bslGlobals.structureGlobContext()["classes"]) {
             classes = classes + "<h2 style='font-size: 1em;'><em>" + segmentClass + "</em></h2><ul>";
-            for (let currentClass in bslGlobals.structureGlobContext()["classes"][segmentClass]) {
+            for (const currentClass in bslGlobals.structureGlobContext()["classes"][segmentClass]) {
                 classes = classes + `<li><span class="a" onclick="fillDescription(this)">${currentClass + " / " + bslGlobals.classes()[currentClass]["name_en"]}</span></li>`;
                 added[currentClass] = true;
                 if (bslGlobals.structureGlobContext()["classes"][segmentClass][currentClass] !== "") {
                     classes = classes + "<ul>";
-                    for (let childClass in bslGlobals.structureGlobContext()["classes"][segmentClass][currentClass]) {
+                    for (const childClass in bslGlobals.structureGlobContext()["classes"][segmentClass][currentClass]) {
                         added[childClass] = true;
                         classes = classes + `<li><span class="a" onclick="fillDescription(this)">${childClass + " / " + bslGlobals.classes()[childClass]["name_en"]}</span></li>`;
                     }
@@ -97,15 +97,15 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                 classes = classes + "</ul>";
             }
         }
-        for (let element in bslGlobals.classes()) {
+        for (const element in bslGlobals.classes()) {
             if (!added[element]) {
-                let alias = (bslGlobals.classes()[element]["name_en"] !== "") ? (" / " + bslGlobals.classes()[element]["name_en"]) : "";
+                const alias = (bslGlobals.classes()[element]["name_en"] !== "") ? (" / " + bslGlobals.classes()[element]["name_en"]) : "";
                 classes = classes + `<li><span class="a" onclick="fillDescription(this)">${element + alias}</span></li>`;
             }
         }
         classes = classes + "</ul><h1 style='font-size: 1em;'>Системные перечисления</h1><ul>";
-        for (let element in bslGlobals.systemEnum()) {
-            let alias = (bslGlobals.systemEnum()[element]["name_en"] !== "") ? (" / " + bslGlobals.systemEnum()[element]["name_en"]) : "";
+        for (const element in bslGlobals.systemEnum()) {
+            const alias = (bslGlobals.systemEnum()[element]["name_en"] !== "") ? (" / " + bslGlobals.systemEnum()[element]["name_en"]) : "";
             classes = classes + `<li><span class="a" onclick="fillDescription(this)">${element + alias}</span></li>`;
         }
         fillStructure.classes = classes + "</ul>";
@@ -113,15 +113,15 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
     }
 
     private Syntax1CMethod(textSyntax) {
-        let syntaxObjext = this._global.methodForDescription;
+        const syntaxObjext = this._global.methodForDescription;
         this._global.methodForDescription = undefined;
         let segmentDescription = "Очень много текста";
         let methodDescription = "Очень много текста";
-        let descClass = syntaxObjext.description.split("/")[syntaxObjext.description.split("/").length - 1];
-        let descMethod = syntaxObjext.label.split(".")[syntaxObjext.label.split(".").length - 1];
-        let alias = (this.oscriptMethods[descClass]["alias"] && this.oscriptMethods[descClass]["alias"] !== "") ? (" / " + this.oscriptMethods[descClass]["alias"]) : "";
-        let segmentHeader = descClass + alias;
-        let segment = this.oscriptMethods[descClass];
+        const descClass = syntaxObjext.description.split("/")[syntaxObjext.description.split("/").length - 1];
+        const descMethod = syntaxObjext.label.split(".")[syntaxObjext.label.split(".").length - 1];
+        const alias = (this.oscriptMethods[descClass]["alias"] && this.oscriptMethods[descClass]["alias"] !== "") ? (" / " + this.oscriptMethods[descClass]["alias"]) : "";
+        const segmentHeader = descClass + alias;
+        const segment = this.oscriptMethods[descClass];
         if (segment["description"]) {
             segmentDescription = "<p>" + segment["description"] + "</p>";
         } else { segmentDescription = ""; }
@@ -131,11 +131,11 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
         segmentDescription = this.fillSegmentData(segmentDescription, segment, "values", "Значения", "value");
         let methodHeader = "1C";
         if (descClass !== descMethod) {
-            let methodData = undefined;
-            let charSegment = undefined;
-            for (let key in this.oscriptMethods[descClass]) {
+            let methodData;
+            let charSegment;
+            for (const key in this.oscriptMethods[descClass]) {
                 if (key === "properties" || key === "methods" || key === "values") {
-                    for (let item in this.oscriptMethods[descClass][key]) {
+                    for (const item in this.oscriptMethods[descClass][key]) {
                         if (item === descMethod) {
                             charSegment = key;
                             methodData = this.oscriptMethods[descClass][key][item];
@@ -152,30 +152,30 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                 if (methodData["Доступ"]) { methodDescription = methodDescription + "<b><em>Доступ: </em></b>" + methodData["Доступ"] + "<br/>"; }
                 if (charSegment === "methods") {
                     if (methodData["signature"]) {
-                        for (let element in methodData["signature"]) {
-                            let nameSyntax = (element === "default") ? "" : " " + element;
+                        for (const element in methodData["signature"]) {
+                            const nameSyntax = (element === "default") ? "" : " " + element;
                             methodDescription = methodDescription + "<p><b>Синтаксис" + nameSyntax + ":</b></p><p><span class='function_name'>" + descMethod + "</span><span class='parameter_variable'>" + methodData["signature"][element]["СтрокаПараметров"] + "</span></p>";
                             let header = false;
-                            for (let param in methodData["signature"][element].Параметры) {
+                            for (const param in methodData["signature"][element].Параметры) {
                                 if (header === false) {
                                     methodDescription = methodDescription + "<p><b>Параметры:</b></p><p>";
                                     header = true;
                                 }
-                                let paramDescription = "<b><em>" + param + ":</em></b> " + methodData["signature"][element].Параметры[param].replace(new RegExp("\\\\^\\\\&\\\\*", "g"), "\\/").replace("^&%", "\\\\");
+                                const paramDescription = "<b><em>" + param + ":</em></b> " + methodData["signature"][element].Параметры[param].replace(new RegExp("\\\\^\\\\&\\\\*", "g"), "\\/").replace("^&%", "\\\\");
                                 methodDescription = methodDescription + paramDescription + "<br/>";
                             }
                             methodDescription = methodDescription + "</p>";
                         }
                     } else {
-                        let ret = new RegExp("Тип: ([^.]+)\\.", "");
-                        let retValue = (!methodData["returns"]) ? "" : ": " + ret.exec(methodData["returns"])[1];
+                        const ret = new RegExp("Тип: ([^.]+)\\.", "");
+                        const retValue = (!methodData["returns"]) ? "" : ": " + ret.exec(methodData["returns"])[1];
                         methodDescription = methodDescription + "<p><b>Синтаксис:</b></p><p><span class='function_name'>" + descMethod + "</span><span class='parameter_variable'>()" + retValue + "</span></p>";
                     }
                 }
                 if (methodData["example"]) { methodDescription = methodDescription + "<p><b>Пример:</b></p><p>" + methodData["example"] + "</p>"; }
             }
         }
-        let fillStructure = {
+        const fillStructure = {
             globalHeader: "Синтакс-Помощник 1С",
             textSyntax,
             descClass,
@@ -195,30 +195,30 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
     }
 
     private fillOsSyntax() {
-        let items = {};
-        for (let element in oscriptStdLib.globalContextOscript()) {
-            let segment = oscriptStdLib.globalContextOscript()[element];
-            let segmentChar = this.fillSegmentOsSyntax(segment, true, "OneScript", "");
+        const items = {};
+        for (const element in oscriptStdLib.globalContextOscript()) {
+            const segment = oscriptStdLib.globalContextOscript()[element];
+            const segmentChar = this.fillSegmentOsSyntax(segment, true, "OneScript", "");
             items[element] = segmentChar;
         }
-        for (let element in oscriptStdLib.classesOscript()) {
-            let segment = oscriptStdLib.classesOscript()[element];
-            let segmentChar = this.fillSegmentOsSyntax(segment, false, "OneScript", bslGlobals.classes()[segment.name]);
+        for (const element in oscriptStdLib.classesOscript()) {
+            const segment = oscriptStdLib.classesOscript()[element];
+            const segmentChar = this.fillSegmentOsSyntax(segment, false, "OneScript", bslGlobals.classes()[segment.name]);
             items[element] = segmentChar;
         }
-        for (let element in oscriptStdLib.systemEnum()) {
-            let segment = oscriptStdLib.systemEnum()[element];
-            let segmentChar = this.fillSegmentOsSyntax(segment, false, "OneScript", bslGlobals.systemEnum()[segment.name]);
+        for (const element in oscriptStdLib.systemEnum()) {
+            const segment = oscriptStdLib.systemEnum()[element];
+            const segmentChar = this.fillSegmentOsSyntax(segment, false, "OneScript", bslGlobals.systemEnum()[segment.name]);
             items[element] = segmentChar;
         }
         this.oscriptMethods = items;
-        let bbb = "'" + JSON.stringify(items).replace(new RegExp("\\\\\"", "g"), "").replace(new RegExp("'", "g"), "").replace(new RegExp("\\\\\\\\", "g"), "^&%").replace(new RegExp("\\/", "g"), "^&*") + "'";
+        const bbb = "'" + JSON.stringify(items).replace(new RegExp("\\\\\"", "g"), "").replace(new RegExp("'", "g"), "").replace(new RegExp("\\\\\\\\", "g"), "^&%").replace(new RegExp("\\/", "g"), "^&*") + "'";
         return ` window.localStorage.setItem("bsl-language", ${bbb});
                 `;
     }
 
     private fillSegmentOsSyntax(segment, globalContext, context, segment1C) {
-        let segmentChar = {};
+        const segmentChar = {};
         if (segment["description"]) {
             segmentChar["description"] = segment["description"];
         }
@@ -226,16 +226,16 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
             segmentChar["alias"] = segment["name_en"];
         }
         if (segment["methods"]) {
-            let methodsGlobalContext = {};
-            for (let indexMethod in segment["methods"]) {
-                let helper = undefined;
-                let returns = undefined;
-                let example = undefined;
-                let signature1C = undefined;
-                let description1C = undefined;
-                let returns1C = undefined;
-                let helper1C = undefined;
-                let signature = undefined;
+            const methodsGlobalContext = {};
+            for (const indexMethod in segment["methods"]) {
+                let helper;
+                let returns;
+                let example;
+                let signature1C;
+                let description1C;
+                let returns1C;
+                let helper1C;
+                let signature;
                 if (context === "OneScript") {
                     helper = segment["methods"][indexMethod];
                     returns = (helper["returns"]) ? (helper["returns"]) : undefined;
@@ -259,13 +259,13 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
             segmentChar["methods"] = methodsGlobalContext;
         }
         if (segment["properties"]) {
-            let variableGlobalContext = {};
-            for (let indexMethod in segment["properties"]) {
-                let helper = segment["properties"][indexMethod];
-                let access = (helper["access"]) ? (helper["access"]) : undefined;
-                let example = undefined;
-                let description1C = undefined;
-                let helper1C = undefined;
+            const variableGlobalContext = {};
+            for (const indexMethod in segment["properties"]) {
+                const helper = segment["properties"][indexMethod];
+                const access = (helper["access"]) ? (helper["access"]) : undefined;
+                let example;
+                let description1C;
+                let helper1C;
                 if (context === "OneScript") {
                     example = (helper["example"]) ? (helper["example"]) : undefined;
                     helper1C = (globalContext) ? bslGlobals.globalvariables()[indexMethod] : (segment1C) ? (segment1C["properties"] ? segment1C["properties"][indexMethod] : undefined) : undefined;
@@ -278,11 +278,11 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
             segmentChar["properties"] = variableGlobalContext;
         }
         if (segment["values"]) {
-            let variableGlobalContext = {};
-            for (let indexMethod in segment["values"]) {
-                let helper = segment["values"][indexMethod];
-                let description1C = undefined;
-                let helper1C = undefined;
+            const variableGlobalContext = {};
+            for (const indexMethod in segment["values"]) {
+                const helper = segment["values"][indexMethod];
+                let description1C;
+                let helper1C;
                 if (context === "OneScript") {
                     helper1C = (globalContext) ? bslGlobals.globalvariables()[indexMethod] : (segment1C) ? (segment1C["values"] ? segment1C["values"][indexMethod] : undefined) : undefined;
                     if (helper1C && helper1C["description"]) {
@@ -294,13 +294,13 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
             segmentChar["values"] = variableGlobalContext;
         }
         if (segment["constructors"]) {
-            let classOs = {};
-            for (let indexMethod in segment["constructors"]) {
-                let helper = segment["constructors"][indexMethod];
-                let signature = { "default": { "СтрокаПараметров": helper["signature"], "Параметры": helper["params"] } };
-                let signature1C = undefined;
-                let description1C = undefined;
-                let helper1C = undefined;
+            const classOs = {};
+            for (const indexMethod in segment["constructors"]) {
+                const helper = segment["constructors"][indexMethod];
+                const signature = { "default": { "СтрокаПараметров": helper["signature"], "Параметры": helper["params"] } };
+                let signature1C;
+                let description1C;
+                let helper1C;
                 if (context === "OneScript") {
                     helper1C = (segment1C) ? (segment1C["constructors"] ? segment1C["constructors"][indexMethod] : undefined) : undefined;
                     if (helper1C) {
@@ -316,13 +316,13 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
     }
 
     private fill1CSyntax() {
-        let items = {};
-        for (let element in bslGlobals.structureGlobContext()["global"]) {
-            let segment = bslGlobals.structureGlobContext()["global"][element];
-            let segmentChar = {};
-            let methodsGlobalContext = {};
-            for (let key in segment) {
-                let methodData = (bslGlobals.globalfunctions()[key]) ? (bslGlobals.globalfunctions()[key]) : (bslGlobals.globalvariables()[key]);
+        const items = {};
+        for (const element in bslGlobals.structureGlobContext()["global"]) {
+            const segment = bslGlobals.structureGlobContext()["global"][element];
+            const segmentChar = {};
+            const methodsGlobalContext = {};
+            for (const key in segment) {
+                const methodData = (bslGlobals.globalfunctions()[key]) ? (bslGlobals.globalfunctions()[key]) : (bslGlobals.globalvariables()[key]);
                 methodsGlobalContext[key] = { description: (methodData.description) ? methodData.description : "", alias: methodData.name_en, signature: (methodData.signature) ? methodData.signature : undefined, returns: (methodData.returns) ? methodData.returns : undefined };
             }
             if (element === "Свойства") {
@@ -330,18 +330,18 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
             } else { segmentChar["methods"] = methodsGlobalContext; }
             items[element] = segmentChar;
         }
-        for (let element in bslGlobals.classes()) {
-            let segment = bslGlobals.classes()[element];
-            let segmentChar = this.fillSegmentOsSyntax(segment, false, "1C", "");
+        for (const element in bslGlobals.classes()) {
+            const segment = bslGlobals.classes()[element];
+            const segmentChar = this.fillSegmentOsSyntax(segment, false, "1C", "");
             items[element] = segmentChar;
         }
-        for (let element in bslGlobals.systemEnum()) {
-            let segment = bslGlobals.systemEnum()[element];
-            let segmentChar = this.fillSegmentOsSyntax(segment, false, "1C", "");
+        for (const element in bslGlobals.systemEnum()) {
+            const segment = bslGlobals.systemEnum()[element];
+            const segmentChar = this.fillSegmentOsSyntax(segment, false, "1C", "");
             items[element] = segmentChar;
         }
         this.oscriptMethods = items;
-        let bbb = "'" + JSON.stringify(items).replace(new RegExp("\\\\\"", "g"), "").replace(new RegExp("'", "g"), "").replace(new RegExp("\\\\\\\\", "g"), "^&%").replace(new RegExp("\\/", "g"), "^&*") + "'";
+        const bbb = "'" + JSON.stringify(items).replace(new RegExp("\\\\\"", "g"), "").replace(new RegExp("'", "g"), "").replace(new RegExp("\\\\\\\\", "g"), "^&%").replace(new RegExp("\\/", "g"), "^&*") + "'";
         return ` window.localStorage.setItem("bsl-language", ${bbb});
                 `;
     }
@@ -350,13 +350,13 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
         if (segment[strSegment]) {
             segmentDescription = segmentDescription + "<h1 style = 'font-size: 1em;'>" + headerSegment + "</h1><ul>";
             let counter = 0;
-            for (let elem in segment[strSegment]) {
+            for (const elem in segment[strSegment]) {
                 counter = counter + 1;
                 let onlyOs = "";
                 if (this._global.syntaxFilled === "OneScript" && !segment[strSegment][elem].description1C && !segment[strSegment][elem].signature1C) {
                     onlyOs = "*";
                 }
-                let alias = (nameID === "constructor") ? "" : (segment[strSegment][elem]["alias"] !== "") ? (" / " + segment[strSegment][elem]["alias"]) : "";
+                const alias = (nameID === "constructor") ? "" : (segment[strSegment][elem]["alias"] !== "") ? (" / " + segment[strSegment][elem]["alias"]) : "";
                 segmentDescription = segmentDescription + "<li><span class='a' id = " + "'" + nameID + counter + "' " + " onclick='fill(this)'>" + elem + alias + "</span>" + onlyOs + "</li>";
             }
             segmentDescription = segmentDescription + "</ul>";
@@ -366,7 +366,7 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
 
     private SyntaxOscriptDefault(textSyntax) {
         this._global.methodForDescription = undefined;
-        let fillStructure = {
+        const fillStructure = {
             globalHeader: "Стандартная библиотека классов и функций OneScript",
             textSyntax,
             descClass: "",
@@ -385,16 +385,16 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
     }
 
     private SyntaxOscriptMethod(textSyntax) {
-        let syntaxObjext = this._global.methodForDescription;
+        const syntaxObjext = this._global.methodForDescription;
         this._global.methodForDescription = undefined;
         let switch1C = "Только для OneScript";
         let segmentDescription = "Очень много текста";
         let methodDescription = "Очень много текста";
-        let descClass = syntaxObjext.description.split("/")[syntaxObjext.description.split("/").length - 1];
-        let descMethod = syntaxObjext.label.split(".")[syntaxObjext.label.split(".").length - 1];
-        let alias = (this.oscriptMethods[descClass]["alias"] && this.oscriptMethods[descClass]["alias"] !== "") ? (" / " + this.oscriptMethods[descClass]["alias"]) : "";
-        let segmentHeader = descClass + alias;
-        let segment = this.oscriptMethods[descClass];
+        const descClass = syntaxObjext.description.split("/")[syntaxObjext.description.split("/").length - 1];
+        const descMethod = syntaxObjext.label.split(".")[syntaxObjext.label.split(".").length - 1];
+        const alias = (this.oscriptMethods[descClass]["alias"] && this.oscriptMethods[descClass]["alias"] !== "") ? (" / " + this.oscriptMethods[descClass]["alias"]) : "";
+        const segmentHeader = descClass + alias;
+        const segment = this.oscriptMethods[descClass];
         if (segment["description"]) {
             segmentDescription = "<p>" + segment["description"] + "</p>";
         } else { segmentDescription = ""; }
@@ -404,10 +404,10 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
         segmentDescription = this.fillSegmentData(segmentDescription, segment, "values", "Значения", "value");
         let methodHeader = "OneScript";
         if (descClass !== descMethod) {
-            let methodData = undefined;
-            for (let key in this.oscriptMethods[descClass]) {
+            let methodData;
+            for (const key in this.oscriptMethods[descClass]) {
                 if (key === "properties" || key === "methods" || key === "values") {
-                    for (let item in this.oscriptMethods[descClass][key]) {
+                    for (const item in this.oscriptMethods[descClass][key]) {
                         if (item === descMethod) {
                             methodData = this.oscriptMethods[descClass][key][item];
                             methodHeader = descMethod + (methodData["alias"] !== "" ? (" / " + methodData["alias"]) : "");
@@ -425,12 +425,12 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                 if (methodData["returns"]) { methodDescription = methodDescription + "<b><em>Возвращаемое значение: </em></b>" + methodData["returns"] + "<br/>"; }
                 if (methodData["Доступ"]) { methodDescription = methodDescription + "<b><em>Доступ: </em></b>" + methodData["Доступ"] + "<br/>"; }
                 if (methodData["signature"]) {
-                    let stingParams = methodData["signature"]["default"]["СтрокаПараметров"];
+                    const stingParams = methodData["signature"]["default"]["СтрокаПараметров"];
                     methodDescription = methodDescription + "<p><b>Синтаксис:</b></p><p><span class='function_name'>" + descMethod + "</span><span class='parameter_variable'>" + stingParams + "</span></p>";
                     if (methodData["signature"]["default"]["Параметры"]) {
                         methodDescription = methodDescription + "<p><b>Параметры:</b></p><p>";
-                        for (let param in methodData["signature"]["default"]["Параметры"]) {
-                            let paramDescription = "<b><em>" + param + ": </em></b>" + methodData["signature"]["default"]["Параметры"][param];
+                        for (const param in methodData["signature"]["default"]["Параметры"]) {
+                            const paramDescription = "<b><em>" + param + ": </em></b>" + methodData["signature"]["default"]["Параметры"][param];
                             methodDescription = methodDescription + paramDescription + "<br/>";
                         }
                         methodDescription = methodDescription + "</p>";
@@ -439,7 +439,7 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                 if (methodData["example"]) { methodDescription = methodDescription + "<p><b>Пример:</b></p><p>" + methodData["example"] + "</p>"; }
             }
         }
-        let fillStructure = {
+        const fillStructure = {
             globalHeader: "Стандартная библиотека классов и функций OneScript",
             textSyntax,
             descClass,
@@ -459,14 +459,14 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
 
     private OscriptSyntax(fillStructure) {
         let globCont = "";
-        for (let element in oscriptStdLib.globalContextOscript()) {
+        for (const element in oscriptStdLib.globalContextOscript()) {
             globCont = globCont + `<li><span class="a" onclick="fillDescription(this)">${element}</span></li>`;
         }
         let classes = "";
-        let added = {};
-        for (let segmentClass in oscriptStdLib.structureMenu()["classes"]) {
+        const added = {};
+        for (const segmentClass in oscriptStdLib.structureMenu()["classes"]) {
             classes = classes + "<h2 style='font-size: 1em;'><em>" + segmentClass + "</em></h2><ul>";
-            for (let currentClass in oscriptStdLib.structureMenu()["classes"][segmentClass]) {
+            for (const currentClass in oscriptStdLib.structureMenu()["classes"][segmentClass]) {
                 let onlyOs = "";
                 if (!bslGlobals.classes()[currentClass]) {
                     onlyOs = "*";
@@ -475,7 +475,7 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                 added[currentClass] = true;
                 if (oscriptStdLib.structureMenu()["classes"][segmentClass][currentClass] !== "") {
                     classes = classes + "<ul>";
-                    for (let childClass in oscriptStdLib.structureMenu()["classes"][segmentClass][currentClass]) {
+                    for (const childClass in oscriptStdLib.structureMenu()["classes"][segmentClass][currentClass]) {
                         added[childClass] = true;
                         classes = classes + `<li><span class="a" onclick="fillDescription(this)">${childClass + " / " + oscriptStdLib.classesOscript()[childClass]["name_en"]}</span></li>`;
                     }
@@ -486,23 +486,23 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                 classes = classes + "</ul>";
             }
         }
-        for (let element in oscriptStdLib.classesOscript()) {
+        for (const element in oscriptStdLib.classesOscript()) {
             if (!added[element]) {
                 let onlyOs = "";
                 if (!bslGlobals.classes()[element]) {
                     onlyOs = "*";
                 }
-                let alias = (oscriptStdLib.classesOscript()[element]["name_en"] !== "") ? (" / " + oscriptStdLib.classesOscript()[element]["name_en"]) : "";
+                const alias = (oscriptStdLib.classesOscript()[element]["name_en"] !== "") ? (" / " + oscriptStdLib.classesOscript()[element]["name_en"]) : "";
                 classes = classes + `<li><span class="a" onclick="fillDescription(this)">${element + alias}</span>${onlyOs}</li>`;
             }
         }
         classes = classes + "</ul><h1 style='font-size: 1em;'>Системные перечисления</h1><ul>";
-        for (let element in oscriptStdLib.systemEnum()) {
+        for (const element in oscriptStdLib.systemEnum()) {
             let onlyOs = "";
             if (!bslGlobals.systemEnum()[element]) {
                 onlyOs = "*";
             }
-            let alias = (oscriptStdLib.systemEnum()[element]["name_en"] !== "") ? (" / " + oscriptStdLib.systemEnum()[element]["name_en"]) : "";
+            const alias = (oscriptStdLib.systemEnum()[element]["name_en"] !== "") ? (" / " + oscriptStdLib.systemEnum()[element]["name_en"]) : "";
             classes = classes + `<li><span class="a" onclick="fillDescription(this)">${element + alias}</span>${onlyOs}</li>`;
         }
         fillStructure.globCont = globCont;
