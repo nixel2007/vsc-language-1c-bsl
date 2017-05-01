@@ -37,7 +37,45 @@ describe("Signature", () => {
             "("
         );
 
-        signatureHelp.should.not.be.undefined();
+        signatureHelp.signatures.should.has.length(1);
+        signatureHelp.signatures[0].parameters.length.should.be.aboveOrEqual(1);
+        signatureHelp.signatures[0].parameters[0].label.should.not.be.equal("");
+
+    });
+
+    it("should be showed on export methods of modules", async () => {
+
+        await addText("CommonModule.ЭкспортнаяПроцедураСПараметрами(");
+        const position = vscode.window.activeTextEditor.selection.anchor;
+
+        const signatureHelp = await vscode.commands.executeCommand<vscode.SignatureHelp>(
+            "vscode.executeSignatureHelpProvider",
+            textDocument.uri,
+            position,
+            "("
+        );
+
+        signatureHelp.signatures.should.has.length(1);
+        const signature = signatureHelp.signatures[0];
+        signature.parameters.should.has.length(1);
+
+    });
+
+    it("should be showed on global functions", async () => {
+
+        await addText("Сообщить(");
+        const position = vscode.window.activeTextEditor.selection.anchor;
+
+        const signatureHelp = await vscode.commands.executeCommand<vscode.SignatureHelp>(
+            "vscode.executeSignatureHelpProvider",
+            textDocument.uri,
+            position,
+            "("
+        );
+
+        signatureHelp.signatures.should.has.length(1);
+        const signature = signatureHelp.signatures[0];
+        signature.parameters.should.has.length(2);
 
     });
 
