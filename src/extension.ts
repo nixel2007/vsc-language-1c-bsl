@@ -449,7 +449,7 @@ export function activate(context: vscode.ExtensionContext) {
     const previewUri = vscode.Uri.parse(previewUriString);
 
     context.subscriptions.push(vscode.languages.registerOnTypeFormattingEditProvider(
-        BSL_MODE, new DocumentFormattingEditProvider(global), "и", "ы", "е", "а", "e", "n", "f", "o", "y", "t", "\n"));
+        BSL_MODE, new DocumentFormattingEditProvider(global), "\n"));
 
     context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.syntaxHelper", () => {
         let globalMethod;

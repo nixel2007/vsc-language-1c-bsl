@@ -211,7 +211,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
         for (const name in completionDictKeywords) {
             if (wordMatch.exec(name)) {
                 const full = completionDictKeywords[name];
-                const completion = new vscode.CompletionItem(name);
+                const completion = new vscode.CompletionItem(full);
                 completion.kind = vscode.CompletionItemKind.Keyword;
                 completions.push(completion);
                 this.added[name.toLowerCase()] = true;

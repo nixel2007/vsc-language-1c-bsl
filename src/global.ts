@@ -53,7 +53,10 @@ export class Global {
         this.classes = {} as IClasses;
         const globalfunctions: IMethods = bslglobals.globalfunctions();
         const globalvariables: IGlobalVariables = bslglobals.globalvariables();
-        this.keywords = bslglobals.keywords()[autocompleteLanguage];
+        this.keywords = {};
+        for (const keyword in bslglobals.keywords()[autocompleteLanguage]) {
+            this.keywords[keyword.toLowerCase()] = keyword;
+        }
         for (const key in globalfunctions) {
             const globalFunction = globalfunctions[key];
             const newName = globalFunction["name" + postfix];
@@ -1045,5 +1048,5 @@ interface IKeywords {
 }
 
 interface IKeywordsForLanguage {
-    [index: string]: {};
+    [index: string]: string;
 }
