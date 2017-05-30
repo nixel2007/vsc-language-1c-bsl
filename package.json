@@ -70,6 +70,11 @@
         "category": "Language 1C (BSL)"
       },
       {
+        "command": "language-1c-bsl.beautify",
+        "title": "Выровнять блок пробелами",
+        "category": "Language 1C (BSL)"
+      },
+      {
         "command": "language-1c-bsl.syntaxHelper",
         "title": "Show syntax-helper",
         "category": "Language 1C (BSL)",
@@ -85,6 +90,12 @@
           "when": "resourceLangId == bsl",
           "command": "language-1c-bsl.syntaxHelper",
           "group": "navigation"
+        }
+      ],
+			"editor/context": [
+				{
+					"when": "resourceLangId == bsl && editorHasSelection",
+					"command": "language-1c-bsl.beautify"
         }
       ],
       "commandPalette": [
@@ -229,6 +240,7 @@
     "iconv-lite": "^0.4.15",
     "lokijs": "^1.4.2",
     "onec-syntaxparser": "0.1.9",
-    "xml2js": "^0.4.17"
+    "xml2js": "^0.4.17",
+    "alignment": "0.0.1"
   }
 }

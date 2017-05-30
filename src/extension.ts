@@ -18,6 +18,7 @@ import SyntaxHelper from "./features/syntaxHelper";
 import WorkspaseSymbolProvider from "./features/workspaceSymbolProvider";
 
 import * as bslGlobals from "./features/bslGlobals";
+import { CodeBeautyfier } from "./features/codeBeautifier";
 import * as dynamicSnippets from "./features/dynamicSnippets";
 import * as oscriptStdLib from "./features/oscriptStdLib";
 import * as tasksTemplate from "./features/tasksTemplate";
@@ -438,6 +439,10 @@ export function activate(context: vscode.ExtensionContext) {
                 });
             }
         });
+    }));
+
+    context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.beautify", () => {
+        CodeBeautyfier.beautify();
     }));
 
     const previewUriString = "syntax-helper://authority/Синтакс-Помощник";
