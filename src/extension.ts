@@ -15,13 +15,13 @@ import LintProvider from "./features/lintProvider";
 import ReferenceProvider from "./features/referenceProvider";
 import SignatureHelpProvider from "./features/signatureHelpProvider";
 import SyntaxHelper from "./features/syntaxHelper";
+import TaskProvider from "./features/taskProvider";
 import WorkspaseSymbolProvider from "./features/workspaceSymbolProvider";
 
 import * as bslGlobals from "./features/bslGlobals";
 import { CodeBeautyfier } from "./features/codeBeautifier";
 import * as dynamicSnippets from "./features/dynamicSnippets";
 import * as oscriptStdLib from "./features/oscriptStdLib";
-import * as tasksTemplate from "./features/tasksTemplate";
 import * as vscAdapter from "./vscAdapter";
 
 // this method is called when your extension is activated
@@ -29,6 +29,10 @@ import * as vscAdapter from "./vscAdapter";
 export function activate(context: vscode.ExtensionContext) {
 
     const global = Global.create(vscAdapter);
+    const taskProvider = new TaskProvider();
+
+    vscode.workspace.onDidChangeConfiguration(taskProvider.onConfigurationChanged);
+    taskProvider.onConfigurationChanged();
 
     context.subscriptions.push(
         vscode.languages.registerCompletionItemProvider(BSL_MODE, new CompletionItemProvider(global), ".", "=")
@@ -115,49 +119,6 @@ export function activate(context: vscode.ExtensionContext) {
                 });
             }
         }
-    }));
-
-    context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.createTasks", () => {
-        const rootPath = vscode.workspace.rootPath;
-        if (!rootPath) {
-            return;
-        }
-        const vscodePath = path.join(rootPath, ".vscode");
-        const promise = new Promise((resolve, reject) => {
-            fs.stat(vscodePath, (statErr: NodeJS.ErrnoException, stats: fs.Stats) => {
-                if (statErr) {
-                    fs.mkdir(vscodePath, (mkdirErr) => {
-                        if (mkdirErr) {
-                            reject(mkdirErr);
-                        }
-                        resolve();
-                    });
-                    return;
-                }
-                resolve();
-            });
-        });
-
-        promise.then((result) => {
-            const tasksPath = path.join(vscodePath, "tasks.json");
-            fs.stat(tasksPath, (statErr: NodeJS.ErrnoException, stats: fs.Stats) => {
-                if (statErr) {
-                    fs.writeFile(
-                        tasksPath,
-                        JSON.stringify(tasksTemplate.getTasksObject(), undefined, 4),
-                        (writeErr: NodeJS.ErrnoException) => {
-                            if (writeErr) {
-                                throw writeErr;
-                            }
-                            vscode.window.showInformationMessage("tasks.json was created");
-                        });
-                } else {
-                    vscode.window.showInformationMessage("tasks.json already exists");
-                }
-            });
-        }).catch((reason) => {
-            throw reason;
-        });
     }));
 
     vscode.languages.setLanguageConfiguration("bsl", {
