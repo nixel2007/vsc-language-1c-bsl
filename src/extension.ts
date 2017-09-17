@@ -1,7 +1,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as fs from "fs";
-import * as path from "path";
 import * as vscode from "vscode";
 import { BSL_MODE } from "./const";
 import { Global } from "./global";

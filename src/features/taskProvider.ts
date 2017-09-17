@@ -87,7 +87,7 @@ export default class TaskProvider {
         }
 
         if (isBuildCommand) {
-            kind.group = "build"
+            kind.group = "build";
         }
 
         return new vscode.Task(kind, taskName, command,
