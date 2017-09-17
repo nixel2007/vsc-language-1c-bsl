@@ -21,7 +21,7 @@ describe("Hover", () => {
         await globals.waitForCacheUpdate();
     });
 
-    beforeEach( () => {
+    beforeEach(() => {
         globals.hoverTrue = true; // TODO: разобраться, зачем это было нужно
     });
 
@@ -37,8 +37,8 @@ describe("Hover", () => {
 
         hovers.should.has.length(1);
 
-        let hover = hovers[0];
-        hover.contents[0].should.be.equal("Метод текущего модуля");
+        const hover = hovers[0];
+        hover.contents[0].should.has.a.key("value").which.is.equal("Метод текущего модуля");
         hover.contents[2].should.has.a.key("value").which.is.equal("Процедура НеЭкспортнаяПроцедура()");
 
     });
@@ -55,8 +55,9 @@ describe("Hover", () => {
 
         hovers.should.has.length(1);
 
-        let hover = hovers[0];
-        hover.contents[0].should.startWith("Метод из").and.endWith("Document/Ext/ManagerModule.bsl");
+        const hover = hovers[0];
+        hover.contents[0].should.has.a.key("value").which.startWith("Метод из")
+            .and.endWith("Document/Ext/ManagerModule.bsl");
         hover.contents[2].should.has.a.key("value").which.is.equal("Процедура ПроцедураМодуляМенеджера()");
 
     });
@@ -73,10 +74,10 @@ describe("Hover", () => {
 
         hovers.should.has.length(1);
 
-        let hover = hovers[0];
-        hover.contents[0].should.startWith("Метод глобального контекста");
+        const hover = hovers[0];
+        hover.contents[0].should.has.a.key("value").which.startWith("Метод глобального контекста");
         hover.contents[2].should.has.a.key("value").which.startWith("Процедура Сообщить(");
-        hover.contents[3].should.startWith("***ТекстСообщения***");
+        hover.contents[3].should.has.a.key("value").which.startWith("***ТекстСообщения***");
 
     });
 
@@ -89,7 +90,7 @@ describe("Hover", () => {
         await addText("#Использовать strings\n");
         await addText("\n");
         await addText("СтроковыеФункции.РазложитьСтрокуВМассивПодстрок(\"\", \"\")");
-        
+
         const position = new vscode.Position(2, 40);
 
         const hovers = await vscode.commands.executeCommand<vscode.Hover[]>(
@@ -100,7 +101,7 @@ describe("Hover", () => {
 
         hovers.should.has.length(1);
 
-        let hover = hovers[0];
+        const hover = hovers[0];
         // hover.contents[0].should.startWith("Метод глобального контекста");
         // hover.contents[2].should.has.a.key("value").which.startWith("Функция РазложитьСтрокуВМассивПодстрок(");
         // hover.contents[3].should.startWith("***ТекстСообщения***");
