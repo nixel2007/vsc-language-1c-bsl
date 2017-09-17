@@ -59,7 +59,7 @@ describe("Hover", () => {
         hover.contents[0].should.has.a.key("value").which.startWith("Метод из")
             .and.endWith("Document/Ext/ManagerModule.bsl");
         hover.contents[2].should.has.a.key("value").which.is
-            .equal("``bsl\nПроцедура ПроцедураМодуляМенеджера()\n```\n");
+            .equal("```bsl\nПроцедура ПроцедураМодуляМенеджера()\n```\n");
 
     });
 
