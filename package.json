@@ -22,7 +22,7 @@
     "Languages"
   ],
   "engines": {
-    "vscode": "^1.10.0"
+    "vscode": "^1.15.0"
   },
   "main": "./out/src/extension",
   "scripts": {
@@ -47,11 +47,6 @@
       {
         "command": "language-1c-bsl.createComments",
         "title": "Create comment to current method",
-        "category": "Language 1C (BSL)"
-      },
-      {
-        "command": "language-1c-bsl.createTasks",
-        "title": "Create tasks.json for current workspace",
         "category": "Language 1C (BSL)"
       },
       {
@@ -92,10 +87,10 @@
           "group": "navigation"
         }
       ],
-			"editor/context": [
-				{
-					"when": "resourceLangId == bsl && editorHasSelection",
-					"command": "language-1c-bsl.beautify"
+      "editor/context": [
+        {
+          "when": "resourceLangId == bsl && editorHasSelection",
+          "command": "language-1c-bsl.beautify"
         }
       ],
       "commandPalette": [
@@ -139,6 +134,15 @@
         "language-1c-bsl.rootPath": {
           "description": "Путь по умолчанию к корню файла конфигурации (./src/cf) относительно каталога workspace для правильного autocomplete",
           "type": "string"
+        },
+        "language-1c-bsl.autoDetect": {
+          "type": "string",
+          "enum": [
+            "off",
+            "on"
+          ],
+          "default": "on",
+          "description": "Controls whether auto detection of npm scripts is on or off. Default is on."
         }
       }
     },
@@ -204,6 +208,20 @@
         "path": "./syntaxes/1c-query.tmLanguage"
       }
     ],
+    "problemMatchers": [
+      {
+        "name": "bsl",
+        "label": "bsl compiler",
+        "owner": "bsl",
+        "fileLocation": "absolute",
+        "pattern": {
+          "regexp": "Модуль\\s+(.*)\\s\\/\\s.*:\\s+(\\d+)\\s+\\/\\s+(.*)",
+          "file": 1,
+          "line": 2,
+          "message": 3
+        }
+      }
+    ],
     "snippets": [
       {
         "language": "bsl",
@@ -230,7 +248,7 @@
     "should": "^11.2.0",
     "tslint": "^5.0.0",
     "typescript": "^2.2.1",
-    "vscode": "^1.0.3"
+    "vscode": "^1.1.5"
   },
   "dependencies": {
     "cross-spawn": "^5.0.1",
