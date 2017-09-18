@@ -34,7 +34,6 @@
   "activationEvents": [
     "onLanguage:bsl",
     "onLanguage:sdbl",
-    "onCommand:language-1c-bsl.createTasks",
     "onCommand:language-1c-bsl.update"
   ],
   "contributes": {
@@ -142,7 +141,7 @@
             "on"
           ],
           "default": "on",
-          "description": "Controls whether auto detection of npm scripts is on or off. Default is on."
+          "description": "Controls whether auto detection of opm scripts is on or off. Default is on."
         }
       }
     },
@@ -210,8 +209,8 @@
     ],
     "problemMatchers": [
       {
-        "name": "bsl",
-        "label": "bsl compiler",
+        "name": "OneScript Linter",
+        "label": "onescript",
         "owner": "bsl",
         "fileLocation": "absolute",
         "pattern": {
@@ -236,29 +235,29 @@
     }
   },
   "devDependencies": {
-    "@types/fs-promise": "^1.0.1",
-    "@types/glob": "^5.0.30",
-    "@types/mocha": "^2.2.40",
-    "@types/node": "^7.0.32",
-    "@types/should": "^8.1.30",
-    "cross-env": "^5.0.0",
+    "@types/fs-promise": "^1.0.3",
+    "@types/glob": "^5.0.32",
+    "@types/mocha": "^2.2.43",
+    "@types/node": "^8.0.28",
+    "@types/should": "^11.2.0",
+    "cross-env": "^5.0.5",
     "decache": "^4.1.0",
     "istanbul": "^0.4.5",
     "remap-istanbul": "^0.9.5",
-    "should": "^11.2.0",
-    "tslint": "^5.0.0",
-    "typescript": "^2.2.1",
+    "should": "^13.0.1",
+    "tslint": "^5.7.0",
+    "typescript": "^2.5.2",
     "vscode": "^1.1.5"
   },
   "dependencies": {
-    "cross-spawn": "^5.0.1",
+    "cross-spawn": "^5.1.0",
     "filequeue": "^0.5.0",
-    "fs-promise": "^2.0.0",
-    "glob": "^7.1.1",
-    "iconv-lite": "^0.4.15",
-    "lokijs": "^1.4.2",
+    "fs-promise": "^2.0.3",
+    "glob": "^7.1.2",
+    "iconv-lite": "^0.4.19",
+    "lokijs": "^1.5.0",
     "onec-syntaxparser": "0.1.9",
-    "xml2js": "^0.4.17",
+    "xml2js": "^0.4.19",
     "alignment": "0.0.1"
   }
 }

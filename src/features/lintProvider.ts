@@ -109,7 +109,7 @@ export default class LintProvider {
             }
         });
 
-    };
+    }
 
     public async getDiagnosticData(uri: vscode.Uri) {
         while (this.diagnosticCollection.get(uri) === undefined) {
@@ -133,6 +133,6 @@ export default class LintProvider {
             command = String(commandConfig);
         }
         return command;
-    };
+    }
 
 }
