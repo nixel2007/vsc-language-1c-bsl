@@ -237,7 +237,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     }));
 
-    context.subscriptions.push(vscode.workspace.onDidSaveTextDocument( (document: vscode.TextDocument) => {
+    context.subscriptions.push(vscode.workspace.onDidSaveTextDocument((document: vscode.TextDocument) => {
         if (vscode.workspace.rootPath) {
             global.customUpdateCache(document.getText(), document.fileName);
         }
@@ -263,7 +263,7 @@ export function activate(context: vscode.ExtensionContext) {
             const arrStrings = regex.exec(textline);
             if ((char === "++" || char === "--" || char === "+=" || char === "-=" || char === "*=" || char === "/=" || char === "%=") && editor.selection.isEmpty && arrStrings) {
                 const word = arrStrings[1];
-                editor.edit( (editBuilder) => {
+                editor.edit((editBuilder) => {
                     let postfix;
                     switch (char) {
                         case "++":
@@ -427,8 +427,8 @@ export function activate(context: vscode.ExtensionContext) {
         items.push({ label: "1C", description: "" });
         const postfix = ""; // (autocompleteLanguage === "en") ? "_en" : "";
         if (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.fileName.endsWith(".bsl") && globalMethod) {
-            for (const element in bslGlobals.structureGlobContext()["global"]) {
-                const segment = bslGlobals.structureGlobContext()["global"][element];
+            for (const element in bslGlobals.structureGlobContext().global) {
+                const segment = bslGlobals.structureGlobContext().global[element];
                 if (segment[globalMethod.name] === "" || segment[globalMethod.name] === "") {
                     // let target = (segment[globalMethod.name] === "") ? segment[globalMethod.name] : segment[globalMethod.alias];
                     global.methodForDescription = { label: globalMethod.name, description: "1С/Глобальный контекст/" + element };
@@ -440,7 +440,7 @@ export function activate(context: vscode.ExtensionContext) {
         } else if (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.fileName.endsWith(".os") && globalMethod) {
             for (const element in oscriptStdLib.globalContextOscript()) {
                 const segment = oscriptStdLib.globalContextOscript()[element];
-                if (segment["methods"][globalMethod.name] !== undefined || segment["methods"][globalMethod.alias] !== undefined) {
+                if (segment.methods[globalMethod.name] !== undefined || segment.methods[globalMethod.alias] !== undefined) {
                     // let target = (segment["methods"][globalMethod.name] === "") ? segment["methods"][globalMethod.name] : segment["methods"][globalMethod.alias];
                     global.methodForDescription = { label: globalMethod.name, description: "OneScript/Глобальный контекст/" + element };
                     syntaxHelper.update(previewUri);
@@ -489,8 +489,8 @@ export function activate(context: vscode.ExtensionContext) {
             }
 
         } else if (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.languageId === "bsl") {
-            for (const elementSegment in bslGlobals.structureGlobContext()["global"]) {
-                const segment = bslGlobals.structureGlobContext()["global"][elementSegment];
+            for (const elementSegment in bslGlobals.structureGlobContext().global) {
+                const segment = bslGlobals.structureGlobContext().global[elementSegment];
                 for (const element in segment) {
                     items.push({ label: element, description: "1С/Глобальный контекст/" + elementSegment });
                 }
@@ -536,7 +536,7 @@ export function activate(context: vscode.ExtensionContext) {
             syntaxHelper.update(previewUri);
             vscode.commands.executeCommand("vscode.previewHtml", previewUri, vscode.ViewColumn.Two);
         } else {
-            vscode.window.showQuickPick(items, options).then( (selection) => {
+            vscode.window.showQuickPick(items, options).then((selection) => {
                 if (typeof selection === "undefined") {
                     return;
                 }
