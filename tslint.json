@@ -1,16 +1,13 @@
 {
     "extends": "tslint:latest",
     "rules": {
-        "semicolon": [
-            "always"
-        ],
+        "semicolon": true,
         "object-literal-sort-keys": false,
         "trailing-comma": [
             false
         ],
-        "no-console": [
-            "log"
-        ],
-        "forin": false
+        "no-console": false,
+        "forin": false,
+        "no-var-requires": false
     }
 }
