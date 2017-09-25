@@ -237,7 +237,7 @@
   "devDependencies": {
     "@types/glob": "^5.0.32",
     "@types/mocha": "^2.2.43",
-    "@types/node": "^8.0.30",
+    "@types/node": "^8.0.31",
     "cross-env": "^5.0.5",
     "decache": "^4.1.0",
     "istanbul": "^0.4.5",
