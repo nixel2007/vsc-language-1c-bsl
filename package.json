@@ -235,11 +235,9 @@
     }
   },
   "devDependencies": {
-    "@types/fs-promise": "^1.0.3",
     "@types/glob": "^5.0.32",
     "@types/mocha": "^2.2.43",
-    "@types/node": "^8.0.28",
-
+    "@types/node": "^8.0.30",
     "cross-env": "^5.0.5",
     "decache": "^4.1.0",
     "istanbul": "^0.4.5",
@@ -252,7 +250,7 @@
   "dependencies": {
     "cross-spawn": "^5.1.0",
     "filequeue": "^0.5.0",
-    "fs-promise": "^2.0.3",
+    "fs-extra": "^4.0.2",
     "glob": "^7.1.2",
     "iconv-lite": "^0.4.19",
     "lokijs": "^1.5.0",
