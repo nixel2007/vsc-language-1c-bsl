@@ -254,7 +254,7 @@
     "glob": "^7.1.2",
     "iconv-lite": "^0.4.19",
     "lokijs": "^1.5.0",
-    "onec-syntaxparser": "0.1.9",
+    "onec-syntaxparser": "0.1.10",
     "xml2js": "^0.4.19",
     "alignment": "0.0.1"
   }
