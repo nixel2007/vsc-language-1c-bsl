@@ -65,7 +65,7 @@ export default class DocumentFormattingEditProvider
                                         ch: string,
                                         options: vscode.FormattingOptions,
                                         token: vscode.CancellationToken): vscode.TextEdit[] {
-        const iterator = new BackwardIterator(document, position.character - 1, position.line - 1);
+        const iterator = new BackwardIterator(document, 0, position.line - 1);
         if (ch === "\n") {
             while (iterator.hasNext()) {
                 const nextCh = iterator.next();
@@ -114,12 +114,7 @@ export default class DocumentFormattingEditProvider
         }
 
         let indentLevel = initialIndentLevel;
-        let indentValue: string;
-        if (options.insertSpaces) {
-            indentValue = this.repeat(" ", options.tabSize).toString();
-        } else {
-            indentValue = "\t";
-        }
+        const indentValue: string = (options.insertSpaces) ? this.repeat(" ", options.tabSize).toString() : "\t";
 
         function addEdit(text: string, lineNumber: number) {
             const oldIndent = /^\s*/.exec(text)[0];
@@ -135,19 +130,21 @@ export default class DocumentFormattingEditProvider
             }
         }
 
-        function wizard(value) {
-            const keywords = "(?:[^\wа-яё\.]|^)(Процедура|Функция|КонецПроцедуры|КонецФункции|Если|Иначе|ИначеЕсли|КонецЕсли|Тогда|Для|Каждого|Пока|Цикл|КонецЦикла|Попытка|Исключение|КонецПопытки|Экспорт|Возврат|Истина|Ложь|Сообщить|Новый|СообщениеПользователю|Неопределено)(?=[^\wа-яё\.]|$)";
+        function wizard(formattingValue) {
+            const keywords = "(?:[^\wа-яё\.]|^)(Процедура|Функция|КонецПроцедуры|КонецФункции|Если|Иначе"
+            + "|ИначеЕсли|КонецЕсли|Тогда|Для|Каждого|Пока|Цикл|КонецЦикла|Попытка|Исключение|КонецПопытки"
+            + "|Экспорт|Возврат|Истина|Ложь|Сообщить|Новый|СообщениеПользователю|Неопределено)(?=[^\wа-яё\.]|$)";
             const Regex = /(\/\/.*$)|(\/\/.*\r?\n)|("[^"]*$)|("(""|[^"]*)*")|((\/[^\/"]|[^\/"])+)/g;
             const separator = /(^|.)(<>|<=|>=|,|=|\+|-|\*|\/|%|<|>)(.|$)/g;
             let ArrStrings;
-            while ((ArrStrings = Regex.exec(value)) != null) {
+            while ((ArrStrings = Regex.exec(formattingValue)) != null) {
                 if (ArrStrings[6]) {
                     indexValue = ArrStrings.index;
                     ArrStrings[6].replace(new RegExp(keywords, "ig"), replacer);
                     ArrStrings[6].replace(new RegExp(separator, "g"), spaceInserter);
                 }
             }
-            return value;
+            return formattingValue;
         }
 
         function spaceInserter(match, match1, match2, match3, offset) {
@@ -189,7 +186,7 @@ export default class DocumentFormattingEditProvider
                 const startPosition = document.positionAt(
                     rangeOffset + indexValue + offset + match.length - match1.length
                 );
-                const endPosition = document.positionAt(rangeOffset + indexValue + offset + match.length)
+                const endPosition = document.positionAt(rangeOffset + indexValue + offset + match.length);
                 editOperations.push(vscode.TextEdit.replace(new vscode.Range(startPosition, endPosition), match1));
             }
             return match;
