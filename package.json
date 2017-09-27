@@ -244,7 +244,7 @@
     "remap-istanbul": "^0.9.5",
     "should": "^13.1.0",
     "tslint": "^5.7.0",
-    "typescript": "^2.5.2",
+    "typescript": "^2.5.3",
     "vscode": "^1.1.5"
   },
   "dependencies": {
