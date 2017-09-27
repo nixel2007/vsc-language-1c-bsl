@@ -812,7 +812,12 @@ export class Global {
                     continue;
                 }
             }
+
             const packageDef = result["package-def"];
+            if (packageDef === undefined) {
+                continue;
+            }
+
             let modules = [];
             const classes = [];
             if (packageDef.hasOwnProperty("module")) {
