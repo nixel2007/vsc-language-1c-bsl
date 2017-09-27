@@ -51,8 +51,9 @@ export default class TaskProvider {
         result.push(this.createTask("OneScript: make", workspaceRoot,
         // tslint:disable-next-line:no-invalid-template-strings
         "oscript", ["-make", "${file}", "${fileBasename}.exe"], []));
+        result.push(this.createTask("OneScript: run", workspaceRoot,
         // tslint:disable-next-line:no-invalid-template-strings
-        result.push(this.createTask("OneScript: run", workspaceRoot, "oscript", ["${file}"], ["$bsl"], true));
+            "oscript", ["${file}"], ["$OneScript Linter"], true));
         return result;
     }
 
@@ -91,7 +92,6 @@ export default class TaskProvider {
         }
 
         return new vscode.Task(kind, taskName, command,
-        // tslint:disable-next-line:no-invalid-template-strings
         new vscode.ProcessExecution(command, args, { cwd: workspaceRoot }), problemMatcher);
 
     }
@@ -117,7 +117,7 @@ export default class TaskProvider {
                 }
                 const taskName = taskFiles[i];
                 result.push(this.createTask("opm task: " + taskName,
-                workspaceRoot, "cmd", ["opm", "run", taskName.replace(".os", "")], ["$bsl"]));
+                workspaceRoot, "cmd", ["opm", "run", taskName.replace(".os", "")], ["$OneScript Linter"]));
             }
             return result;
         } catch (e) {
