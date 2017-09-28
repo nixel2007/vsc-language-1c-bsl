@@ -92,12 +92,9 @@ export function activate(context: vscode.ExtensionContext) {
                 const functionKeyword = matchMethod[1].toLowerCase();
                 const isFunc = (functionKeyword === "function" || functionKeyword === "функция");
                 let comment = "";
-                let methodDescription = "";
-                if (enMode) {
-                    methodDescription = (isFunc) ? "Function description" : "Procedure description";
-                } else {
-                    methodDescription = (isFunc) ? "Описание функции" : "Описание процедуры";
-                }
+                const methodDescription = (enMode)
+                    ? (isFunc) ? "Function description" : "Procedure description"
+                    : (isFunc) ? "Описание функции" : "Описание процедуры";
                 comment += "// <" + methodDescription + ">\n";
                 const methodData = global.getCacheLocal(
                     editor.document.fileName,
@@ -140,8 +137,11 @@ export function activate(context: vscode.ExtensionContext) {
 
     vscode.languages.setLanguageConfiguration("bsl", {
         indentationRules: {
-            decreaseIndentPattern: /^\s*(конецесли|конеццикла|конецпроцедуры|конецфункции|иначе|иначеесли|конецпопытки|исключение|endif|enddo|endprocedure|endfunction|else|elseif|endtry|except).*$/i, // tslint:disable-line:max-line-length
-            increaseIndentPattern: /^\s*(пока|процедура|функция|если|иначе|иначеесли|попытка|исключение|для|while|procedure|function|if|else|elseif|try|for)[^;]*$/i // tslint:disable-line:max-line-length
+            decreaseIndentPattern: new RegExp("^\\s*(конецесли|конеццикла|конецпроцедуры" +
+                "|конецфункции|иначе|иначеесли|конецпопытки|исключение|endif|enddo|endprocedure" +
+                "|endfunction|else|elseif|endtry|except).*$", "i"),
+            increaseIndentPattern: new RegExp("^\\s*(пока|процедура|функция|если|иначе|иначеесли" +
+                "|попытка|исключение|для|while|procedure|function|if|else|elseif|try|for)[^;]*$", "i")
         },
         comments: {
             lineComment: "//"
@@ -283,7 +283,15 @@ export function activate(context: vscode.ExtensionContext) {
             );
             const regex = /([а-яё_\w]+\s?)$/i;
             const arrStrings = regex.exec(textline);
-            if ((char === "++" || char === "--" || char === "+=" || char === "-=" || char === "*=" || char === "/=" || char === "%=") && editor.selection.isEmpty && arrStrings) {
+            if ((char === "++" ||
+                char === "--" ||
+                char === "+=" ||
+                char === "-=" ||
+                char === "*=" ||
+                char === "/=" ||
+                char === "%=")
+                && editor.selection.isEmpty
+                && arrStrings) {
                 const word = arrStrings[1];
                 editor.edit((editBuilder) => {
                     let postfix;
@@ -487,7 +495,8 @@ export function activate(context: vscode.ExtensionContext) {
                     for (const indexMethod in segment[sectionTitle]) {
                         const method = segment[sectionTitle][indexMethod];
                         items.push({
-                            label: method["name" + postfix], description: "OneScript/Глобальный контекст/" + element
+                            label: method["name" + postfix],
+                            description: "OneScript/Глобальный контекст/" + element
                         });
                     }
                 }
@@ -496,7 +505,10 @@ export function activate(context: vscode.ExtensionContext) {
                 const classOscript = oscriptStdLib.classesOscript()[element];
                 items.push({ label: classOscript["name" + postfix], description: "OneScript/Классы/" + element });
                 for (const sectionTitle in classOscript) {
-                    if (sectionTitle === "constructors" || sectionTitle === "description" || sectionTitle === "name" || sectionTitle === "name_en") {
+                    if (sectionTitle === "constructors"
+                        || sectionTitle === "description"
+                        || sectionTitle === "name"
+                        || sectionTitle === "name_en") {
                         continue;
                     }
                     for (const indexMethod in classOscript[sectionTitle]) {
@@ -511,7 +523,8 @@ export function activate(context: vscode.ExtensionContext) {
             for (const element in oscriptStdLib.systemEnum()) {
                 const classOscript = oscriptStdLib.systemEnum()[element];
                 items.push({
-                    label: classOscript["name" + postfix], description: "OneScript/Системные перечисления/" + element
+                    label: classOscript["name" + postfix],
+                    description: "OneScript/Системные перечисления/" + element
                 });
                 for (const sectionTitle in classOscript) {
                     if (sectionTitle === "description" || sectionTitle === "name" || sectionTitle === "name_en") {
@@ -538,7 +551,10 @@ export function activate(context: vscode.ExtensionContext) {
                 const class1C = bslGlobals.classes()[elementSegment];
                 items.push({ label: elementSegment, description: "1С/Классы/" + elementSegment });
                 for (const sectionTitle in class1C) {
-                    if (sectionTitle === "constructors" || sectionTitle === "description" || sectionTitle === "name" || sectionTitle === "name_en") {
+                    if (sectionTitle === "constructors"
+                        || sectionTitle === "description"
+                        || sectionTitle === "name"
+                        || sectionTitle === "name_en") {
                         continue;
                     }
                     for (const element in class1C[sectionTitle]) {
