@@ -472,7 +472,7 @@ export function activate(context: vscode.ExtensionContext) {
                     return;
                 }
             }
-        } else if (isOs && globalMethod) {
+        } else if (vscode.window.activeTextEditor && globalMethod) {
             for (const element in oscriptStdLib.globalContextOscript()) {
                 const segment = oscriptStdLib.globalContextOscript()[element];
                 const methods = segment.methods;
