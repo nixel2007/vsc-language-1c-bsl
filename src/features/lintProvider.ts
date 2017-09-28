@@ -17,12 +17,7 @@ export default class LintProvider {
 
     public activate(subscriptions: vscode.Disposable[]) {
         vscode.workspace.onDidOpenTextDocument(this.doBsllint, this, subscriptions);
-        vscode.workspace.onDidCloseTextDocument(
-            (textDocument) => {
-                this.diagnosticCollection.delete(textDocument.uri);
-            },
-            undefined,
-            subscriptions);
+        vscode.workspace.onDidCloseTextDocument(this.doBsllint, this, subscriptions);
         vscode.workspace.onDidSaveTextDocument(this.doBsllint, this);
         vscode.workspace.textDocuments.forEach(this.doBsllint, this);
     }
@@ -37,6 +32,7 @@ export default class LintProvider {
         if (!vscode.languages.match(BSL_MODE, textDocument)) {
             return;
         }
+        this.diagnosticCollection.clear();
         const configuration = vscode.workspace.getConfiguration("language-1c-bsl");
         const linterEnabled = Boolean(configuration.get("enableOneScriptLinter"));
         const otherExtensions = String(configuration.get("lintOtherExtensions"));
@@ -75,7 +71,8 @@ export default class LintProvider {
                 result = result.trim();
                 const lines = result.split(/\r?\n/);
                 const regex = /^\{Модуль\s+(.*)\s\/\s.*:\s+(\d+)\s+\/\s+(.*)\}/;
-                const vscodeDiagnosticArray = new Array<vscode.Diagnostic>();
+                const errorFiles = {};
+                let countErrors = 0;
                 for (const line in lines) {
                     let match;
                     match = lines[line].match(regex);
@@ -92,14 +89,19 @@ export default class LintProvider {
                             match[3],
                             vscode.DiagnosticSeverity.Error
                         );
-                        vscodeDiagnosticArray.push(vscodeDiagnostic);
+                        if (!errorFiles[match[1]]) {
+                            errorFiles[match[1]] = new Array<vscode.Diagnostic>();
+                        }
+                        errorFiles[match[1]].push(vscodeDiagnostic);
+                        countErrors++;
                     }
                 }
-                this.diagnosticCollection.set(textDocument.uri, vscodeDiagnosticArray);
-                if (vscodeDiagnosticArray.length !== 0 && !vscode.workspace.rootPath) {
-                    this.statusBarItem.text = vscodeDiagnosticArray.length === 0
-                        ? "$(check) No Error"
-                        : "$(alert) " + vscodeDiagnosticArray.length + " Errors";
+                for (const file in errorFiles) {
+                    const vscodeDiagnosticArray = errorFiles[file];
+                    this.diagnosticCollection.set(vscode.Uri.file(file), vscodeDiagnosticArray);
+                }
+                if (countErrors !== 0 && !vscode.workspace.rootPath) {
+                    this.statusBarItem.text = "$(alert) " + countErrors + " Errors";
                     this.statusBarItem.show();
                 } else {
                     this.statusBarItem.hide();
@@ -125,13 +127,9 @@ export default class LintProvider {
     }
 
     private getCommandId(): string {
-        let command = "";
         const commandConfig = vscode.workspace.getConfiguration("language-1c-bsl").get("onescriptPath");
-        if (!commandConfig || String(commandConfig).length === 0) {
-            command = "oscript";
-        } else {
-            command = String(commandConfig);
-        }
+        const command = (!commandConfig || String(commandConfig).length === 0)
+            ? "oscript" : String(commandConfig);
         return command;
     }
 
