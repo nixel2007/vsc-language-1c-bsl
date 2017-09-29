@@ -665,9 +665,12 @@ export class Global {
                 continue;
             }
             const nameParam = params[element];
-            paramsString = (paramsString === "(" ? paramsString : paramsString + ", ") + nameParam;
+            paramsString += (paramsString === "(" ? "" : ", ");
+            paramsString += (nameParam.byval ? "Знач " : "");
+            paramsString += nameParam.name;
+            paramsString += (nameParam.default ? " = " + nameParam.default : "");
             const re = new RegExp(
-                "^\\s*(Параметры|Parameters)(.|\\n)*\\n\\s*" + nameParam + "\\s*(-|–)\\s*([<\\wа-яА-Я\\.>]+)",
+                "^\\s*(Параметры|Parameters)(.|\\n)*\\n\\s*" + nameParam.name + "\\s*(-|–)\\s*([<\\wа-яА-Я\\.>]+)",
                 "gm"
             );
             const match: RegExpExecArray = re.exec(description);
@@ -678,6 +681,8 @@ export class Global {
         paramsString = paramsString + ")";
         if (strRetState) {
             paramsString = paramsString + ": " + strRetState;
+        } else if (!entry.isproc) {
+            paramsString = paramsString + ": Произвольный";
         }
         return {
             description,
