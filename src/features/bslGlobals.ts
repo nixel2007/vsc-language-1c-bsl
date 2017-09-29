@@ -1,5 +1,6 @@
 
 /* tslint:disable:quotemark */
+/* tslint:disable:object-literal-key-quotes */
 /* tslint:disable:max-line-length */
 /* tslint:disable:object-literal-sort-keys */
 /* tslint:disable:trailing-comma */
