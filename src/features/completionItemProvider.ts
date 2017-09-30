@@ -332,17 +332,16 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                 continue;
             }
             const systemEnum = systemEnums[key];
-            if (enumName.toLowerCase() === systemEnum.name.toLowerCase() ||
-                enumName.toLowerCase() === systemEnum.alias.toLowerCase()) {
+            if (enumName.toLowerCase() === systemEnum.name.toLowerCase()) {
                 const values = systemEnum.values;
                 for (const value of values) {
                     if (wordMatch) {
-                        if (!wordMatch.exec(value.alias)) {
+                        if (!wordMatch.exec(value.name)) {
                             continue;
                         }
                     }
                     const item: vscode.CompletionItem = new vscode.CompletionItem(
-                        value.alias,
+                        value.name,
                         vscode.CompletionItemKind.Enum
                     );
                     item.documentation = value.description;
