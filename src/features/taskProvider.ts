@@ -49,16 +49,44 @@ export default class TaskProvider {
         // tslint:disable-next-line:no-invalid-template-strings
         result.push(this.createTask("OneScript: check", workspaceRoot, "oscript", ["-check", "${file}"], []));
         result.push(this.createTask("OneScript: make", workspaceRoot,
-        // tslint:disable-next-line:no-invalid-template-strings
-        "oscript", ["-make", "${file}", "${fileBasename}.exe"], []));
+            // tslint:disable-next-line:no-invalid-template-strings
+            "oscript", ["-make", "${file}", "${fileBasename}.exe"], []));
         result.push(this.createTask("OneScript: run", workspaceRoot,
-        // tslint:disable-next-line:no-invalid-template-strings
+            // tslint:disable-next-line:no-invalid-template-strings
             "oscript", ["${file}"], ["$OneScript Linter"], true));
+        result.push(this.createTask("1testrunner: Testing project", workspaceRoot, "cmd",
+            // tslint:disable-next-line:no-invalid-template-strings
+            ["1testrunner", "-runall", "${workspaceRoot}/tests"], ["$OneScript Linter"]));
+        result.push(this.createTask("1testrunner: Testing current test-file", workspaceRoot, "cmd",
+            // tslint:disable-next-line:no-invalid-template-strings
+            ["1testrunner", "-run", "${file}"], ["$OneScript Linter"], false, true));
+        result.push(this.createTask("Opm: package build", workspaceRoot, "cmd",
+            // tslint:disable-next-line:no-invalid-template-strings
+            ["opm", "build", "${workspaceRoot}"], []));
+        result.push(this.createTask("1bdd: Exec all features", workspaceRoot, "cmd",
+            // tslint:disable-next-line:no-invalid-template-strings
+            ["1bdd", "${workspaceRoot}/features", "-out", "${workspaceRoot}/exec.log"], ["$OneScript Linter"], true));
+        result.push(this.createTask("1bdd: Exec feature", workspaceRoot, "cmd",
+            // tslint:disable-next-line:no-invalid-template-strings
+            ["1bdd", "${file}", "-fail-fast", "-out", "${workspaceRoot}/exec.log"],
+            ["$OneScript Linter"], false, true));
+        result.push(this.createTask("1bdd: Exec feature for current step def", workspaceRoot, "cmd",
+            // tslint:disable-next-line:no-invalid-template-strings
+            ["1bdd", "${fileDirname}/../${fileBasenameNoExtension}.feature", "-fail-fast", "-out",
+                // tslint:disable-next-line:no-invalid-template-strings
+                "${workspaceRoot}/exec.log"], ["$OneScript Linter"], false, true));
+        result.push(this.createTask("1bdd: Exec feature + debug", workspaceRoot, "cmd",
+            // tslint:disable-next-line:no-invalid-template-strings
+            ["1bdd", "${file}", "-fail-fast", "-verbose", "on", "-out", "${workspaceRoot}/exec.log"],
+            ["$OneScript Linter"]));
+        result.push(this.createTask("1bdd: Generate feature steps", workspaceRoot, "cmd",
+                // tslint:disable-next-line:no-invalid-template-strings
+            ["1bdd", "gen", "${file}", "-out", "${workspaceRoot}/exec.log"], ["$OneScript Linter"]));
         return result;
     }
 
     private createTask(taskName: string, workspaceRoot, command, args?: string[],
-                       problemMatcher?: string[], isBuildCommand?: boolean): vscode.Task {
+                       problemMatcher?: string[], isBuildCommand?: boolean, isTestCommand?: boolean): vscode.Task {
 
         const kind: vscode.TaskDefinition = {
             taskName,
@@ -89,6 +117,9 @@ export default class TaskProvider {
 
         if (isBuildCommand) {
             kind.group = "build";
+        }
+        if (isTestCommand) {
+            kind.group = "test";
         }
 
         return new vscode.Task(kind, taskName, command,
