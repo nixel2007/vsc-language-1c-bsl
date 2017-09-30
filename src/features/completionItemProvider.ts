@@ -30,14 +30,17 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                     );
                     let result: any[];
                     if (word.indexOf(".") === -1) {
-                        if (document.getText(new vscode.Range(new vscode.Position(position.line, 0), position)).match(/.*=\s*[\wа-яё]+$/i)) {
+                        if (document.getText(new vscode.Range(new vscode.Position(position.line, 0), position))
+                            .match(/.*=\s*[\wа-яё]+$/i)) {
                             bucket = this.getGlobals(word, true);
                             bucket = this.getAllWords(word, document.getText(), bucket);
                             for (const key in this._global.systemEnum) {
                                 const full = this._global.systemEnum[key];
-                                if (vscode.window.activeTextEditor.document.fileName.endsWith(".bsl") && !full.description) {
+                                if (vscode.window.activeTextEditor.document.fileName.endsWith(".bsl")
+                                    && !full.description) {
                                     continue;
-                                } else if (vscode.window.activeTextEditor.document.fileName.endsWith(".os") && !full.oscript_description) {
+                                } else if (vscode.window.activeTextEditor.document.fileName.endsWith(".os")
+                                && !full.oscript_description) {
                                     continue;
                                 }
                                 const item = new vscode.CompletionItem(full.name);
@@ -46,15 +49,18 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                                 bucket.push(item);
                             }
                             return resolve(bucket);
-                        } else if (document.getText(new vscode.Range(new vscode.Position(position.line, 0), position)).match(/(^|[\(;=,\s])(новый|new)\s+[\wа-яё]+$/i)) {
+                        } else if (document.getText(new vscode.Range(new vscode.Position(position.line, 0), position))
+                        .match(/(^|[\(;=,\s])(новый|new)\s+[\wа-яё]+$/i)) {
                             for (const key in this._global.classes) {
                                 const full = this._global.classes[key];
                                 if (!full.constructors) {
                                     continue;
                                 }
-                                if (vscode.window.activeTextEditor.document.fileName.endsWith(".bsl") && !full.description) {
+                                if (vscode.window.activeTextEditor.document.fileName.endsWith(".bsl")
+                                    && !full.description) {
                                     continue;
-                                } else if (vscode.window.activeTextEditor.document.fileName.endsWith(".os") && !full.oscript_description) {
+                                } else if (vscode.window.activeTextEditor.document.fileName.endsWith(".os")
+                                && !full.oscript_description) {
                                     continue;
                                 }
                                 const item = new vscode.CompletionItem(full.name);
@@ -71,11 +77,8 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                                     const item = new vscode.CompletionItem(value.name);
                                     item.documentation = value.description;
                                     item.kind = vscode.CompletionItemKind.Function;
-                                    if (value._method.Params.length > 0) {
-                                        item.insertText = value.name + "(";
-                                    } else {
-                                        item.insertText = value.name + "()";
-                                    }
+                                    item.insertText = (value._method.Params.length > 0)
+                                    ? (value.name + "(") : (value.name + "()");
                                     bucket.push(item);
                                     this.added[value.name.toLowerCase()] = true;
                                 }
@@ -159,7 +162,8 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                 const full = completionDictFunctions[name];
                 if (vscode.window.activeTextEditor.document.fileName.endsWith(".bsl") && !full.description) {
                     continue;
-                } else if (vscode.window.activeTextEditor.document.fileName.endsWith(".os") && !full.oscript_signature) {
+                } else if (vscode.window.activeTextEditor.document.fileName.endsWith(".os")
+                && !full.oscript_signature) {
                     continue;
                 }
                 const completion = new vscode.CompletionItem(full.name);
@@ -177,9 +181,11 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                         let detail = "";
                         for (const signatureName in signature) {
                             syn++;
-                            detail = detail + (syn === 1 ? "" : ", \n") + syn + ". " + signature[signatureName].СтрокаПараметров;
+                            detail += (syn === 1 ? "" : ", \n")
+                             + syn + ". " + signature[signatureName].СтрокаПараметров;
                         }
-                        completion.detail = "" + syn + " вариант" + (syn < 5 ? "a " : "ов ") + "синтаксиса: \n" + detail;
+                        completion.detail =
+                        "" + syn + " вариант" + (syn < 5 ? "a " : "ов ") + "синтаксиса: \n" + detail;
                     }
                     completion.insertText = full.name + "(";
                 } else {
@@ -266,11 +272,8 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                 const item: vscode.CompletionItem = new vscode.CompletionItem(element.name);
                 item.kind = vscode.CompletionItemKind.Function;
                 item.documentation = element.description;
-                if (element._method.Params.length > 0) {
-                    item.insertText = element.name + "(";
-                } else {
-                    item.insertText = element.name + "()";
-                }
+                item.insertText = (element._method.Params.length > 0)
+                ? (element.name + "(") : (element.name + "()");
                 result.push(item);
             }
         }
