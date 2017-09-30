@@ -267,12 +267,11 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.expandAbbreviation", () => {
         const editor = vscode.window.activeTextEditor;
-        if (!editor || !editor.selection.isEmpty) {
+        if (!editor || !editor.selection.isEmpty || editor.selection.active.character < 3) {
             vscode.commands.executeCommand("tab");
             return;
         }
         const position = editor.selection.active;
-        if (position.character > 1) {
             const char = editor.document.getText(new vscode.Range(
                 new vscode.Position(position.line, position.character - 2), position));
             const textline = editor.document.getText(
@@ -283,17 +282,7 @@ export function activate(context: vscode.ExtensionContext) {
             );
             const regex = /([а-яё_\w]+\s?)$/i;
             const arrStrings = regex.exec(textline);
-            if ((char === "++" ||
-                char === "--" ||
-                char === "+=" ||
-                char === "-=" ||
-                char === "*=" ||
-                char === "/=" ||
-                char === "%=")
-                && editor.selection.isEmpty
-                && arrStrings) {
-                const word = arrStrings[1];
-                editor.edit((editBuilder) => {
+        if (arrStrings) {
                     let postfix;
                     switch (char) {
                         case "++":
@@ -318,7 +307,11 @@ export function activate(context: vscode.ExtensionContext) {
                             postfix = " % ";
                             break;
                         default:
+                    vscode.commands.executeCommand("tab");
+                    return;
                     }
+            const word = arrStrings[1];
+            editor.edit((editBuilder) => {
                     editBuilder.replace(
                         new vscode.Range(
                             new vscode.Position(
@@ -341,15 +334,8 @@ export function activate(context: vscode.ExtensionContext) {
                     );
                 });
             } else {
-                editor.edit((editBuilder) => {
                     vscode.commands.executeCommand("tab");
-                });
             }
-        } else {
-            editor.edit((editBuilder) => {
-                vscode.commands.executeCommand("tab");
-            });
-        }
 
     }));
 
