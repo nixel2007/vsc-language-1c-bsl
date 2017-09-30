@@ -326,40 +326,49 @@ export class Global {
                     }
                 }
             } else {
-                const newElement: IClass = {} as IClass;
-                newElement.name = newName;
-                newElement.alias = (postfix === "_en") ? segment.name : segment.name_en;
-                newElement.description = undefined;
-                newElement.oscript_description = segment.description;
-                newElement.methods = (segment.methods) ? {} : undefined;
-                for (const key in segment.methods) {
-                    const newNameMethod = segment.methods[key]["name" + postfix];
-                    const newMethod: IMethod = {} as IMethod;
-                    newMethod.name = newName;
-                    newMethod.alias = (postfix === "_en") ? segment.methods[key].name : segment.methods[key].name_en;
-                    newMethod.description = undefined;
-                    newMethod.oscript_description = segment.methods[key].description;
-                    newElement.methods[newNameMethod.toLowerCase()] = newMethod;
+                const newElement: IClass = {
+                    name: newName,
+                    name_en: undefined,
+                    alias: (postfix === "_en") ? segment.name : segment.name_en,
+                    description: undefined,
+                    oscript_description: segment.description,
+                    methods: (segment.methods) ? {} : undefined,
+                    properties: (segment.properties) ? {} : undefined,
+                    constructors: (segment.constructors) ? {} : undefined,
+                };
+                for (const key in segment.constructors) {
+                    const newCntr: IConstructorDefinition = {
+                        signature: segment.constructors[key].signature,
+                        description: undefined,
+                        oscript_description: segment.constructors[key].description,
+                    };
+                    newElement.constructors[key.toLowerCase()] = newCntr;
                 }
-                newElement.properties = (segment.properties) ? {} : undefined;
                 for (const key in segment.properties) {
                     const newNameProp = segment.properties[key]["name" + postfix];
-                    const newProp: IPropertyDefinition = {} as IPropertyDefinition;
-                    newProp.name = newName;
-                    newProp.alias = (postfix === "_en")
-                        ? segment.properties[key].name
-                        : segment.properties[key].name_en;
-                    newProp.description = undefined;
-                    newProp.oscript_description = segment.properties[key].description;
+                    const newProp: IPropertyDefinition = {
+                        name: newName,
+                        name_en: undefined,
+                        alias: (postfix === "_en")
+                            ? segment.properties[key].name
+                            : segment.properties[key].name_en,
+                        description: undefined,
+                        oscript_description: segment.properties[key].description,
+                    };
                     newElement.properties[newNameProp.toLowerCase()] = newProp;
                 }
-                newElement.constructors = (segment.constructors) ? {} : undefined;
-                for (const key in segment.constructors) {
-                    const newCntr: IConstructorDefinition = {} as IConstructorDefinition;
-                    newCntr.signature = segment.constructors[key].signature;
-                    newCntr.description = undefined;
-                    newCntr.oscript_description = segment.constructors[key].description;
-                    newElement.constructors[key.toLowerCase()] = newCntr;
+                for (const key in segment.methods) {
+                    const newNameMethod = segment.methods[key]["name" + postfix];
+                    const newMethod: IMethod = {
+                        name: newName,
+                        name_en: undefined,
+                        alias: (postfix === "_en") ? segment.methods[key].name : segment.methods[key].name_en,
+                        description: undefined,
+                        oscript_description: segment.methods[key].description,
+                        // TODO ?
+                        signature: undefined,
+                    };
+                    newElement.methods[newNameMethod.toLowerCase()] = newMethod;
                 }
                 this.classes[newName.toLowerCase()] = newElement;
             }
