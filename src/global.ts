@@ -154,7 +154,7 @@ export class Global {
                     continue;
                 }
                 const newNameValues = values[key]["name" + postfix];
-                const elementValue: ISystemEnumValue = {};
+                const elementValue: ISystemEnumValue = {} as ISystemEnumValue;
                 elementValue.name = newNameValues;
                 elementValue.alias = (postfix === "_en") ? values[key].name : values[key].name_en;
                 elementValue.description = values[key].description;
@@ -185,7 +185,7 @@ export class Global {
                         continue;
                     }
                     const newNameValues = values[key]["name" + postfix];
-                    const elementValue: ISystemEnumValue = {};
+                    const elementValue: ISystemEnumValue = {} as ISystemEnumValue;
                     elementValue.name = newNameValues;
                     elementValue.alias = (postfix === "_en") ? values[key].name : values[key].name_en;
                     elementValue.description = values[key].description;
