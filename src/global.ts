@@ -218,36 +218,45 @@ export class Global {
             }
             const segment = classes[element];
             const newName = segment["name" + postfix];
-            const newElement: IClass = {} as IClass;
-            newElement.name = newName;
-            newElement.alias = (postfix === "_en") ? segment.name : segment.name_en;
-            newElement.description = segment.description;
-            newElement.methods = (segment.methods) ? {} : undefined;
+            const newElement: IClass = {
+                name: newName,
+                name_en: undefined,
+                alias: (postfix === "_en") ? segment.name : segment.name_en,
+                description: segment.description,
+                methods: (segment.methods) ? {} : undefined,
+                properties: (segment.properties) ? {} : undefined,
+                constructors: (segment.constructors) ? {} : undefined,
+            };
             for (const key in segment.methods) {
                 const method = segment.methods[key];
                 const newNameMethod = method["name" + postfix];
-                const newMethod: IMethod = {} as IMethod;
-                newMethod.name = newName;
-                newMethod.alias = (postfix === "_en") ? method.name : method.name_en;
-                newMethod.description = method.description;
+                const newMethod: IMethod = {
+                    name: newName,
+                    name_en: undefined,
+                    alias: (postfix === "_en") ? method.name : method.name_en,
+                    description: method.description,
+                    // TODO: undefined?
+                    signature: undefined,
+                };
                 newElement.methods[newNameMethod.toLowerCase()] = newMethod;
             }
-            newElement.properties = (segment.properties) ? {} : undefined;
             for (const key in segment.properties) {
                 const property = segment.properties[key];
                 const newNameProp = property["name" + postfix];
-                const newProp: IPropertyDefinition = {} as IPropertyDefinition;
-                newProp.name = newName;
-                newProp.alias = (postfix === "_en") ? property.name : property.name_en;
-                newProp.description = property.description;
+                const newProp: IPropertyDefinition = {
+                    name: newName,
+                    name_en: undefined,
+                    alias: (postfix === "_en") ? property.name : property.name_en,
+                    description: property.description,
+                };
                 newElement.properties[newNameProp.toLowerCase()] = newProp;
             }
-            newElement.constructors = (segment.constructors) ? {} : undefined;
             for (const key in segment.constructors) {
                 const constructor = segment.constructors[key];
-                const newCntr: IConstructorDefinition = {} as IConstructorDefinition;
-                newCntr.signature = constructor.signature;
-                newCntr.description = constructor.description;
+                const newCntr: IConstructorDefinition = {
+                    signature: constructor.signature,
+                    description: constructor.description,
+                };
                 newElement.constructors[key.toLowerCase()] = newCntr;
             }
             this.classes[newName.toLowerCase()] = newElement;
@@ -267,13 +276,17 @@ export class Global {
                     const nameMethod = findMethod["name" + postfix];
                     // TODO: Тут происходит что-то странное
                     if (!findMethod) {
-                        findMethod = {} as IMethod;
-                        findMethod.name = nameMethod;
-                        findMethod.alias = (postfix === "_en")
-                            ? segment.methods[key].name
-                            : segment.methods[key].name_en;
-                        findMethod.description = undefined;
-                        findMethod.oscript_description = segment.methods[key].description;
+                        findMethod = {
+                            name: nameMethod,
+                            name_en: undefined,
+                            alias: (postfix === "_en")
+                                ? segment.methods[key].name
+                                : segment.methods[key].name_en,
+                            description: undefined,
+                            oscript_description: segment.methods[key].description,
+                            // TODO: ?
+                            signature: undefined,
+                        };
                         findClass.methods[nameMethod.toLowerCase()] = findMethod;
                     } else {
                         findMethod.oscript_description = segment.methods[key].description;
@@ -284,13 +297,15 @@ export class Global {
                     const nameProp = findProp["name" + postfix];
                     // TODO: Тут происходит что-то странное
                     if (!findProp) {
-                        findProp = {} as IPropertyDefinition;
-                        findProp.name = nameProp;
-                        findProp.alias = (postfix === "_en")
-                            ? segment.properties[key].name
-                            : segment.properties[key].name_en;
-                        findProp.description = undefined;
-                        findProp.oscript_description = segment.properties[key].description;
+                        findProp = {
+                            name: nameProp,
+                            name_en: undefined,
+                            alias: (postfix === "_en")
+                                ? segment.properties[key].name
+                                : segment.properties[key].name_en,
+                            description: undefined,
+                            oscript_description: segment.properties[key].description,
+                        };
                         findClass.properties[nameProp.toLowerCase()] = findProp;
                     } else {
                         findProp.oscript_description = segment.properties[key].description;
@@ -299,9 +314,12 @@ export class Global {
                 for (const key in segment.constructors) {
                     let findCntr = segment.constructors[key];
                     if (!findCntr) {
-                        findCntr = {} as IConstructorDefinition;
-                        findCntr.description = undefined;
-                        findCntr.oscript_description = segment.constructors[key].description;
+                        findCntr = {
+                            description: undefined,
+                            oscript_description: segment.constructors[key].description,
+                            // TODO ?
+                            signature: undefined,
+                        };
                         findClass.constructors[key.toLowerCase()] = findCntr;
                     } else {
                         findCntr.oscript_description = segment.constructors[key].description;
@@ -953,7 +971,7 @@ interface IMethod {
     alias: string;
     description: string;
     signature: ISignatureCollection;
-    returns: string;
+    returns?: string;
     oscript_description?: string;
     oscript_signature?: ISignatureCollection;
     oscript_access?: boolean;
@@ -996,8 +1014,8 @@ interface IPropertyDefinition {
     name_en: string;
     alias: string;
     description: string;
-    oscript_description: string;
-    access: string;
+    oscript_description?: string;
+    access?: string;
 }
 
 interface IOscriptFunctionDefinition {
@@ -1052,7 +1070,7 @@ interface IClass {
     name_en: string;
     alias: string;
     description: string;
-    oscript_description: string;
+    oscript_description?: string;
     methods?: IMethods;
     properties?: IPropertyDefinitions;
     constructors?: IConstructorDefinitions;
@@ -1063,9 +1081,9 @@ interface IConstructorDefinitions {
 }
 
 interface IConstructorDefinition {
-    description: string;
+    description?: string;
     signature: string;
-    oscript_description: string;
+    oscript_description?: string;
     params?: ISignatureParameters;
 }
 
