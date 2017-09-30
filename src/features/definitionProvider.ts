@@ -30,11 +30,9 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
             }
             let module = "";
             if (wordAtPosition.indexOf(".") > 0) {
-                // if (path.extname(document.fileName) !== ".os") { // Для oscript не можем гаранитировать полное совпадение модулей.
                 const dotArray: string[] = wordAtPosition.split(".");
                 wordAtPosition = dotArray.pop();
                 module = dotArray.join(".");
-                // }
             }
             let d: any[] = new Array();
             if (module.length === 0) {
@@ -43,10 +41,11 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
             } else {
                 d = this._global.query(wordAtPosition, module, false, false);
                 if (d.length > 1) {
-                    for (let k = 0; k < d.length; k++) {
-                        const arrayFilename = d[k].filename.split("/");
-                        if (!d[k].oscriptLib && arrayFilename[arrayFilename.length - 4] === "CommonModules" || d[k].filename.endsWith("ManagerModule.bsl")) {
-                            d = [d[k]];
+                    for (const targetModule of d) {
+                        const arrayFilename = targetModule.filename.split("/");
+                        if (!targetModule.oscriptLib && arrayFilename[arrayFilename.length - 4] === "CommonModules"
+                            || targetModule.filename.endsWith("ManagerModule.bsl")) {
+                            d = [targetModule];
                             break;
                         }
                     }

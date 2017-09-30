@@ -2,14 +2,16 @@ import * as vscode from "vscode";
 import AbstractProvider from "./abstractProvider";
 
 export default class GlobalReferenceProvider extends AbstractProvider implements vscode.ReferenceProvider {
-    public provideReferences(document: vscode.TextDocument, position: vscode.Position, options: { includeDeclaration: boolean; }, token: vscode.CancellationToken): Thenable<vscode.Location[]> {
+    public provideReferences(document: vscode.TextDocument,
+                             position: vscode.Position,
+                             options: { includeDeclaration: boolean; },
+                             token: vscode.CancellationToken): Thenable<vscode.Location[]> {
         return this.doFindReferences(document, position, options, token);
     }
 
     private addReference(searchResult: any, results: vscode.Location[]): any {
         if (searchResult) {
-            for (let index = 0; index < searchResult.length; index++) {
-                const element = searchResult[index];
+            for (const element of searchResult) {
                 const result = {
                     path: element.filename,
                     line: element.line,
@@ -27,7 +29,10 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
         }
     }
 
-    private doFindReferences(document: vscode.TextDocument, position: vscode.Position, options: { includeDeclaration: boolean }, token: vscode.CancellationToken): Thenable<vscode.Location[]> {
+    private doFindReferences(document: vscode.TextDocument,
+                             position: vscode.Position,
+                             options: { includeDeclaration: boolean },
+                             token: vscode.CancellationToken): Thenable<vscode.Location[]> {
         return new Promise((resolve, reject) => {
             const filename = document.fileName;
             const workspaceRoot = vscode.workspace.rootPath;
@@ -51,13 +56,15 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
                 // resolve(results);
             }
             if (workspaceRoot) {
-                const fullmodule = this._global.getModuleForPath(filename.replace(/\\/g, "/"), vscode.workspace.rootPath);
+                const fullmodule = this._global.getModuleForPath(filename.replace(/\\/g, "/"),
+                    vscode.workspace.rootPath);
                 let localsearch = false;
                 let enTextAtPosition;
                 if (fullmodule.length !== 0) {
                     const arrName = filename.substr(vscode.workspace.rootPath.length).split("\\");
                     if (this._global.toreplaced[arrName[arrName.length - 4]]) {
-                        enTextAtPosition = arrName[arrName.length - 4] + "." + arrName[arrName.length - 3] + "." + textAtPosition;
+                        enTextAtPosition = arrName[arrName.length - 4] + "."
+                            + arrName[arrName.length - 3] + "." + textAtPosition;
                     }
                     textAtPosition = fullmodule + "." + textAtPosition;
                     localsearch = true;

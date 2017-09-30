@@ -40,7 +40,7 @@ describe("Definitions", () => {
 
         locations.should.have.length(1);
 
-        let location = locations[0];
+        const location = locations[0];
         location.uri.path.should.endWith("Documents/Definition/Ext/ManagerModule.bsl");
 
     });

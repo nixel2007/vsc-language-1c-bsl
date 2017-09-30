@@ -136,13 +136,14 @@ export default class DocumentFormattingEditProvider
             + "|Экспорт|Возврат|Истина|Ложь|Сообщить|Новый|СообщениеПользователю|Неопределено)(?=[^\wа-яё\.]|$)";
             const Regex = /(\/\/.*$)|(\/\/.*\r?\n)|("[^"]*$)|("(""|[^"]*)*")|((\/[^\/"]|[^\/"])+)/g;
             const separator = /(^|.)(<>|<=|>=|,|=|\+|-|\*|\/|%|<|>)(.|$)/g;
-            let ArrStrings;
-            while ((ArrStrings = Regex.exec(formattingValue)) != null) {
+            let ArrStrings = Regex.exec(formattingValue);
+            while (ArrStrings) {
                 if (ArrStrings[6]) {
                     indexValue = ArrStrings.index;
                     ArrStrings[6].replace(new RegExp(keywords, "ig"), replacer);
                     ArrStrings[6].replace(new RegExp(separator, "g"), spaceInserter);
                 }
+                ArrStrings = Regex.exec(formattingValue);
             }
             return formattingValue;
         }
