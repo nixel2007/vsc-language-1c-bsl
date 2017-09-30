@@ -60,12 +60,15 @@ export class Global {
         for (const key in globalfunctions) {
             const globalFunction = globalfunctions[key];
             const newName = globalFunction["name" + postfix];
-            const newElement: IMethod = {} as IMethod;
-            newElement.name = newName;
-            newElement.alias = (postfix === "_en") ? globalFunction.name : globalFunction.name_en;
-            newElement.description = globalFunction.description;
-            newElement.signature = globalFunction.signature;
-            newElement.returns = globalFunction.returns;
+            const newElement: IMethod = {
+                name: newName,
+                // TODO: в интерфейсе и алиас и name_en?
+                name_en: undefined,
+                alias: (postfix === "_en") ? globalFunction.name : globalFunction.name_en,
+                description: globalFunction.description,
+                signature: globalFunction.signature,
+                returns: globalFunction.returns,
+            };
             this.globalfunctions[newName.toLowerCase()] = newElement;
         }
         const globalContextOscript: IOscriptGlobalContext = oscriptStdLib.globalContextOscript();
@@ -83,20 +86,22 @@ export class Global {
                     };
                     globMethod.oscript_description = method.description;
                 } else {
-                    const newElement: IMethod = {} as IMethod;
                     const newName = method["name" + postfix];
-                    newElement.name = newName;
-                    newElement.alias = (postfix === "_en") ? method.name : method.name_en;
-                    newElement.description = undefined;
-                    newElement.signature = undefined;
-                    newElement.returns = method.returns;
-                    newElement.oscript_signature = {
-                        default: {
-                            СтрокаПараметров: method.signature,
-                            Параметры: method.params
-                        }
+                    const newElement: IMethod = {
+                        name: newName,
+                        name_en: undefined,
+                        alias: (postfix === "_en") ? method.name : method.name_en,
+                        description: undefined,
+                        signature: undefined,
+                        returns: method.returns,
+                        oscript_signature: {
+                            default: {
+                                СтрокаПараметров: method.signature,
+                                Параметры: method.params
+                            }
+                        },
+                        oscript_description: method.description
                     };
-                    newElement.oscript_description = method.description;
                     this.globalfunctions[newName.toLowerCase()] = newElement;
                 }
             }
@@ -106,10 +111,12 @@ export class Global {
                 continue;
             }
             const newName = globalvariables[element]["name" + postfix];
-            const newElement: IGlobalVariable = {} as IGlobalVariable;
-            newElement.name = newName;
-            newElement.alias = (postfix === "_en") ? globalvariables[element].name : globalvariables[element].name_en;
-            newElement.description = globalvariables[element].description;
+            const newElement: IGlobalVariable = {
+                name: newName,
+                name_en: undefined,
+                alias: (postfix === "_en") ? globalvariables[element].name : globalvariables[element].name_en,
+                description: globalvariables[element].description
+            };
             this.globalvariables[newName.toLowerCase()] = newElement;
         }
         for (const element in globalContextOscript) {
@@ -123,15 +130,17 @@ export class Global {
                     globVar.oscript_description = segment.properties[key].description;
                     globVar.oscript_access = segment.properties[key].access;
                 } else {
-                    const newElement: IGlobalVariable = {} as IGlobalVariable;
                     const newName = segment.properties[key]["name" + postfix];
-                    newElement.name = newName;
-                    newElement.alias = (postfix === "_en")
-                        ? segment.properties[key].name
-                        : segment.properties[key].name_en;
-                    newElement.description = undefined;
-                    newElement.oscript_description = segment.properties[key].description;
-                    newElement.oscript_access = segment.properties[key].access;
+                    const newElement: IGlobalVariable = {
+                        name: newName,
+                        name_en: undefined,
+                        alias: (postfix === "_en")
+                            ? segment.properties[key].name
+                            : segment.properties[key].name_en,
+                        description: undefined,
+                        oscript_description: segment.properties[key].description,
+                        oscript_access: segment.properties[key].access
+                    };
                     this.globalvariables[newName.toLowerCase()] = newElement;
                 }
             }
@@ -143,21 +152,25 @@ export class Global {
             }
             const segment = systemEnum[element];
             const newName = segment["name" + postfix];
-            const newElement: ISystemEnum = {} as ISystemEnum;
-            newElement.name = newName;
-            newElement.alias = (postfix === "_en") ? segment.name : segment.name_en;
-            newElement.description = segment.description;
-            newElement.values = [];
+            const newElement: ISystemEnum = {
+                name: newName,
+                name_en: undefined,
+                alias: (postfix === "_en") ? segment.name : segment.name_en,
+                description: segment.description,
+                values: [],
+            };
             const values = segment.values;
             for (const key in values) {
                 if (!values.hasOwnProperty(key)) {
                     continue;
                 }
                 const newNameValues = values[key]["name" + postfix];
-                const elementValue: ISystemEnumValue = {} as ISystemEnumValue;
-                elementValue.name = newNameValues;
-                elementValue.alias = (postfix === "_en") ? values[key].name : values[key].name_en;
-                elementValue.description = values[key].description;
+                const elementValue: ISystemEnumValue = {
+                    name: newNameValues,
+                    name_en: undefined,
+                    alias: (postfix === "_en") ? values[key].name : values[key].name_en,
+                    description: values[key].description,
+                };
                 newElement.values.push(elementValue);
             }
             this.systemEnum[newName.toLowerCase()] = newElement;
@@ -173,22 +186,26 @@ export class Global {
                 const findEnum = this.systemEnum[newName.toLowerCase()];
                 findEnum.oscript_description = segment.description;
             } else {
-                const newElement: ISystemEnum = {} as ISystemEnum;
-                newElement.name = newName;
-                newElement.alias = (postfix === "_en") ? segment.name : segment.name_en;
-                newElement.description = undefined;
-                newElement.values = [];
-                newElement.oscript_description = segment.description;
+                const newElement: ISystemEnum = {
+                    name: newName,
+                    name_en: undefined,
+                    alias: (postfix === "_en") ? segment.name : segment.name_en,
+                    description: undefined,
+                    values: [],
+                    oscript_description: segment.description,
+                };
                 const values = segment.values;
                 for (const key in values) {
                     if (!values.hasOwnProperty(key)) {
                         continue;
                     }
                     const newNameValues = values[key]["name" + postfix];
-                    const elementValue: ISystemEnumValue = {} as ISystemEnumValue;
-                    elementValue.name = newNameValues;
-                    elementValue.alias = (postfix === "_en") ? values[key].name : values[key].name_en;
-                    elementValue.description = values[key].description;
+                    const elementValue: ISystemEnumValue = {
+                        name: newNameValues,
+                        name_en: undefined,
+                        alias: (postfix === "_en") ? values[key].name : values[key].name_en,
+                        description: values[key].description,
+                    };
                     newElement.values.push(elementValue);
                 }
                 this.systemEnum[newName.toLowerCase()] = newElement;
@@ -1015,7 +1032,7 @@ interface ISystemEnum {
     name_en: string;
     alias: string;
     description: string;
-    oscript_description: string;
+    oscript_description?: string;
     values: ISystemEnumValue[];
 }
 
