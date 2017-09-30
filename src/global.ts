@@ -6,9 +6,9 @@ import * as path from "path";
 import * as bslglobals from "./features/bslGlobals";
 import * as oscriptStdLib from "./features/oscriptStdLib";
 
+import FileQueue = require("filequeue");
 import loki = require("lokijs");
 import Parser = require("onec-syntaxparser");
-import FileQueue = require("filequeue");
 import xml2js = require("xml2js");
 const fq = new FileQueue(500);
 
@@ -47,10 +47,10 @@ export class Global {
         const postfix = (autocompleteLanguage === "en") ? "_en" : "";
         this.toreplaced = this.getReplaceMetadata();
         this.cache = new loki("gtags.json");
-        this.globalfunctions = {} as IMethods;
-        this.globalvariables = {} as IGlobalVariables;
-        this.systemEnum = {} as ISystemEnums;
-        this.classes = {} as IClasses;
+        this.globalfunctions = {};
+        this.globalvariables = {};
+        this.systemEnum = {};
+        this.classes = {};
         const globalfunctions: IMethods = bslglobals.globalfunctions();
         const globalvariables: IGlobalVariables = bslglobals.globalvariables();
         this.keywords = {};
@@ -534,7 +534,7 @@ export class Global {
                 console.error(e);
             }
         });
-    };
+    }
 
     public customUpdateCache(source: string, filename: string) {
         if (!this.cacheUpdated()) {
@@ -587,7 +587,7 @@ export class Global {
             };
             this.db.insert(newItem);
         }
-    };
+    }
 
     public queryref(word: string, collection: any, local: boolean = false): any {
         if (!collection) {
@@ -727,11 +727,11 @@ export class Global {
         });
     }
 
-    public postMessage(description: string, interval?: number) { }
+    public postMessage(description: string, interval?: number) { } // tslint:disable-line:no-empty
 
-    public getConfiguration(section: string) { }
+    public getConfiguration(section: string) { } // tslint:disable-line:no-empty
 
-    public getConfigurationKey(configuration, key: string) { }
+    public getConfigurationKey(configuration, key: string) { } // tslint:disable-line:no-empty
 
     public getRootPath(): string {
         return "";
@@ -741,7 +741,7 @@ export class Global {
         return "";
     }
 
-    public findFilesForCache(searchPattern: string, rootPath: string) { }
+    public findFilesForCache(searchPattern: string, rootPath: string) { } // tslint:disable-line:no-empty
 
     private delay(milliseconds: number) {
         return new Promise<void>((resolve) => {
