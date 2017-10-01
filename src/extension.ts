@@ -5,6 +5,7 @@ import * as vscode from "vscode";
 import { BSL_MODE } from "./const";
 import { Global } from "./global";
 
+import BslQuickOpen from "./features/bslQuickOpen";
 import CompletionItemProvider from "./features/completionItemProvider";
 import DefinitionProvider from "./features/definitionProvider";
 import DocumentFormattingEditProvider from "./features/documentFormattingEditProvider";
@@ -16,7 +17,6 @@ import SignatureHelpProvider from "./features/signatureHelpProvider";
 import SyntaxHelper from "./features/syntaxHelper";
 import TaskProvider from "./features/taskProvider";
 import WorkspaseSymbolProvider from "./features/workspaceSymbolProvider";
-import bslQuickOpen from "./features/bslQuickOpen";
 
 import * as bslGlobals from "./features/bslGlobals";
 import { CodeBeautyfier } from "./features/codeBeautifier";
@@ -35,7 +35,7 @@ export function activate(context: vscode.ExtensionContext) {
     const CMD_QUICKOPEN = "language-1c-bsl.quickopen";
 
     const global = Global.create(vscAdapter);
-    const quickOpen = new bslQuickOpen(global);
+    const quickOpen = new BslQuickOpen(global);
     const taskProvider = new TaskProvider();
 
     vscode.workspace.onDidChangeConfiguration(taskProvider.onConfigurationChanged);

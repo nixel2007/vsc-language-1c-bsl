@@ -430,9 +430,7 @@ export class Global {
         const moduleArray: string[] = fullpath.substr(
             rootPath.length + (rootPath.slice(-1) === "\\" ? 0 : 1)
         ).split(splitsymbol);
-        let moduleStr: string = "";
         const hierarchy = moduleArray.length;
-        
         if (hierarchy > 3) {
             if (moduleArray[hierarchy-1].startsWith("ObjectModule.bsl") && moduleArray[hierarchy-2].startsWith("Ext")) {
                 let meta: IMetaData = {
@@ -441,7 +439,7 @@ export class Global {
                     fullpath: fullpath,
                     module: moduleArray[hierarchy-4] + "." + moduleArray[hierarchy-3],
                     project: moduleArray.slice(0, 4).join("/")
-                }
+                };
                 this.dbmodules.insert(meta);
             } else if (moduleArray[hierarchy-1].startsWith("ManagerModule.bsl") && hierarchy > 4 && moduleArray[hierarchy-2].startsWith("Ext")) {
             let meta: IMetaData = {
@@ -450,7 +448,7 @@ export class Global {
                 fullpath: fullpath,
                 module: moduleArray[hierarchy-4] + "." + moduleArray[hierarchy-3],
                 project: moduleArray.slice(0, hierarchy-5).join("/")
-            }
+            };
             this.dbmodules.insert(meta);
             } else if (moduleArray[hierarchy-1].startsWith("RecordSetModule.bsl") && hierarchy > 4 && moduleArray[hierarchy-2].startsWith("Ext")) {
                 let meta: IMetaData = {
@@ -459,7 +457,7 @@ export class Global {
                     fullpath: fullpath,
                     module: moduleArray[hierarchy-4] + "." + moduleArray[hierarchy-3],
                     project: moduleArray.slice(0, hierarchy-5).join("/")
-                }
+                };
                 this.dbmodules.insert(meta);
             } else if (moduleArray[hierarchy-1].startsWith("CommandModule.bsl") && hierarchy > 5) {
             let meta: IMetaData = {
@@ -468,7 +466,7 @@ export class Global {
                 fullpath: fullpath,
                 module: moduleArray[hierarchy-5] + "." + moduleArray[hierarchy-4] + "." + moduleArray[hierarchy-3],
                 project: moduleArray.slice(0, hierarchy-5).join("/")
-            }
+            };
             this.dbmodules.insert(meta);
             } else if (moduleArray[hierarchy-1].startsWith("CommandModule.bsl") && moduleArray[hierarchy-4].startsWith("CommonCommands")) {
                 let meta: IMetaData = {
@@ -477,7 +475,7 @@ export class Global {
                     fullpath: fullpath,
                     module: moduleArray[hierarchy-4] + "." + moduleArray[hierarchy-3],
                     project: moduleArray.slice(0, hierarchy-4).join("/")
-                }
+                };
                 this.dbmodules.insert(meta);
             } else if (moduleArray[hierarchy-1].startsWith("Module.bsl") && moduleArray[hierarchy-4].startsWith("CommonModules")) {
             let meta: IMetaData = {
@@ -486,7 +484,7 @@ export class Global {
                 fullpath: fullpath,
                 module: moduleArray[hierarchy-4] + "." + moduleArray[hierarchy-3],
                 project: moduleArray.slice(0, hierarchy-4).join("/")
-            }
+            };
             this.dbmodules.insert(meta);
             } else if (moduleArray[hierarchy-1].startsWith("Module.bsl") && moduleArray[hierarchy-2].startsWith("Form")) {
             let meta: IMetaData = {
@@ -495,7 +493,7 @@ export class Global {
                 fullpath: fullpath,
                 module: moduleArray[hierarchy-7] + "." + moduleArray[hierarchy-6] + "." + moduleArray[hierarchy-4],
                 project: moduleArray.slice(0, hierarchy-7).join("/")
-            }
+            };
             this.dbmodules.insert(meta);
             } else if (moduleArray[hierarchy-1].startsWith("Module.bsl") 
                 && moduleArray[hierarchy-2].startsWith("Ext") 
@@ -507,7 +505,7 @@ export class Global {
                     fullpath: fullpath,
                     module: moduleArray[hierarchy-7] + "." + moduleArray[hierarchy-6] + "." + moduleArray[hierarchy-4],
                     project: moduleArray.slice(0, hierarchy-7).join("/")
-                }
+                };
                 this.dbmodules.insert(meta);
             } else if (moduleArray[hierarchy-1].startsWith("ValueManagerModule.bsl") && hierarchy > 4 && moduleArray[hierarchy-2].startsWith("Ext")) {
                 let meta: IMetaData = {
@@ -516,7 +514,7 @@ export class Global {
                     fullpath: fullpath,
                     module: moduleArray[hierarchy-4] + "." + moduleArray[hierarchy-3],
                     project: moduleArray.slice(0, hierarchy-5).join("/")
-                }
+                };
                 this.dbmodules.insert(meta);
             }  else {
                console.error("error set metadata for " + fullpath);

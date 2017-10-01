@@ -1,12 +1,12 @@
-import * as vscode from "vscode";
 import AbstractProvider from "./abstractProvider";
-import { Global } from "../global";
 import * as path from "path";
+import * as vscode from "vscode";
 
-export default class bslQuickOpen extends AbstractProvider {
-    public quickOpen(){
+
+export default class BslQuickOpen extends AbstractProvider {
+    public quickOpen() {
         vscode.window.showQuickPick(this.listOpen()).then(item => {
-            if (!item){
+            if ( !item ) {
                 console.log("canceled pick");
                 return;
             }
@@ -34,7 +34,7 @@ export default class bslQuickOpen extends AbstractProvider {
         const search = await this._global.dbmodules.chain().find(querystring).simplesort("module").data();
         search.forEach((value, index, array) => {
         let label: string = String(value.module);
-        if (this._global.toreplaced[value.parenttype]==undefined){
+        if ( !this._global.toreplaced[value.parenttype] ) {
             label = label.replace(value.parenttype + ".", "");
         }
         switch (value.type) {
@@ -45,7 +45,7 @@ export default class bslQuickOpen extends AbstractProvider {
                 label = label + ".МодульМенеджера";
                 break;
             case "CommandModule":
-                label = label+ ".МодульКоманды";
+                label = label + ".МодульКоманды";
                 break;
             case "CommonModule":
                 label = label;
@@ -61,20 +61,19 @@ export default class bslQuickOpen extends AbstractProvider {
             default:
                 break;
         }
-        //let fullpath = value.fullpath.startWith(this._global.getRootPath()) ? value.fullpath.replace(this._global.getRootPath()) : value.fullpath;
         let fullpath: string = String(value.fullpath);
         if (fullpath.startsWith(this._global.getRootPath())) {
             fullpath = fullpath.replace(this._global.getRootPath(), ".");
         }
-        let newPick: vscode.QuickPickItem = {
+        const newPick: vscode.QuickPickItem = {
             label: label,
             description: fullpath
-        }
-        if (firstproject.length == 0){
+        };
+        if ( firstproject.length == 0 ){
             firstproject = value.project;
         } else if (firstproject !== value.project){
             newPick.detail = value.project;
-        }
+        };
         result.push(newPick);
         });
         return result;
