@@ -430,90 +430,103 @@ export class Global {
         const moduleArray: string[] = fullpath.substr(
             rootPath.length + (rootPath.slice(-1) === "\\" ? 0 : 1)
         ).split(splitsymbol);
+        const filepath = fullpath;
         const hierarchy = moduleArray.length;
         if (hierarchy > 3) {
-            if (moduleArray[hierarchy-1].startsWith("ObjectModule.bsl") && moduleArray[hierarchy-2].startsWith("Ext")) {
-                let meta: IMetaData = {
+            if (moduleArray[hierarchy - 1].startsWith("ObjectModule.bsl")
+                && moduleArray[hierarchy - 2].startsWith("Ext")) {
+                const meta: IMetaData = {
                     type: "ObjectModule",
-                    parenttype: moduleArray[hierarchy-4],
-                    fullpath: fullpath,
-                    module: moduleArray[hierarchy-4] + "." + moduleArray[hierarchy-3],
+                    fullpath: filepath,
+                    parenttype: moduleArray[hierarchy - 4],
+                    module: moduleArray[hierarchy - 4] + "." + moduleArray[hierarchy - 3],
                     project: moduleArray.slice(0, 4).join("/")
                 };
                 this.dbmodules.insert(meta);
-            } else if (moduleArray[hierarchy-1].startsWith("ManagerModule.bsl") && hierarchy > 4 && moduleArray[hierarchy-2].startsWith("Ext")) {
-            let meta: IMetaData = {
-                type: "ManagerModule",
-                parenttype: moduleArray[hierarchy-4],
-                fullpath: fullpath,
-                module: moduleArray[hierarchy-4] + "." + moduleArray[hierarchy-3],
-                project: moduleArray.slice(0, hierarchy-5).join("/")
-            };
-            this.dbmodules.insert(meta);
-            } else if (moduleArray[hierarchy-1].startsWith("RecordSetModule.bsl") && hierarchy > 4 && moduleArray[hierarchy-2].startsWith("Ext")) {
-                let meta: IMetaData = {
+            } else if (moduleArray[hierarchy - 1].startsWith("ManagerModule.bsl")
+                && hierarchy > 4
+                && moduleArray[hierarchy - 2].startsWith("Ext")) {
+                const meta: IMetaData = {
+                    type: "ManagerModule",
+                    parenttype: moduleArray[hierarchy - 4],
+                    fullpath: filepath,
+                    module: moduleArray[hierarchy  - 4] + "." + moduleArray[hierarchy - 3],
+                    project: moduleArray.slice(0, hierarchy - 5).join("/")
+                };
+                this.dbmodules.insert(meta);
+            } else if (moduleArray[hierarchy - 1].startsWith("RecordSetModule.bsl")
+                && hierarchy > 4
+                && moduleArray[hierarchy - 2].startsWith("Ext")) {
+                const meta: IMetaData = {
                     type: "RecordSetModule",
-                    parenttype: moduleArray[hierarchy-4],
-                    fullpath: fullpath,
-                    module: moduleArray[hierarchy-4] + "." + moduleArray[hierarchy-3],
-                    project: moduleArray.slice(0, hierarchy-5).join("/")
+                    parenttype: moduleArray[hierarchy - 4],
+                    fullpath: filepath,
+                    module: moduleArray[hierarchy - 4] + "." + moduleArray[hierarchy - 3],
+                    project: moduleArray.slice(0, hierarchy - 5).join("/")
                 };
                 this.dbmodules.insert(meta);
-            } else if (moduleArray[hierarchy-1].startsWith("CommandModule.bsl") && hierarchy > 5) {
-            let meta: IMetaData = {
-                type: "CommandModule",
-                parenttype: moduleArray[hierarchy-4],
-                fullpath: fullpath,
-                module: moduleArray[hierarchy-5] + "." + moduleArray[hierarchy-4] + "." + moduleArray[hierarchy-3],
-                project: moduleArray.slice(0, hierarchy-5).join("/")
-            };
-            this.dbmodules.insert(meta);
-            } else if (moduleArray[hierarchy-1].startsWith("CommandModule.bsl") && moduleArray[hierarchy-4].startsWith("CommonCommands")) {
-                let meta: IMetaData = {
+            } else if (moduleArray[hierarchy - 1].startsWith("CommandModule.bsl") && hierarchy > 5) {
+                const meta: IMetaData = {
                     type: "CommandModule",
-                    parenttype: moduleArray[hierarchy-4],
-                    fullpath: fullpath,
-                    module: moduleArray[hierarchy-4] + "." + moduleArray[hierarchy-3],
-                    project: moduleArray.slice(0, hierarchy-4).join("/")
+                    parenttype: moduleArray[hierarchy - 4],
+                    fullpath: filepath,
+                    module: moduleArray[hierarchy - 5] + "."
+                            + moduleArray[hierarchy - 4] + "." + moduleArray[hierarchy - 3],
+                    project: moduleArray.slice(0, hierarchy - 5).join("/")
                 };
                 this.dbmodules.insert(meta);
-            } else if (moduleArray[hierarchy-1].startsWith("Module.bsl") && moduleArray[hierarchy-4].startsWith("CommonModules")) {
-            let meta: IMetaData = {
-                type: "CommonModule",
-                parenttype: moduleArray[hierarchy-4],
-                fullpath: fullpath,
-                module: moduleArray[hierarchy-4] + "." + moduleArray[hierarchy-3],
-                project: moduleArray.slice(0, hierarchy-4).join("/")
-            };
-            this.dbmodules.insert(meta);
-            } else if (moduleArray[hierarchy-1].startsWith("Module.bsl") && moduleArray[hierarchy-2].startsWith("Form")) {
-            let meta: IMetaData = {
+            } else if (moduleArray[hierarchy - 1].startsWith("CommandModule.bsl")
+                && moduleArray[hierarchy - 4].startsWith("CommonCommands")) {
+                const meta: IMetaData = {
+                    type: "CommandModule",
+                    parenttype: moduleArray[hierarchy - 4],
+                    fullpath: filepath,
+                    module: moduleArray[hierarchy - 4] + "." + moduleArray[hierarchy - 3],
+                    project: moduleArray.slice(0, hierarchy - 4).join("/")
+                };
+                this.dbmodules.insert(meta);
+            } else if (moduleArray[hierarchy - 1].startsWith("Module.bsl")
+                && moduleArray[hierarchy - 4].startsWith("CommonModules")) {
+                const meta: IMetaData = {
+                    type: "CommonModule",
+                    parenttype: moduleArray[hierarchy - 4],
+                    fullpath: filepath,
+                    module: moduleArray[hierarchy - 4] + "." + moduleArray[hierarchy - 3],
+                    project: moduleArray.slice(0, hierarchy - 4).join("/")
+                };
+                this.dbmodules.insert(meta);
+            } else if (moduleArray[hierarchy - 1].startsWith("Module.bsl")
+                && moduleArray[hierarchy - 2].startsWith("Form")) {
+            const meta: IMetaData = {
                 type: "FormModule",
-                parenttype: moduleArray[hierarchy-7],
-                fullpath: fullpath,
-                module: moduleArray[hierarchy-7] + "." + moduleArray[hierarchy-6] + "." + moduleArray[hierarchy-4],
-                project: moduleArray.slice(0, hierarchy-7).join("/")
+                parenttype: moduleArray[hierarchy - 7],
+                fullpath: filepath,
+                module: moduleArray[hierarchy - 7] + "."
+                        + moduleArray[hierarchy - 6] + "." + moduleArray[hierarchy - 4],
+                project: moduleArray.slice(0, hierarchy - 7).join("/")
             };
             this.dbmodules.insert(meta);
-            } else if (moduleArray[hierarchy-1].startsWith("Module.bsl") 
-                && moduleArray[hierarchy-2].startsWith("Ext") 
-                && moduleArray[hierarchy-4].startsWith("WebServices"))
-            {
-                let meta: IMetaData = {
+            } else if (moduleArray[hierarchy - 1].startsWith("Module.bsl")
+                && moduleArray[hierarchy - 2].startsWith("Ext")
+                && moduleArray[hierarchy - 4].startsWith("WebServices")) {
+                const meta: IMetaData = {
                     type: "FormModule",
-                    parenttype: moduleArray[hierarchy-7],
-                    fullpath: fullpath,
-                    module: moduleArray[hierarchy-7] + "." + moduleArray[hierarchy-6] + "." + moduleArray[hierarchy-4],
-                    project: moduleArray.slice(0, hierarchy-7).join("/")
+                    parenttype: moduleArray[hierarchy - 7],
+                    fullpath,
+                    module: moduleArray[hierarchy - 7]
+                            + "." + moduleArray[hierarchy - 6] + "." + moduleArray[hierarchy - 4],
+                    project: moduleArray.slice(0, hierarchy - 7).join("/")
                 };
                 this.dbmodules.insert(meta);
-            } else if (moduleArray[hierarchy-1].startsWith("ValueManagerModule.bsl") && hierarchy > 4 && moduleArray[hierarchy-2].startsWith("Ext")) {
-                let meta: IMetaData = {
+            } else if (moduleArray[hierarchy - 1].startsWith("ValueManagerModule.bsl")
+                && hierarchy > 4
+                && moduleArray[hierarchy - 2].startsWith("Ext")) {
+                const meta: IMetaData = {
                     type: "ValueManagerModule",
-                    parenttype: moduleArray[hierarchy-4],
-                    fullpath: fullpath,
-                    module: moduleArray[hierarchy-4] + "." + moduleArray[hierarchy-3],
-                    project: moduleArray.slice(0, hierarchy-5).join("/")
+                    parenttype: moduleArray[hierarchy - 4],
+                    fullpath,
+                    module: moduleArray[hierarchy - 4] + "." + moduleArray[hierarchy - 3],
+                    project: moduleArray.slice(0, hierarchy - 5).join("/")
                 };
                 this.dbmodules.insert(meta);
             }  else {
@@ -560,7 +573,7 @@ export class Global {
                 }
                 const moduleStr: string = fullpath.endsWith(".bsl") ? this.getModuleForPath(fullpath, rootPath) : "";
                 source = source.replace(/\r\n?/g, "\n");
-                if (fullpath.endsWith(".bsl") && source.trim().length > 0){
+                if (fullpath.endsWith(".bsl") && source.trim().length > 0) {
                     this.setMetadataForPath(fullpath, rootPath);
                 }
                 let parsesModule = new Parser().parse(source);
@@ -1207,11 +1220,11 @@ interface IKeywordsForLanguage {
     [index: string]: string;
 }
 
-interface IMetaData{
+interface IMetaData {
     description?: string;
     module?: string;
     type?: string; // Оставим пока строка.
-    parenttype?: string; //CommonModules, Documets, ExternalDataProcessor
+    parenttype?: string; // CommonModules, Documets, ExternalDataProcessor
     fullpath: string;
     project?: string;
 }

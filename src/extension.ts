@@ -280,16 +280,16 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
         const position = editor.selection.active;
-            const char = editor.document.getText(new vscode.Range(
+        const char = editor.document.getText(new vscode.Range(
                 new vscode.Position(position.line, position.character - 2), position));
-            const textline = editor.document.getText(
+        const textline = editor.document.getText(
                 new vscode.Range(
                     new vscode.Position(position.line, 0),
                     new vscode.Position(position.line, position.character - 2)
                 )
             );
-            const regex = /([а-яё_\w]+\s?)$/i;
-            const arrStrings = regex.exec(textline);
+        const regex = /([а-яё_\w]+\s?)$/i;
+        const arrStrings = regex.exec(textline);
         if (arrStrings) {
                     let postfix;
                     switch (char) {
@@ -318,8 +318,8 @@ export function activate(context: vscode.ExtensionContext) {
                     vscode.commands.executeCommand("tab");
                     return;
                     }
-            const word = arrStrings[1];
-            editor.edit((editBuilder) => {
+                    const word = arrStrings[1];
+                    editor.edit((editBuilder) => {
                     editBuilder.replace(
                         new vscode.Range(
                             new vscode.Position(
