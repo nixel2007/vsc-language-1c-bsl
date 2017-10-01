@@ -16,6 +16,7 @@ import SignatureHelpProvider from "./features/signatureHelpProvider";
 import SyntaxHelper from "./features/syntaxHelper";
 import TaskProvider from "./features/taskProvider";
 import WorkspaseSymbolProvider from "./features/workspaceSymbolProvider";
+import bslQuickOpen from "./features/bslQuickOpen";
 
 import * as bslGlobals from "./features/bslGlobals";
 import { CodeBeautyfier } from "./features/codeBeautifier";
@@ -27,7 +28,14 @@ import * as vscAdapter from "./vscAdapter";
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
+    const CMD_UPDATE = "language-1c-bsl.update";
+    const CMD_CREATECOMMENTS = "language-1c-bsl.createComments";
+    const CMD_ADDCOMMENT = "language-1c-bsl.addComment";
+    const CMD_EXPANDABBREVIATION = "language-1c-bsl.expandAbbreviation";
+    const CMD_QUICKOPEN = "language-1c-bsl.quickopen";
+
     const global = Global.create(vscAdapter);
+    const quickOpen = new bslQuickOpen(global);
     const taskProvider = new TaskProvider();
 
     vscode.workspace.onDidChangeConfiguration(taskProvider.onConfigurationChanged);
@@ -70,11 +78,11 @@ export function activate(context: vscode.ExtensionContext) {
     const linter = new LintProvider();
     linter.activate(context.subscriptions);
 
-    context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.update", () => {
+    context.subscriptions.push(vscode.commands.registerCommand(CMD_UPDATE, () => {
         global.updateCache();
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.createComments", () => {
+    context.subscriptions.push(vscode.commands.registerCommand(CMD_CREATECOMMENTS, () => {
         if (vscode.window.activeTextEditor.document.languageId === "bsl") {
             const configuration = vscode.workspace.getConfiguration("language-1c-bsl");
             const aL: any = configuration.get("languageAutocomplete");
@@ -215,7 +223,7 @@ export function activate(context: vscode.ExtensionContext) {
         )
     );
 
-    context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.addComment", () => {
+    context.subscriptions.push(vscode.commands.registerCommand(CMD_ADDCOMMENT, () => {
         const editor = vscode.window.activeTextEditor;
         if (!editor || !editor.selection.isEmpty || editor.document.languageId !== "bsl") {
             return;
@@ -265,7 +273,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.expandAbbreviation", () => {
+    context.subscriptions.push(vscode.commands.registerCommand(CMD_EXPANDABBREVIATION, () => {
         const editor = vscode.window.activeTextEditor;
         if (!editor || !editor.selection.isEmpty || editor.selection.active.character < 3) {
             vscode.commands.executeCommand("tab");
@@ -419,6 +427,10 @@ export function activate(context: vscode.ExtensionContext) {
 
     context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.beautify", () => {
         CodeBeautyfier.beautify();
+    }));
+
+    context.subscriptions.push(vscode.commands.registerCommand(CMD_QUICKOPEN, () => {
+        quickOpen.quickOpen();
     }));
 
     const previewUriString = "syntax-helper://authority/Синтакс-Помощник";
