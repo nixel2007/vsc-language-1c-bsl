@@ -296,7 +296,7 @@ export class Global {
                     }
                 }
                 for (const key in segment.constructors) {
-                    let findCntr = findClass.constructors[key];
+                    let findCntr = findClass.constructors[key.toLowerCase()];
                     if (!findCntr) {
                         findCntr = {
                             description: undefined,
