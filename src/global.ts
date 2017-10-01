@@ -261,6 +261,9 @@ export class Global {
                 findClass.oscript_description = (segment.description) ? (segment.description) : findClass.description;
                 for (const key in segment.methods) {
                     const nameMethod = segment.methods[key]["name" + postfix];
+                    if (!findClass.methods) {
+                        findClass.methods = {};
+                    }
                     let findMethod = findClass.methods[nameMethod.toLowerCase()];
                     if (!findMethod) {
                         findMethod = {
@@ -279,7 +282,10 @@ export class Global {
                     }
                 }
                 for (const key in segment.properties) {
-                    const nameProp = findClass.properties[key]["name" + postfix];
+                    const nameProp = segment.properties[key]["name" + postfix];
+                    if (!findClass.properties) {
+                        findClass.properties = {};
+                    }
                     let findProp = findClass.properties[nameProp.toLowerCase()];
                     if (!findProp) {
                         findProp = {
@@ -296,6 +302,9 @@ export class Global {
                     }
                 }
                 for (const key in segment.constructors) {
+                    if (!findClass.constructors) {
+                        findClass.constructors = {};
+                    }
                     let findCntr = findClass.constructors[key.toLowerCase()];
                     if (!findCntr) {
                         findCntr = {
