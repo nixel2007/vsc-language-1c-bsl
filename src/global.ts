@@ -440,29 +440,29 @@ export class Global {
                     fullpath: filepath,
                     parenttype: moduleArray[hierarchy - 4],
                     module: moduleArray[hierarchy - 4] + "." + moduleArray[hierarchy - 3],
-                    project: moduleArray.slice(0, 4).join("/")
+                    project: moduleArray.slice(0, hierarchy - 4).join("/")
                 };
                 this.dbmodules.insert(meta);
             } else if (moduleArray[hierarchy - 1].startsWith("ManagerModule.bsl")
-                && hierarchy > 4
+                && hierarchy > 3
                 && moduleArray[hierarchy - 2].startsWith("Ext")) {
                 const meta: IMetaData = {
                     type: "ManagerModule",
                     parenttype: moduleArray[hierarchy - 4],
                     fullpath: filepath,
                     module: moduleArray[hierarchy  - 4] + "." + moduleArray[hierarchy - 3],
-                    project: moduleArray.slice(0, hierarchy - 5).join("/")
+                    project: moduleArray.slice(0, hierarchy - 4).join("/")
                 };
                 this.dbmodules.insert(meta);
             } else if (moduleArray[hierarchy - 1].startsWith("RecordSetModule.bsl")
-                && hierarchy > 4
+                && hierarchy > 3
                 && moduleArray[hierarchy - 2].startsWith("Ext")) {
                 const meta: IMetaData = {
                     type: "RecordSetModule",
                     parenttype: moduleArray[hierarchy - 4],
                     fullpath: filepath,
                     module: moduleArray[hierarchy - 4] + "." + moduleArray[hierarchy - 3],
-                    project: moduleArray.slice(0, hierarchy - 5).join("/")
+                    project: moduleArray.slice(0, hierarchy - 4).join("/")
                 };
                 this.dbmodules.insert(meta);
             } else if (moduleArray[hierarchy - 1].startsWith("CommandModule.bsl") && hierarchy > 5) {
@@ -470,9 +470,9 @@ export class Global {
                     type: "CommandModule",
                     parenttype: moduleArray[hierarchy - 4],
                     fullpath: filepath,
-                    module: moduleArray[hierarchy - 5] + "."
-                            + moduleArray[hierarchy - 4] + "." + moduleArray[hierarchy - 3],
-                    project: moduleArray.slice(0, hierarchy - 5).join("/")
+                    module: moduleArray[hierarchy - 6] + "."
+                            + moduleArray[hierarchy - 5] + "." + moduleArray[hierarchy - 3],
+                    project: moduleArray.slice(0, hierarchy - 6).join("/")
                 };
                 this.dbmodules.insert(meta);
             } else if (moduleArray[hierarchy - 1].startsWith("CommandModule.bsl")
@@ -510,27 +510,27 @@ export class Global {
                 && moduleArray[hierarchy - 2].startsWith("Ext")
                 && moduleArray[hierarchy - 4].startsWith("WebServices")) {
                 const meta: IMetaData = {
-                    type: "FormModule",
-                    parenttype: moduleArray[hierarchy - 7],
-                    fullpath,
-                    module: moduleArray[hierarchy - 7]
-                            + "." + moduleArray[hierarchy - 6] + "." + moduleArray[hierarchy - 4],
-                    project: moduleArray.slice(0, hierarchy - 7).join("/")
+                    type: "CommonModule",
+                    parenttype: moduleArray[hierarchy - 4],
+                    fullpath: filepath,
+                    module: moduleArray[hierarchy - 4]
+                            + "." + moduleArray[hierarchy - 3],
+                    project: moduleArray.slice(0, hierarchy - 4).join("/")
                 };
                 this.dbmodules.insert(meta);
             } else if (moduleArray[hierarchy - 1].startsWith("ValueManagerModule.bsl")
-                && hierarchy > 4
+                && hierarchy > 3
                 && moduleArray[hierarchy - 2].startsWith("Ext")) {
                 const meta: IMetaData = {
                     type: "ValueManagerModule",
                     parenttype: moduleArray[hierarchy - 4],
-                    fullpath,
+                    fullpath: filepath,
                     module: moduleArray[hierarchy - 4] + "." + moduleArray[hierarchy - 3],
-                    project: moduleArray.slice(0, hierarchy - 5).join("/")
+                    project: moduleArray.slice(0, hierarchy - 4).join("/")
                 };
                 this.dbmodules.insert(meta);
             }  else {
-               console.error("error set metadata for " + fullpath);
+               // console.error("error set metadata for " + fullpath);
             }
         }
     }
