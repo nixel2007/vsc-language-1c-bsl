@@ -76,6 +76,11 @@
           "light": "./images/preview-darkgray.svg",
           "dark": "./images/preview-lightgray.svg"
         }
+      },
+      {
+        "command": "language-1c-bsl.quickopen",
+        "title": "QuickOpen",
+        "category": "Language 1C (BSL)"
       }
     ],
     "menus": {

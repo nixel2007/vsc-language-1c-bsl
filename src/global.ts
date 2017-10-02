@@ -25,6 +25,7 @@ export class Global {
 
     public cache: any;
     public db: any;
+    public dbmodules: any;
     public dbcalls: Map<string, any[]>;
     public globalfunctions: IMethods;
     public globalvariables: IPropertyDefinitions;
@@ -35,6 +36,7 @@ export class Global {
     public methodForDescription: any = undefined;
     public syntaxFilled: string = "";
     public hoverTrue: boolean = true;
+    public autocompleteLanguage: any;
     private bslCacheUpdated: boolean;
     private oscriptCacheUpdated: boolean;
 
@@ -43,8 +45,8 @@ export class Global {
             this.redefineMethods(adapter);
         }
         const configuration = this.getConfiguration("language-1c-bsl");
-        const autocompleteLanguage: any = this.getConfigurationKey(configuration, "languageAutocomplete");
-        const postfix = (autocompleteLanguage === "en") ? "_en" : "";
+        this.autocompleteLanguage = this.getConfigurationKey(configuration, "languageAutocomplete");
+        const postfix = (this.autocompleteLanguage === "en") ? "_en" : "";
         this.toreplaced = this.getReplaceMetadata();
         this.cache = new loki("gtags.json");
         this.globalfunctions = {};
@@ -54,7 +56,7 @@ export class Global {
         const globalfunctions: IBSLMethods = bslglobals.globalfunctions();
         const globalvariables: IPropertyDefinition = bslglobals.globalvariables();
         this.keywords = {};
-        for (const keyword in bslglobals.keywords()[autocompleteLanguage]) {
+        for (const keyword in bslglobals.keywords()[this.autocompleteLanguage]) {
             this.keywords[keyword.toLowerCase()] = keyword;
         }
         for (const key in globalfunctions) {
@@ -414,12 +416,124 @@ export class Global {
         };
     }
 
-    public getModuleForPath(fullpath: string, rootPath: string): any {
+    public getMetadataForPath(fullpath: string, rootPath: string): any {
         const splitsymbol = "/";
         const moduleArray: string[] = fullpath.substr(
             rootPath.length + (rootPath.slice(-1) === "\\" ? 0 : 1)
         ).split(splitsymbol);
-        let moduleStr = "";
+        const filepath = fullpath;
+        const hierarchy = moduleArray.length;
+        let result: any;
+        if (hierarchy > 3) {
+            if (moduleArray[hierarchy - 1].startsWith("ObjectModule.bsl")
+                && moduleArray[hierarchy - 2].startsWith("Ext")) {
+                const meta: IMetaData = {
+                    type: "ObjectModule",
+                    fullpath: filepath,
+                    parenttype: moduleArray[hierarchy - 4],
+                    module: moduleArray[hierarchy - 4] + "." + moduleArray[hierarchy - 3],
+                    project: moduleArray.slice(0, hierarchy - 4).join("/")
+                };
+                result = meta;
+            } else if (moduleArray[hierarchy - 1].startsWith("ManagerModule.bsl")
+                && hierarchy > 3
+                && moduleArray[hierarchy - 2].startsWith("Ext")) {
+                const meta: IMetaData = {
+                    type: "ManagerModule",
+                    parenttype: moduleArray[hierarchy - 4],
+                    fullpath: filepath,
+                    module: moduleArray[hierarchy  - 4] + "." + moduleArray[hierarchy - 3],
+                    project: moduleArray.slice(0, hierarchy - 4).join("/")
+                };
+                result = meta;
+            } else if (moduleArray[hierarchy - 1].startsWith("RecordSetModule.bsl")
+                && hierarchy > 3
+                && moduleArray[hierarchy - 2].startsWith("Ext")) {
+                const meta: IMetaData = {
+                    type: "RecordSetModule",
+                    parenttype: moduleArray[hierarchy - 4],
+                    fullpath: filepath,
+                    module: moduleArray[hierarchy - 4] + "." + moduleArray[hierarchy - 3],
+                    project: moduleArray.slice(0, hierarchy - 4).join("/")
+                };
+                result = meta;
+            } else if (moduleArray[hierarchy - 1].startsWith("CommandModule.bsl") && hierarchy > 5) {
+                const meta: IMetaData = {
+                    type: "CommandModule",
+                    parenttype: moduleArray[hierarchy - 6],
+                    fullpath: filepath,
+                    module: moduleArray[hierarchy - 6] + "."
+                            + moduleArray[hierarchy - 5] + "." + moduleArray[hierarchy - 3],
+                    project: moduleArray.slice(0, hierarchy - 6).join("/")
+                };
+                result = meta;
+            } else if (moduleArray[hierarchy - 1].startsWith("CommandModule.bsl")
+                && moduleArray[hierarchy - 4].startsWith("CommonCommands")) {
+                const meta: IMetaData = {
+                    type: "CommandModule",
+                    parenttype: moduleArray[hierarchy - 4],
+                    fullpath: filepath,
+                    module: moduleArray[hierarchy - 4] + "." + moduleArray[hierarchy - 3],
+                    project: moduleArray.slice(0, hierarchy - 4).join("/")
+                };
+                result = meta;
+            } else if (moduleArray[hierarchy - 1].startsWith("Module.bsl")
+                && moduleArray[hierarchy - 4].startsWith("CommonModules")) {
+                const meta: IMetaData = {
+                    type: "CommonModule",
+                    parenttype: moduleArray[hierarchy - 4],
+                    fullpath: filepath,
+                    module: moduleArray[hierarchy - 4] + "." + moduleArray[hierarchy - 3],
+                    project: moduleArray.slice(0, hierarchy - 4).join("/")
+                };
+                result = meta;
+            } else if (moduleArray[hierarchy - 1].startsWith("Module.bsl")
+                && moduleArray[hierarchy - 2].startsWith("Form")) {
+            const meta: IMetaData = {
+                type: "FormModule",
+                parenttype: moduleArray[hierarchy - 7],
+                fullpath: filepath,
+                module: moduleArray[hierarchy - 7] + "."
+                        + moduleArray[hierarchy - 6] + "." + moduleArray[hierarchy - 4],
+                project: moduleArray.slice(0, hierarchy - 7).join("/")
+            };
+            result = meta;
+            } else if (moduleArray[hierarchy - 1].startsWith("Module.bsl")
+                && moduleArray[hierarchy - 2].startsWith("Ext")
+                && moduleArray[hierarchy - 4].startsWith("WebServices")) {
+                const meta: IMetaData = {
+                    type: "CommonModule",
+                    parenttype: moduleArray[hierarchy - 4],
+                    fullpath: filepath,
+                    module: moduleArray[hierarchy - 4]
+                            + "." + moduleArray[hierarchy - 3],
+                    project: moduleArray.slice(0, hierarchy - 4).join("/")
+                };
+                this.dbmodules.insert(meta);
+            } else if (moduleArray[hierarchy - 1].startsWith("ValueManagerModule.bsl")
+                && hierarchy > 3
+                && moduleArray[hierarchy - 2].startsWith("Ext")) {
+                const meta: IMetaData = {
+                    type: "ValueManagerModule",
+                    parenttype: moduleArray[hierarchy - 4],
+                    fullpath: filepath,
+                    module: moduleArray[hierarchy - 4] + "." + moduleArray[hierarchy - 3],
+                    project: moduleArray.slice(0, hierarchy - 4).join("/")
+                };
+                result = meta;
+            }  else {
+               // console.error("error set metadata for " + fullpath);
+            }
+        }
+        return result;
+    }
+
+    public getModuleForPath(fullpath: string, rootPath: string): string {
+        const splitsymbol = "/";
+        const moduleArray: string[] = fullpath.substr(
+            rootPath.length + (rootPath.slice(-1) === "\\" ? 0 : 1)
+        ).split(splitsymbol);
+        let moduleStr: string = "";
         const hierarchy = moduleArray.length;
         if (hierarchy > 3) {
             if (moduleArray[hierarchy - 4].startsWith("CommonModules")) {
@@ -429,6 +543,37 @@ export class Global {
             }
         }
         return moduleStr;
+    }
+
+    public getHumanMetadata(meta: any): string {
+        const toReplacedPrefix = this.getReplaceMetadata();
+        const toReplecedSuffix = {
+            ObjectModule: "МодульОбъекта",
+            ManagerModule: "МодульМенеджера",
+            CommandModule: "МодульОбщий",
+            FormModule: "МодульФормы",
+            RecordSetModule: "МодульНабораЗаписей",
+            ValueManagerModule: "МодульМенеджераЗначений"
+        };
+
+        let locLabel: string = String(meta.module);
+        if (!toReplacedPrefix[meta.parenttype]) {
+            locLabel = locLabel.replace(meta.parenttype + ".", ""); // Для внешних обработок уберем "метаданные"
+        }
+        if (this.autocompleteLanguage === "ru") {
+
+            if (toReplacedPrefix[meta.parenttype]) {
+                locLabel = locLabel.replace(meta.parenttype + ".", toReplacedPrefix[meta.parenttype] + ".");
+            }
+
+            // tslint:disable-next-line:prefer-conditional-expression
+            if (toReplecedSuffix[meta.type]) {
+                locLabel = locLabel + "." + toReplecedSuffix[meta.type];
+            }
+        } else {
+            locLabel = locLabel + "." + meta.type;
+        }
+        return locLabel;
     }
 
     public async waitForCacheUpdate() {
@@ -446,12 +591,18 @@ export class Global {
             if (fullpath.startsWith("file:")) {
                 fullpath = fullpath.substr(substrIndex);
             }
-            fq.readFile(fullpath, { encoding: "utf8" }, (err, source) => {
+            fq.readFile(fullpath, { encoding: "utf8" }, (err, source: string) => {
                 if (err) {
                     throw err;
                 }
-                const moduleStr = fullpath.endsWith(".bsl") ? this.getModuleForPath(fullpath, rootPath) : "";
+                const moduleStr: string = fullpath.endsWith(".bsl") ? this.getModuleForPath(fullpath, rootPath) : "";
                 source = source.replace(/\r\n?/g, "\n");
+                if (fullpath.endsWith(".bsl") && source.trim().length > 0) {
+                    const metacollection = this.getMetadataForPath(fullpath, rootPath);
+                    if (metacollection !== undefined) {
+                        this.dbmodules.insert(metacollection);
+                    }
+                }
                 let parsesModule = new Parser().parse(source);
                 source = undefined;
                 const entries = parsesModule.getMethodsTable().find();
@@ -504,9 +655,13 @@ export class Global {
         if (this.cache.getCollection("ValueTable")) {
             this.cache.removeCollection("ValueTable");
         }
+        if (this.cache.getCollection("ValueTableModules")) {
+            this.cache.removeCollection("ValueTableModules");
+        }
 
         this.db = this.cache.addCollection("ValueTable");
         this.dbcalls = new Map();
+        this.dbmodules = this.cache.addCollection("ValueTableModules");
 
         const configuration = this.getConfiguration("language-1c-bsl");
         const basePath: string = String(this.getConfigurationKey(configuration, "rootPath"));
@@ -1129,4 +1284,13 @@ interface IKeywords {
 
 interface IKeywordsForLanguage {
     [index: string]: string;
+}
+
+interface IMetaData {
+    description?: string;
+    module?: string;
+    type?: string; // Оставим пока строка.
+    parenttype?: string; // CommonModules, Documets, ExternalDataProcessor
+    fullpath: string;
+    project?: string;
 }
