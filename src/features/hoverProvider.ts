@@ -111,8 +111,8 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
             }
         );
         for (const param of entry._method.Params) {
-            const documentationParam = this._global.GetDocParam(arraySignature.description, param);
-            description.push("***" + param + "***: " + documentationParam.descriptionParam);
+            const documentationParam = this._global.GetDocParam(arraySignature.description, param.name);
+            description.push("***" + param.name + "***: " + documentationParam.descriptionParam);
         }
         return new vscode.Hover(description);
     }

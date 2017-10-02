@@ -28,7 +28,7 @@ export class Global {
     public dbmodules: any;
     public dbcalls: Map<string, any[]>;
     public globalfunctions: IMethods;
-    public globalvariables: IGlobalVariables;
+    public globalvariables: IPropertyDefinitions;
     public keywords: IKeywordsForLanguage;
     public systemEnum: ISystemEnums;
     public classes: IClasses;
@@ -53,8 +53,8 @@ export class Global {
         this.globalvariables = {};
         this.systemEnum = {};
         this.classes = {};
-        const globalfunctions: IMethods = bslglobals.globalfunctions();
-        const globalvariables: IGlobalVariables = bslglobals.globalvariables();
+        const globalfunctions: IBSLMethods = bslglobals.globalfunctions();
+        const globalvariables: IPropertyDefinition = bslglobals.globalvariables();
         this.keywords = {};
         for (const keyword in bslglobals.keywords()[this.autocompleteLanguage]) {
             this.keywords[keyword.toLowerCase()] = keyword;
@@ -64,8 +64,6 @@ export class Global {
             const newName = globalFunction["name" + postfix];
             const newElement: IMethod = {
                 name: newName,
-                // TODO: в интерфейсе и алиас и name_en?
-                name_en: undefined,
                 alias: (postfix === "_en") ? globalFunction.name : globalFunction.name_en,
                 description: globalFunction.description,
                 signature: globalFunction.signature,
@@ -91,7 +89,6 @@ export class Global {
                     const newName = method["name" + postfix];
                     const newElement: IMethod = {
                         name: newName,
-                        name_en: undefined,
                         alias: (postfix === "_en") ? method.name : method.name_en,
                         description: undefined,
                         signature: undefined,
@@ -113,9 +110,8 @@ export class Global {
                 continue;
             }
             const newName = globalvariables[element]["name" + postfix];
-            const newElement: IGlobalVariable = {
+            const newElement: IPropertyDefinition = {
                 name: newName,
-                name_en: undefined,
                 alias: (postfix === "_en") ? globalvariables[element].name : globalvariables[element].name_en,
                 description: globalvariables[element].description
             };
@@ -133,9 +129,8 @@ export class Global {
                     globVar.oscript_access = segment.properties[key].access;
                 } else {
                     const newName = segment.properties[key]["name" + postfix];
-                    const newElement: IGlobalVariable = {
+                    const newElement: IPropertyDefinition = {
                         name: newName,
-                        name_en: undefined,
                         alias: (postfix === "_en")
                             ? segment.properties[key].name
                             : segment.properties[key].name_en,
@@ -147,7 +142,7 @@ export class Global {
                 }
             }
         }
-        let systemEnum: ISystemEnums = bslglobals.systemEnum();
+        let systemEnum: IBSLSystemEnums = bslglobals.systemEnum();
         for (const element in systemEnum) {
             if (!systemEnum.hasOwnProperty(element)) {
                 continue;
@@ -156,7 +151,6 @@ export class Global {
             const newName = segment["name" + postfix];
             const newElement: ISystemEnum = {
                 name: newName,
-                name_en: undefined,
                 alias: (postfix === "_en") ? segment.name : segment.name_en,
                 description: segment.description,
                 values: [],
@@ -169,7 +163,6 @@ export class Global {
                 const newNameValues = values[key]["name" + postfix];
                 const elementValue: ISystemEnumValue = {
                     name: newNameValues,
-                    name_en: undefined,
                     alias: (postfix === "_en") ? values[key].name : values[key].name_en,
                     description: values[key].description,
                 };
@@ -190,7 +183,6 @@ export class Global {
             } else {
                 const newElement: ISystemEnum = {
                     name: newName,
-                    name_en: undefined,
                     alias: (postfix === "_en") ? segment.name : segment.name_en,
                     description: undefined,
                     values: [],
@@ -204,7 +196,6 @@ export class Global {
                     const newNameValues = values[key]["name" + postfix];
                     const elementValue: ISystemEnumValue = {
                         name: newNameValues,
-                        name_en: undefined,
                         alias: (postfix === "_en") ? values[key].name : values[key].name_en,
                         description: values[key].description,
                     };
@@ -213,7 +204,7 @@ export class Global {
                 this.systemEnum[newName.toLowerCase()] = newElement;
             }
         }
-        const classes: IClasses = bslglobals.classes();
+        const classes: IBSLClasses = bslglobals.classes();
         for (const element in classes) {
             if (!classes.hasOwnProperty(element)) {
                 continue;
@@ -222,7 +213,6 @@ export class Global {
             const newName = segment["name" + postfix];
             const newElement: IClass = {
                 name: newName,
-                name_en: undefined,
                 alias: (postfix === "_en") ? segment.name : segment.name_en,
                 description: segment.description,
                 methods: (segment.methods) ? {} : undefined,
@@ -234,7 +224,6 @@ export class Global {
                 const newNameMethod = method["name" + postfix];
                 const newMethod: IMethod = {
                     name: newName,
-                    name_en: undefined,
                     alias: (postfix === "_en") ? method.name : method.name_en,
                     description: method.description,
                     // TODO: undefined?
@@ -247,7 +236,6 @@ export class Global {
                 const newNameProp = property["name" + postfix];
                 const newProp: IPropertyDefinition = {
                     name: newName,
-                    name_en: undefined,
                     alias: (postfix === "_en") ? property.name : property.name_en,
                     description: property.description,
                 };
@@ -263,7 +251,7 @@ export class Global {
             }
             this.classes[newName.toLowerCase()] = newElement;
         }
-        const classesOscript: IClasses = oscriptStdLib.classesOscript();
+        const classesOscript: IBSLClasses = oscriptStdLib.classesOscript();
         for (const element in classesOscript) {
             if (!classesOscript.hasOwnProperty(element)) {
                 continue;
@@ -274,13 +262,14 @@ export class Global {
                 const findClass = this.classes[newName.toLowerCase()];
                 findClass.oscript_description = (segment.description) ? (segment.description) : findClass.description;
                 for (const key in segment.methods) {
-                    let findMethod = segment.methods[key];
-                    const nameMethod = findMethod["name" + postfix];
-                    // TODO: Тут происходит что-то странное
+                    const nameMethod = segment.methods[key]["name" + postfix];
+                    if (!findClass.methods) {
+                        findClass.methods = {};
+                    }
+                    let findMethod = findClass.methods[nameMethod.toLowerCase()];
                     if (!findMethod) {
                         findMethod = {
                             name: nameMethod,
-                            name_en: undefined,
                             alias: (postfix === "_en")
                                 ? segment.methods[key].name
                                 : segment.methods[key].name_en,
@@ -295,13 +284,14 @@ export class Global {
                     }
                 }
                 for (const key in segment.properties) {
-                    let findProp = segment.properties[key];
-                    const nameProp = findProp["name" + postfix];
-                    // TODO: Тут происходит что-то странное
+                    const nameProp = segment.properties[key]["name" + postfix];
+                    if (!findClass.properties) {
+                        findClass.properties = {};
+                    }
+                    let findProp = findClass.properties[nameProp.toLowerCase()];
                     if (!findProp) {
                         findProp = {
                             name: nameProp,
-                            name_en: undefined,
                             alias: (postfix === "_en")
                                 ? segment.properties[key].name
                                 : segment.properties[key].name_en,
@@ -314,7 +304,10 @@ export class Global {
                     }
                 }
                 for (const key in segment.constructors) {
-                    let findCntr = segment.constructors[key];
+                    if (!findClass.constructors) {
+                        findClass.constructors = {};
+                    }
+                    let findCntr = findClass.constructors[key.toLowerCase()];
                     if (!findCntr) {
                         findCntr = {
                             description: undefined,
@@ -330,7 +323,6 @@ export class Global {
             } else {
                 const newElement: IClass = {
                     name: newName,
-                    name_en: undefined,
                     alias: (postfix === "_en") ? segment.name : segment.name_en,
                     description: undefined,
                     oscript_description: segment.description,
@@ -350,7 +342,6 @@ export class Global {
                     const newNameProp = segment.properties[key]["name" + postfix];
                     const newProp: IPropertyDefinition = {
                         name: newName,
-                        name_en: undefined,
                         alias: (postfix === "_en")
                             ? segment.properties[key].name
                             : segment.properties[key].name_en,
@@ -363,7 +354,6 @@ export class Global {
                     const newNameMethod = segment.methods[key]["name" + postfix];
                     const newMethod: IMethod = {
                         name: newName,
-                        name_en: undefined,
                         alias: (postfix === "_en") ? segment.methods[key].name : segment.methods[key].name_en,
                         description: undefined,
                         oscript_description: segment.methods[key].description,
@@ -1129,9 +1119,12 @@ interface IMethods {
     [index: string]: IMethod;
 }
 
+interface IBSLMethods {
+    [index: string]: IBSLMethod;
+}
+
 interface IMethod {
     name: string;
-    name_en: string;
     alias: string;
     description: string;
     signature: ISignatureCollection;
@@ -1139,6 +1132,14 @@ interface IMethod {
     oscript_description?: string;
     oscript_signature?: ISignatureCollection;
     oscript_access?: boolean;
+}
+
+interface IBSLMethod {
+    name: string;
+    name_en: string;
+    description: string;
+    signature: ISignatureCollection;
+    returns?: string;
 }
 
 interface ISignatureCollection {
@@ -1161,7 +1162,7 @@ interface IOscriptGlobalContext {
 
 interface IOscriptSegment {
     description?: string;
-    properties?: IPropertyDefinitions;
+    properties?: IBSLPropertyDefinitions;
     methods?: IOscriptFunctionDefinitions;
 }
 
@@ -1169,17 +1170,28 @@ interface IPropertyDefinitions {
     [index: string]: IPropertyDefinition;
 }
 
-interface IOscriptFunctionDefinitions {
-    [index: string]: IOscriptFunctionDefinition;
+interface IBSLPropertyDefinitions {
+    [index: string]: IBSLPropertyDefinition;
 }
 
 interface IPropertyDefinition {
     name: string;
-    name_en: string;
     alias: string;
     description: string;
     oscript_description?: string;
     access?: string;
+    oscript_access?: string;
+}
+
+interface IBSLPropertyDefinition {
+    name: string;
+    name_en: string;
+    description: string;
+    access?: string;
+}
+
+interface IOscriptFunctionDefinitions {
+    [index: string]: IOscriptFunctionDefinition;
 }
 
 interface IOscriptFunctionDefinition {
@@ -1192,51 +1204,65 @@ interface IOscriptFunctionDefinition {
     example?: string;
 }
 
-interface IGlobalVariables {
-    [index: string]: IGlobalVariable;
-}
-
-interface IGlobalVariable {
-    name: string;
-    name_en: string;
-    description: string;
-    alias: string;
-    oscript_description?: string;
-    oscript_access?: string;
-}
-
 interface ISystemEnums {
     [index: string]: ISystemEnum;
 }
 
+interface IBSLSystemEnums {
+    [index: string]: IBSLSystemEnum;
+}
+
 interface ISystemEnum {
     name: string;
-    name_en: string;
     alias: string;
     description: string;
     oscript_description?: string;
     values: ISystemEnumValue[];
 }
 
-interface ISystemEnumValue {
+interface IBSLSystemEnum {
     name: string;
     name_en: string;
-    alias: string;
     description: string;
+    values: IBSLSystemEnumValue[];
+}
+
+interface ISystemEnumValue {
+    name?: string;
+    alias?: string;
+    description?: string;
+}
+
+interface IBSLSystemEnumValue {
+    name?: string;
+    name_en?: string;
+    description?: string;
 }
 
 interface IClasses {
     [index: string]: IClass;
 }
 
+interface IBSLClasses {
+    [index: string]: IBSLClass;
+}
+
 interface IClass {
     name: string;
-    name_en: string;
     alias: string;
     description: string;
     oscript_description?: string;
     methods?: IMethods;
     properties?: IPropertyDefinitions;
+    constructors?: IConstructorDefinitions;
+}
+
+interface IBSLClass {
+    name: string;
+    name_en: string;
+    description: string;
+    methods?: IBSLMethods;
+    properties?: IBSLPropertyDefinitions;
     constructors?: IConstructorDefinitions;
 }
 
