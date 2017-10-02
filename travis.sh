@@ -12,7 +12,7 @@ prop='version'
 
 jsonval
 
-if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
+if [ "$TRAVIS_PULL_REQUEST" != "false" ] && [ "$TRAVIS_REPO_SLUG" == xDrivenDevelopment* ]; then
   sonar-scanner \
       -Dsonar.host.url=http://sonar.silverbulleters.org \
       -Dsonar.analysis.mode=issues \
