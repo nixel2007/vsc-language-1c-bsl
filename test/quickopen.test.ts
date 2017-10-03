@@ -52,16 +52,20 @@ describe("MetadataParse", () => {
     });
 
     it("should be return human name", async () => {
-        const metadata = globals.dbmodules.chain().find({parenttype: "Catalogs"}).data();
+        const metadata = globals.dbmodules.chain()
+                .find({parenttype: "Catalogs", type: "ObjectModule"})
+                .data();
         globals.getHumanMetadata(metadata[0]).should
-            .equals("Справочники._ДемоБанковскиеСчета._ДемоБанковскиеСчета.МодульОбщий");
+            .equals("Справочники._ДемоБанковскиеСчета.МодульОбъекта");
     });
 
     it("should be return human name in En", async () => {
         globals.autocompleteLanguage = "en";
-        const metadata = globals.dbmodules.chain().find({parenttype: "Catalogs"}).data();
+        const metadata = globals.dbmodules.chain()
+                .find({parenttype: "Catalogs", type: "ObjectModule"})
+                .data();
         globals.getHumanMetadata(metadata[0]).should
-            .equals("Catalogs._ДемоБанковскиеСчета._ДемоБанковскиеСчета.CommandModule");
+            .equals("Catalogs._ДемоБанковскиеСчета.ObjectModule");
     });
 
 });
