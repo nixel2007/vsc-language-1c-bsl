@@ -42,7 +42,7 @@ describe("MetadataParse", () => {
         const metadata = globals.dbmodules.chain().find({parenttype: "Catalogs"}).data();
         metadata.length.should.greaterThan(0);
         metadata[0].should.has.a.key("parenttype").which.is.equal("Catalogs");
-        metadata[0].should.has.a.key("module").which.is.match("Catalogs._ДемоБанковскиеСчета");
+        metadata[0].should.has.a.key("module").which.is.equal("Catalogs._ДемоБанковскиеСчета._ДемоБанковскиеСчета");
     });
 
     it("should be avaliable Documents metadata", async () => {
@@ -52,14 +52,14 @@ describe("MetadataParse", () => {
     });
 
     it("should be return human name", async () => {
-        const metadata = globals.dbmodules.chain().data();
+        const metadata = globals.dbmodules.chain().find({parenttype: "Catalogs"}).data();
         globals.getHumanMetadata(metadata[0]).should
             .equals("Справочники._ДемоБанковскиеСчета._ДемоБанковскиеСчета.МодульОбщий");
     });
 
     it("should be return human name in En", async () => {
         globals.autocompleteLanguage = "en";
-        const metadata = globals.dbmodules.chain().data();
+        const metadata = globals.dbmodules.chain().find({parenttype: "Catalogs"}).data();
         globals.getHumanMetadata(metadata[0]).should
             .equals("Catalogs._ДемоБанковскиеСчета._ДемоБанковскиеСчета.CommandModule");
     });
