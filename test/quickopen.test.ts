@@ -39,14 +39,20 @@ describe("MetadataParse", () => {
     });
 
     it("should be avaliable Catalogs metadata", async () => {
-        const metadata = globals.dbmodules.chain().find({parenttype: "Catalogs"}).data();
+        const metadata = globals.dbmodules.chain()
+            .find({parenttype: "Catalogs"})
+            .simplesort("module")
+            .data();
         metadata.length.should.greaterThan(0);
         metadata[0].should.has.a.key("parenttype").which.is.equal("Catalogs");
-        metadata[0].should.has.a.key("module").which.is.equal("Catalogs._ДемоБанковскиеСчета._ДемоБанковскиеСчета");
+        metadata[0].should.has.a.key("module").which.is.equal("Catalogs._ДемоБанковскиеСчета");
     });
 
     it("should be avaliable Documents metadata", async () => {
-        const metadata = globals.dbmodules.chain().find({parenttype: "Documents"}).data();
+        const metadata = globals.dbmodules.chain()
+            .find({parenttype: "Documents"})
+            .simplesort("module")
+            .data();
         metadata.length.should.greaterThan(0);
         metadata[0].should.has.a.key("parenttype").which.is.equal("Documents");
     });
