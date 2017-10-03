@@ -14,33 +14,54 @@ let textDocument: vscode.TextDocument;
 
 describe("MetadataParse", () => {
 
-    beforeEach(async () => {
-        await clearActiveTextEditor();
-    });
-
-    it("should be avaliable metadata data", async () => {
+    before(async () => {
         const uriFile = vscode.Uri.file(
             path.join(fixturePath, "CommonModules", "CommonModule", "Ext", "Module.bsl")
         );
         textDocument = await newTextDocument(uriFile);
         await globals.waitForCacheUpdate();
+    });
 
-        const position = vscode.window.activeTextEditor.selection.anchor;
+    beforeEach(async () => {
+        await clearActiveTextEditor();
+    });
+
+    it("should be avaliable metadata data", async () => {
         const quick = new BslQuickOpen(globals);
-        globals.dbmodules.chain().data().should.have.length(3);
+        globals.dbmodules.chain().data().length.should.greaterThan(1);
 
     });
 
-    it("should be avaliable document metadata", async () => {
-        const uriFile = vscode.Uri.file(
-            path.join(fixturePath, "Documents", "Document", "Ext", "ManagerModule.bsl")
-        );
-        textDocument = await newTextDocument(uriFile);
-        await globals.waitForCacheUpdate();
+    it("should be avaliable CommonModule metadata", async () => {
+        const metadata = globals.dbmodules.chain().find({parenttype: "CommonModules"}).data();
+        metadata.length.should.greaterThan(0);
+        metadata[0].should.has.a.key("parenttype").which.is.equal("CommonModules");
+    });
+
+    it("should be avaliable Catalogs metadata", async () => {
+        const metadata = globals.dbmodules.chain().find({parenttype: "Catalogs"}).data();
+        metadata.length.should.greaterThan(0);
+        metadata[0].should.has.a.key("parenttype").which.is.equal("Catalogs");
+        metadata[0].should.has.a.key("module").which.is.match("Catalogs._ДемоБанковскиеСчета");
+    });
+
+    it("should be avaliable Documents metadata", async () => {
+        const metadata = globals.dbmodules.chain().find({parenttype: "Documents"}).data();
+        metadata.length.should.greaterThan(0);
+        metadata[0].should.has.a.key("parenttype").which.is.equal("Documents");
+    });
+
+    it("should be return human name", async () => {
         const metadata = globals.dbmodules.chain().data();
-        metadata.should.have.length(3);
-        metadata[0].should.has.a.key("type").which.is.equal("CommonModule");
-        // metadata[2].should.has.a.key("module").which.is.equal("Documents.Document");
+        globals.getHumanMetadata(metadata[0]).should
+            .equals("Справочники._ДемоБанковскиеСчета._ДемоБанковскиеСчета.МодульОбщий");
+    });
+
+    it("should be return human name in En", async () => {
+        globals.autocompleteLanguage = "en";
+        const metadata = globals.dbmodules.chain().data();
+        globals.getHumanMetadata(metadata[0]).should
+            .equals("Catalogs._ДемоБанковскиеСчета._ДемоБанковскиеСчета.CommandModule");
     });
 
 });
