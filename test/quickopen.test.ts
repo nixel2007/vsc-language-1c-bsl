@@ -39,7 +39,7 @@ describe("MetadataParse", () => {
     });
 
     it("should be avaliable Catalogs metadata", async () => {
-        const metadata = globals.dbmodules.chain().find({parenttypeype: "Catalogs"}).data();
+        const metadata = globals.dbmodules.chain().find({parenttype: "Catalogs"}).data();
         metadata.length.should.greaterThan(0);
         metadata[0].should.has.a.key("parenttype").which.is.equal("Catalogs");
         metadata[0].should.has.a.key("module").which.is.match("Catalogs._ДемоБанковскиеСчета");
