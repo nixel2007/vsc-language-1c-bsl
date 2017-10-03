@@ -39,29 +39,39 @@ describe("MetadataParse", () => {
     });
 
     it("should be avaliable Catalogs metadata", async () => {
-        const metadata = globals.dbmodules.chain().find({parenttype: "Catalogs"}).data();
+        const metadata = globals.dbmodules.chain()
+            .find({parenttype: "Catalogs"})
+            .simplesort("module")
+            .data();
         metadata.length.should.greaterThan(0);
         metadata[0].should.has.a.key("parenttype").which.is.equal("Catalogs");
-        metadata[0].should.has.a.key("module").which.is.equal("Catalogs._ДемоБанковскиеСчета._ДемоБанковскиеСчета");
+        metadata[0].should.has.a.key("module").which.is.equal("Catalogs._ДемоБанковскиеСчета");
     });
 
     it("should be avaliable Documents metadata", async () => {
-        const metadata = globals.dbmodules.chain().find({parenttype: "Documents"}).data();
+        const metadata = globals.dbmodules.chain()
+            .find({parenttype: "Documents"})
+            .simplesort("module")
+            .data();
         metadata.length.should.greaterThan(0);
         metadata[0].should.has.a.key("parenttype").which.is.equal("Documents");
     });
 
     it("should be return human name", async () => {
-        const metadata = globals.dbmodules.chain().find({parenttype: "Catalogs"}).data();
+        const metadata = globals.dbmodules.chain()
+                .find({parenttype: "Catalogs", type: "ObjectModule"})
+                .data();
         globals.getHumanMetadata(metadata[0]).should
-            .equals("Справочники._ДемоБанковскиеСчета._ДемоБанковскиеСчета.МодульОбщий");
+            .equals("Справочники._ДемоБанковскиеСчета.МодульОбъекта");
     });
 
     it("should be return human name in En", async () => {
         globals.autocompleteLanguage = "en";
-        const metadata = globals.dbmodules.chain().find({parenttype: "Catalogs"}).data();
+        const metadata = globals.dbmodules.chain()
+                .find({parenttype: "Catalogs", type: "ObjectModule"})
+                .data();
         globals.getHumanMetadata(metadata[0]).should
-            .equals("Catalogs._ДемоБанковскиеСчета._ДемоБанковскиеСчета.CommandModule");
+            .equals("Catalogs._ДемоБанковскиеСчета.ObjectModule");
     });
 
 });
