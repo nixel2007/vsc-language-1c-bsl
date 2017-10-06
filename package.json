@@ -22,7 +22,7 @@
     "Languages"
   ],
   "engines": {
-    "vscode": "^1.15.0"
+    "vscode": "^1.17.0"
   },
   "main": "./out/src/extension",
   "scripts": {
@@ -186,7 +186,8 @@
         "aliases": [
           "1C (BSL)",
           "BSL"
-        ]
+        ],
+        "configuration": "./language-configuration.json"
       },
       {
         "id": "sdbl",
