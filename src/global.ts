@@ -550,7 +550,8 @@ export class Global {
         const toReplecedSuffix = {
             ObjectModule: "МодульОбъекта",
             ManagerModule: "МодульМенеджера",
-            CommandModule: "МодульОбщий",
+            CommonModule: "МодульОбщий",
+            CommandModule: "МодульКоманды",
             FormModule: "МодульФормы",
             RecordSetModule: "МодульНабораЗаписей",
             ValueManagerModule: "МодульМенеджераЗначений"
