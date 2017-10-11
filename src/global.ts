@@ -1290,3 +1290,26 @@ interface IMetaData {
     fullpath: string;
     project?: string;
 }
+
+interface ISyntaxHelper {
+    systemEnum?: IBSLSystemEnums;
+    classes?: IBSLClasses;
+    keywords?: IKeywords;
+    globalvariables?: IBSLPropertyDefinitions;
+    globalfunctions?: IBSLMethods;
+    structureMenu?: ISyntaxHelperMenu;
+}
+
+interface ISyntaxHelperMenu {
+    globalContext: ISyntaxHelperGlobalSections;
+    classes: ISyntaxHelperClass[];
+}
+
+interface ISyntaxHelperGlobalSections {
+    [index: string]: string[];
+}
+
+interface ISyntaxHelperClass {
+    name: string;
+    subclasses: ISyntaxHelperClass[];
+}
