@@ -713,9 +713,7 @@ export class Global {
                     const globOptions: glob.IOptions = {};
                     globOptions.nocase = true;
                     globOptions.cwd = line;
-                    // glob >=7.0.0 contains this property
-                    // tslint:disable-next-line:no-string-literal
-                    globOptions["absolute"] = true;
+                    globOptions.absolute = true;
                     glob(libSearchPattern, globOptions, (err, files) => {
                         if (err) {
                             console.error(err);
