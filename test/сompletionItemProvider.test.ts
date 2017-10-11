@@ -104,7 +104,7 @@ describe("Completion", function() {
 
     it("should show global variables", async () => {
 
-        await addText("БиблиотекаКарт");
+        await addText("WS");
 
         const completionList = await getCompletionListFromCurrentPosition();
         const completions = completionList.items;
@@ -112,7 +112,7 @@ describe("Completion", function() {
         completions.should.have.length(1);
 
         const completion = completions[0];
-        completion.label.should.be.equal("БиблиотекаКартинок");
+        completion.label.should.be.equal("WSСсылки");
         completion.kind.should.be.equal(vscode.CompletionItemKind.Variable);
 
     });
