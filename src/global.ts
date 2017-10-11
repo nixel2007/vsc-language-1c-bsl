@@ -41,8 +41,11 @@ export class Global {
     public syntaxFilled: string = "";
     public hoverTrue: boolean = true;
     public autocompleteLanguage: any;
-    private bslCacheUpdated: boolean;
-    private oscriptCacheUpdated: boolean;
+    public dllData: object;
+    public libData: object = {};
+    public subsystems: object = {};
+    public oscriptCacheUpdated: boolean;
+    public bslCacheUpdated: boolean;
 
     constructor(adapter?: any) {
         if (adapter) {
@@ -57,10 +60,10 @@ export class Global {
         this.globalvariables = {};
         this.systemEnum = {};
         this.classes = {};
-        const globalfunctions: IBSLMethods = bslglobals.globalfunctions();
-        const globalvariables: IPropertyDefinition = bslglobals.globalvariables();
+        const globalfunctions: IBSLMethods = bslglobals.globalfunctions;
+        const globalvariables: IBSLPropertyDefinitions = bslglobals.globalvariables;
         this.keywords = {};
-        for (const keyword in bslglobals.keywords()[this.autocompleteLanguage]) {
+        for (const keyword in bslglobals.keywords[this.autocompleteLanguage]) {
             this.keywords[keyword.toLowerCase()] = keyword;
         }
         for (const key in globalfunctions) {
@@ -75,38 +78,25 @@ export class Global {
             };
             this.globalfunctions[newName.toLowerCase()] = newElement;
         }
-        const globalContextOscript: IOscriptGlobalContext = oscriptStdLib.globalContextOscript();
-        for (const segmentKey in globalContextOscript) {
-            const segmentMethods = globalContextOscript[segmentKey].methods;
-            for (const methodKey in segmentMethods) {
-                const method = segmentMethods[methodKey];
-                if (this.globalfunctions[method["name" + postfix].toLowerCase()]) {
-                    const globMethod = this.globalfunctions[method["name" + postfix].toLowerCase()];
-                    globMethod.oscript_signature = {
-                        default: {
-                            СтрокаПараметров: method.signature,
-                            Параметры: method.params
-                        }
-                    };
-                    globMethod.oscript_description = method.description;
-                } else {
-                    const newName = method["name" + postfix];
-                    const newElement: IMethod = {
-                        name: newName,
-                        alias: (postfix === "_en") ? method.name : method.name_en,
-                        description: undefined,
-                        signature: undefined,
-                        returns: method.returns,
-                        oscript_signature: {
-                            default: {
-                                СтрокаПараметров: method.signature,
-                                Параметры: method.params
-                            }
-                        },
-                        oscript_description: method.description
-                    };
-                    this.globalfunctions[newName.toLowerCase()] = newElement;
-                }
+        const osGlobalfunctions: IBSLMethods = oscriptStdLib.globalfunctions;
+        for (const methodKey in osGlobalfunctions) {
+            const method = osGlobalfunctions[methodKey];
+            if (this.globalfunctions[method["name" + postfix].toLowerCase()]) {
+                const globMethod = this.globalfunctions[method["name" + postfix].toLowerCase()];
+                globMethod.oscript_signature = method.signature;
+                globMethod.oscript_description = method.description;
+            } else {
+                const newName = method["name" + postfix];
+                const newElement: IMethod = {
+                    name: newName,
+                    alias: (postfix === "_en") ? method.name : method.name_en,
+                    description: undefined,
+                    signature: undefined,
+                    returns: method.returns,
+                    oscript_signature: method.signature,
+                    oscript_description: method.description
+                };
+                this.globalfunctions[newName.toLowerCase()] = newElement;
             }
         }
         for (const element in globalvariables) {
@@ -121,32 +111,31 @@ export class Global {
             };
             this.globalvariables[newName.toLowerCase()] = newElement;
         }
-        for (const element in globalContextOscript) {
-            if (!globalContextOscript.hasOwnProperty(element)) {
+        const osGlobalvariables: IBSLPropertyDefinitions = oscriptStdLib.globalvariables;
+        for (const key in osGlobalvariables) {
+            if (!osGlobalvariables.hasOwnProperty(key)) {
                 continue;
             }
-            const segment = globalContextOscript[element];
-            for (const key in segment.properties) {
-                if (this.globalvariables[segment.properties[key]["name" + postfix].toLowerCase()]) {
-                    const globVar = this.globalvariables[segment.properties[key]["name" + postfix].toLowerCase()];
-                    globVar.oscript_description = segment.properties[key].description;
-                    globVar.oscript_access = segment.properties[key].access;
-                } else {
-                    const newName = segment.properties[key]["name" + postfix];
-                    const newElement: IPropertyDefinition = {
-                        name: newName,
-                        alias: (postfix === "_en")
-                            ? segment.properties[key].name
-                            : segment.properties[key].name_en,
-                        description: undefined,
-                        oscript_description: segment.properties[key].description,
-                        oscript_access: segment.properties[key].access
-                    };
-                    this.globalvariables[newName.toLowerCase()] = newElement;
-                }
+            const variable = osGlobalvariables[key];
+            if (this.globalvariables[variable["name" + postfix].toLowerCase()]) {
+                const globVar = this.globalvariables[variable["name" + postfix].toLowerCase()];
+                globVar.oscript_description = variable.description;
+                globVar.oscript_access = variable.access;
+            } else {
+                const newName = variable["name" + postfix];
+                const newElement: IPropertyDefinition = {
+                    name: newName,
+                    alias: (postfix === "_en")
+                        ? variable.name
+                        : variable.name_en,
+                    description: undefined,
+                    oscript_description: variable.description,
+                    oscript_access: variable.access
+                };
+                this.globalvariables[newName.toLowerCase()] = newElement;
             }
         }
-        let systemEnum: IBSLSystemEnums = bslglobals.systemEnum();
+        let systemEnum: IBSLSystemEnums = bslglobals.systemEnum;
         for (const element in systemEnum) {
             if (!systemEnum.hasOwnProperty(element)) {
                 continue;
@@ -174,41 +163,45 @@ export class Global {
             }
             this.systemEnum[newName.toLowerCase()] = newElement;
         }
-        systemEnum = oscriptStdLib.systemEnum();
+        systemEnum = oscriptStdLib.systemEnum;
         for (const element in systemEnum) {
             if (!systemEnum.hasOwnProperty(element)) {
                 continue;
             }
             const segment = systemEnum[element];
             const newName = segment["name" + postfix];
+            let findEnum: ISystemEnum;
             if (this.systemEnum[newName.toLowerCase()]) {
-                const findEnum = this.systemEnum[newName.toLowerCase()];
-                findEnum.oscript_description = segment.description;
+                findEnum = this.systemEnum[newName.toLowerCase()];
+                findEnum.oscript_values = [];
             } else {
-                const newElement: ISystemEnum = {
+                findEnum = {
                     name: newName,
                     alias: (postfix === "_en") ? segment.name : segment.name_en,
                     description: undefined,
                     values: [],
-                    oscript_description: segment.description,
+                    oscript_values: []
                 };
-                const values = segment.values;
-                for (const key in values) {
-                    if (!values.hasOwnProperty(key)) {
-                        continue;
-                    }
-                    const newNameValues = values[key]["name" + postfix];
-                    const elementValue: ISystemEnumValue = {
-                        name: newNameValues,
-                        alias: (postfix === "_en") ? values[key].name : values[key].name_en,
-                        description: values[key].description,
-                    };
-                    newElement.values.push(elementValue);
+            }
+            findEnum.oscript_description = segment.description;
+            const values = segment.values;
+            for (const key in values) {
+                if (!values.hasOwnProperty(key)) {
+                    continue;
                 }
-                this.systemEnum[newName.toLowerCase()] = newElement;
+                const newNameValues = values[key]["name" + postfix];
+                const elementValue: ISystemEnumValue = {
+                    name: newNameValues,
+                    alias: (postfix === "_en") ? values[key].name : values[key].name_en,
+                    description: values[key].description,
+                };
+                findEnum.oscript_values.push(elementValue);
+            }
+            if (this.systemEnum[newName.toLowerCase()]) {
+                this.systemEnum[newName.toLowerCase()] = findEnum;
             }
         }
-        const classes: IBSLClasses = bslglobals.classes();
+        const classes: IBSLClasses = bslglobals.classes;
         for (const element in classes) {
             if (!classes.hasOwnProperty(element)) {
                 continue;
@@ -255,7 +248,7 @@ export class Global {
             }
             this.classes[newName.toLowerCase()] = newElement;
         }
-        const classesOscript: IBSLClasses = oscriptStdLib.classesOscript();
+        const classesOscript: IBSLClasses = oscriptStdLib.classes;
         for (const element in classesOscript) {
             if (!classesOscript.hasOwnProperty(element)) {
                 continue;
