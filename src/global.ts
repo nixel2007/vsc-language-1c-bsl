@@ -3,14 +3,18 @@ import * as fs from "fs-extra";
 import * as glob from "glob";
 import * as path from "path";
 
-import * as bslglobals from "./features/bslGlobals";
-import * as oscriptStdLib from "./features/oscriptStdLib";
-
 import FileQueue = require("filequeue");
 import loki = require("lokijs");
 import Parser = require("onec-syntaxparser");
 import xml2js = require("xml2js");
 const fq = new FileQueue(500);
+
+const libPath = path.join(__dirname, "..", "..", "lib");
+
+const bslglobals = JSON.parse(fs.readFileSync(
+    path.join(libPath, "bslGlobals.json"), "utf8")) as ISyntaxHelper;
+const oscriptStdLib = JSON.parse(fs.readFileSync(
+    path.join(libPath, "oscriptStdLib.json"), "utf8")) as ISyntaxHelper;
 
 export class Global {
 
