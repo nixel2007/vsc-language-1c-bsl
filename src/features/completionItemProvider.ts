@@ -333,7 +333,8 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
             }
             const systemEnum = systemEnums[key];
             if (enumName.toLowerCase() === systemEnum.name.toLowerCase()) {
-                const values = systemEnum.values;
+                const values = (vscode.window.activeTextEditor.document.fileName.endsWith(".bsl"))
+                ? systemEnum.values : systemEnum.oscript_values;
                 for (const value of values) {
                     if (wordMatch) {
                         if (!wordMatch.exec(value.name)) {

@@ -1214,6 +1214,7 @@ interface ISystemEnum {
     description: string;
     oscript_description?: string;
     values: ISystemEnumValue[];
+    oscript_values?: IBSLSystemEnumValue[];
 }
 
 interface IBSLSystemEnum {
