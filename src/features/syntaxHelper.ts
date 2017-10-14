@@ -157,6 +157,11 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
     }
 
     private fillExportMethods(items, exportMethods) {
+        function compareMethods(a, b) {
+            if (a.name > b.name) { return 1; }
+            if (a.name < b.name) { return -1; }
+        }
+        exportMethods = exportMethods.sort(compareMethods);
         for (const expMethod of exportMethods) {
             if (!items[expMethod.module]) {
                 items[expMethod.module] = {
