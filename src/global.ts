@@ -9,12 +9,8 @@ import Parser = require("onec-syntaxparser");
 import xml2js = require("xml2js");
 const fq = new FileQueue(500);
 
-const libPath = path.join(__dirname, "..", "..", "lib");
-
-const bslglobals = JSON.parse(fs.readFileSync(
-    path.join(libPath, "bslGlobals.json"), "utf8")) as ISyntaxHelper;
-const oscriptStdLib = JSON.parse(fs.readFileSync(
-    path.join(libPath, "oscriptStdLib.json"), "utf8")) as ISyntaxHelper;
+import LibProvider, { IBSLClasses, IBSLMethods, IBSLPropertyDefinitions, IBSLSystemEnums } from "./libProvider";
+const libProvider = new LibProvider();
 
 export class Global {
 
@@ -60,10 +56,10 @@ export class Global {
         this.globalvariables = {};
         this.systemEnum = {};
         this.classes = {};
-        const globalfunctions: IBSLMethods = bslglobals.globalfunctions;
-        const globalvariables: IBSLPropertyDefinitions = bslglobals.globalvariables;
+        const globalfunctions: IBSLMethods = libProvider.bslglobals.globalfunctions;
+        const globalvariables: IBSLPropertyDefinitions = libProvider.bslglobals.globalvariables;
         this.keywords = {};
-        for (const keyword in bslglobals.keywords[this.autocompleteLanguage]) {
+        for (const keyword in libProvider.bslglobals.keywords[this.autocompleteLanguage]) {
             this.keywords[keyword.toLowerCase()] = keyword;
         }
         for (const key in globalfunctions) {
@@ -78,7 +74,7 @@ export class Global {
             };
             this.globalfunctions[newName.toLowerCase()] = newElement;
         }
-        const osGlobalfunctions: IBSLMethods = oscriptStdLib.globalfunctions;
+        const osGlobalfunctions: IBSLMethods = libProvider.oscriptStdLib.globalfunctions;
         for (const methodKey in osGlobalfunctions) {
             const method = osGlobalfunctions[methodKey];
             if (this.globalfunctions[method["name" + postfix].toLowerCase()]) {
@@ -111,7 +107,7 @@ export class Global {
             };
             this.globalvariables[newName.toLowerCase()] = newElement;
         }
-        const osGlobalvariables: IBSLPropertyDefinitions = oscriptStdLib.globalvariables;
+        const osGlobalvariables: IBSLPropertyDefinitions = libProvider.oscriptStdLib.globalvariables;
         for (const key in osGlobalvariables) {
             if (!osGlobalvariables.hasOwnProperty(key)) {
                 continue;
@@ -135,7 +131,7 @@ export class Global {
                 this.globalvariables[newName.toLowerCase()] = newElement;
             }
         }
-        let systemEnum: IBSLSystemEnums = bslglobals.systemEnum;
+        let systemEnum: IBSLSystemEnums = libProvider.bslglobals.systemEnum;
         for (const element in systemEnum) {
             if (!systemEnum.hasOwnProperty(element)) {
                 continue;
@@ -163,7 +159,7 @@ export class Global {
             }
             this.systemEnum[newName.toLowerCase()] = newElement;
         }
-        systemEnum = oscriptStdLib.systemEnum;
+        systemEnum = libProvider.oscriptStdLib.systemEnum;
         for (const element in systemEnum) {
             if (!systemEnum.hasOwnProperty(element)) {
                 continue;
@@ -201,7 +197,7 @@ export class Global {
                 this.systemEnum[newName.toLowerCase()] = findEnum;
             }
         }
-        const classes: IBSLClasses = bslglobals.classes;
+        const classes: IBSLClasses = libProvider.bslglobals.classes;
         for (const element in classes) {
             if (!classes.hasOwnProperty(element)) {
                 continue;
@@ -248,7 +244,7 @@ export class Global {
             }
             this.classes[newName.toLowerCase()] = newElement;
         }
-        const classesOscript: IBSLClasses = oscriptStdLib.classes;
+        const classesOscript: IBSLClasses = libProvider.oscriptStdLib.classes;
         for (const element in classesOscript) {
             if (!classesOscript.hasOwnProperty(element)) {
                 continue;
@@ -392,6 +388,7 @@ export class Global {
 
     public getReplaceMetadata() {
         return {
+            CommonModules: "ОбщиеМодули",
             AccountingRegisters: "РегистрыБухгалтерии",
             AccumulationRegisters: "РегистрыНакопления",
             BusinessProcesses: "БизнесПроцессы",
@@ -628,6 +625,7 @@ export class Global {
                     const newItem: IMethodValue = {
                         name: String(item.name),
                         isproc: Boolean(item.isproc),
+                        isExport: Boolean(item._method.IsExport),
                         line: item.line,
                         endline: item.endline,
                         context: item.context,
@@ -664,14 +662,6 @@ export class Global {
         const configuration = this.getConfiguration("language-1c-bsl");
         const basePath: string = String(this.getConfigurationKey(configuration, "rootPath"));
         let rootPath = this.getRootPath();
-        if (rootPath) {
-            this.postMessage("Запущено заполнение кеша", 3000);
-            rootPath = path.join(rootPath, basePath);
-            const searchPattern = basePath !== "" ? basePath.substr(2) + "/**" : "**/*.{bsl,os}";
-            this.findFilesForCache(searchPattern, rootPath);
-        } else {
-            this.bslCacheUpdated = true;
-        }
 
         const args: string[] = [];
         args.push("get");
@@ -701,7 +691,7 @@ export class Global {
             try {
                 result = result.trim();
                 const lines = result.split(/\r?\n/);
-                const libSearchPattern = "**/lib.config";
+                let libSearchPattern = "**/lib.config";
                 for (const line of lines) {
                     const globOptions: glob.IOptions = {};
                     globOptions.nocase = true;
@@ -715,10 +705,38 @@ export class Global {
                         this.addOscriptLibrariesToCache(files);
                     });
                 }
+                libSearchPattern = "**/syntaxHelp.json";
+                for (const line of lines) {
+                    const globOptions: glob.IOptions = {};
+                    globOptions.nocase = true;
+                    globOptions.cwd = line;
+                    globOptions.absolute = true;
+                    glob(libSearchPattern, globOptions, (err, files) => {
+                        if (err) {
+                            console.error(err);
+                            return;
+                        }
+                        this.addOscriptDll(globOptions.cwd, files);
+                    });
+                }
+
             } catch (e) {
                 console.error(e);
             }
         });
+
+        if (rootPath) {
+            let searchPattern = basePath !== "" ? basePath.substr(2) + "/Subsystems/*.xml"
+            : "Subsystems/*.xml";
+            this.findSubsystems(searchPattern, rootPath);
+            this.postMessage("Запущено заполнение кеша", 3000);
+            rootPath = path.join(rootPath, basePath);
+            searchPattern = basePath !== "" ? basePath.substr(2) + "/**/*.{bsl,os}" : "**/*.{bsl,os}";
+            this.findFilesForCache(searchPattern, rootPath);
+        } else {
+            this.bslCacheUpdated = true;
+        }
+
     }
 
     public customUpdateCache(source: string, filename: string) {
@@ -928,6 +946,86 @@ export class Global {
 
     public findFilesForCache(searchPattern: string, rootPath: string) { } // tslint:disable-line:no-empty
 
+    private addOscriptDll(pathLib, files: string[]) {
+        const dataDll = {};
+        const splitsymbol = "/";
+        for (const syntaxHelp of files) {
+            let data;
+            try {
+                data = fs.readFileSync(syntaxHelp);
+                const pathDll = path.basename(path.dirname(path.dirname(syntaxHelp)));
+                const dllDesc = JSON.parse(data);
+                dataDll[pathDll] = dllDesc;
+                dataDll[pathDll].description = path.join(path.dirname(path.dirname(syntaxHelp)), "readme.md");
+            } catch (err) {
+                if (err) {
+                    console.log(err);
+                    continue;
+                }
+            }
+        }
+        this.dllData = dataDll;
+    }
+
+    private findSubsystems(searchPattern: string, rootPath: string) {
+        const globOptions: glob.IOptions = {};
+        globOptions.dot = true;
+        globOptions.cwd = rootPath;
+        globOptions.nocase = true;
+        globOptions.absolute = true;
+        glob(searchPattern, globOptions, (err, files) => {
+            if (err) {
+                console.error(err);
+                return;
+            }
+            this.addSubsystemsToCache(files);
+        });
+    }
+
+    private async addSubsystemsToCache(files: string[]) {
+        const filesLength = files.length;
+        const substrIndex = (process.platform === "win32") ? 8 : 7;
+        for (let i = 0; i < filesLength; ++i) {
+            let fullpath = files[i].toString();
+            fullpath = decodeURIComponent(fullpath);
+            if (fullpath.startsWith("file:")) {
+                fullpath = fullpath.substr(substrIndex);
+            }
+            let data;
+            try {
+                data = fs.readFileSync(fullpath);
+            } catch (err) {
+                if (err) {
+                    console.log(err);
+                    continue;
+                }
+            }
+            let result;
+            try {
+                result = await this.xml2json(data);
+            } catch (err) {
+                if (err) {
+                    console.log(err);
+                    continue;
+                }
+            }
+            const propSubsys = result.MetaDataObject.Subsystem[0].Properties[0];
+            const ChildObjects = result.MetaDataObject.Subsystem[0].ChildObjects[0];
+            const content = (propSubsys.Content.length === 0 || !propSubsys.Content[0].hasOwnProperty("xr:Item"))
+            ? [] : propSubsys.Content[0]["xr:Item"];
+            const object = [];
+            for (const obj of content) {
+                object.push(obj._);
+            }
+            const item = {
+                name: propSubsys.Name[0],
+                object,
+                subsystems: (ChildObjects.Subsystem) ? ChildObjects.Subsystem : []
+            };
+            this.subsystems[item.name] = item;
+        }
+    }
+
     private delay(milliseconds: number) {
         return new Promise<void>((resolve) => {
             setTimeout(resolve, milliseconds);
@@ -972,6 +1070,7 @@ export class Global {
                 name: String(method.name),
                 filename: file,
                 isproc: Boolean(method.isproc),
+                isExport: Boolean(method.isExport),
                 call: value.call,
                 context: method.context,
                 line: value.line,
@@ -986,7 +1085,7 @@ export class Global {
         for (const libConfig of files) {
             let data;
             try {
-                data = await fs.readFile(libConfig);
+                data = fs.readFileSync(libConfig);
             } catch (err) {
                 if (err) {
                     console.log(err);
@@ -1008,7 +1107,7 @@ export class Global {
                 continue;
             }
 
-            let modules = [];
+            const modules = [];
             const classes = [];
             if (packageDef.hasOwnProperty("module")) {
                 if (packageDef.module instanceof Array) {
@@ -1028,52 +1127,115 @@ export class Global {
                     classes.push(packageDef.class);
                 }
             }
-            // TODO: Пока обрабатываем классы так же как модули
-            modules = modules.concat(classes);
-            for (const module of modules) {
-                const fullpath = path.join(path.dirname(libConfig), module.$.file);
-                fq.readFile(fullpath, { encoding: "utf8" }, (err, source) => {
-                    if (err) {
-                        throw err;
-                    }
-                    const moduleStr = module.$.name;
-                    source = source.replace(/\r\n?/g, "\n");
-                    let parsesModule = new Parser().parse(source);
-                    source = undefined;
-                    const entries = parsesModule.getMethodsTable().find();
-                    // if (parsesModule.context.CallsPosition.length > 0) {
-                    //     this.updateReferenceCalls(parsesModule.context.CallsPosition, "GlobalModuleText", fullpath);
-                    // }
-                    parsesModule = undefined;
-                    for (const item of entries) {
-                        const method = {
-                            name: item.name,
-                            endline: item.endline,
-                            context: item.context,
-                            isproc: item.isproc
-                        };
-                        // if (item._method.CallsPosition.length > 0) {
-                        //     this.updateReferenceCalls(item._method.CallsPosition, method, fullpath);
-                        // }
-                        const dbMethod = { Params: item._method.Params, IsExport: item._method.IsExport };
-                        const newItem: IMethodValue = {
-                            name: String(item.name),
-                            isproc: Boolean(item.isproc),
-                            line: item.line,
-                            endline: item.endline,
-                            context: item.context,
-                            _method: dbMethod,
-                            filename: fullpath,
-                            module: moduleStr,
-                            description: item.description,
-                            oscriptLib: true
-                        };
-                        this.db.insert(newItem);
-                    }
-                });
-            }
+            this.addOscriptFilesToCache(libConfig, modules);
+            this.addOscriptFilesToCache(libConfig, classes, true);
         }
         this.oscriptCacheUpdated = true;
+    }
+
+    private addOscriptFilesToCache(libConfig, modules, isClasses = false) {
+        const lib = path.basename(path.dirname(libConfig));
+        for (const module of modules) {
+            const fullpath = path.join(path.dirname(libConfig), module.$.file);
+            fq.readFile(fullpath, { encoding: "utf8" }, (err, source) => {
+                if (err) {
+                    throw err;
+                }
+                const moduleStr = module.$.name;
+                source = source.replace(/\r\n?/g, "\n");
+                let parsesModule = new Parser().parse(source);
+                source = undefined;
+                const entries = parsesModule.getMethodsTable().find();
+                // if (parsesModule.context.CallsPosition.length > 0) {
+                //     this.updateReferenceCalls(parsesModule.context.CallsPosition, "GlobalModuleText", fullpath);
+                // }
+                const moduleDescr = moduleStr + ", " + ((isClasses) ? "класс" : "модуль");
+                for (const exportVar in parsesModule.context.ModuleVars) {
+                    if (parsesModule.context.ModuleVars[exportVar].isExport) {
+                        if (!this.libData[lib]) {
+                            this.libData[lib] = { modules: {} };
+                            this.libData[lib].description = path.join(path.dirname(libConfig), "readme.md");
+                        }
+                        if (!this.libData[lib].modules[moduleDescr]) {
+                            this.libData[lib].modules[moduleDescr] = {};
+                        }
+                        if (!this.libData[lib].modules[moduleDescr].properties) {
+                            this.libData[lib].modules[moduleDescr].properties = {};
+                            this.libData[lib].modules[moduleDescr].description = "";
+                        }
+                        this.libData[lib].modules[moduleDescr].properties[exportVar] = {
+                            description: parsesModule.context.ModuleVars[exportVar].description,
+                            alias: ""
+                        };
+                    }
+                }
+                parsesModule = undefined;
+                for (const item of entries) {
+                    const method = {
+                        name: item.name,
+                        endline: item.endline,
+                        context: item.context,
+                        isproc: item.isproc
+                    };
+                    // if (item._method.CallsPosition.length > 0) {
+                    //     this.updateReferenceCalls(item._method.CallsPosition, method, fullpath);
+                    // }
+                    const dbMethod = { Params: item._method.Params, IsExport: item._method.IsExport };
+                    const newItem: IMethodValue = {
+                        name: String(item.name),
+                        isproc: Boolean(item.isproc),
+                        isExport: Boolean(item._method.IsExport),
+                        line: item.line,
+                        endline: item.endline,
+                        context: item.context,
+                        _method: dbMethod,
+                        filename: fullpath,
+                        module: moduleStr,
+                        description: item.description,
+                        oscriptLib: true,
+                        oscriptClass: isClasses
+                    };
+                    if (item._method.IsExport) {
+                        const signature = this.GetSignature(newItem);
+                        if (!this.libData[lib]) {
+                            this.libData[lib] = {modules: {}};
+                            this.libData[lib].description = path.join(path.dirname(libConfig), "readme.md");
+                        }
+                        if (!this.libData[lib].modules[moduleDescr]) {
+                            this.libData[lib].modules[moduleDescr] = {};
+                        }
+                        if (!this.libData[lib].modules[moduleDescr].methods) {
+                            this.libData[lib].modules[moduleDescr].methods = {};
+                            this.libData[lib].modules[moduleDescr].description = "";
+                        }
+                        const regExpParams = new RegExp("^\\s*(Параметры|Parameters)\\:?\s*\n*((.|\\n)*)", "gm");
+                        const paramsDesc = regExpParams.exec(signature.description);
+                        let strParamsDesc = "";
+                        if (paramsDesc) {
+                            strParamsDesc = paramsDesc[2];
+                            signature.description = signature.description.substr(0, paramsDesc.index);
+                        }
+                        const returnData = signature.fullRetState.substring(25)
+                            .replace(/((.|\n)*.+)\n*/m, "$1")
+                            .replace(/\n/g, "<br>").replace(/\t/g, "");
+                        this.libData[lib].modules[moduleDescr].methods[item.name] = {
+                            description: signature.description.replace(/((.|\n)*.+)\n*/m, "$1")
+                                .replace(/\n/g, "<br>").replace(/\t/g, ""),
+                            alias: "",
+                            signature: {
+                                default: {
+                                    СтрокаПараметров: signature.paramsString,
+                                    Параметры: strParamsDesc.replace(/((.|\n)*.+)\n*/m, "$1")
+                                        .replace(/\n/g, "<br>").replace(/\t/g, "")
+                                }
+                            },
+                            returns: returnData
+                        };
+                    }
+                    this.db.insert(newItem);
+                }
+            });
+        }
     }
 
     private async xml2json(xml: string) {
@@ -1095,6 +1257,7 @@ interface IMethodValue {
     name: string;
     // Процедура = true, Функция = false
     isproc: boolean;
+    isExport: boolean;
     // начало
     line: number;
     // конец процедуры
@@ -1109,14 +1272,11 @@ interface IMethodValue {
     character?: number;
     _method?: {};
     oscriptLib?: boolean;
+    oscriptClass?: boolean;
 }
 
 interface IMethods {
     [index: string]: IMethod;
-}
-
-interface IBSLMethods {
-    [index: string]: IBSLMethod;
 }
 
 interface IMethod {
@@ -1127,15 +1287,6 @@ interface IMethod {
     returns?: string;
     oscript_description?: string;
     oscript_signature?: ISignatureCollection;
-    oscript_access?: boolean;
-}
-
-interface IBSLMethod {
-    name: string;
-    name_en: string;
-    description: string;
-    signature: ISignatureCollection;
-    returns?: string;
 }
 
 interface ISignatureCollection {
@@ -1152,22 +1303,8 @@ interface ISignatureParameters {
     [index: string]: string;
 }
 
-interface IOscriptGlobalContext {
-    [index: string]: IOscriptSegment;
-}
-
-interface IOscriptSegment {
-    description?: string;
-    properties?: IBSLPropertyDefinitions;
-    methods?: IOscriptFunctionDefinitions;
-}
-
 interface IPropertyDefinitions {
     [index: string]: IPropertyDefinition;
-}
-
-interface IBSLPropertyDefinitions {
-    [index: string]: IBSLPropertyDefinition;
 }
 
 interface IPropertyDefinition {
@@ -1179,33 +1316,8 @@ interface IPropertyDefinition {
     oscript_access?: string;
 }
 
-interface IBSLPropertyDefinition {
-    name: string;
-    name_en: string;
-    description: string;
-    access?: string;
-}
-
-interface IOscriptFunctionDefinitions {
-    [index: string]: IOscriptFunctionDefinition;
-}
-
-interface IOscriptFunctionDefinition {
-    name: string;
-    name_en: string;
-    description: string;
-    signature: string;
-    returns: string;
-    params?: ISignatureParameters;
-    example?: string;
-}
-
 interface ISystemEnums {
     [index: string]: ISystemEnum;
-}
-
-interface IBSLSystemEnums {
-    [index: string]: IBSLSystemEnum;
 }
 
 interface ISystemEnum {
@@ -1217,11 +1329,10 @@ interface ISystemEnum {
     oscript_values?: IBSLSystemEnumValue[];
 }
 
-interface IBSLSystemEnum {
-    name: string;
-    name_en: string;
-    description: string;
-    values: IBSLSystemEnumValue[];
+interface IBSLSystemEnumValue {
+    name?: string;
+    name_en?: string;
+    description?: string;
 }
 
 interface ISystemEnumValue {
@@ -1230,18 +1341,8 @@ interface ISystemEnumValue {
     description?: string;
 }
 
-interface IBSLSystemEnumValue {
-    name?: string;
-    name_en?: string;
-    description?: string;
-}
-
 interface IClasses {
     [index: string]: IClass;
-}
-
-interface IBSLClasses {
-    [index: string]: IBSLClass;
 }
 
 interface IClass {
@@ -1251,15 +1352,6 @@ interface IClass {
     oscript_description?: string;
     methods?: IMethods;
     properties?: IPropertyDefinitions;
-    constructors?: IConstructorDefinitions;
-}
-
-interface IBSLClass {
-    name: string;
-    name_en: string;
-    description: string;
-    methods?: IBSLMethods;
-    properties?: IBSLPropertyDefinitions;
     constructors?: IConstructorDefinitions;
 }
 
@@ -1290,27 +1382,4 @@ interface IMetaData {
     parenttype?: string; // CommonModules, Documets, ExternalDataProcessor
     fullpath: string;
     project?: string;
-}
-
-interface ISyntaxHelper {
-    systemEnum?: IBSLSystemEnums;
-    classes?: IBSLClasses;
-    keywords?: IKeywords;
-    globalvariables?: IBSLPropertyDefinitions;
-    globalfunctions?: IBSLMethods;
-    structureMenu?: ISyntaxHelperMenu;
-}
-
-interface ISyntaxHelperMenu {
-    globalContext: ISyntaxHelperGlobalSections;
-    classes: ISyntaxHelperClass[];
-}
-
-interface ISyntaxHelperGlobalSections {
-    [index: string]: string[];
-}
-
-interface ISyntaxHelperClass {
-    name: string;
-    subclasses: ISyntaxHelperClass[];
 }

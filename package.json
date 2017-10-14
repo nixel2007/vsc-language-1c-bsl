@@ -81,6 +81,11 @@
         "command": "language-1c-bsl.quickopen",
         "title": "QuickOpen",
         "category": "Language 1C (BSL)"
+      },
+      {
+        "command": "language-1c-bsl.openContent",
+        "title": "OpenContent",
+        "category": "Language 1C (BSL)"
       }
     ],
     "menus": {
@@ -100,6 +105,10 @@
       "commandPalette": [
         {
           "command": "language-1c-bsl.addComment",
+          "when": "false"
+        },
+        {
+          "command": "language-1c-bsl.openContent",
           "when": "false"
         }
       ]
@@ -262,6 +271,7 @@
     "lokijs": "^1.5.0",
     "onec-syntaxparser": "0.1.11",
     "xml2js": "^0.4.19",
+    "fast-xml-parser": "^2.7.4",
     "alignment": "0.0.1"
   }
 }

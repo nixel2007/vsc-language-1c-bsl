@@ -1,540 +1,436 @@
+import * as fs from "fs-extra";
+import * as glob from "glob";
+import * as path from "path";
 import * as vscode from "vscode";
 import AbstractProvider from "./abstractProvider";
-import * as oscriptStdLib from "./oscriptStdLib";
-import * as bslGlobals from "./bslGlobals";
+import AbstractSyntaxContent from "./AbstractSyntaxContent";
+import SyntaxContent1C from "./SyntaxContent1C";
+import SyntaxContentBSL from "./SyntaxContentBSL";
+import SyntaxContentOscript from "./SyntaxContentOscript";
+import SyntaxContentOscriptLibrary from "./SyntaxContentOscriptLibrary";
 
-export default class TextDocumentContentProvider extends AbstractProvider implements vscode.TextDocumentContentProvider {
-    private _onDidChange = new vscode.EventEmitter<vscode.Uri>();
-    private oscriptMethods;
+import fastXmlParser = require("fast-xml-parser");
+
+export default class SyntaxHelperProvider extends AbstractProvider implements vscode.TextDocumentContentProvider {
+    private onDidChangeEvent = new vscode.EventEmitter<vscode.Uri>();
+    private syntaxContent: AbstractSyntaxContent;
+    private syntax: string;
+    private oscriptMethods: any;
+    private metadata = [
+        "CommonModules",
+        "ExchangePlans",
+        "SettingsStorages",
+        "Constants",
+        "Catalogs",
+        "Documents",
+        "DocumentJournals",
+        "Enums",
+        "Reports",
+        "DataProcessors",
+        "ChartsOfCharacteristicTypes",
+        "ChartsOfAccounts",
+        "ChartsOfCalculationTypes",
+        "InformationRegisters",
+        "AccumulationRegisters",
+        "AccountingRegisters",
+        "CalculationRegisters",
+        "BusinessProcesses",
+        "Tasks"];
+
     get onDidChange(): vscode.Event<vscode.Uri> {
-        return this._onDidChange.event;
-    }
-    public provideTextDocumentContent(uri: vscode.Uri): string {
-        if (!this._global.methodForDescription) {
-            return;
-        }
-        const word = this._global.methodForDescription.label;
-        let textSyntax = "";
-        if (this._global.syntaxFilled === "") {
-            if (vscode.window.activeTextEditor.document.fileName.endsWith(".os")) {
-                this._global.syntaxFilled = "OneScript";
-                textSyntax = this.fillOsSyntax();
-            } else {
-                this._global.syntaxFilled = "1C";
-                textSyntax = this.fill1CSyntax();
-            }
-        } else if (this._global.syntaxFilled === "1C") {
-            if (word === "OneScript" || (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.fileName.endsWith(".os"))) {
-                this._global.syntaxFilled = "OneScript";
-                textSyntax = this.fillOsSyntax();
-            }
-        } else if (this._global.syntaxFilled === "OneScript") {
-            if (word === "1C" || (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.fileName.endsWith(".bsl"))) {
-                this._global.syntaxFilled = "1C";
-                textSyntax = this.fill1CSyntax();
-            }
-        }
-        if (word === "OneScript") {
-            return this.SyntaxOscriptDefault(textSyntax);
-        } else if (this._global.methodForDescription.description.split("/")[0] === "OneScript") {
-            return this.SyntaxOscriptMethod(textSyntax);
-        } else if (word === "1C") {
-            return this.Syntax1CDefault(textSyntax);
-        } else {
-            return this.Syntax1CMethod(textSyntax);
-        }
+        return this.onDidChangeEvent.event;
     }
 
     public update(uri: vscode.Uri) {
-        this._onDidChange.fire(uri);
+        this.onDidChangeEvent.fire(uri);
     }
 
-    private Syntax1CDefault(textSyntax: string) {
-        this._global.methodForDescription = undefined;
-        const fillStructure = {
-            globalHeader: "Синтакс-Помощник 1С",
-            textSyntax,
-            descClass: "",
-            descMethod: "",
-            menuHeight: "100%",
-            elHeight: "100%",
-            classVisible: "none",
-            methodVisible: "none",
-            segmentHeader: "1C",
-            methodHeader: "1C",
-            displaySwitch: "none",
-            switch1C: "",
-            segmentDescription: "Очень много текста",
-            methodDescription: "Очень много текста",
-            onlyOs: "",
-        };
-        return this.fillStructure1CSyntax(fillStructure);
+    public provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
+        if (!this._global.methodForDescription) {
+            return;
+        }
+        this.setupSyntaxContent();
+        return this.buildHTMLDocument();
     }
 
-    private fillStructure1CSyntax(fillStructure) {
-        let globCont = "";
-        for (const element in bslGlobals.structureGlobContext()["global"]) {
-            globCont = globCont + `<li><span class="a" onclick="fillDescription(this)">${element}</span></li>`;
+    private setupSyntaxContent() {
+        const label = this._global.methodForDescription.label;
+        const desc = this._global.methodForDescription.description;
+
+        if (desc.split("/")[0] === "1С") {
+            this.syntaxContent = new SyntaxContent1C();
+            this.syntax = "1C";
+        } else if (desc.split("/")[0] === "Экспортные методы bsl") {
+            this.syntaxContent = new SyntaxContentBSL();
+            this.syntax = "BSL";
+        } else if (desc.split("/")[0] === "oscript-library") {
+            this.syntaxContent = new SyntaxContentOscriptLibrary();
+            this.syntax = "oscript-library";
+        } else {
+            this.syntaxContent = new SyntaxContentOscript();
+            this.syntax = "OneScript";
         }
-        fillStructure.globCont = globCont;
-        let classes = "";
-        const added = {};
-        for (const segmentClass in bslGlobals.structureGlobContext()["classes"]) {
-            classes = classes + "<h2 style='font-size: 1em;'><em>" + segmentClass + "</em></h2><ul>";
-            for (const currentClass in bslGlobals.structureGlobContext()["classes"][segmentClass]) {
-                classes = classes + `<li><span class="a" onclick="fillDescription(this)">${currentClass + " / " + bslGlobals.classes()[currentClass]["name_en"]}</span></li>`;
-                added[currentClass] = true;
-                if (bslGlobals.structureGlobContext()["classes"][segmentClass][currentClass] !== "") {
-                    classes = classes + "<ul>";
-                    for (const childClass in bslGlobals.structureGlobContext()["classes"][segmentClass][currentClass]) {
-                        added[childClass] = true;
-                        classes = classes + `<li><span class="a" onclick="fillDescription(this)">${childClass + " / " + bslGlobals.classes()[childClass]["name_en"]}</span></li>`;
-                    }
-                    classes = classes + "</ul>";
-                }
-            }
-            if (segmentClass !== "Прочее") {
-                classes = classes + "</ul>";
-            }
-        }
-        for (const element in bslGlobals.classes()) {
-            if (!added[element]) {
-                const alias = (bslGlobals.classes()[element]["name_en"] !== "") ? (" / " + bslGlobals.classes()[element]["name_en"]) : "";
-                classes = classes + `<li><span class="a" onclick="fillDescription(this)">${element + alias}</span></li>`;
-            }
-        }
-        classes = classes + "</ul><h1 style='font-size: 1em;'>Системные перечисления</h1><ul>";
-        for (const element in bslGlobals.systemEnum()) {
-            const alias = (bslGlobals.systemEnum()[element]["name_en"] !== "") ? (" / " + bslGlobals.systemEnum()[element]["name_en"]) : "";
-            classes = classes + `<li><span class="a" onclick="fillDescription(this)">${element + alias}</span></li>`;
-        }
-        fillStructure.classes = classes + "</ul>";
-        return this.fillSyntax(fillStructure);
     }
 
-    private Syntax1CMethod(textSyntax) {
-        const syntaxObjext = this._global.methodForDescription;
-        this._global.methodForDescription = undefined;
-        let segmentDescription = "Очень много текста";
-        let methodDescription = "Очень много текста";
-        const descClass = syntaxObjext.description.split("/")[syntaxObjext.description.split("/").length - 1];
-        const descMethod = syntaxObjext.label.split(".")[syntaxObjext.label.split(".").length - 1];
-        const alias = (this.oscriptMethods[descClass]["alias"] && this.oscriptMethods[descClass]["alias"] !== "") ? (" / " + this.oscriptMethods[descClass]["alias"]) : "";
-        const segmentHeader = descClass + alias;
-        const segment = this.oscriptMethods[descClass];
-        if (segment["description"]) {
-            segmentDescription = "<p>" + segment["description"] + "</p>";
-        } else { segmentDescription = ""; }
-        segmentDescription = this.fillSegmentData(segmentDescription, segment, "methods", "Методы", "method");
-        segmentDescription = this.fillSegmentData(segmentDescription, segment, "properties", "Свойства", "property");
-        segmentDescription = this.fillSegmentData(segmentDescription, segment, "constructors", "Конструкторы", "constructor");
-        segmentDescription = this.fillSegmentData(segmentDescription, segment, "values", "Значения", "value");
-        let methodHeader = "1C";
-        if (descClass !== descMethod) {
-            let methodData;
-            let charSegment;
-            for (const key in this.oscriptMethods[descClass]) {
-                if (key === "properties" || key === "methods" || key === "values") {
-                    for (const item in this.oscriptMethods[descClass][key]) {
-                        if (item === descMethod) {
-                            charSegment = key;
-                            methodData = this.oscriptMethods[descClass][key][item];
-                            methodHeader = descMethod + (methodData["alias"] !== "" ? (" / " + methodData["alias"]) : "");
-                            break;
-                        }
-                    }
-                }
-            }
-            if (methodData) {
-                methodDescription = "";
-                if (methodData["description"]) { methodDescription = methodData["description"] + "<br/>"; }
-                if (methodData["returns"]) { methodDescription = methodDescription + "<b><em>Возвращаемое значение: </em></b>" + methodData["returns"] + "<br/>"; }
-                if (methodData["Доступ"]) { methodDescription = methodDescription + "<b><em>Доступ: </em></b>" + methodData["Доступ"] + "<br/>"; }
-                if (charSegment === "methods") {
-                    if (methodData["signature"]) {
-                        for (const element in methodData["signature"]) {
-                            const nameSyntax = (element === "default") ? "" : " " + element;
-                            methodDescription = methodDescription + "<p><b>Синтаксис" + nameSyntax + ":</b></p><p><span class='function_name'>" + descMethod + "</span><span class='parameter_variable'>" + methodData["signature"][element]["СтрокаПараметров"] + "</span></p>";
-                            let header = false;
-                            for (const param in methodData["signature"][element].Параметры) {
-                                if (header === false) {
-                                    methodDescription = methodDescription + "<p><b>Параметры:</b></p><p>";
-                                    header = true;
-                                }
-                                const paramDescription = "<b><em>" + param + ":</em></b> " + methodData["signature"][element].Параметры[param].replace(new RegExp("\\\\^\\\\&\\\\*", "g"), "\\/").replace("^&%", "\\\\");
-                                methodDescription = methodDescription + paramDescription + "<br/>";
-                            }
-                            methodDescription = methodDescription + "</p>";
-                        }
-                    } else {
-                        const ret = new RegExp("Тип: ([^.]+)\\.", "");
-                        const retValue = (!methodData["returns"]) ? "" : ": " + ret.exec(methodData["returns"])[1];
-                        methodDescription = methodDescription + "<p><b>Синтаксис:</b></p><p><span class='function_name'>" + descMethod + "</span><span class='parameter_variable'>()" + retValue + "</span></p>";
-                    }
-                }
-                if (methodData["example"]) { methodDescription = methodDescription + "<p><b>Пример:</b></p><p>" + methodData["example"] + "</p>"; }
-            }
+    private createListMd(label): object {
+        function compareModules(a, b) {
+            if (a.module > b.module) { return 1; }
+            if (a.module < b.module) { return -1; }
         }
-        const fillStructure = {
-            globalHeader: "Синтакс-Помощник 1С",
-            textSyntax,
-            descClass,
-            descMethod,
-            menuHeight: "133px",
-            elHeight: (descClass !== descMethod) ? "120px" : "100%",
-            classVisible: "block",
-            methodVisible: (descClass !== descMethod) ? "block" : "none",
-            segmentHeader,
-            methodHeader,
-            displaySwitch: "none",
-            switch1C: "",
-            segmentDescription,
-            methodDescription
-        };
-        return this.fillStructure1CSyntax(fillStructure);
-    }
-
-    private fillOsSyntax() {
         const items = {};
-        for (const element in oscriptStdLib.globalContextOscript()) {
-            const segment = oscriptStdLib.globalContextOscript()[element];
-            const segmentChar = this.fillSegmentOsSyntax(segment, true, "OneScript", "");
-            items[element] = segmentChar;
+        const fillMD = (label.indexOf("Metadata.") === -1) ? false : true;
+        const labelMD = label.replace("Metadata.", "");
+        for (const md of this.metadata) {
+            let listMod = this._global.db.find(
+                {
+                    filename: { $regex: "." + md + "." },
+                    isExport: true,
+                    module: { $ne: "" }
+                });
+            if (listMod.length > 0) {
+                items[this._global.toreplaced[md]] = [];
+                if (fillMD && this._global.toreplaced[md] === labelMD) {
+                    listMod = listMod.sort(compareModules);
+                    const arr = {};
+                    this.fillExportMethods(arr, listMod);
+                    items[this._global.toreplaced[md]].push(arr);
+                }
+            }
         }
-        for (const element in oscriptStdLib.classesOscript()) {
-            const segment = oscriptStdLib.classesOscript()[element];
-            const segmentChar = this.fillSegmentOsSyntax(segment, false, "OneScript", bslGlobals.classes()[segment.name]);
-            items[element] = segmentChar;
+        return items;
+    }
+
+    private createListSubsystems(label) {
+        const subsystems = {};
+        const fillSubsystem = (label.indexOf("Subsystem.") === -1) ? false : true;
+        const labelSubsystem = label.replace("Subsystem.", "");
+        for (const sub in this._global.subsystems) {
+            if (this._global.subsystems.hasOwnProperty(sub)) {
+                const element = this._global.subsystems[sub];
+                subsystems[sub] = {};
+                if (fillSubsystem && labelSubsystem === sub) {
+                    const items = {};
+                    this.fillObject(element.object, items);
+                    subsystems[sub].object = items;
+                    const parentSubsystem = this._global.subsystems[labelSubsystem];
+                    subsystems[sub].subsystems = (parentSubsystem.subsystems.length > 0)
+                    ? this.getSubsystems(labelSubsystem) : [];
+                }
+            }
         }
-        for (const element in oscriptStdLib.systemEnum()) {
-            const segment = oscriptStdLib.systemEnum()[element];
-            const segmentChar = this.fillSegmentOsSyntax(segment, false, "OneScript", bslGlobals.systemEnum()[segment.name]);
-            items[element] = segmentChar;
+        return subsystems;
+    }
+
+    private fillObject(element, items) {
+        const humanMeta = {
+            CommonModule: "ОбщиеМодули",
+            ExchangePlan: "ПланыОбмена",
+            SettingsStorages: "ХранилищаНастроек",
+            Constant: "Константы",
+            Catalog: "Справочники",
+            Document: "Документы",
+            DocumentJournal: "ЖурналыДокумента",
+            Enum: "Перечисления",
+            Report: "Отчеты",
+            DataProcessor: "Обработки",
+            ChartsOfCharacteristicTypes: "ПланыВидовХарактеристик",
+            ChartsOfAccounts: "ПланыСчетов",
+            ChartsOfCalculationTypes: "ПланыВидовРасчета",
+            InformationRegisters: "РегистрыСведений",
+            AccumulationRegisters: "РегистрыНакопления",
+            AccountingRegisters: "РегистрыБухгалтерии",
+            CalculationRegisters: "РегистрыРасчета",
+            BusinessProcesses: "БизнесПроцессы",
+            Tasks: "Задачи"};
+        for (const el of element) {
+            const humanMetadata = humanMeta[el.split(".")[0]];
+            if (!humanMetadata) {
+                continue;
+            }
+            let humanModule = humanMetadata + "." + el.split(".")[1];
+            humanModule = humanModule.replace("ОбщиеМодули.", "");
+            const exportMethods = this._global.db.find({ isExport: true, module: humanModule });
+            if (exportMethods.length > 0) {
+                this.fillExportMethods(items, exportMethods);
+            }
         }
-        this.oscriptMethods = items;
-        const bbb = "'" + JSON.stringify(items).replace(new RegExp("\\\\\"", "g"), "").replace(new RegExp("'", "g"), "").replace(new RegExp("\\\\\\\\", "g"), "^&%").replace(new RegExp("\\/", "g"), "^&*") + "'";
-        return ` window.localStorage.setItem("bsl-language", ${bbb});
+    }
+
+    private fillExportMethods(items, exportMethods) {
+        for (const expMethod of exportMethods) {
+            if (!items[expMethod.module]) {
+                items[expMethod.module] = {
+                    name: expMethod.module
+                };
+            }
+            const moduleDesc = items[expMethod.module];
+            const isManager = expMethod.filename.endsWith("ManagerModule.bsl");
+            const segment = (isManager) ? "manager" : "object";
+            if (!moduleDesc[segment]) {
+                moduleDesc[segment] = {};
+            }
+            const signature = this._global.GetSignature(expMethod);
+            const regExpParams = new RegExp("^\\s*(Параметры|Parameters)\\:?\s*\n*((.|\\n)*)", "gm");
+            const paramsDesc = regExpParams.exec(signature.description);
+            let strParamsDesc = "";
+            if (paramsDesc) {
+                strParamsDesc = paramsDesc[2];
+                signature.description = signature.description.substr(0, paramsDesc.index);
+            }
+            const returnData = signature.fullRetState.substring(25)
+                .replace(/((.|\n)*.+)\n*/m, "$1")
+                .replace(/\n/g, "<br>").replace(/\t/g, "");
+            moduleDesc[segment][expMethod.name] = {
+                description: signature.description.replace(/((.|\n)*.+)\n*/m, "$1")
+                    .replace(/\n/g, "<br>").replace(/\t/g, ""),
+                alias: "",
+                signature: {
+                    default: {
+                        СтрокаПараметров: signature.paramsString,
+                        Параметры: strParamsDesc.replace(/((.|\n)*.+)\n*/m, "$1")
+                            .replace(/\n/g, "<br>").replace(/\t/g, "")
+                    }
+                },
+                returns: returnData
+            };
+        }
+    }
+
+    private getSubsystems(label) {
+        const searchPattern = `Subsystems/${label}/**/Subsystems/*.xml`;
+        const globOptions: glob.IOptions = {};
+        globOptions.dot = true;
+        globOptions.cwd = vscode.workspace.rootPath;
+        globOptions.nocase = true;
+        globOptions.absolute = true;
+        const files = glob.sync(searchPattern, globOptions);
+        const subs = this.addSubsystems(files);
+        return subs;
+    }
+
+    private addSubsystems(files) {
+        const subsystems = [];
+        const filesLength = files.length;
+        const substrIndex = (process.platform === "win32") ? 8 : 7;
+        for (let i = 0; i < filesLength; ++i) {
+            let fullpath = files[i].toString();
+            fullpath = decodeURIComponent(fullpath);
+            if (fullpath.startsWith("file:")) {
+                fullpath = fullpath.substr(substrIndex);
+            }
+            let data;
+            try {
+                data = fs.readFileSync(fullpath);
+            } catch (err) {
+                if (err) {
+                    console.log(err);
+                    continue;
+                }
+            }
+            let result;
+            try {
+                result = fastXmlParser.parse(data);
+            } catch (err) {
+                if (err) {
+                    console.log(err);
+                    continue;
+                }
+            }
+            const propSubsys = result.MetaDataObject.Subsystem.Properties;
+            const content = (propSubsys.Content.length === 0 || !propSubsys.Content.hasOwnProperty("xr:Item"))
+                ? [] : propSubsys.Content["xr:Item"];
+            const items = {};
+            this.fillObject(content, items);
+            const item = {
+                name: propSubsys.Name,
+                content: items,
+                subsystems: (propSubsys.ChildObjects)
+                ? propSubsys.ChildObjects.Subsystem : []
+            };
+            subsystems.push(item);
+        }
+        return subsystems;
+    }
+
+    private buildHTMLDocument(): Promise<string> {
+        let textSyntax = "";
+        const metadata = (this.syntax === "BSL")
+            ? this.createListMd(this._global.methodForDescription.label) : undefined;
+        const subsystems = (this.syntax === "BSL")
+            ? this.createListSubsystems(this._global.methodForDescription.label) : undefined;
+        if ((this._global.syntaxFilled === "")
+            || (this._global.syntaxFilled !== this.syntax)
+            || (this.syntax === "BSL")) {
+            this._global.syntaxFilled = this.syntax;
+            this.oscriptMethods = this.syntaxContent.getSyntaxContentItems(
+                (this.syntax === "BSL") ? subsystems : this._global.dllData,
+                (this.syntax === "BSL") ? metadata : this._global.libData);
+            const bbb = "'"
+                + JSON.stringify(this.oscriptMethods)
+                    .replace(new RegExp("\\\\\"", "g"), "*&^")
+                    .replace(new RegExp("'", "g"), "")
+                    .replace(new RegExp("\\\\\\\\", "g"), "^&%")
+                    .replace(new RegExp("\\/", "g"), "^&*") + "'";
+            textSyntax = ` window.localStorage.setItem("bsl-language", ${bbb});
                 `;
-    }
+        }
 
-    private fillSegmentOsSyntax(segment, globalContext, context, segment1C) {
-        const segmentChar = {};
-        if (segment["description"]) {
-            segmentChar["description"] = segment["description"];
-        }
-        if (segment["name_en"]) {
-            segmentChar["alias"] = segment["name_en"];
-        }
-        if (segment["methods"]) {
-            const methodsGlobalContext = {};
-            for (const indexMethod in segment["methods"]) {
-                let helper;
-                let returns;
-                let example;
-                let signature1C;
-                let description1C;
-                let returns1C;
-                let helper1C;
-                let signature;
-                if (context === "OneScript") {
-                    helper = segment["methods"][indexMethod];
-                    returns = (helper["returns"]) ? (helper["returns"]) : undefined;
-                    example = (helper["example"]) ? (helper["example"]) : undefined;
-                    signature = { "default": { "СтрокаПараметров": helper["signature"], "Параметры": helper["params"] } };
-                    helper1C = (globalContext) ? bslGlobals.globalfunctions()[indexMethod] : (segment1C) ? ((segment1C["methods"]) ? segment1C["methods"][indexMethod] : undefined) : undefined;
-                    if (helper1C) {
-                        signature1C = helper1C["signature"];
-                        description1C = helper1C.description;
-                        returns1C = helper1C.returns;
-                    }
-                } else {
-                    helper = (bslGlobals.classes()[segment.name]) ? ((bslGlobals.classes()[segment.name]["methods"]) ? bslGlobals.classes()[segment.name]["methods"][indexMethod] : undefined) : undefined;
-                    if (helper) {
-                        signature = helper["signature"];
-                        returns = helper.returns;
-                    }
-                }
-                methodsGlobalContext[indexMethod] = { description: helper.description, alias: helper.name_en, signature, returns, example, description1C, signature1C, returns1C };
-            }
-            segmentChar["methods"] = methodsGlobalContext;
-        }
-        if (segment["properties"]) {
-            const variableGlobalContext = {};
-            for (const indexMethod in segment["properties"]) {
-                const helper = segment["properties"][indexMethod];
-                const access = (helper["access"]) ? (helper["access"]) : undefined;
-                let example;
-                let description1C;
-                let helper1C;
-                if (context === "OneScript") {
-                    example = (helper["example"]) ? (helper["example"]) : undefined;
-                    helper1C = (globalContext) ? bslGlobals.globalvariables()[indexMethod] : (segment1C) ? (segment1C["properties"] ? segment1C["properties"][indexMethod] : undefined) : undefined;
-                    if (helper1C && helper1C["description"]) {
-                        description1C = helper1C.description;
-                    }
-                }
-                variableGlobalContext[indexMethod] = { description: helper.description, alias: helper.name_en, "Доступ": access, example, description1C };
-            }
-            segmentChar["properties"] = variableGlobalContext;
-        }
-        if (segment["values"]) {
-            const variableGlobalContext = {};
-            for (const indexMethod in segment["values"]) {
-                const helper = segment["values"][indexMethod];
-                let description1C;
-                let helper1C;
-                if (context === "OneScript") {
-                    helper1C = (globalContext) ? bslGlobals.globalvariables()[indexMethod] : (segment1C) ? (segment1C["values"] ? segment1C["values"][indexMethod] : undefined) : undefined;
-                    if (helper1C && helper1C["description"]) {
-                        description1C = helper1C.description;
-                    }
-                }
-                variableGlobalContext[indexMethod] = { description: helper.description, alias: helper.name_en, description1C };
-            }
-            segmentChar["values"] = variableGlobalContext;
-        }
-        if (segment["constructors"]) {
-            const classOs = {};
-            for (const indexMethod in segment["constructors"]) {
-                const helper = segment["constructors"][indexMethod];
-                const signature = { "default": { "СтрокаПараметров": helper["signature"], "Параметры": helper["params"] } };
-                let signature1C;
-                let description1C;
-                let helper1C;
-                if (context === "OneScript") {
-                    helper1C = (segment1C) ? (segment1C["constructors"] ? segment1C["constructors"][indexMethod] : undefined) : undefined;
-                    if (helper1C) {
-                        description1C = helper1C["description"];
-                        signature1C = { "default": { "СтрокаПараметров": helper1C["signature"], "Параметры": helper1C["params"] } };
-                    }
-                }
-                classOs[indexMethod] = { description: helper.description, signature, description1C, signature1C };
-            }
-            segmentChar["constructors"] = classOs;
-        }
-        return segmentChar;
-    }
+        this.syntaxContent.syntaxFilled = this._global.syntaxFilled;
 
-    private fill1CSyntax() {
-        const items = {};
-        for (const element in bslGlobals.structureGlobContext()["global"]) {
-            const segment = bslGlobals.structureGlobContext()["global"][element];
-            const segmentChar = {};
-            const methodsGlobalContext = {};
-            for (const key in segment) {
-                const methodData = (bslGlobals.globalfunctions()[key]) ? (bslGlobals.globalfunctions()[key]) : (bslGlobals.globalvariables()[key]);
-                methodsGlobalContext[key] = { description: (methodData.description) ? methodData.description : "", alias: methodData.name_en, signature: (methodData.signature) ? methodData.signature : undefined, returns: (methodData.returns) ? methodData.returns : undefined };
-            }
-            if (element === "Свойства") {
-                segmentChar["properties"] = methodsGlobalContext;
-            } else { segmentChar["methods"] = methodsGlobalContext; }
-            items[element] = segmentChar;
-        }
-        for (const element in bslGlobals.classes()) {
-            const segment = bslGlobals.classes()[element];
-            const segmentChar = this.fillSegmentOsSyntax(segment, false, "1C", "");
-            items[element] = segmentChar;
-        }
-        for (const element in bslGlobals.systemEnum()) {
-            const segment = bslGlobals.systemEnum()[element];
-            const segmentChar = this.fillSegmentOsSyntax(segment, false, "1C", "");
-            items[element] = segmentChar;
-        }
-        this.oscriptMethods = items;
-        const bbb = "'" + JSON.stringify(items).replace(new RegExp("\\\\\"", "g"), "").replace(new RegExp("'", "g"), "").replace(new RegExp("\\\\\\\\", "g"), "^&%").replace(new RegExp("\\/", "g"), "^&*") + "'";
-        return ` window.localStorage.setItem("bsl-language", ${bbb});
-                `;
-    }
-
-    private fillSegmentData(segmentDescription, segment, strSegment, headerSegment, nameID) {
-        if (segment[strSegment]) {
-            segmentDescription = segmentDescription + "<h1 style = 'font-size: 1em;'>" + headerSegment + "</h1><ul>";
-            let counter = 0;
-            for (const elem in segment[strSegment]) {
-                counter = counter + 1;
-                let onlyOs = "";
-                if (this._global.syntaxFilled === "OneScript" && !segment[strSegment][elem].description1C && !segment[strSegment][elem].signature1C) {
-                    onlyOs = "*";
-                }
-                const alias = (nameID === "constructor") ? "" : (segment[strSegment][elem]["alias"] !== "") ? (" / " + segment[strSegment][elem]["alias"]) : "";
-                segmentDescription = segmentDescription + "<li><span class='a' id = " + "'" + nameID + counter + "' " + " onclick='fill(this)'>" + elem + alias + "</span>" + onlyOs + "</li>";
-            }
-            segmentDescription = segmentDescription + "</ul>";
-        }
-        return segmentDescription;
-    }
-
-    private SyntaxOscriptDefault(textSyntax) {
+        const syntaxObject = this._global.methodForDescription;
         this._global.methodForDescription = undefined;
-        const fillStructure = {
-            globalHeader: "Стандартная библиотека классов и функций OneScript",
-            textSyntax,
-            descClass: "",
-            descMethod: "",
-            menuHeight: "100%",
-            elHeight: "100%",
-            classVisible: "none",
-            methodVisible: "none",
-            segmentHeader: "OneScript",
-            methodHeader: "OneScript",
-            switch1C: "Только для OneScript",
-            segmentDescription: "Очень много текста",
-            methodDescription: "Очень много текста",
-        };
-        return this.OscriptSyntax(fillStructure);
+
+        const fillStructure = this.syntaxContent.getStructure(textSyntax, syntaxObject,
+            this.oscriptMethods,
+            (this.syntax === "BSL") ? subsystems : this._global.dllData,
+            (this.syntax === "BSL") ? metadata : this._global.libData);
+
+        return this.getHTML(fillStructure);
     }
 
-    private SyntaxOscriptMethod(textSyntax) {
-        const syntaxObjext = this._global.methodForDescription;
-        this._global.methodForDescription = undefined;
-        let switch1C = "Только для OneScript";
-        let segmentDescription = "Очень много текста";
-        let methodDescription = "Очень много текста";
-        const descClass = syntaxObjext.description.split("/")[syntaxObjext.description.split("/").length - 1];
-        const descMethod = syntaxObjext.label.split(".")[syntaxObjext.label.split(".").length - 1];
-        const alias = (this.oscriptMethods[descClass]["alias"] && this.oscriptMethods[descClass]["alias"] !== "") ? (" / " + this.oscriptMethods[descClass]["alias"]) : "";
-        const segmentHeader = descClass + alias;
-        const segment = this.oscriptMethods[descClass];
-        if (segment["description"]) {
-            segmentDescription = "<p>" + segment["description"] + "</p>";
-        } else { segmentDescription = ""; }
-        segmentDescription = this.fillSegmentData(segmentDescription, segment, "methods", "Методы", "method");
-        segmentDescription = this.fillSegmentData(segmentDescription, segment, "properties", "Свойства", "property");
-        segmentDescription = this.fillSegmentData(segmentDescription, segment, "constructors", "Конструкторы", "constructor");
-        segmentDescription = this.fillSegmentData(segmentDescription, segment, "values", "Значения", "value");
-        let methodHeader = "OneScript";
-        if (descClass !== descMethod) {
-            let methodData;
-            for (const key in this.oscriptMethods[descClass]) {
-                if (key === "properties" || key === "methods" || key === "values") {
-                    for (const item in this.oscriptMethods[descClass][key]) {
-                        if (item === descMethod) {
-                            methodData = this.oscriptMethods[descClass][key][item];
-                            methodHeader = descMethod + (methodData["alias"] !== "" ? (" / " + methodData["alias"]) : "");
-                            if (methodData["description1C"] || methodData["signature1C"]) {
-                                switch1C = "Описание OneScript<br/>(<span class='a' id = '" + key + "' onclick='switchDescription(this)' style='font-size:1em'>переключить</span>)";
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-            if (methodData) {
-                methodDescription = "";
-                if (methodData["description"]) { methodDescription = methodData["description"] + "<br/>"; }
-                if (methodData["returns"]) { methodDescription = methodDescription + "<b><em>Возвращаемое значение: </em></b>" + methodData["returns"] + "<br/>"; }
-                if (methodData["Доступ"]) { methodDescription = methodDescription + "<b><em>Доступ: </em></b>" + methodData["Доступ"] + "<br/>"; }
-                if (methodData["signature"]) {
-                    const stingParams = methodData["signature"]["default"]["СтрокаПараметров"];
-                    methodDescription = methodDescription + "<p><b>Синтаксис:</b></p><p><span class='function_name'>" + descMethod + "</span><span class='parameter_variable'>" + stingParams + "</span></p>";
-                    if (methodData["signature"]["default"]["Параметры"]) {
-                        methodDescription = methodDescription + "<p><b>Параметры:</b></p><p>";
-                        for (const param in methodData["signature"]["default"]["Параметры"]) {
-                            const paramDescription = "<b><em>" + param + ": </em></b>" + methodData["signature"]["default"]["Параметры"][param];
-                            methodDescription = methodDescription + paramDescription + "<br/>";
-                        }
-                        methodDescription = methodDescription + "</p>";
-                    }
-                }
-                if (methodData["example"]) { methodDescription = methodDescription + "<p><b>Пример:</b></p><p>" + methodData["example"] + "</p>"; }
-            }
-        }
-        const fillStructure = {
-            globalHeader: "Стандартная библиотека классов и функций OneScript",
-            textSyntax,
-            descClass,
-            descMethod,
-            menuHeight: "133px",
-            elHeight: (descClass !== descMethod) ? "120px" : "100%",
-            classVisible: "block",
-            methodVisible: (descClass !== descMethod) ? "block" : "none",
-            segmentHeader,
-            methodHeader,
-            switch1C,
-            segmentDescription,
-            methodDescription
-        };
-        return this.OscriptSyntax(fillStructure);
+    private currentFileIsBSL(): boolean {
+        return vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.fileName.endsWith(".bsl");
     }
 
-    private OscriptSyntax(fillStructure) {
-        let globCont = "";
-        for (const element in oscriptStdLib.globalContextOscript()) {
-            globCont = globCont + `<li><span class="a" onclick="fillDescription(this)">${element}</span></li>`;
-        }
-        let classes = "";
-        const added = {};
-        for (const segmentClass in oscriptStdLib.structureMenu()["classes"]) {
-            classes = classes + "<h2 style='font-size: 1em;'><em>" + segmentClass + "</em></h2><ul>";
-            for (const currentClass in oscriptStdLib.structureMenu()["classes"][segmentClass]) {
-                let onlyOs = "";
-                if (!bslGlobals.classes()[currentClass]) {
-                    onlyOs = "*";
-                }
-                classes = classes + `<li><span class="a" onclick="fillDescription(this)">${currentClass + " / " + oscriptStdLib.classesOscript()[currentClass]["name_en"]}</span>${onlyOs}</li>`;
-                added[currentClass] = true;
-                if (oscriptStdLib.structureMenu()["classes"][segmentClass][currentClass] !== "") {
-                    classes = classes + "<ul>";
-                    for (const childClass in oscriptStdLib.structureMenu()["classes"][segmentClass][currentClass]) {
-                        added[childClass] = true;
-                        classes = classes + `<li><span class="a" onclick="fillDescription(this)">${childClass + " / " + oscriptStdLib.classesOscript()[childClass]["name_en"]}</span></li>`;
-                    }
-                    classes = classes + "</ul>";
-                }
-            }
-            if (segmentClass !== "Прочее") {
-                classes = classes + "</ul>";
-            }
-        }
-        for (const element in oscriptStdLib.classesOscript()) {
-            if (!added[element]) {
-                let onlyOs = "";
-                if (!bslGlobals.classes()[element]) {
-                    onlyOs = "*";
-                }
-                const alias = (oscriptStdLib.classesOscript()[element]["name_en"] !== "") ? (" / " + oscriptStdLib.classesOscript()[element]["name_en"]) : "";
-                classes = classes + `<li><span class="a" onclick="fillDescription(this)">${element + alias}</span>${onlyOs}</li>`;
-            }
-        }
-        classes = classes + "</ul><h1 style='font-size: 1em;'>Системные перечисления</h1><ul>";
-        for (const element in oscriptStdLib.systemEnum()) {
-            let onlyOs = "";
-            if (!bslGlobals.systemEnum()[element]) {
-                onlyOs = "*";
-            }
-            const alias = (oscriptStdLib.systemEnum()[element]["name_en"] !== "") ? (" / " + oscriptStdLib.systemEnum()[element]["name_en"]) : "";
-            classes = classes + `<li><span class="a" onclick="fillDescription(this)">${element + alias}</span>${onlyOs}</li>`;
-        }
-        fillStructure.globCont = globCont;
-        fillStructure.classes = classes;
-        fillStructure.displaySwitch = "block";
-        fillStructure.onlyOs = `if (!segment[strSegment][elem].description1C && !segment[strSegment][elem].signature1C){
-                                        onlyOs = "*";
-                                    }`;
-        return this.fillSyntax(fillStructure);
-    }
+    private async getHTML(fillStructure): Promise<string> {
+        const hljs = path.join(vscode.extensions.getExtension("xDrivenDevelopment.language-1c-bsl").extensionPath,
+        "lib", "highlight.pack.js");
+        const mdit = path.join(vscode.extensions.getExtension("xDrivenDevelopment.language-1c-bsl").extensionPath,
+        "lib", "markdown-it.js");
 
-    private fillSyntax(fillStructure) {
         return `<head>
                     <style>
+                        /* Tomorrow Comment */
+                        .hljs-comment,
+                        .hljs-quote {
+                            color: #608B4E;/*#8e908c;*/
+                        }
+                        /* Tomorrow Red */
+                        .hljs-variable,
+                        .hljs-template-variable,
+                        .hljs-tag,
+                        .hljs-name,
+                        .hljs-selector-id,
+                        .hljs-selector-class,
+                        .hljs-regexp,
+                        .hljs-deletion {
+                            color: #c82829;
+                        }
+                        /* Tomorrow Orange */
+                        .hljs-number,
+                        .hljs-built_in,
+                        .hljs-builtin-name,
+                        .hljs-literal,
+                        .hljs-type,
+                        .hljs-params,
+                        .hljs-meta,
+                        .hljs-link {
+                            color: #DCDCAA; /*#f5871f;*/
+                        }
+                        /* Tomorrow Yellow */
+                        .hljs-attribute {
+                            color: #eab700;
+                        }
+                        /* Tomorrow Green */
+                        .hljs-string,
+                        .hljs-symbol,
+                        .hljs-bullet,
+                        .hljs-addition {
+                            color: #CE9178; /*#718c00;*/
+                        }
+                        /* Tomorrow Blue */
+                        .hljs-title,
+                        .hljs-section {
+                            color: #4271ae;
+                        }
+                        /* Tomorrow Purple */
+                        .hljs-keyword,
+                        .hljs-selector-tag {
+                            color: #C586C0;/*#8959a8;*/
+                        }
+                        .hljs {
+                            display: block;
+                            overflow-x: auto;
+                            padding: 0.5em;
+                            margin: 0px;
+                            font-family: Menlo, Monaco, Consolas,
+                            "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+                            font-size: 14px;
+                            line-height: 19px;
+                        }
+                        pre {
+                            white-space: pre-wrap;
+                            padding: 0.5em;
+                        }
+                        code {
+                            border-radius: 3px;
+                            font-family: Menlo, Monaco, Consolas,
+                            "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+                            font-size: 14px;
+                            line-height: 19px;
+                        }
+                        .vscode-light pre code {
+                            color: rgb(30, 30, 30);
+                        }
+                        .vscode-dark,
+                        .vscode-dark pre code {
+                            color: #DDD;
+                        }
+                        .vscode-light code {
+                            color: #A31515;
+                        }
+                        .vscode-dark code {
+                            color: #D7BA7D;
+                        }
+                        .vscode-light pre:not(.hljs),
+                        .vscode-light code > div {
+                            background-color: rgba(220, 220, 220, 0.4);
+                        }
+                        .vscode-dark pre:not(.hljs),
+                        .vscode-dark code > div {
+                            background-color: rgba(10, 10, 10, 0.4);
+                        }
+                        .vscode-high-contrast pre:not(.hljs),
+                        .vscode-high-contrast code > div {
+                            background-color: rgb(0, 0, 0);
+                        }
+                        .vscode-light .hljs {
+                            background-color: rgba(220, 220, 220, 0.4);
+                        }
+                        .vscode-dark .hljs {
+                            background-color: rgba(10, 10, 10, 0.4);
+                        }
+                        .hljs-emphasis {
+                            font-style: italic;
+                        }
+                        .hljs-strong {
+                            font-weight: bold;
+                        }
                         .a {
                             cursor: pointer;
-                            text-decoration: underline
-                        } 
+                            text-decoration: underline;
+                        }
+                        a.mod {
+                            color: white;
+                            text-decoration: underline;
+                        }
+                        a.mod:hover {
+                            color: white;
+                        }
                         .button {
                             border: 0px;
                             background-color: inherit;
                             color: inherit;
                             font-weight: bold
                         }
-                        .monaco-shell .storage {
+                        .vscode-light .storage {
                             color: #0000FF
                         }
-                        .monaco-shell .function_name {
-                            color: #795E26
+                        .vscode-light .function_name {
+                            color: #795E26 /*#795E26*/
                         }
-                        .monaco-shell .parameter_variable {
-                            color: #001080
+                        .vscode-light .parameter_variable {
+                            color: #267F99 /*#001080*/
                         }
                         .storage {
                             color: #569CD6
@@ -543,7 +439,31 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                             color: #DCDCAA
                         }
                         .parameter_variable {
-                            color: #9CDCFE
+                            color: #4EC9B0 /*#9CDCFE*/
+                        }
+                        a {
+                            color: #4080D0;
+                            text-decoration: none;
+                        }
+                        a:hover {
+                            color: #4080D0;
+                            text-decoration: underline;
+                        }
+                        table {
+                            border-collapse: collapse;
+                        }
+                        table > thead > tr > th {
+                            text-align: left;
+                            border-bottom: 1px solid;
+                        }
+                        table > thead > tr > th,
+                        table > thead > tr > td,
+                        table > tbody > tr > th,
+                        table > tbody > tr > td {
+                            padding: 5px 10px;
+                        }
+                        table > tbody > tr + tr > td {
+                            border-top: 1px solid;
                         }
                     </style>
                     <script>
@@ -560,23 +480,37 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                             if (segment["description"]) {
                                 segmentDescription = "<p>"+segment["description"]+"</p>";
                             }
-                            segmentDescription = fillSegmentData(segmentDescription, segment, "methods", "Методы", "method");
-                            segmentDescription = fillSegmentData(segmentDescription, segment, "properties", "Свойства", "property");
-                            segmentDescription = fillSegmentData(segmentDescription, segment, "constructors", "Конструкторы", "constructor");
-                            segmentDescription = fillSegmentData(segmentDescription, segment, "values", "Значения", "value");
-                            document.getElementById('header').innerHTML = elem.innerHTML; 
+                            segmentDescription = fillSegmentData(
+                                segmentDescription, segment, "methods", "Методы", "method");
+                            segmentDescription = fillSegmentData(
+                                segmentDescription, segment, "manager", "Методы модуля менеджера", "manager");
+                            segmentDescription = fillSegmentData(
+                                segmentDescription, segment, "object", "Методы модуля объекта", "object");
+                            segmentDescription = fillSegmentData(
+                                segmentDescription, segment, "properties", "Свойства", "property");
+                            segmentDescription = fillSegmentData(
+                                segmentDescription, segment, "constructors", "Конструкторы", "constructor");
+                            segmentDescription = fillSegmentData(
+                                segmentDescription, segment, "values", "Значения", "value");
+                            document.getElementById('header').innerHTML = elem.innerHTML
+                            + ((segment.oscriptLib) ? (" (" + segment.oscriptLib + ")") : "");
                             document.getElementById('el').innerHTML = segmentDescription;
                         }
 
                         function fillSegmentData(segmentDescription, segment, strSegment, headerSegment, nameID) {
                             if (segment[strSegment]) {
-                                segmentDescription = segmentDescription + "<h1 style='font-size: 1em;'>" + headerSegment + "</h1><ul>";
+                                segmentDescription = segmentDescription
+                                + "<h1 style='font-size: 1em;'>" + headerSegment + "</h1><ul>";
                                 var counter = 0;
                                 for (var elem in segment[strSegment]) {
                                     counter = counter + 1;
                                     var onlyOs = "";${fillStructure.onlyOs}
-                                    var alias = (nameID === "constructor") ? "" : ((segment[strSegment][elem]["alias"]!=="")?(" / " + segment[strSegment][elem]["alias"]):"");
-                                    segmentDescription = segmentDescription + "<li><span class='a' id = "+"'" + nameID + counter + "' " + " onclick='fill(this)'>" + elem + alias + "</span>" + onlyOs + "</li>";
+                                    var alias = (nameID === "constructor")
+                                    ? "" : ((segment[strSegment][elem]["alias"]!=="")
+                                    ?(" / " + segment[strSegment][elem]["alias"]):"");
+                                    segmentDescription = segmentDescription + "<li><span class='a' id = "
+                                    + "'" + nameID + counter + "' "
+                                    + " onclick='fill(this)'>" + elem + alias + "</span>" + onlyOs + "</li>";
                                 }
                                 segmentDescription = segmentDescription+ "</ul>";
                             }
@@ -589,29 +523,38 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                                 document.getElementById('splitter2').style.display = "block";
                                 document.getElementById('el').style.height = "120px";
                             }
-                            var strSegment = document.getElementById('header').innerHTML.replace(new RegExp('\\n[ ]*','m'),'').split(" / ")[0];
+                            var strSegment = document.getElementById('header').innerHTML.replace(
+                                new RegExp('\\n[ ]*','m'),'').split(" / ")[0].replace(new RegExp(' \\\\(.*\\\\)'),'');
                             var str = elem.innerHTML.replace(new RegExp('\\n[ ]*','m'),'').split(" / ")[0];
                             var charSegment = "";
                             if (elem.id.slice(0,6)==="method"){
                                 charSegment = "methods";
                             } else if (elem.id.slice(0,8)==="property"){
                                 charSegment = "properties";
+                            } else if (elem.id.slice(0,6)==="object"){
+                                charSegment = "object";
+                            } else if (elem.id.slice(0,7)==="manager"){
+                                charSegment = "manager";
                             } else if (elem.id.slice(0,11)==="constructor"){
                                 charSegment = "constructors";
                             } else if (elem.id.slice(0,5)==="value"){
                                 charSegment = "values";
                             }
-                            let methodData = JSON.parse(window.localStorage.getItem('bsl-language'))[strSegment][charSegment][str];
+                            let methodData =
+                            JSON.parse(window.localStorage.getItem('bsl-language'))[strSegment][charSegment][str];
                             var depp = "";
                             if (charSegment === "constructors") {
                                 str = strSegment;
                             }
-                            depp = fillDescriptionData(methodData, depp, "description", "signature", "returns", str, charSegment);
+                            depp = fillDescriptionData(
+                                methodData, depp, "description", "signature", "returns", str, charSegment);
                             document.getElementById('headerMethod').innerHTML = elem.innerHTML;
                             if (!methodData.description1C&&!methodData["Параметры1С"]){
                                 document.getElementById('desc').innerHTML = "Только для OneScript";
                                 } else {
-                                document.getElementById('desc').innerHTML =  "Описание OneScript<br/>(<span class='a' id = '" + charSegment + "' onclick='switchDescription(this)' style='font-size:1em'>переключить</span>)";
+                                document.getElementById('desc').innerHTML =
+                                "Описание OneScript<br/>(<span class='a' id = '" + charSegment
+                                + "' onclick='switchDescription(this)' style='font-size:1em'>переключить</span>)";
                                 }
                             document.getElementById('elMethod').innerHTML = depp;
                         }
@@ -627,59 +570,129 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                             } else if (elem.id.slice(0,5)==="value"){
                                 charSegment = "values";
                             }
-                            var strMethod = document.getElementById('headerMethod').innerHTML.replace("<br>", "").replace(new RegExp('\\n[ ]*','m'),'').split(" / ")[0];
-                            var strSegment = document.getElementById('header').innerHTML.replace(new RegExp('\\n[ ]*','m'),'').split(" / ")[0];
-                            let methodData = JSON.parse(window.localStorage.getItem('bsl-language'))[strSegment][charSegment][strMethod];
+                            var strMethod =
+                            document.getElementById('headerMethod').innerHTML.replace("<br>", "").replace(
+                                new RegExp('\\n[ ]*','m'),'').split(" / ")[0];
+                            var strSegment =
+                            document.getElementById('header').innerHTML.replace(
+                                new RegExp('\\n[ ]*','m'),'').split(" / ")[0];
+                            let methodData =
+                            JSON.parse(window.localStorage.getItem('bsl-language'))[strSegment][charSegment][strMethod];
                             if (charSegment === "constructors"){
                                 strMethod = strSegment;
                             }
                             let depp = "";
                             if (document.getElementById('desc').innerHTML.slice(0,11)==="Описание 1С") {
-                                depp = fillDescriptionData(methodData, depp, "description", "signature", "returns", strMethod, charSegment);
-                                document.getElementById('desc').innerHTML =  "Описание OneScript<br/>(<span class='a' id = '" + charSegment + "' onclick='switchDescription(this)' style='font-size:1em'>переключить</span>)";
+                                depp = fillDescriptionData(
+                                    methodData, depp, "description", "signature", "returns", strMethod, charSegment);
+                                document.getElementById('desc').innerHTML =
+                                "Описание OneScript<br/>(<span class='a' id = '" + charSegment
+                                + "' onclick='switchDescription(this)' style='font-size:1em'>переключить</span>)";
                             } else {
-                                depp = fillDescriptionData(methodData, depp, "description1C", "signature1C", "returns1C", strMethod, charSegment);
-                                document.getElementById('desc').innerHTML =  "Описание 1С<br/>(<span class='a' id = '" + charSegment + "' onclick='switchDescription(this)' style='font-size:1em'>переключить</span>)";
+                                depp = fillDescriptionData(methodData, depp, "description1C",
+                                "signature1C", "returns1C", strMethod, charSegment);
+                                document.getElementById('desc').innerHTML =
+                                "Описание 1С<br/>(<span class='a' id = '" + charSegment
+                                + "' onclick='switchDescription(this)' style='font-size:1em'>переключить</span>)";
                             }
                             document.getElementById('elMethod').innerHTML = depp;
                         }
 
-                        function fillDescriptionData(methodData, depp, descContext, paramContext, returns, strMethod, charSegment) {
-                            if (methodData[descContext]) { depp = methodData[descContext].replace(new RegExp("\\\\^\\\\&\\\\*","g"),'\\/').replace(new RegExp("\\\\^\\\\&%","g"),'\\\\') + "<br/>"; }
-                            if (methodData[returns]) { depp = depp + "<b><em>Возвращаемое значение: </em></b>" + methodData[returns] + "<br/>";}
-                            if (methodData["Доступ"]) { depp = depp + "<b><em>Доступ: </em></b>" + methodData["Доступ"].replace("^&*",'\\/') + "<br/>";}
+                        function fillDescriptionData(methodData, depp, descContext,
+                                                     paramContext, returns, strMethod, charSegment) {
+                            if (methodData[descContext]) {
+                                depp = methodData[descContext]
+                                .replace(new RegExp("\\\\^\\\\&\\\\*","g"),'\\/')
+                                .replace(new RegExp("\\\\^\\\\&%","g"),'\\\\')
+                                .replace(new RegExp("\\\\*\\\\&\\\\^","g"),'\\"') + "<br/>";
+                                    }
+                            if (methodData[returns]) {
+                                depp = depp + "<b><em>Возвращаемое значение: </em></b>"
+                                + methodData[returns].replace(new RegExp("\\\\*\\\\&\\\\^","g"),'\\"')
+                                .replace(new RegExp("\\\\^\\\\&\\\\*","g"),'\\/')
+                                .replace(new RegExp("\\\\^\\\\&%","g"),'\\\\') + "<br/>";
+                            }
+                            if (methodData["Доступ"]) {
+                                depp = depp + "<b><em>Доступ: </em></b>"
+                                + methodData["Доступ"].replace("^&*",'\\/') + "<br/>";}
                             var constructor = (charSegment === "constructors")? "Новый " : "";
-                            if (charSegment === "methods" || charSegment === "constructors") {
+                            if (charSegment === "methods" || charSegment === "constructors"
+                                ||charSegment === "object" || charSegment === "manager") {
                                 if (methodData[paramContext]) {
                                     for (let element in methodData[paramContext]) {
                                         var name_syntax = (element === "default") ? "" : " " + element;
-                                        depp = depp + "<p><b>Синтаксис" + name_syntax + ":</b></p><p>"+ constructor + "<span class='function_name'>" + strMethod + "</span><span class='parameter_variable'>" + methodData[paramContext][element]["СтрокаПараметров"] + "</span></p>";
-                                        let header = false;
-                                        for (let param in methodData[paramContext][element].Параметры) {
-                                            if (header === false) {
-                                                depp = depp + "<p><b>Параметры:</b></p><p>";
-                                                header = true;
+                                        depp = depp + "<p><b>Синтаксис" + name_syntax + ":</b></p><p class='hljs'>"
+                                        + constructor + "<span class='function_name'>" + strMethod
+                                        + "</span><span class='parameter_variable'>"
+                                        + methodData[paramContext][element]["СтрокаПараметров"] + "</span></p>";
+                                        if (typeof methodData[paramContext][element].Параметры !=="string"){
+                                            let header = false;
+                                            for (let param in methodData[paramContext][element].Параметры) {
+                                                if (header === false) {
+                                                    depp = depp + "<p><b>Параметры:</b></p><p>";
+                                                    header = true;
+                                                }
+                                                var paramDescription = "<b><em>" + param + ":</em></b> "
+                                                + methodData[paramContext][element].Параметры[param]
+                                                .replace(new RegExp("\\\\^\\\\&\\\\*","g"),'\\/')
+                                                .replace(new RegExp("\\\\^\\\\&%","g"),'\\\\')
+                                                .replace(new RegExp("\\\\*\\\\&\\\\^","g"),'\\"');
+                                                depp = depp + paramDescription + "<br/>";
                                             }
-                                            var paramDescription = "<b><em>" + param + ":</em></b> " + methodData[paramContext][element].Параметры[param].replace(new RegExp("\\\\^\\\\&\\\\*","g"),'\\/').replace(new RegExp("\\\\^\\\\&%","g"),'\\\\');
-                                            depp = depp + paramDescription + "<br/>";
+                                        } else if (methodData[paramContext][element].Параметры !== ""){
+                                            depp = depp + "<p><b>Параметры:</b></p><p>";
+                                            depp = depp + methodData[paramContext][element].Параметры
+                                            .replace(new RegExp("\\\\^\\\\&\\\\*","g"),'\\/')
+                                            .replace(new RegExp("\\\\^\\\\&%","g"),'\\\\')
+                                            .replace(new RegExp("\\\\*\\\\&\\\\^","g"),'\\"');
                                         }
                                         depp = depp + "</p>";
                                     }
                                 } else {
                                     var ret = new RegExp("Тип: ([^.]+)\\.", "");
                                     var retValue = (!methodData[returns]) ? "" : ": "+ ret.exec(methodData[returns])[1];
-                                    depp = depp + "<p><b>Синтаксис:</b></p><p><span class='function_name'>" + strMethod + "</span><span class='parameter_variable'>()" + retValue + "</span></p>";
+                                    depp = depp + "<p><b>Синтаксис:</b></p><p class='hljs'>"
+                                    + "<span class='function_name'>" + strMethod
+                                    + "</span><span class='parameter_variable'>()"
+                                    + retValue + "</span></p>";
                                 }
                             }
-                            if (methodData["example"] && descContext === "description") { depp = depp + "<p><b>Пример:</b></p><p>" + methodData["example"].replace(new RegExp("\\\\^\\\\&\\\\*","g"),'\\/').replace("^&%",'\\\\')+ "</p>";}
+                            if (methodData["example"] && descContext === "description") {
+                                console.log()
+                                 depp = depp + "<p><b>Пример:</b></p><pre class='hljs'>"
+                                 + hljs.highlight("1c", methodData["example"]
+                                 .replace(new RegExp("\\\\^\\\\&\\\\*","g"),'\\/')
+                                 .replace("^&%",'\\\\')
+                                 .replace(new RegExp("\\\\*\\\\&\\\\^","g"),'\\"')
+                                 .replace(new RegExp("<br>","g"), String.fromCharCode(10)), true).value
+                                 + "</pre>";}
                             return depp;
+                        }
+
+                        function readFile(file) {
+                            if (document.getElementById('cont').style.display === "none") {
+                                document.getElementById('cont').style.display = "block";
+                                document.getElementById('splitter1').style.display = "block";
+                                document.getElementById('struct').style.height = "133px";
+                            }
+                            document.getElementById('header').innerHTML = file.split("\\\\").reverse()[1];
+                            var request = new XMLHttpRequest();
+                            request.open('GET', file);
+                            request.onload = function (e) {
+                                if (request.readyState == 4 && request.status == 200) {
+                                    var md = window.markdownit(defaults);
+                                    document.getElementById('el').innerHTML = md.render(request.responseText
+                                        .replace(new RegExp("\`\`\`bsl","g"), "\`\`\`1c"));
+                                }
+                            };
+                            request.send(null);
                         }
 
                         function drag(elementToDrag, event) {
                             // Зарегистрировать обработчики событий mousemove и mouseup,
-                            // которые последуют за событием mousedown. 
+                            // которые последуют за событием mousedown.
                             if (document.addEventListener) {
-                                // Стандартная модель событий 
+                                // Стандартная модель событий
                                 // Зарегистрировать перехватывающие обработчики в документе
                                 document.addEventListener("mousemove", moveHandler, true);
                                 document.addEventListener("mouseup", upHandler, true);
@@ -687,71 +700,140 @@ export default class TextDocumentContentProvider extends AbstractProvider implem
                             event.cancelBubble = true;
                             event.returnValue = false;
                             function moveHandler(e) {
-                                // Переместить элемент в позицию указателя мыши с учетом позиций 
-                                // полос прокрутки и смещений относительно начального щелчка. 
+                                // Переместить элемент в позицию указателя мыши с учетом позиций
+                                // полос прокрутки и смещений относительно начального щелчка.
                                 if (elementToDrag.id==="splitter1"){
-                                    document.getElementById('struct').style.height = (e.clientY - document.getElementById('struct').offsetTop)  + "px";
+                                    document.getElementById('struct').style.height =
+                                    (e.clientY - document.getElementById('struct').offsetTop)  + "px";
                                 } else {
-                                    document.getElementById('el').style.height = (e.clientY - document.getElementById('el').offsetTop)  + "px";
+                                    document.getElementById('el').style.height =
+                                    (e.clientY - document.getElementById('el').offsetTop)  + "px";
                                 }
                                 // И прервать дальнейшее распространение события.
-                                e.cancelBubble = true; 
+                                e.cancelBubble = true;
                             }
                             function upHandler(e) {
-                                // Удалить перехватывающие обработчики событий. 
+                                // Удалить перехватывающие обработчики событий.
                                 if (document.removeEventListener) {
-                                    document.removeEventListener("mouseup", upHandler, true); 
+                                    document.removeEventListener("mouseup", upHandler, true);
                                     document.removeEventListener("mousemove", moveHandler, true);
                                 }
-                                e.cancelBubble = true; 
+                                e.cancelBubble = true;
                             }
                         }
+                        function escapeHtml(str) {
+                            var HTML_ESCAPE_TEST_RE = /[&<>"]/;
+                            var HTML_ESCAPE_REPLACE_RE = /[&<>"]/g;
+                            var HTML_REPLACEMENTS = {
+                                '&': '&amp;',
+                                '<': '&lt;',
+                                '>': '&gt;',
+                                '"': '&quot;'
+                            };
+                            function replaceUnsafeChar(ch) {
+                                return HTML_REPLACEMENTS[ch];
+                            }
+                            if (HTML_ESCAPE_TEST_RE.test(str)) {
+                                return str.replace(HTML_ESCAPE_REPLACE_RE, replaceUnsafeChar);
+                            }
+                            return str;
+                        };
                     </script>
-                </head>
-
-                <body>
+                    <script type="text/javascript" src="${hljs}"></script>
+                    <script type="text/javascript" src="${mdit}"></script>
+                    <script>;
+                    var defaults = {
+                        highlight: function (str, lang) {
+                            if (lang && hljs.getLanguage(lang)) {
+                                try {
+                                    return '<pre class="hljs"><code>' +
+                                       hljs.highlight(lang, str, true).value +
+                                       '</code></pre>';
+                                } catch (__) {
+                                }
+                            }
+                            return '<pre><code>'
+                            + escapeHtml(str) + '</code></pre>';
+                          }
+                      };</script>
+                    </head>
+                    <body onload = "
+                    var md = window.markdownit(defaults);
+                    // document.getElementById('hjh').innerHTML =
+                    // md.render(textHL);
+                    //.replace(new RegExp('<', 'g'), '&lt;').replace(new RegExp('>', 'g'), '&gt;');
+                    ">
                     <script>
                         (function() {
                             try {
                                 ${fillStructure.textSyntax}
                                 var theme = window.localStorage.getItem('storage://global/workbench.theme');
                                 if (theme && theme.indexOf('vs-dark') < 0) {
-                                    window.document.body.className = 'monaco-shell'; // remove the dark theme class if we are on a light theme
+                                    window.document.body.className = 'monaco-shell';
+                                    // remove the dark theme class if we are on a light theme
                                 }
                             } catch (error) {
                                 console.error(error);
                             }
                         })();
                     </script>
-                    
-                    <h1 style="font-size: 1em; margin-left:5px; float:left;  display: inline-block; width:calc(85% - 55px)">${fillStructure.globalHeader}</h1><span style = "padding: 5px 15px 5px 5px;  display: inline-block; margin: 10px;float:right; width:55px; white-space: nowrap; height:15px; background: #007acc;"><a href="command:language-1c-bsl.syntaxHelper" style = "text-decoration:none; color: white"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14"><path d="M15.7 13.3l-3.81-3.83A5.93 5.93 0 0 0 13 6c0-3.31-2.69-6-6-6S1 2.69 1 6s2.69 6 6 6c1.3 0 2.48-.41 3.47-1.11l3.83 3.81c.19.2.45.3.7.3.25 0 .52-.09.7-.3a.996.996 0 0 0 0-1.41v.01zM7 10.7c-2.59 0-4.7-2.11-4.7-4.7 0-2.59 2.11-4.7 4.7-4.7 2.59 0 4.7 2.11 4.7 4.7 0 2.59-2.11 4.7-4.7 4.7z" fill="white"/></svg>&nbsp; Поиск</a></span>
+                    <h1 id="hjh" style="font-size: 1em; margin-left:5px; margin-top: 20px; float:left;
+                    display: inline-block; width:calc(90% - 80px);">${fillStructure.globalHeader}</h1>
+                    <a href="command:language-1c-bsl.syntaxHelper" style = "margin: 20px 10px 10px 10px;
+                    padding: 5px 15px 5px 5px; float:right; width:55px; height:15px; white-space: nowrap;
+                    background: #007acc; text-decoration:none; color: white; "><svg xmlns="http://www.w3.org/2000/svg"
+                    width="14" height="14" viewBox="0 0 14 14"><path d="M15.7 13.3l-3.81-3.83A5.93 5.93 0 0 0 13
+                    6c0-3.31-2.69-6-6-6S1 2.69 1 6s2.69 6 6 6c1.3 0 2.48-.41 3.47-1.11l3.83 3.81c.19.2.45.3.7.3.25 0
+                    .52-.09.7-.3a.996.996 0 0 0 0-1.41v.01zM7 10.7c-2.59 0-4.7-2.11-4.7-4.7 0-2.59 2.11-4.7 4.7-4.7
+                    2.59 0 4.7 2.11 4.7 4.7 0 2.59-2.11 4.7-4.7 4.7z" fill="white"/></svg>
+                    &nbsp; Поиск</a>
                     <hr style = "clear:both">
-                    <div id = "struct" style="overflow-y: scroll; margin-left:5px; height: ${fillStructure.menuHeight};">
-                        <h1 style="font-size: 1em;">Глобальный контекст</h1>
-                        <ul>${fillStructure.globCont}</ul>
-                        <h1 style="font-size: 1em;">Доступные классы</h1>
+                    <div id = "struct" style="overflow-y: scroll; margin-left:5px; height:
+                    ${fillStructure.menuHeight};">
+                        ${fillStructure.globCont}
                         ${fillStructure.classes}</ul>
                     </div>
-                    <div id = "splitter1" style = "background: #9A9A9A; display:${fillStructure.classVisible}; cursor: n-resize; height:2px; margin-top:4px;" onmousedown="drag(this, event);"></div>
+                    <div id = "splitter1" style = "background: #9A9A9A; display:${fillStructure.classVisible};
+                    cursor: n-resize; height:2px; margin-top:4px;" onmousedown="drag(this, event);"></div>
                     <div id="cont" style = "display:${fillStructure.classVisible};">
-                        <h1 id="header" style="font-size: 1em; float:left; margin-left:5px; width:90%; margin-right:0px">${fillStructure.segmentHeader}</h1> 
-                        <input type = "button" class = "button" value = "x" onclick = "document.getElementById('cont').style.display = 'none'; document.getElementById('splitter1').style.display = 'none'; document.getElementById('struct').style.height = '100%'" style="float: right; margin-top: 6px">
+                        <h1 id="header" style="font-size: 1em; float:left; margin-left:5px; width:90%;
+                        margin-right:0px">${fillStructure.segmentHeader}</h1>
+                        <input type = "button" class = "button" value = "x"
+                        onclick = "document.getElementById('cont').style.display = 'none';
+                        document.getElementById('splitter1').style.display = 'none';
+                        document.getElementById('struct').style.height = '100%'" style="float: right; margin-top: 6px">
                         <hr style = "clear:both">
                         <div id="el" style = "overflow-y: scroll; margin-left:5px; height: ${fillStructure.elHeight}">
                             ${fillStructure.segmentDescription}
-                        </div> 
-                    <div id = "splitter2" style = "background: #9A9A9A; display:${fillStructure.methodVisible}; cursor: n-resize; height:2px; margin-top:4px;" onmousedown="drag(this, event);"></div>
-                    <div id="contMethod" style = "display:${fillStructure.methodVisible};">
-                        <div style="float:left; width:90%; margin-right:0px; margin-left:5px"><h1 id="headerMethod" style="font-size: 1em; float:left; width:50%;">${fillStructure.methodHeader}</h1> 
-                        <span id = "desc" style='font-size:0.8em; width:95px; float:right; margin-top:5px; display:${fillStructure.displaySwitch}'>${fillStructure.switch1C}<\span>
                         </div>
-                        <input type = "button" class = "button" value = "x" onclick = "document.getElementById('contMethod').style.display = 'none'; document.getElementById('splitter2').style.display = 'none'; document.getElementById('el').style.height = '60%'" style="float: right; margin-top:5px">
+                    <div id = "splitter2" style = "background: #9A9A9A; display:${fillStructure.methodVisible};
+                    cursor: n-resize; height:2px; margin-top:4px;" onmousedown="drag(this, event);"></div>
+                    <div id="contMethod" style = "display:${fillStructure.methodVisible};">
+                        <div style="float:left; width:calc(100% - 30px); margin-right:0px; margin-left:5px">
+                        <h1 id="headerMethod" style="font-size: 1em; float:left; width:calc(100% - 110px);
+                        margin-right:0px;">
+                        ${fillStructure.methodHeader}</h1>
+                        <span id = "desc" style='margin-left:5px; text-align: right;
+                        margin-right:0px; padding-right:5px; font-size:0.8em; width:95px;
+                        float:right; margin-top:5px; padding-left:0px;
+                        display:${fillStructure.displaySwitch}'>${fillStructure.switch1C}<\span>
+                        </div>
+                        <input type = "button" class = "button" value = "x"
+                        onclick = "document.getElementById('contMethod').style.display = 'none';
+                        document.getElementById('splitter2').style.display = 'none';
+                        document.getElementById('el').style.height = '60%'" style="float: right;
+                        margin-left:0px; margin-top:5px">
                         <hr style = "clear:both">
                         <div id="elMethod" style = "overflow-y: scroll; margin-left:5px">
                             ${fillStructure.methodDescription}
-                        </div> 
+                        </div>
                     </div>
                     </div>
                 </body>`;
     }
+}
+interface IModuleDesc {
+    name: string;
+    object?: object;
+    manager?: object;
 }

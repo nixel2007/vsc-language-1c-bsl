@@ -18,11 +18,12 @@ import SyntaxHelper from "./features/syntaxHelper";
 import TaskProvider from "./features/taskProvider";
 import WorkspaseSymbolProvider from "./features/workspaceSymbolProvider";
 
-import * as bslGlobals from "./features/bslGlobals";
 import { CodeBeautyfier } from "./features/codeBeautifier";
 import * as dynamicSnippets from "./features/dynamicSnippets";
-import * as oscriptStdLib from "./features/oscriptStdLib";
 import * as vscAdapter from "./vscAdapter";
+
+import LibProvider from "./libProvider";
+const libProvider = new LibProvider();
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -33,6 +34,7 @@ export function activate(context: vscode.ExtensionContext) {
     const CMD_ADDCOMMENT = "language-1c-bsl.addComment";
     const CMD_EXPANDABBREVIATION = "language-1c-bsl.expandAbbreviation";
     const CMD_QUICKOPEN = "language-1c-bsl.quickopen";
+    const CMD_OPENCONT = "language-1c-bsl.openContent";
 
     const global = Global.create(vscAdapter);
     const quickOpen = new BslQuickOpen(global);
@@ -197,7 +199,8 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.workspace.onDidChangeTextDocument(
             async (textDocumentChangeEvent: vscode.TextDocumentChangeEvent) => {
                 const editor = vscode.window.activeTextEditor;
-                if (!editor || editor.document.languageId !== "bsl") {
+                if (!editor || editor.document.languageId !== "bsl"
+                    || textDocumentChangeEvent.contentChanges.length === 0) {
                     return;
                 }
 
@@ -291,35 +294,35 @@ export function activate(context: vscode.ExtensionContext) {
         const regex = /([а-яё_\w]+\s?)$/i;
         const arrStrings = regex.exec(textline);
         if (arrStrings) {
-                    let postfix;
-                    switch (char) {
-                        case "++":
-                            postfix = " + 1;";
-                            break;
-                        case "--":
-                            postfix = " - 1;";
-                            break;
-                        case "+=":
-                            postfix = " + ";
-                            break;
-                        case "-=":
-                            postfix = " - ";
-                            break;
-                        case "*=":
-                            postfix = " * ";
-                            break;
-                        case "/=":
-                            postfix = " / ";
-                            break;
-                        case "%=":
-                            postfix = " % ";
-                            break;
-                        default:
+            let postfix;
+            switch (char) {
+                case "++":
+                    postfix = " + 1;";
+                    break;
+                case "--":
+                    postfix = " - 1;";
+                    break;
+                case "+=":
+                    postfix = " + ";
+                    break;
+                case "-=":
+                    postfix = " - ";
+                    break;
+                case "*=":
+                    postfix = " * ";
+                    break;
+                case "/=":
+                    postfix = " / ";
+                    break;
+                case "%=":
+                    postfix = " % ";
+                    break;
+                default:
                     vscode.commands.executeCommand("tab");
                     return;
                     }
-                    const word = arrStrings[1];
-                    editor.edit((editBuilder) => {
+            const word = arrStrings[1];
+            editor.edit((editBuilder) => {
                     editBuilder.replace(
                         new vscode.Range(
                             new vscode.Position(
@@ -328,22 +331,22 @@ export function activate(context: vscode.ExtensionContext) {
                             ),
                             position
                         ),
-                        word + " = " + word + postfix
-                    );
-                }).then(() => {
-                    const newPosition = editor.selection.isReversed
-                        ? editor.selection.anchor
-                        : editor.selection.active;
-                    editor.selection = new vscode.Selection(
-                        newPosition.line,
-                        newPosition.character,
-                        newPosition.line,
-                        newPosition.character
-                    );
-                });
-            } else {
-                    vscode.commands.executeCommand("tab");
-            }
+                    word + " = " + word + postfix
+                );
+            }).then(() => {
+                const newPosition = editor.selection.isReversed
+                    ? editor.selection.anchor
+                    : editor.selection.active;
+                editor.selection = new vscode.Selection(
+                    newPosition.line,
+                    newPosition.character,
+                    newPosition.line,
+                    newPosition.character
+                );
+            });
+        } else {
+            vscode.commands.executeCommand("tab");
+        }
 
     }));
 
@@ -433,6 +436,12 @@ export function activate(context: vscode.ExtensionContext) {
         quickOpen.quickOpen();
     }));
 
+    context.subscriptions.push(vscode.commands.registerCommand(CMD_OPENCONT, (label) => {
+        global.methodForDescription = { label, description: "Экспортные методы bsl" };
+        syntaxHelper.update(previewUri);
+        vscode.commands.executeCommand("vscode.previewHtml", previewUri, vscode.ViewColumn.Two);
+    }));
+
     const previewUriString = "syntax-helper://authority/Синтакс-Помощник";
     const previewUri = vscode.Uri.parse(previewUriString);
 
@@ -440,6 +449,26 @@ export function activate(context: vscode.ExtensionContext) {
         BSL_MODE, new DocumentFormattingEditProvider(global), "\n"));
 
     context.subscriptions.push(vscode.commands.registerCommand("language-1c-bsl.syntaxHelper", () => {
+
+        function fillLabel(label, description) {
+            if (global.dllData && global.oscriptCacheUpdated) {
+                global.methodForDescription = { label, description };
+                syntaxHelper.update(previewUri);
+                vscode.commands.executeCommand("vscode.previewHtml", previewUri, vscode.ViewColumn.Two);
+            } else {
+                const interval = setInterval(() => {
+                    vscode.window.setStatusBarMessage("Подождите, заполняется кэш связанных данных", 1000);
+                    if (global.dllData && global.oscriptCacheUpdated) {
+                        global.methodForDescription = { label, description };
+                        syntaxHelper.update(previewUri);
+                        vscode.commands.executeCommand("vscode.previewHtml", previewUri, vscode.ViewColumn.Two);
+                        clearInterval(interval);
+                    }
+
+                }, 1000);
+            }
+        }
+
         let globalMethod;
         if (vscode.window.activeTextEditor) {
             const word = vscode.window.activeTextEditor.document.getText(
@@ -451,62 +480,98 @@ export function activate(context: vscode.ExtensionContext) {
         }
         // push the items
         const items = [];
-        items.push({ label: "OneScript", description: "" });
-        items.push({ label: "1C", description: "" });
+        items.push({ label: "OneScript", description: "OneScript" });
+        items.push({ label: "1C", description: "1С" });
+        items.push({ label: "oscript-library", description: "oscript-library" });
+        if (Object.keys(global.subsystems).length > 0
+            || global.db.find({ isExport: true, module: { $ne: "" } }).length > 0) {
+            items.push({ label: "Экспортные методы bsl", description: "Экспортные методы bsl" });
+        }
         const postfix = ""; // (autocompleteLanguage === "en") ? "_en" : "";
         const isBsl: boolean = vscode.window.activeTextEditor
             && vscode.window.activeTextEditor.document.fileName.endsWith(".bsl");
         const isOs: boolean = vscode.window.activeTextEditor
             && vscode.window.activeTextEditor.document.fileName.endsWith(".os");
         if (isBsl && globalMethod) {
-            for (const element in bslGlobals.structureGlobContext().global) {
-                const segment = bslGlobals.structureGlobContext().global[element];
-                if (segment[globalMethod.name] === "" || segment[globalMethod.name] === "") {
-                    global.methodForDescription = {
-                        label: globalMethod.name, description: "1С/Глобальный контекст/" + element
-                    };
-                    syntaxHelper.update(previewUri);
-                    vscode.commands.executeCommand("vscode.previewHtml", previewUri, vscode.ViewColumn.Two);
+            for (const element in libProvider.bslglobals.structureMenu.global) {
+                const segment = libProvider.bslglobals.structureMenu.global[element];
+                if (segment[globalMethod.name] === "" || segment[globalMethod.alias] === "") {
+                    fillLabel(globalMethod.name, "1С/Глобальный контекст/" + element);
                     return;
                 }
             }
-        } else if (vscode.window.activeTextEditor && globalMethod) {
-            for (const element in oscriptStdLib.globalContextOscript()) {
-                const segment = oscriptStdLib.globalContextOscript()[element];
-                const methods = segment.methods;
-                if (methods[globalMethod.name] !== undefined || methods[globalMethod.alias] !== undefined) {
-                    global.methodForDescription = {
-                        label: globalMethod.name, description: "OneScript/Глобальный контекст/" + element
-                    };
-                    syntaxHelper.update(previewUri);
-                    vscode.commands.executeCommand("vscode.previewHtml", previewUri, vscode.ViewColumn.Two);
+
+        } else if (vscode.window.activeTextEditor &&
+            vscode.window.activeTextEditor.document.languageId === "bsl" && globalMethod) {
+            for (const element in libProvider.oscriptStdLib.structureMenu.global) {
+                const segment = libProvider.oscriptStdLib.structureMenu.global[element];
+                if (segment[globalMethod.name] === "" || segment[globalMethod.alias] === "") {
+                    fillLabel(globalMethod.name, "OneScript/Глобальный контекст/" + element);
                     return;
                 }
             }
-        } else if (!isOs) {
-            for (const element in oscriptStdLib.globalContextOscript()) {
-                const segment = oscriptStdLib.globalContextOscript()[element];
-                for (const sectionTitle in segment) {
-                    if (sectionTitle === "description" || sectionTitle === "name" || sectionTitle === "name_en") {
+            for (const element in libProvider.bslglobals.structureMenu.global) {
+                const segment = libProvider.bslglobals.structureMenu.global[element];
+                if (segment[globalMethod.name] === "" || segment[globalMethod.alias] === "") {
+                    fillLabel(globalMethod.name, "1С/Глобальный контекст/" + element);
+                    return;
+                }
+            }
+
+        } else if (isBsl || global.syntaxFilled === "1C" || global.syntaxFilled === "BSL") {
+            for (const elementSegment in libProvider.bslglobals.structureMenu.global) {
+                const segment = libProvider.bslglobals.structureMenu.global[elementSegment];
+                for (const element in segment) {
+                    items.push({ label: element, description: "1С/Глобальный контекст/" + elementSegment });
+                }
+            }
+            for (const elementSegment in libProvider.bslglobals.classes) {
+                const class1C = libProvider.bslglobals.classes[elementSegment];
+                items.push({ label: elementSegment, description: "1С/Классы/" + elementSegment });
+                for (const sectionTitle in class1C) {
+                    if (sectionTitle !== "properties" && sectionTitle !== "methods") {
                         continue;
                     }
-                    for (const indexMethod in segment[sectionTitle]) {
-                        const method = segment[sectionTitle][indexMethod];
+                    for (const element in class1C[sectionTitle]) {
                         items.push({
-                            label: method["name" + postfix],
-                            description: "OneScript/Глобальный контекст/" + element
+                            label: elementSegment + "." + element,
+                            description: "1С/Классы/" + elementSegment
                         });
                     }
                 }
             }
-            for (const element in oscriptStdLib.classesOscript()) {
-                const classOscript = oscriptStdLib.classesOscript()[element];
+            for (const elementSegment in libProvider.bslglobals.systemEnum) {
+                const class1C = libProvider.bslglobals.systemEnum[elementSegment];
+                items.push({ label: elementSegment, description: "1С/Системные перечисления/" + elementSegment });
+                for (const sectionTitle in class1C) {
+                    if (sectionTitle !== "properties" && sectionTitle !== "methods") {
+                        continue;
+                    }
+                    for (const element in class1C[sectionTitle]) {
+                        items.push({
+                            label: elementSegment + "." + element,
+                            description: "1С/Системные перечисления/" + elementSegment
+                        });
+                    }
+                }
+            }
+
+        } else if ((vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.languageId === "bsl")
+            || global.syntaxFilled === "OneScript" || global.syntaxFilled === "oscript-library") {
+            for (const element in libProvider.oscriptStdLib.structureMenu.global) {
+                const segment = libProvider.oscriptStdLib.structureMenu.global[element];
+                for (const sectionTitle in segment) {
+                    items.push({
+                        label: sectionTitle,
+                        description: "OneScript/Глобальный контекст/" + element
+                    });
+                }
+            }
+            for (const element in libProvider.oscriptStdLib.classes) {
+                const classOscript = libProvider.oscriptStdLib.classes[element];
                 items.push({ label: classOscript["name" + postfix], description: "OneScript/Классы/" + element });
                 for (const sectionTitle in classOscript) {
-                    if (sectionTitle === "constructors"
-                        || sectionTitle === "description"
-                        || sectionTitle === "name"
-                        || sectionTitle === "name_en") {
+                    if (sectionTitle !== "properties" && sectionTitle !== "methods") {
                         continue;
                     }
                     for (const indexMethod in classOscript[sectionTitle]) {
@@ -518,14 +583,14 @@ export function activate(context: vscode.ExtensionContext) {
                     }
                 }
             }
-            for (const element in oscriptStdLib.systemEnum()) {
-                const classOscript = oscriptStdLib.systemEnum()[element];
+            for (const element in libProvider.oscriptStdLib.systemEnum) {
+                const classOscript = libProvider.oscriptStdLib.systemEnum[element];
                 items.push({
                     label: classOscript["name" + postfix],
                     description: "OneScript/Системные перечисления/" + element
                 });
                 for (const sectionTitle in classOscript) {
-                    if (sectionTitle === "description" || sectionTitle === "name" || sectionTitle === "name_en") {
+                    if (sectionTitle !== "properties" && sectionTitle !== "methods") {
                         continue;
                     }
                     for (const indexMethod in classOscript[sectionTitle]) {
@@ -538,46 +603,6 @@ export function activate(context: vscode.ExtensionContext) {
                 }
             }
 
-        } else if (vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.languageId === "bsl") {
-            for (const elementSegment in bslGlobals.structureGlobContext().global) {
-                const segment = bslGlobals.structureGlobContext().global[elementSegment];
-                for (const element in segment) {
-                    items.push({ label: element, description: "1С/Глобальный контекст/" + elementSegment });
-                }
-            }
-            for (const elementSegment in bslGlobals.classes()) {
-                const class1C = bslGlobals.classes()[elementSegment];
-                items.push({ label: elementSegment, description: "1С/Классы/" + elementSegment });
-                for (const sectionTitle in class1C) {
-                    if (sectionTitle === "constructors"
-                        || sectionTitle === "description"
-                        || sectionTitle === "name"
-                        || sectionTitle === "name_en") {
-                        continue;
-                    }
-                    for (const element in class1C[sectionTitle]) {
-                        items.push({
-                            label: elementSegment + "." + element,
-                            description: "1С/Классы/" + elementSegment
-                        });
-                    }
-                }
-            }
-            for (const elementSegment in bslGlobals.systemEnum()) {
-                const class1C = bslGlobals.systemEnum()[elementSegment];
-                items.push({ label: elementSegment, description: "1С/Системные перечисления/" + elementSegment });
-                for (const sectionTitle in class1C) {
-                    if (sectionTitle === "description" || sectionTitle === "name" || sectionTitle === "name_en") {
-                        continue;
-                    }
-                    for (const element in class1C[sectionTitle]) {
-                        items.push({
-                            label: elementSegment + "." + element,
-                            description: "1С/Системные перечисления/" + elementSegment
-                        });
-                    }
-                }
-            }
         } else {
             return;
         }
@@ -587,13 +612,11 @@ export function activate(context: vscode.ExtensionContext) {
             matchOnDescription: false
         };
         if (!global.syntaxFilled) {
-            if (vscode.window.activeTextEditor.document.fileName.endsWith(".os")) {
-                global.methodForDescription = { label: "OneScript", description: "" };
+            if (vscode.window.activeTextEditor.document.fileName.endsWith(".bsl")) {
+                fillLabel("1C", "1С");
             } else if (vscode.window.activeTextEditor.document.languageId === "bsl") {
-                global.methodForDescription = { label: "1C", description: "" };
+                fillLabel("OneScript", "OneScript");
             }
-            syntaxHelper.update(previewUri);
-            vscode.commands.executeCommand("vscode.previewHtml", previewUri, vscode.ViewColumn.Two);
         } else {
             vscode.window.showQuickPick(items, options).then((selection) => {
                 if (typeof selection === "undefined") {
