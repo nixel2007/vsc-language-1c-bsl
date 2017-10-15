@@ -8,8 +8,8 @@ export default class SyntaxContentOscriptLibrary extends AbstractSyntaxContent {
     public getSyntaxContentItems(globalDllData, libData): any {
         const items = {};
         for (const dll in globalDllData) {
-            for (const element in globalDllData[dll].classesOscript) {
-                const segment = globalDllData[dll].classesOscript[element];
+            for (const element in globalDllData[dll].classes) {
+                const segment = globalDllData[dll].classes[element];
                 const segmentChar = this.getSegmentData(segment, false, "OneScript",
                     libProvider.bslglobals.classes[segment.name]);
                 items[element] = segmentChar;
@@ -76,19 +76,20 @@ export default class SyntaxContentOscriptLibrary extends AbstractSyntaxContent {
                 + dllData[classDll].description.replace(new RegExp("\\\\", "g"), "\\\\")
                 + "');\" > <em>" + classDll + " </em></h2 > <ul>";
 
-                for (const element in defDll.classesOscript) {
+                for (const element in defDll.classes) {
                     if (!added[element]) {
                         let onlyOs = "";
                         if (!libProvider.bslglobals.classes[element]) {
                             onlyOs = "*";
                         }
-                        const alias = (defDll.classesOscript[element].name_en !== "")
-                            ? (" / " + defDll.classesOscript[element].name_en) : "";
+                        const alias = (defDll.classes[element].name_en !== "")
+                            ? (" / " + defDll.classes[element].name_en) : "";
                         classes = classes
                             + `<li><span class="a" onclick="fillDescription(this)">
                             ${element + alias}</span>${onlyOs}</li>`;
                     }
                 }
+                classes = classes + "</ul>";
             }
         }
         fillStructure.globCont = "";
