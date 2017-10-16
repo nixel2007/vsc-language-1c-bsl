@@ -272,10 +272,15 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
                 (this.syntax === "BSL") ? metadata : this._global.libData);
             const bbb = "'"
                 + JSON.stringify(this.oscriptMethods)
-                    .replace(new RegExp("\\\\\"", "g"), "*&^")
-                    .replace(new RegExp("'", "g"), "")
-                    .replace(new RegExp("\\\\\\\\", "g"), "^&%")
-                    .replace(new RegExp("\\/", "g"), "^&*") + "'";
+                .replace(/[\\]/g, "\\\\")
+                .replace(/[\"]/g, "\\\"")
+                .replace(/[\']/g, "\\\'")
+                .replace(/[\/]/g, "\\/")
+                .replace(/[\b]/g, "\\b")
+                .replace(/[\f]/g, "\\f")
+                .replace(/[\n]/g, "\\n")
+                .replace(/[\r]/g, "\\r")
+                .replace(/[\t]/g, "\\t") + "'";
             textSyntax = ` window.localStorage.setItem("bsl-language", ${bbb});
                 `;
         }
