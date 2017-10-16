@@ -1,3 +1,5 @@
+import * as path from "path";
+
 import AbstractSyntaxContent from "./AbstractSyntaxContent";
 
 import LibProvider from "../libProvider";
@@ -56,7 +58,8 @@ export default class SyntaxContentOscriptLibrary extends AbstractSyntaxContent {
             for (const lib in libData) {
                 const dataModul = libData[lib].modules;
                 classes = classes + "<h2 class='a' style='font-size: 1em;' onclick=\"readFile('"
-                    + libData[lib].description.replace(new RegExp("\\\\", "g"), "\\\\")
+                    + libData[lib].description.replace(/[\\]/g, "\\\\").replace(/[\/]/g, "\\/")
+                    + "', '" + path.sep.replace(/[\\]/g, "\\\\").replace(/[\/]/g, "\\/")
                     + "');\"> <em>" + lib + " </em></h2 > <ul>";
                 for (const modul in dataModul) {
                     const onlyOs = "";
@@ -73,8 +76,9 @@ export default class SyntaxContentOscriptLibrary extends AbstractSyntaxContent {
             for (const classDll in dllData) {
                 const defDll = dllData[classDll];
                 classes = classes + "<h2 class='a' style='font-size: 1em;' onclick=\"readFile('"
-                + dllData[classDll].description.replace(new RegExp("\\\\", "g"), "\\\\")
-                + "');\" > <em>" + classDll + " </em></h2 > <ul>";
+                    + dllData[classDll].description.replace(/[\\]/g, "\\\\").replace(/[\/]/g, "\\/")
+                    + "', '" + path.sep.replace(/[\\]/g, "\\\\").replace(/[\/]/g, "\\/")
+                    + "');\" > <em>" + classDll + " </em></h2 > <ul>";
 
                 for (const element in defDll.classes) {
                     if (!added[element]) {

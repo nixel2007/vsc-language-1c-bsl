@@ -679,13 +679,13 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
                             return depp;
                         }
 
-                        function readFile(file) {
+                        function readFile(file, sep) {
                             if (document.getElementById('cont').style.display === "none") {
                                 document.getElementById('cont').style.display = "block";
                                 document.getElementById('splitter1').style.display = "block";
                                 document.getElementById('struct').style.height = "133px";
                             }
-                            document.getElementById('header').innerHTML = file.split("\\\\").reverse()[1];
+                            document.getElementById('header').innerHTML = file.split(sep).reverse()[1];
                             var request = new XMLHttpRequest();
                             request.open('GET', file);
                             request.onload = function (e) {
