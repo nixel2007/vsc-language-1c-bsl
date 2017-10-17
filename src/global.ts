@@ -956,7 +956,7 @@ export class Global {
                 const pathDll = path.basename(path.dirname(path.dirname(syntaxHelp)));
                 const dllDesc = JSON.parse(data);
                 dataDll[pathDll] = dllDesc;
-                dataDll[pathDll].description = path.join(path.dirname(path.dirname(syntaxHelp)), "readme.md");
+                dataDll[pathDll].description = path.join(path.dirname(path.dirname(syntaxHelp)), "README.md");
             } catch (err) {
                 if (err) {
                     console.log(err);
@@ -1154,7 +1154,7 @@ export class Global {
                     if (parsesModule.context.ModuleVars[exportVar].isExport) {
                         if (!this.libData[lib]) {
                             this.libData[lib] = { modules: {} };
-                            this.libData[lib].description = path.join(path.dirname(libConfig), "readme.md");
+                            this.libData[lib].description = path.join(path.dirname(libConfig), "README.md");
                         }
                         if (!this.libData[lib].modules[moduleDescr]) {
                             this.libData[lib].modules[moduleDescr] = {};
@@ -1199,7 +1199,7 @@ export class Global {
                         const signature = this.GetSignature(newItem);
                         if (!this.libData[lib]) {
                             this.libData[lib] = {modules: {}};
-                            this.libData[lib].description = path.join(path.dirname(libConfig), "readme.md");
+                            this.libData[lib].description = path.join(path.dirname(libConfig), "README.md");
                         }
                         if (!this.libData[lib].modules[moduleDescr]) {
                             this.libData[lib].modules[moduleDescr] = {};
