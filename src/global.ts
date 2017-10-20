@@ -870,7 +870,6 @@ export class Global {
             paramsString += (paramsString === "(" ? "" : ", ");
             paramsString += (nameParam.byval ? "Знач " : "");
             paramsString += nameParam.name;
-            paramsString += (nameParam.default ? " = " + nameParam.default : "");
             const re = new RegExp(
                 "^\\s*(Параметры|Parameters)(.|\\n)*\\n\\s*" + nameParam.name + "\\s*(-|–)\\s*([<\\wа-яА-Я\\.>]+)",
                 "gm"
@@ -879,6 +878,7 @@ export class Global {
             if (match) {
                 paramsString = paramsString + ": " + match[4];
             }
+            paramsString += (nameParam.default ? " = " + nameParam.default : "");
         }
         paramsString = paramsString + ")";
         if (strRetState) {
