@@ -57,10 +57,14 @@ export default class SyntaxContentOscriptLibrary extends AbstractSyntaxContent {
             classes = classes + "</ul><h1 style='font-size: 1em;'>Библиотеки</h1>";
             for (const lib in libData) {
                 const dataModul = libData[lib].modules;
-                classes = classes + "<h2 class='a' style='font-size: 1em;' onclick=\"readFile('"
-                    + libData[lib].description.replace(/[\\]/g, "\\\\").replace(/[\/]/g, "\\/")
-                    + "', '" + path.sep.replace(/[\\]/g, "\\\\").replace(/[\/]/g, "\\/")
-                    + "');\"> <em>" + lib + " </em></h2 > <ul>";
+                if (libData[lib].description) {
+                    classes = classes + "<h2 class='a' style='font-size: 1em;' onclick=\"readFile('"
+                        + libData[lib].description.replace(/[\\]/g, "\\\\").replace(/[\/]/g, "\\/")
+                        + "', '" + path.sep.replace(/[\\]/g, "\\\\").replace(/[\/]/g, "\\/")
+                        + "');\"> <em>" + lib + " </em></h2 > <ul>";
+                } else {
+                    classes = classes + "<h2 style='font-size: 1em;'> <em>" + lib + " </em></h2 > <ul>";
+                }
                 for (const modul in dataModul) {
                     const onlyOs = "";
 
@@ -75,10 +79,14 @@ export default class SyntaxContentOscriptLibrary extends AbstractSyntaxContent {
             classes = classes + "</ul><h1 style='font-size: 1em;'>Классы, добавляемые внешними компонентами</h1>";
             for (const classDll in dllData) {
                 const defDll = dllData[classDll];
-                classes = classes + "<h2 class='a' style='font-size: 1em;' onclick=\"readFile('"
-                    + dllData[classDll].description.replace(/[\\]/g, "\\\\").replace(/[\/]/g, "\\/")
-                    + "', '" + path.sep.replace(/[\\]/g, "\\\\").replace(/[\/]/g, "\\/")
-                    + "');\" > <em>" + classDll + " </em></h2 > <ul>";
+                if (dllData[classDll].description) {
+                    classes = classes + "<h2 class='a' style='font-size: 1em;' onclick=\"readFile('"
+                        + dllData[classDll].description.replace(/[\\]/g, "\\\\").replace(/[\/]/g, "\\/")
+                        + "', '" + path.sep.replace(/[\\]/g, "\\\\").replace(/[\/]/g, "\\/")
+                        + "');\" > <em>" + classDll + " </em></h2 > <ul>";
+                } else {
+                    classes = classes + "<h2 style='font-size: 1em;'> <em>" + classDll + " </em></h2 > <ul>";
+                }
 
                 for (const element in defDll.classes) {
                     if (!added[element]) {

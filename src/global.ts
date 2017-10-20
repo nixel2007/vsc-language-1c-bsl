@@ -541,7 +541,7 @@ export class Global {
 
     public getHumanMetadata(meta: any): string {
         const toReplacedPrefix = this.getReplaceMetadata();
-        const toReplecedSuffix = {
+        const toReplacedSuffix = {
             ObjectModule: "МодульОбъекта",
             ManagerModule: "МодульМенеджера",
             CommonModule: "МодульОбщий",
@@ -561,9 +561,8 @@ export class Global {
                 locLabel = locLabel.replace(meta.parenttype + ".", toReplacedPrefix[meta.parenttype] + ".");
             }
 
-            // tslint:disable-next-line:prefer-conditional-expression
-            if (toReplecedSuffix[meta.type]) {
-                locLabel = locLabel + "." + toReplecedSuffix[meta.type];
+            if (toReplacedSuffix[meta.type]) {
+                locLabel = locLabel + "." + toReplacedSuffix[meta.type];
             }
         } else {
             locLabel = locLabel + "." + meta.type;
@@ -948,16 +947,19 @@ export class Global {
 
     private addOscriptDll(pathLib, files: string[]) {
         const dataDll = {};
-        const splitsymbol = "/";
         for (const syntaxHelp of files) {
             let data;
             try {
                 data = fs.readFileSync(syntaxHelp);
                 const pathDll = path.basename(path.dirname(path.dirname(syntaxHelp)));
                 const dllDesc = JSON.parse(data);
+                const readme = fs.readdirSync(
+                    path.join(path.dirname(path.dirname(syntaxHelp)))).join(";").match(/readme\.md/i);
                 dataDll[pathDll] = dllDesc;
-                dataDll[pathDll].description = ((process.platform === "win32") ? "" : "file://")
-                    + path.join(path.dirname(path.dirname(syntaxHelp)), "README.md");
+                if (readme) {
+                    dataDll[pathDll].description = ((process.platform === "win32") ? "" : "file://")
+                        + path.join(path.dirname(path.dirname(syntaxHelp)), readme[0]);
+                }
             } catch (err) {
                 if (err) {
                     console.log(err);
@@ -1154,9 +1156,13 @@ export class Global {
                 for (const exportVar in parsesModule.context.ModuleVars) {
                     if (parsesModule.context.ModuleVars[exportVar].isExport) {
                         if (!this.libData[lib]) {
+                            const readme = fs.readdirSync(
+                                path.join(path.dirname(libConfig))).join(";").match(/readme\.md/i);
                             this.libData[lib] = { modules: {} };
-                            this.libData[lib].description = ((process.platform === "win32") ? "" : "file://")
-                                + path.join(path.dirname(libConfig), "README.md");
+                            if (readme) {
+                                this.libData[lib].description = ((process.platform === "win32") ? "" : "file://")
+                                    + path.join(path.dirname(libConfig), readme[0]);
+                            }
                         }
                         if (!this.libData[lib].modules[moduleDescr]) {
                             this.libData[lib].modules[moduleDescr] = {};
@@ -1200,9 +1206,13 @@ export class Global {
                     if (item._method.IsExport) {
                         const signature = this.GetSignature(newItem);
                         if (!this.libData[lib]) {
-                            this.libData[lib] = {modules: {}};
-                            this.libData[lib].description = ((process.platform === "win32") ? "" : "file://")
-                                + path.join(path.dirname(libConfig), "README.md");
+                            const readme = fs.readdirSync(
+                                path.join(path.dirname(libConfig))).join(";").match(/readme\.md/i);
+                            this.libData[lib] = { modules: {} };
+                            if (readme) {
+                                this.libData[lib].description = ((process.platform === "win32") ? "" : "file://")
+                                    + path.join(path.dirname(libConfig), readme[0]);
+                            }
                         }
                         if (!this.libData[lib].modules[moduleDescr]) {
                             this.libData[lib].modules[moduleDescr] = {};
