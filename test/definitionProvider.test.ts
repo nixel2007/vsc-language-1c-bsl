@@ -13,7 +13,7 @@ let textDocument: vscode.TextDocument;
 
 describe("Definitions", () => {
 
-    before(async function () {
+    before(async function() {
         this.timeout(10000);
         const uriEmptyFile = vscode.Uri.file(
             path.join(fixturePath, "emptyFile.bsl")
@@ -40,7 +40,7 @@ describe("Definitions", () => {
 
         locations.should.have.length(1);
 
-        let location = locations[0];
+        const location = locations[0];
         location.uri.path.should.endWith("Documents/Definition/Ext/ManagerModule.bsl");
 
     });

@@ -2,7 +2,8 @@ import * as vscode from "vscode";
 import AbstractProvider from "./abstractProvider";
 
 export default class GlobalHoverProvider extends AbstractProvider implements vscode.HoverProvider {
-    public provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.Hover {
+    public provideHover(document: vscode.TextDocument, position: vscode.Position,
+                        token: vscode.CancellationToken): vscode.Hover {
         if (!this._global.hoverTrue) {
             this._global.hoverTrue = true;
             return undefined;
@@ -12,7 +13,8 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
         if (word.split(" ").length > 1) {
             return undefined;
         }
-        if (document.getText(new vscode.Range(wordRange.end, new vscode.Position(wordRange.end.line, wordRange.end.character + 1))) !== "(") {
+        if (document.getText(new vscode.Range(wordRange.end,
+            new vscode.Position(wordRange.end.line, wordRange.end.character + 1))) !== "(") {
             return undefined;
         }
         word = this._global.fullNameRecursor(word, document, wordRange, true);
@@ -43,10 +45,10 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
             } else if (module.length === 0) {
                 return this.GetHover(entries[0], "Метод текущего модуля");
             } else {
-                for (let i = 0; i < entries.length; i++) {
-                    const hoverElement = entries[i];
+                for (const hoverElement of entries) {
                     const arrayFilename = hoverElement.filename.split("/");
-                    if (!hoverElement.oscriptLib && arrayFilename[arrayFilename.length - 4] !== "CommonModules" && !hoverElement.filename.endsWith("ManagerModule.bsl")) {
+                    if (!hoverElement.oscriptLib && arrayFilename[arrayFilename.length - 4] !== "CommonModules"
+                        && !hoverElement.filename.endsWith("ManagerModule.bsl")) {
                         continue;
                     }
                     if (hoverElement._method.IsExport) {
@@ -90,11 +92,8 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
         const arraySignature = this._global.GetSignature(entry);
         const re = new RegExp("(Параметры|Parameters)(.|\\s)*\\n\\s*", "g");
         const paramString = re.exec(arraySignature.description);
-        if (paramString) {
-            methodDescription = arraySignature.description.substr(0, paramString.index);
-        } else {
-            methodDescription = arraySignature.description;
-        }
+        methodDescription = (paramString)
+            ? arraySignature.description.substr(0, paramString.index) : arraySignature.description;
         methodDescription = methodDescription + (arraySignature.fullRetState ? arraySignature.fullRetState : "");
         description.push(methodContext);
         description.push(methodDescription);
@@ -112,8 +111,8 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
             }
         );
         for (const param of entry._method.Params) {
-            const documentationParam = this._global.GetDocParam(arraySignature.description, param);
-            description.push("***" + param + "***: " + documentationParam.descriptionParam);
+            const documentationParam = this._global.GetDocParam(arraySignature.description, param.name);
+            description.push("***" + param.name + "***: " + documentationParam.descriptionParam);
         }
         return new vscode.Hover(description);
     }

@@ -3,7 +3,7 @@
   "displayName": "Language 1C (BSL)",
   "description": "Syntax highlighting for 1C:Enterprise 8.",
   "icon": "images/xDDIcon.png",
-  "version": "1.9.3",
+  "version": "1.10.0",
   "publisher": "xDrivenDevelopment",
   "galleryBanner": {
     "color": "#0000FF",
@@ -22,7 +22,7 @@
     "Languages"
   ],
   "engines": {
-    "vscode": "^1.10.0"
+    "vscode": "^1.17.0"
   },
   "main": "./out/src/extension",
   "scripts": {
@@ -34,7 +34,6 @@
   "activationEvents": [
     "onLanguage:bsl",
     "onLanguage:sdbl",
-    "onCommand:language-1c-bsl.createTasks",
     "onCommand:language-1c-bsl.update"
   ],
   "contributes": {
@@ -47,11 +46,6 @@
       {
         "command": "language-1c-bsl.createComments",
         "title": "Create comment to current method",
-        "category": "Language 1C (BSL)"
-      },
-      {
-        "command": "language-1c-bsl.createTasks",
-        "title": "Create tasks.json for current workspace",
         "category": "Language 1C (BSL)"
       },
       {
@@ -70,6 +64,11 @@
         "category": "Language 1C (BSL)"
       },
       {
+        "command": "language-1c-bsl.beautify",
+        "title": "Выровнять блок пробелами",
+        "category": "Language 1C (BSL)"
+      },
+      {
         "command": "language-1c-bsl.syntaxHelper",
         "title": "Show syntax-helper",
         "category": "Language 1C (BSL)",
@@ -77,6 +76,16 @@
           "light": "./images/preview-darkgray.svg",
           "dark": "./images/preview-lightgray.svg"
         }
+      },
+      {
+        "command": "language-1c-bsl.quickopen",
+        "title": "QuickOpen",
+        "category": "Language 1C (BSL)"
+      },
+      {
+        "command": "language-1c-bsl.openContent",
+        "title": "OpenContent",
+        "category": "Language 1C (BSL)"
       }
     ],
     "menus": {
@@ -87,9 +96,19 @@
           "group": "navigation"
         }
       ],
+      "editor/context": [
+        {
+          "when": "resourceLangId == bsl && editorHasSelection",
+          "command": "language-1c-bsl.beautify"
+        }
+      ],
       "commandPalette": [
         {
           "command": "language-1c-bsl.addComment",
+          "when": "false"
+        },
+        {
+          "command": "language-1c-bsl.openContent",
           "when": "false"
         }
       ]
@@ -128,6 +147,15 @@
         "language-1c-bsl.rootPath": {
           "description": "Путь по умолчанию к корню файла конфигурации (./src/cf) относительно каталога workspace для правильного autocomplete",
           "type": "string"
+        },
+        "language-1c-bsl.autoDetect": {
+          "type": "string",
+          "enum": [
+            "off",
+            "on"
+          ],
+          "default": "on",
+          "description": "Controls whether auto detection of opm scripts is on or off. Default is on."
         }
       }
     },
@@ -167,7 +195,8 @@
         "aliases": [
           "1C (BSL)",
           "BSL"
-        ]
+        ],
+        "configuration": "./language-configuration.json"
       },
       {
         "id": "sdbl",
@@ -193,6 +222,20 @@
         "path": "./syntaxes/1c-query.tmLanguage"
       }
     ],
+    "problemMatchers": [
+      {
+        "name": "OneScript Linter",
+        "label": "onescript",
+        "owner": "bsl",
+        "fileLocation": "absolute",
+        "pattern": {
+          "regexp": "Модуль\\s+(.*)\\s\\/\\s.*:\\s+(\\d+)\\s+\\/\\s+(.*)",
+          "file": 1,
+          "line": 2,
+          "message": 3
+        }
+      }
+    ],
     "snippets": [
       {
         "language": "bsl",
@@ -207,28 +250,28 @@
     }
   },
   "devDependencies": {
-    "@types/fs-promise": "^1.0.1",
-    "@types/glob": "^5.0.30",
-    "@types/mocha": "^2.2.39",
-    "@types/node": "^7.0.5",
-    "@types/should": "^8.1.30",
-    "cross-env": "^3.1.4",
-    "decache": "^4.1.0",
+    "@types/glob": "^5.0.33",
+    "@types/mocha": "^2.2.43",
+    "@types/node": "^8.0.46",
+    "cross-env": "^5.1.0",
+    "decache": "^4.2.0",
     "istanbul": "^0.4.5",
-    "remap-istanbul": "^0.9.0",
-    "should": "^11.2.0",
-    "tslint": "^4.4.2",
-    "typescript": "^2.2.1",
-    "vscode": "^1.0.3"
+    "remap-istanbul": "^0.9.5",
+    "should": "^13.1.0",
+    "tslint": "^5.8.0",
+    "typescript": "^2.5.3",
+    "vscode": "^1.1.6"
   },
   "dependencies": {
-    "cross-spawn": "^5.0.1",
+    "cross-spawn": "^5.1.0",
     "filequeue": "^0.5.0",
-    "fs-promise": "^2.0.0",
-    "glob": "^7.1.1",
-    "iconv-lite": "^0.4.15",
-    "lokijs": "^1.4.2",
-    "onec-syntaxparser": "0.1.9",
-    "xml2js": "^0.4.17"
+    "fs-extra": "^4.0.2",
+    "glob": "^7.1.2",
+    "iconv-lite": "^0.4.19",
+    "lokijs": "^1.5.1",
+    "onec-syntaxparser": "0.1.11",
+    "xml2js": "^0.4.19",
+    "fast-xml-parser": "^2.7.4",
+    "alignment": "0.0.1"
   }
 }
