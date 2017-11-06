@@ -119,7 +119,7 @@ export function activate(context: vscode.ExtensionContext) {
                     comment += (enMode ? "// Parameters:\n" : "// Параметры:\n");
                 }
                 for (const element of params) {
-                    comment += "//   " + element;
+                    comment += "//   " + element.name;
                     if (enMode) {
                         comment += " - <Type.Subtype> - <parameter description>";
                     } else {
