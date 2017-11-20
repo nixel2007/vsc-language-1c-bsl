@@ -1,5 +1,8 @@
 {
-    "extends": "tslint:latest",
+    "extends": [
+        "tslint:latest",
+        "tslint-sonarts"
+    ],
     "rules": {
         "semicolon": true,
         "object-literal-sort-keys": false,
