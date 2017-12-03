@@ -1105,8 +1105,12 @@ export class Global {
                 }
             }
 
+            if (!result) {
+                continue;
+            }
+
             const packageDef = result["package-def"];
-            if (packageDef === undefined) {
+            if (!packageDef) {
                 continue;
             }
 
