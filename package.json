@@ -251,17 +251,17 @@
   },
   "devDependencies": {
     "@types/glob": "^5.0.33",
-    "@types/mocha": "^2.2.43",
-    "@types/node": "^8.0.46",
-    "cross-env": "^5.1.0",
-    "decache": "^4.2.0",
+    "@types/mocha": "^2.2.44",
+    "@types/node": "^8.0.54",
+    "cross-env": "^5.1.1",
+    "decache": "^4.3.0",
     "istanbul": "^0.4.5",
     "remap-istanbul": "^0.9.5",
-    "should": "^13.1.0",
+    "should": "^13.1.3",
     "tslint": "^5.8.0",
-    "tslint-sonarts": "^1.1.1",
-    "typescript": "^2.5.3",
-    "vscode": "^1.1.6"
+    "tslint-sonarts": "^1.2.0",
+    "typescript": "^2.6.2",
+    "vscode": "^1.1.9"
   },
   "dependencies": {
     "cross-spawn": "^5.1.0",
@@ -272,7 +272,7 @@
     "lokijs": "^1.5.1",
     "onec-syntaxparser": "0.1.11",
     "xml2js": "^0.4.19",
-    "fast-xml-parser": "^2.7.4",
+    "fast-xml-parser": "^2.8.1",
     "alignment": "0.0.1"
   }
 }
