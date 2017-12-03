@@ -690,7 +690,7 @@ export class Global {
             try {
                 result = result.trim();
                 const lines = result.split(/\r?\n/);
-                let libSearchPattern = "**/lib.config";
+                let libSearchPattern = "*/lib.config";
                 for (const line of lines) {
                     const globOptions: glob.IOptions = {};
                     globOptions.nocase = true;
@@ -1105,8 +1105,12 @@ export class Global {
                 }
             }
 
+            if (!result) {
+                continue;
+            }
+
             const packageDef = result["package-def"];
-            if (packageDef === undefined) {
+            if (!packageDef) {
                 continue;
             }
 

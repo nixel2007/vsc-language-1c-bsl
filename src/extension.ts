@@ -119,7 +119,7 @@ export function activate(context: vscode.ExtensionContext) {
                     comment += (enMode ? "// Parameters:\n" : "// Параметры:\n");
                 }
                 for (const element of params) {
-                    comment += "//   " + element;
+                    comment += "//   " + element.name;
                     if (enMode) {
                         comment += " - <Type.Subtype> - <parameter description>";
                     } else {
@@ -204,7 +204,7 @@ export function activate(context: vscode.ExtensionContext) {
                     return;
                 }
 
-                const autoClosingBrackets = Boolean(vscode.workspace.getConfiguration("editor.autoClosingBrackets"));
+                const autoClosingBrackets = Boolean(vscode.workspace.getConfiguration("editor.autoClosingBrackets", vscode.workspace.getWorkspaceFolder(editor.document.uri).uri));
                 if (textDocumentChangeEvent.contentChanges[0].text.slice(-1) === "(") {
                     const contentChange = textDocumentChangeEvent.contentChanges[0];
                     const point = contentChange.range.start.character + contentChange.text.length;

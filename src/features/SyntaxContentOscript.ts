@@ -17,6 +17,9 @@ export default class SyntaxContentOscript extends AbstractSyntaxContent {
             const segmentChar = {};
             const methodsGlobalContext = {};
             for (const key in segment) {
+                let signature1C;
+                let description1C;
+                let returns1C;
                 if (globalfunctions[key]) {
                     // tslint:disable-next-line:no-string-literal
                     if (!segmentChar["methods"]) {
@@ -24,13 +27,21 @@ export default class SyntaxContentOscript extends AbstractSyntaxContent {
                         segmentChar["methods"] = {};
                     }
                     const methodData = globalfunctions[key];
+                    if (libProvider.bslglobals.globalfunctions[key]) {
+                        signature1C = libProvider.bslglobals.globalfunctions[key].signature;
+                        description1C = libProvider.bslglobals.globalfunctions[key].description;
+                        returns1C = libProvider.bslglobals.globalfunctions[key].returns;
+                    }
                     // tslint:disable-next-line:no-string-literal
                     segmentChar["methods"][key] = {
                         description: (methodData.description) ? methodData.description : "",
                         alias: methodData.name_en,
                         signature: methodData.signature,
                         returns: methodData.returns,
-                        example: methodData.example
+                        example: methodData.example,
+                        signature1C,
+                        description1C,
+                        returns1C
                     };
                 } else {
                     // tslint:disable-next-line:no-string-literal
@@ -39,28 +50,24 @@ export default class SyntaxContentOscript extends AbstractSyntaxContent {
                         segmentChar["properties"] = {};
                     }
                     const methodData = libProvider.oscriptStdLib.globalvariables[key];
+                    if (libProvider.bslglobals.globalvariables[key]) {
+                        description1C = libProvider.bslglobals.globalvariables[key].description;
+                    }
+
                     // tslint:disable-next-line:no-string-literal
                     segmentChar["properties"][key] = {
                         description: (methodData.description) ? methodData.description : "",
                         alias: methodData.name_en,
+                        Доступ: methodData.access,
                         signature: undefined,
-                        returns: undefined
+                        returns: undefined,
+                        description1C
                     };
                 }
             }
-            // if (element === "Свойства") {
-            //     // tslint:disable-next-line:no-string-literal
-            //     segmentChar["properties"] = methodsGlobalContext;
-            //     // tslint:disable-next-line:no-string-literal
-            // } else { segmentChar["methods"] = methodsGlobalContext; }
             items[element] = segmentChar;
         }
 
-        // for (const element in globalContextOscript) {
-        //     const segment = globalContextOscript[element];
-        //     const segmentChar = this.getSegmentData(segment, true, "OneScript", "");
-        //     items[element] = segmentChar;
-        // }
         for (const element in classesOscript) {
             const segment = classesOscript[element];
             const segmentChar = this.getSegmentData(segment, false, "OneScript",

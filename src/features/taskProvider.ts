@@ -44,13 +44,15 @@ export default class TaskProvider {
 
     private fillDefaultTasks(workspaceRoot) {
         const result: vscode.Task[] = [];
-        // tslint:disable-next-line:no-invalid-template-strings
-        result.push(this.createTask("OneScript: compile", workspaceRoot, "oscript", ["-compile", "${file}"], []));
-        // tslint:disable-next-line:no-invalid-template-strings
-        result.push(this.createTask("OneScript: check", workspaceRoot, "oscript", ["-check", "${file}"], []));
+        result.push(this.createTask("OneScript: compile", workspaceRoot,
+            // tslint:disable-next-line:no-invalid-template-strings
+            "oscript", ["-compile", "${file}"], ["$OneScript Linter"]));
+        result.push(this.createTask("OneScript: check", workspaceRoot,
+            // tslint:disable-next-line:no-invalid-template-strings
+            "oscript", ["-check", "${file}"], ["$OneScript Linter"]));
         result.push(this.createTask("OneScript: make", workspaceRoot,
             // tslint:disable-next-line:no-invalid-template-strings
-            "oscript", ["-make", "${file}", "${fileBasename}.exe"], []));
+            "oscript", ["-make", "${file}", "${fileBasename}.exe"], ["$OneScript Linter"]));
         result.push(this.createTask("OneScript: run", workspaceRoot,
             // tslint:disable-next-line:no-invalid-template-strings
             "oscript", ["${file}"], ["$OneScript Linter"], true));
@@ -62,7 +64,7 @@ export default class TaskProvider {
             ["1testrunner", "-run", "${file}"], ["$OneScript Linter"], false, true));
         result.push(this.createTask("Opm: package build", workspaceRoot, "cmd",
             // tslint:disable-next-line:no-invalid-template-strings
-            ["opm", "build", "${workspaceRoot}"], []));
+            ["opm", "build", "${workspaceRoot}"], ["$OneScript Linter"]));
         result.push(this.createTask("1bdd: Exec all features", workspaceRoot, "cmd",
             // tslint:disable-next-line:no-invalid-template-strings
             ["1bdd", "${workspaceRoot}/features", "-out", "${workspaceRoot}/exec.log"], ["$OneScript Linter"], true));

@@ -66,13 +66,8 @@ abstract class AbstractSyntaxContent {
                         returns1C = helper1C.returns;
                     }
                 } else {
-                    // helper = (libProvider.bslglobals.classes[segment.name])
-                    // ? ((libProvider.bslglobals.classes[segment.name].methods)
-                    // ? libProvider.bslglobals.classes[segment.name].methods[indexMethod] : undefined) : undefined;
-                    // if (helper) {
-                        signature = helper.signature;
-                        returns = helper.returns;
-                    // }
+                    signature = helper.signature;
+                    returns = helper.returns;
                 }
                 methodsGlobalContext[indexMethod] = {
                     description: helper.description,

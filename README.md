@@ -7,7 +7,7 @@
 [![Build Status](https://travis-ci.org/xDrivenDevelopment/vsc-language-1c-bsl.svg?branch=master)](https://travis-ci.org/xDrivenDevelopment/vsc-language-1c-bsl)
 [![Dependency Status](https://gemnasium.com/badges/github.com/xDrivenDevelopment/vsc-language-1c-bsl.svg)](https://gemnasium.com/github.com/xDrivenDevelopment/vsc-language-1c-bsl)
 [![codecov](https://codecov.io/gh/xDrivenDevelopment/vsc-language-1c-bsl/branch/develop/graph/badge.svg)](https://codecov.io/gh/xDrivenDevelopment/vsc-language-1c-bsl)
-[![SonarQube Tech Debt](https://img.shields.io/sonar/https/sonar.silverbulleters.org/vsc-language-1c-bsl/tech_debt.svg)](https://sonar.silverbulleters.org/dashboard?id=vsc-language-1c-bsl)
+[![Quality Gate](https://sonar.silverbulleters.org/api/badges/gate?key=vsc-language-1c-bsl)](https://sonar.silverbulleters.org//dashboard/index/vsc-language-1c-bsl)
 [![Greenkeeper badge](https://badges.greenkeeper.io/xDrivenDevelopment/vsc-language-1c-bsl.svg)](https://greenkeeper.io/)
 
 Добавляет подсветку встроенного языка 1С:Предпрятие 8 файлам \*.bsl и \*.os - синтаксис `1C (BSL)`.  
@@ -80,3 +80,9 @@ Contributions are greatly appreciated. Development is carried in a parent reposi
 ![bsl-vsc](https://cloud.githubusercontent.com/assets/1132840/13007621/9e730984-d1a2-11e5-8ff5-8f7945421184.PNG)
 
 ![query-vsc](https://cloud.githubusercontent.com/assets/1132840/13007618/9e6f578a-d1a2-11e5-9e30-7d48a269450d.PNG)
+
+### SonarQube Code Inspect
+
+| Порог качества | Технический долг | Ошибки | Замечания по коду |
+| --- | --- | --- | --- |
+| [![Quality Gate](https://sonar.silverbulleters.org/api/badges/gate?key=vsc-language-1c-bsl)](https://sonar.silverbulleters.org//dashboard/index/vsc-language-1c-bsl) | [![New Bugs](https://sonar.silverbulleters.org/api/badges/measure?key=vsc-language-1c-bsl&metric=sqale_index)](https://sonar.silverbulleters.org//dashboard/index/vsc-language-1c-bsl) | [![Bugs](https://sonar.silverbulleters.org/api/badges/measure?key=demo-1c&metric=bugs)](https://sonar.silverbulleters.org//dashboard/index/vsc-language-1c-bsl) | [![Bugs](https://sonar.silverbulleters.org/api/badges/measure?key=vsc-language-1c-bsl&metric=code_smells)](https://sonar.silverbulleters.org//dashboard/index/vsc-language-1c-bsl) |
