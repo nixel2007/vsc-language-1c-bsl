@@ -204,7 +204,8 @@ export function activate(context: vscode.ExtensionContext) {
                     return;
                 }
 
-                const autoClosingBrackets = Boolean(vscode.workspace.getConfiguration("editor.autoClosingBrackets", vscode.workspace.getWorkspaceFolder(editor.document.uri).uri));
+                const autoClosingBrackets = Boolean(vscode.workspace.getConfiguration
+                    ("editor.autoClosingBrackets", vscode.workspace.getWorkspaceFolder(editor.document.uri).uri));
                 if (textDocumentChangeEvent.contentChanges[0].text.slice(-1) === "(") {
                     const contentChange = textDocumentChangeEvent.contentChanges[0];
                     const point = contentChange.range.start.character + contentChange.text.length;
