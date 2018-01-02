@@ -17,7 +17,7 @@ describe("Workspace symbols", () => {
         const uriEmptyFile = vscode.Uri.file(
             path.join(fixturePath, "emptyFile.bsl")
         );
-        textDocument = await newTextDocument(uriEmptyFile);
+        await newTextDocument(uriEmptyFile);
         await globals.waitForCacheUpdate();
     });
 
