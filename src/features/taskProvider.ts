@@ -6,20 +6,16 @@ export default class TaskProvider {
 
     public onConfigurationChanged() {
         type AutoDetect = "on" | "off";
-        let taskProvider: vscode.Disposable | undefined;
         const autoDetect = vscode.workspace.getConfiguration("language-1c-bsl").get<AutoDetect>("autoDetect");
         if (!vscode.workspace.workspaceFolders) {
             return;
         }
-        if (taskProvider && autoDetect === "off") {
-            taskProvider.dispose();
-            taskProvider = undefined;
-        } else if (!taskProvider && autoDetect === "on") {
-            taskProvider = vscode.workspace.registerTaskProvider("bsl", {
+        if (autoDetect === "on") {
+            vscode.workspace.registerTaskProvider("bsl", {
                 provideTasks: () => {
                     return this.provideBslScripts();
                 },
-                resolveTask(taskD: vscode.Task): vscode.Task | undefined {
+                resolveTask(): vscode.Task | undefined {
                     return undefined;
                 }
             });
@@ -159,7 +155,7 @@ export default class TaskProvider {
     }
 
     private exists(file: string): Promise<boolean> {
-        return new Promise<boolean>((resolve, reject) => {
+        return new Promise<boolean>((resolve) => {
             fs.exists(file, (value) => {
                 resolve(value);
             });

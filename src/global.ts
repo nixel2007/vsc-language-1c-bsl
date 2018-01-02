@@ -361,10 +361,8 @@ export class Global {
     }
 
     public getCacheLocal(
-        filename: string,
         word: string,
         source,
-        update: boolean = false,
         allToEnd: boolean = true,
         fromFirst: boolean = true
     ) {
@@ -597,8 +595,7 @@ export class Global {
                         this.dbmodules.insert(metacollection);
                     }
                 }
-                let parsesModule = new Parser().parse(source);
-                source = undefined;
+                const parsesModule = new Parser().parse(source);
                 const entries = parsesModule.getMethodsTable().find();
                 if (i % 100 === 0) {
                     this.postMessage("Обновляем кэш файла № " + i + " из " + filesLength, 2000);
@@ -606,7 +603,6 @@ export class Global {
                 if (parsesModule.context.CallsPosition.length > 0) {
                     this.updateReferenceCalls(parsesModule.context.CallsPosition, "GlobalModuleText", fullpath);
                 }
-                parsesModule = undefined;
                 for (const item of entries) {
                     const method = {
                         name: item.name,
@@ -715,7 +711,7 @@ export class Global {
                             console.error(err);
                             return;
                         }
-                        this.addOscriptDll(globOptions.cwd, files);
+                        this.addOscriptDll(files);
                     });
                 }
 
@@ -929,23 +925,23 @@ export class Global {
         });
     }
 
-    public postMessage(description: string, interval?: number) { } // tslint:disable-line:no-empty
+    public postMessage(_description: string, _interval?: number) { } // tslint:disable-line:no-empty
 
-    public getConfiguration(section: string) { } // tslint:disable-line:no-empty
+    public getConfiguration(_section: string): any { } // tslint:disable-line:no-empty
 
-    public getConfigurationKey(configuration, key: string) { } // tslint:disable-line:no-empty
+    public getConfigurationKey(_configuration, _key: string): any { } // tslint:disable-line:no-empty
 
     public getRootPath(): string {
         return "";
     }
 
-    public fullNameRecursor(word: string, document, range, left: boolean): string {
+    public fullNameRecursor(_word: string, _document, _range, _left: boolean): string {
         return "";
     }
 
-    public findFilesForCache(searchPattern: string, rootPath: string) { } // tslint:disable-line:no-empty
+    public findFilesForCache(_searchPattern: string, _rootPath: string) { } // tslint:disable-line:no-empty
 
-    private addOscriptDll(pathLib, files: string[]) {
+    private addOscriptDll(files: string[]) {
         const dataDll = {};
         for (const syntaxHelp of files) {
             let data;
@@ -1150,8 +1146,7 @@ export class Global {
                 }
                 const moduleStr = module.$.name;
                 source = source.replace(/\r\n?/g, "\n");
-                let parsesModule = new Parser().parse(source);
-                source = undefined;
+                const parsesModule = new Parser().parse(source);
                 const entries = parsesModule.getMethodsTable().find();
                 // if (parsesModule.context.CallsPosition.length > 0) {
                 //     this.updateReferenceCalls(parsesModule.context.CallsPosition, "GlobalModuleText", fullpath);
@@ -1181,14 +1176,7 @@ export class Global {
                         };
                     }
                 }
-                parsesModule = undefined;
                 for (const item of entries) {
-                    const method = {
-                        name: item.name,
-                        endline: item.endline,
-                        context: item.context,
-                        isproc: item.isproc
-                    };
                     // if (item._method.CallsPosition.length > 0) {
                     //     this.updateReferenceCalls(item._method.CallsPosition, method, fullpath);
                     // }
@@ -1381,11 +1369,6 @@ interface IConstructorDefinition {
     signature: string;
     oscript_description?: string;
     params?: ISignatureParameters;
-}
-
-interface IKeywords {
-    ru: IKeywordsForLanguage;
-    en: IKeywordsForLanguage;
 }
 
 interface IKeywordsForLanguage {

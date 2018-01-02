@@ -107,10 +107,8 @@ export function activate(context: vscode.ExtensionContext) {
                     : (isFunc) ? "Описание функции" : "Описание процедуры";
                 comment += "// <" + methodDescription + ">\n";
                 const methodData = global.getCacheLocal(
-                    editor.document.fileName,
                     matchMethod[2],
                     editor.document.getText(),
-                    false,
                     false
                 )[0];
                 const params = methodData._method.Params;
@@ -491,8 +489,6 @@ export function activate(context: vscode.ExtensionContext) {
         const postfix = ""; // (autocompleteLanguage === "en") ? "_en" : "";
         const isBsl: boolean = vscode.window.activeTextEditor
             && vscode.window.activeTextEditor.document.fileName.endsWith(".bsl");
-        const isOs: boolean = vscode.window.activeTextEditor
-            && vscode.window.activeTextEditor.document.fileName.endsWith(".os");
         if (isBsl && globalMethod) {
             for (const element in libProvider.bslglobals.structureMenu.global) {
                 const segment = libProvider.bslglobals.structureMenu.global[element];

@@ -45,7 +45,7 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
         this.onDidChangeEvent.fire(uri);
     }
 
-    public provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
+    public provideTextDocumentContent(): Promise<string> {
         if (!this._global.methodForDescription) {
             return;
         }
@@ -54,7 +54,6 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
     }
 
     private setupSyntaxContent() {
-        const label = this._global.methodForDescription.label;
         const desc = this._global.methodForDescription.description;
 
         if (desc.split("/")[0] === "1С") {
@@ -290,16 +289,13 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
         const syntaxObject = this._global.methodForDescription;
         this._global.methodForDescription = undefined;
 
-        const fillStructure = this.syntaxContent.getStructure(textSyntax, syntaxObject,
-            this.oscriptMethods,
-            (this.syntax === "BSL") ? subsystems : this._global.dllData,
-            (this.syntax === "BSL") ? metadata : this._global.libData);
+        const fillStructure = this.syntaxContent.getStructure(textSyntax,
+            (this.syntax === "BSL") ? subsystems : (this.syntax === "oscript-library")
+                ? this._global.dllData : syntaxObject,
+            (this.syntax === "BSL") ? metadata : (this.syntax === "oscript-library")
+            ? this._global.libData : this.oscriptMethods);
 
         return this.getHTML(fillStructure);
-    }
-
-    private currentFileIsBSL(): boolean {
-        return vscode.window.activeTextEditor && vscode.window.activeTextEditor.document.fileName.endsWith(".bsl");
     }
 
     private async getHTML(fillStructure): Promise<string> {
@@ -841,9 +837,4 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
                     </div>
                 </body>`;
     }
-}
-interface IModuleDesc {
-    name: string;
-    object?: object;
-    manager?: object;
 }

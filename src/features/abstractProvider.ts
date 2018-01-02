@@ -3,7 +3,9 @@ import {Global} from "../global";
 
 export default class AbstractProvider {
 
+    // tslint:disable-next-line:variable-name
     protected _global: Global;
+    // tslint:disable-next-line:variable-name
     protected _disposables: Disposable[];
 
     constructor(global: Global) {

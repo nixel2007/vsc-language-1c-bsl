@@ -51,7 +51,7 @@ function run(testsRoot, clb): any {
     const coverOptions: ITestRunnerOptions = _readCoverOptions(testsRoot);
     if (coverOptions && coverOptions.enabled) {
         // Setup coverage pre-test, including post-test hook to report
-        const coverageRunner = new CoverageRunner(coverOptions, testsRoot, clb);
+        const coverageRunner = new CoverageRunner(coverOptions, testsRoot);
         coverageRunner.setupCoverage();
     }
 
@@ -69,7 +69,7 @@ function run(testsRoot, clb): any {
             let failureCount = 0;
 
             mocha.run()
-                .on("fail", (test, err): void => {
+                .on("fail", (): void => {
                 failureCount++;
             })
             .on("end", (): void => {
@@ -99,9 +99,9 @@ class CoverageRunner {
     private matchFn: any = undefined;
     private instrumenter: any = undefined;
 
-    constructor(private options: ITestRunnerOptions, private testsRoot: string, private endRunCallback: any) {
+    constructor(private options: ITestRunnerOptions, private testsRoot: string) {
         if (!options.relativeSourcePath) {
-            return endRunCallback("Error - relativeSourcePath must be defined for code coverage to work");
+            return;
         }
 
     }

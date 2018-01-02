@@ -10,7 +10,7 @@ export function postMessage(description: string, interval?: number) {
 
 }
 
-export function getConfiguration(section: string) {
+export function getConfiguration(section: string): vscode.WorkspaceConfiguration {
     return vscode.workspace.getConfiguration(section);
 }
 
@@ -31,9 +31,13 @@ export function fullNameRecursor(word: string, document: vscode.TextDocument, ra
             if (range.start.character === 0) {
                 return word;
             }
-            newRange = new vscode.Range(new vscode.Position(range.start.line, range.end.character - word.length + plus), new vscode.Position(range.start.line, range.start.character));
+            newRange = new vscode.Range(new vscode.Position(
+                range.start.line, range.end.character - word.length + plus),
+                new vscode.Position(range.start.line, range.start.character));
         } else {
-            newRange = new vscode.Range(new vscode.Position(range.end.line, range.end.character), new vscode.Position(range.end.line, range.end.character + plus));
+            newRange = new vscode.Range(new vscode.Position(
+                range.end.line, range.end.character),
+                new vscode.Position(range.end.line, range.end.character + plus));
         }
         const dot = document.getText(newRange);
         if (dot.endsWith(".")) {
@@ -42,17 +46,16 @@ export function fullNameRecursor(word: string, document: vscode.TextDocument, ra
                 const leftWordRange: vscode.Range = document.getWordRangeAtPosition(newRange.start);
                 if (leftWordRange !== undefined) {
                     result = document.getText(leftWordRange) + "." + word;
-                    if (leftWordRange !== undefined && leftWordRange.start.character > 1) {
-                        newPosition = new vscode.Position(leftWordRange.start.line, leftWordRange.start.character - 1);
-                    } else {
-                        newPosition = new vscode.Position(leftWordRange.start.line, 0);
-                    }
+                    newPosition = (leftWordRange !== undefined && leftWordRange.start.character > 1)
+                        ? new vscode.Position(leftWordRange.start.line, leftWordRange.start.character - 1)
+                        : new vscode.Position(leftWordRange.start.line, 0);
                 }
             } else {
                 result = word + "." + document.getText(document.getWordRangeAtPosition(newRange.start));
                 newPosition = new vscode.Position(newRange.end.line, newRange.end.character + 2);
             }
-            if (document.getText(new vscode.Range(new vscode.Position(newPosition.line, newPosition.character + 1), newPosition)) === ".") {
+            if (document.getText(new vscode.Range(new vscode.Position(
+                newPosition.line, newPosition.character + 1), newPosition)) === ".") {
                 const newWord = document.getWordRangeAtPosition(newPosition);
                 return document.getText(newWord) + "." + result;
             }

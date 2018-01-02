@@ -6,8 +6,7 @@ import {BSL_MODE} from "../const";
 import AbstractProvider from "./abstractProvider";
 
 export default class GlobalworkspaseSymbolProvider extends AbstractProvider implements vscode.WorkspaceSymbolProvider {
-    public provideWorkspaceSymbols(search: string,
-                                   token: vscode.CancellationToken): Promise<vscode.SymbolInformation[]> {
+    public provideWorkspaceSymbols(search: string): Promise<vscode.SymbolInformation[]> {
         const document = vscode.window.activeTextEditor.document;
         if (vscode.window.activeTextEditor && vscode.languages.match(BSL_MODE, document) && document.isDirty) {
             this._global.customUpdateCache(document.getText(), document.fileName);

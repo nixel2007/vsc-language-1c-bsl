@@ -77,7 +77,6 @@ export default class SyntaxContent1C extends AbstractSyntaxContent {
         if (syntaxObject.label === "1C") {
             return this.fillStructureSyntax(fillStructure);
         }
-        let segmentDescription = "Очень много текста";
         let methodDescription = "Очень много текста";
         const descClass = syntaxObject.description.split("/")[syntaxObject.description.split("/").length - 1];
         const descMethod = syntaxObject.label.split(".")[syntaxObject.label.split(".").length - 1];
@@ -85,7 +84,7 @@ export default class SyntaxContent1C extends AbstractSyntaxContent {
         ? (" / " + oscriptMethods[descClass].alias) : "";
         const segmentHeader = descClass + alias;
         const segment = oscriptMethods[descClass];
-        segmentDescription = (segment.description) ? ("<p>" + segment.description + "</p>") : "";
+        let segmentDescription = (segment.description) ? ("<p>" + segment.description + "</p>") : "";
         segmentDescription = this.fillSegmentData(segmentDescription, segment,
             "methods", "Методы", "method");
         segmentDescription = this.fillSegmentData(segmentDescription, segment,

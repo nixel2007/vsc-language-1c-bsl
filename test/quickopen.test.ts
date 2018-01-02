@@ -2,7 +2,7 @@ import * as path from "path";
 import "should";
 import * as vscode from "vscode";
 
-import { addText, clearActiveTextEditor, fixturePath, newTextDocument } from "./helpers";
+import { clearActiveTextEditor, fixturePath, newTextDocument } from "./helpers";
 
 import BslQuickOpen from "../src/features/bslQuickOpen";
 import { Global } from "../src/global";
@@ -10,15 +10,13 @@ import * as vscAdapter from "../src/vscAdapter";
 
 const globals = Global.create(vscAdapter);
 
-let textDocument: vscode.TextDocument;
-
 describe("MetadataParse", () => {
 
     before(async () => {
         const uriFile = vscode.Uri.file(
             path.join(fixturePath, "CommonModules", "CommonModule", "Ext", "Module.bsl")
         );
-        textDocument = await newTextDocument(uriFile);
+        await newTextDocument(uriFile);
         await globals.waitForCacheUpdate();
     });
 
@@ -27,7 +25,7 @@ describe("MetadataParse", () => {
     });
 
     it("should be avaliable metadata data", async () => {
-        const quick = new BslQuickOpen(globals);
+        new BslQuickOpen(globals);
         globals.dbmodules.chain().data().length.should.greaterThan(1);
 
     });

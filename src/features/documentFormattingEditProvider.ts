@@ -48,23 +48,20 @@ export default class DocumentFormattingEditProvider
     ]);
 
     public provideDocumentFormattingEdits(document: vscode.TextDocument,
-                                          options: vscode.FormattingOptions,
-                                          token: vscode.CancellationToken): vscode.TextEdit[] {
-        return this.format(document, undefined, options, token);
+                                          options: vscode.FormattingOptions): vscode.TextEdit[] {
+        return this.format(document, undefined, options);
     }
 
     public provideDocumentRangeFormattingEdits(document: vscode.TextDocument,
                                                range: vscode.Range,
-                                               options: vscode.FormattingOptions,
-                                               token: vscode.CancellationToken): vscode.TextEdit[] {
-        return this.format(document, range, options, token);
+                                               options: vscode.FormattingOptions): vscode.TextEdit[] {
+        return this.format(document, range, options);
     }
 
     public provideOnTypeFormattingEdits(document: vscode.TextDocument,
                                         position: vscode.Position,
                                         ch: string,
-                                        options: vscode.FormattingOptions,
-                                        token: vscode.CancellationToken): vscode.TextEdit[] {
+                                        options: vscode.FormattingOptions): vscode.TextEdit[] {
         const iterator = new BackwardIterator(document, 0, position.line - 1);
         if (ch === "\n") {
             while (iterator.hasNext()) {
@@ -80,14 +77,13 @@ export default class DocumentFormattingEditProvider
             new vscode.Range(
                 new vscode.Position(iterator.lineNumber, 0),
                 position),
-            options,
-            token);
+            options
+            );
     }
 
     private format(document: vscode.TextDocument,
                    range: vscode.Range,
-                   options: vscode.FormattingOptions,
-                   token: vscode.CancellationToken): vscode.TextEdit[] {
+                   options: vscode.FormattingOptions): vscode.TextEdit[] {
         const documentText = document.getText();
         let initialIndentLevel: number;
         const globals = this._global;
@@ -103,7 +99,7 @@ export default class DocumentFormattingEditProvider
             const endOffset = document.offsetAt(endPosition);
             range = new vscode.Range(startPosition, endPosition);
             value = documentText.substring(rangeOffset, endOffset);
-            initialIndentLevel = this.computeIndentLevel(value, 0, options);
+            initialIndentLevel = this.computeIndentLevel(value, options);
             if (true) {
                 value = wizard(value);
             }
@@ -227,7 +223,7 @@ export default class DocumentFormattingEditProvider
         return result;
     }
 
-    private computeIndentLevel(content: string, offset: number, options: vscode.FormattingOptions): number {
+    private computeIndentLevel(content: string, options: vscode.FormattingOptions): number {
         let i = 0;
         let nChars = 0;
         const tabSize = options.tabSize || 4;

@@ -26,8 +26,7 @@ export default class SyntaxContentBSL extends AbstractSyntaxContent {
         return items;
     }
 
-    public getStructure(textSyntax: string, syntaxObject: any, oscriptMethods: object,
-                        subsystems: object, metadata): any {
+    public getStructure(textSyntax: string, subsystems: object, metadata): any {
         const fillStructure = {
             globalHeader: "Экспортные методы BSL",
             textSyntax,

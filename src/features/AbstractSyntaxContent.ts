@@ -1,5 +1,3 @@
-import { Global } from "../global";
-
 import LibProvider from "../libProvider";
 const libProvider = new LibProvider();
 
@@ -9,8 +7,7 @@ abstract class AbstractSyntaxContent {
 
     public abstract getSyntaxContentItems(dllData: object, libData: object): string;
 
-    public abstract getStructure(textSyntax: string, syntaxObject: any,
-                                 oscriptMethods: object, dllData: object, libData: object): any;
+    public abstract getStructure(textSyntax: string, dllData_syntaxObject: object, libData_oscriptMethods: object): any;
 
     public fillSegmentData(segmentDescription, segment, strSegment, headerSegment, nameID) {
         if (segment[strSegment]) {

@@ -1,5 +1,5 @@
 // tslint:disable:variable-name
-import {CancellationToken, Position, SignatureHelp, SignatureHelpProvider,
+import {Position, SignatureHelp, SignatureHelpProvider,
     SignatureInformation, TextDocument} from "vscode";
 import AbstractProvider from "./abstractProvider";
 import BackwardIterator from "./backwardIterator";
@@ -28,10 +28,9 @@ const _Dot = ".".charCodeAt(0);
 export default class GlobalSignatureHelpProvider extends AbstractProvider implements SignatureHelpProvider {
 
     public provideSignatureHelp(document: TextDocument,
-                                position: Position,
-                                token: CancellationToken): Thenable<SignatureHelp> {
+                                position: Position): Thenable<SignatureHelp> {
 
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             const iterator = new BackwardIterator(document, position.character - 1, position.line);
 
             const paramCount = this.readArguments(iterator);
@@ -58,7 +57,7 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
                 }
                 if (module.length === 0) {
                     const source = document.getText();
-                    entries = this._global.getCacheLocal(document.fileName, ident, source, false, false);
+                    entries = this._global.getCacheLocal(ident, source, false);
                 } else {
                     entries = this._global.query(ident, module, false, false);
                 }

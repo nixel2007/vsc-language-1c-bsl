@@ -2,8 +2,7 @@ import * as vscode from "vscode";
 import AbstractProvider from "./abstractProvider";
 
 export default class GlobalHoverProvider extends AbstractProvider implements vscode.HoverProvider {
-    public provideHover(document: vscode.TextDocument, position: vscode.Position,
-                        token: vscode.CancellationToken): vscode.Hover {
+    public provideHover(document: vscode.TextDocument, position: vscode.Position): vscode.Hover {
         if (!this._global.hoverTrue) {
             this._global.hoverTrue = true;
             return undefined;
@@ -32,7 +31,7 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
             }
             if (module.length === 0) {
                 const source = document.getText();
-                entries = this._global.getCacheLocal(document.fileName, word, source, false, false);
+                entries = this._global.getCacheLocal(word, source, false);
             } else {
                 entries = this._global.query(word, module, false, false);
             }

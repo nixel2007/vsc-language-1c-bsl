@@ -3,10 +3,15 @@
 		"module": "commonjs",
 		"target": "es6",
 		"outDir": "out",
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
 		"lib": [
 			"es6"
 		],
-		"sourceMap": true
+		"sourceMap": true,
+		"plugins": [
+			{ "name": "tslint-language-service"}
+		]
 	},
 	"exclude": [
 		"node_modules"

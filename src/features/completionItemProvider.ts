@@ -5,12 +5,11 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
     public added: object;
     public provideCompletionItems(
         document: vscode.TextDocument,
-        position: vscode.Position,
-        token: vscode.CancellationToken): Thenable<vscode.CompletionItem[]> {
+        position: vscode.Position): Thenable<vscode.CompletionItem[]> {
 
         this.added = {};
 
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             let bucket = new Array<vscode.CompletionItem>();
             if (position.character > 0) {
                 const char = document.getText(new vscode.Range(
@@ -71,8 +70,8 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                             return resolve(bucket);
                         } else {
                             bucket = this.getGlobals(word);
-                            result = this._global.getCacheLocal(document.fileName, word, document.getText(), false);
-                            result.forEach((value, index, array) => {
+                            result = this._global.getCacheLocal(word, document.getText());
+                            result.forEach((value) => {
                                 if (!this.added[value.name.toLowerCase()] === true) {
                                     const item = new vscode.CompletionItem(value.name);
                                     item.documentation = value.description;
@@ -85,7 +84,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                             });
                             bucket = this.getAllWords(word, document.getText(), bucket);
                             result = this._global.querydef(word);
-                            result.forEach((value, index, array) => {
+                            result.forEach((value) => {
                                 const moduleDescription = (value.module && value.module.length > 0)
                                     ? value.module + "."
                                     : "";
@@ -265,7 +264,6 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                 if (!element._method.IsExport) {
                     continue;
                 }
-                const arrayFilename = element.filename.split("/");
                 if (!element.oscriptLib && !this.isModuleAccessable(element.filename)) {
                     continue;
                 }
