@@ -9,9 +9,9 @@ import * as vscAdapter from "../src/vscAdapter";
 
 const globals = Global.create(vscAdapter);
 
-let textDocument: vscode.TextDocument;
+describe("Workspace symbols", function() {
 
-describe("Workspace symbols", () => {
+    this.timeout(10000);
 
     before(async () => {
         const uriEmptyFile = vscode.Uri.file(
