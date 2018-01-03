@@ -19,6 +19,7 @@ import TaskProvider from "./features/taskProvider";
 import WorkspaseSymbolProvider from "./features/workspaceSymbolProvider";
 
 import { CodeBeautyfier } from "./features/codeBeautifier";
+import { MethodDetect, MethodController } from "./features/methodController";
 import * as dynamicSnippets from "./features/dynamicSnippets";
 import * as vscAdapter from "./vscAdapter";
 
@@ -174,6 +175,11 @@ export function activate(context: vscode.ExtensionContext) {
             }
         )
     );
+
+    let methodDetect = new MethodDetect();
+    let controller = new MethodController(methodDetect);
+    context.subscriptions.push(controller);
+    context.subscriptions.push(methodDetect);
 
     context.subscriptions.push(vscode.commands.registerCommand(CMD_ADDCOMMENT, () => {
         const editor = vscode.window.activeTextEditor;

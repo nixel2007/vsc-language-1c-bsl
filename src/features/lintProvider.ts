@@ -77,7 +77,7 @@ export default class LintProvider {
                 let countErrors = 0;
                 for (const line of lines) {
                     let match;
-                    match = lines[line].match(regex);
+                    match = line.match(regex);
                     if (match) {
                         const range = new vscode.Range(
                                 new vscode.Position(+match[2] - 1, 0),
