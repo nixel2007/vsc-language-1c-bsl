@@ -289,13 +289,17 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
         const syntaxObject = this._global.methodForDescription;
         this._global.methodForDescription = undefined;
 
-        const fillStructure = this.syntaxContent.getStructure(textSyntax,
+        const fillStructure = this.getFillStructure(textSyntax, syntaxObject, subsystems, metadata);
+
+        return this.getHTML(fillStructure);
+    }
+
+    private getFillStructure(textSyntax, syntaxObject, subsystems, metadata) {
+        return this.syntaxContent.getStructure(textSyntax,
             (this.syntax === "BSL") ? subsystems : (this.syntax === "oscript-library")
                 ? this._global.dllData : syntaxObject,
             (this.syntax === "BSL") ? metadata : (this.syntax === "oscript-library")
-            ? this._global.libData : this.oscriptMethods);
-
-        return this.getHTML(fillStructure);
+                ? this._global.libData : this.oscriptMethods);
     }
 
     private async getHTML(fillStructure): Promise<string> {
