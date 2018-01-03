@@ -21,7 +21,6 @@ export class MethodDetect {
 
         let doc = editor.document;
 
-        // Only update status if an MD file
         if (doc.languageId === "bsl") {
             let activeMethod = this._getActiveMethod(editor);
 
@@ -37,7 +36,7 @@ export class MethodDetect {
         }
     }
 
-    public _getActiveMethod(editor): string {
+    public _getActiveMethod(editor): string | undefined {
         const line = editor.selections[0].active.line;
         if (line === this._currentLine) {
             return this._methodLabel;
