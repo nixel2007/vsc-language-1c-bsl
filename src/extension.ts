@@ -607,50 +607,60 @@ function createComments(global, all: boolean) {
                 editor.document.getText(),
                 false
             )[0];
-            if (all && (!methodData.isexport || methodData.description != "")) {
+            if (all && (!methodData.isexport || methodData.description !== "")) {
                 continue;
             }
-            const functionKeyword = matchMethod[1].toLowerCase();
-            const isFunc = (functionKeyword === "function" || functionKeyword === "функция");
-            let comment = "";
-            const methodDescription = (enMode)
-                ? (isFunc) ? "Function description" : "Procedure description"
-                : (isFunc) ? "Описание функции" : "Описание процедуры";
-            comment += `// <${methodDescription}>\n`;
-            const params = methodData._method.Params;
-            if (params.length > 0) {
-                comment += "//\n";
-                comment += (enMode ? "// Parameters:\n" : "// Параметры:\n");
-            }
-            for (const element of params) {
-                comment += "//   " + element.name;
-                if (enMode) {
-                    comment += " - <Type.Subtype> - <parameter description>";
-                } else {
-                    comment += " - <Тип.Вид> - <описание параметра>";
-                }
-                comment += "\n";
-            }
-            if (isFunc) {
-                comment += "//\n";
-                if (enMode) {
-                    comment += "//  Returns:\n";
-                    comment += "//   <Type.Subtype> - <returned value description>\n";
-                } else {
-                    comment += "//  Возвращаемое значение:\n";
-                    comment += "//   <Тип.Вид> - <описание возвращаемого значения>\n";
-                }
-            }
-            comment += "//\n";
+            const comment = composeComment(methodData, matchMethod, enMode);
             const dataComment = { comment, indexLine };
             arrComment.push(dataComment);
-            if (!all)
+            if (!all) {
                 break;
-        }
-        editor.edit((editBuilder) => {
-            for (const iterator of arrComment) {
-                editBuilder.replace(new vscode.Position(iterator.indexLine, 0), iterator.comment);
             }
-        });
+        }
+        insertComments(editor, arrComment);
+    }
 }
+
+function insertComments(editor, arrComment) {
+    editor.edit((editBuilder) => {
+        for (const iterator of arrComment) {
+            editBuilder.replace(new vscode.Position(iterator.indexLine, 0), iterator.comment);
+        }
+    });
+}
+
+function composeComment(methodData, matchMethod, enMode) {
+    const functionKeyword = matchMethod[1].toLowerCase();
+    const isFunc = (functionKeyword === "function" || functionKeyword === "функция");
+    let comment = "";
+    const methodDescription = (enMode)
+        ? (isFunc) ? "Function description" : "Procedure description"
+        : (isFunc) ? "Описание функции" : "Описание процедуры";
+    comment += `// <${methodDescription}>\n`;
+    const params = methodData._method.Params;
+    if (params.length > 0) {
+        comment += "//\n";
+        comment += (enMode ? "// Parameters:\n" : "// Параметры:\n");
+    }
+    for (const element of params) {
+        comment += "//   " + element.name;
+        if (enMode) {
+            comment += " - <Type.Subtype> - <parameter description>";
+        } else {
+            comment += " - <Тип.Вид> - <описание параметра>";
+        }
+        comment += "\n";
+    }
+    if (isFunc) {
+        comment += "//\n";
+        if (enMode) {
+            comment += "//  Returns:\n";
+            comment += "//   <Type.Subtype> - <returned value description>\n";
+        } else {
+            comment += "//  Возвращаемое значение:\n";
+            comment += "//   <Тип.Вид> - <описание возвращаемого значения>\n";
+        }
+    }
+    comment += "//\n";
+    return comment;
 }
