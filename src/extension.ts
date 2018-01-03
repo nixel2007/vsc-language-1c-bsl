@@ -641,15 +641,7 @@ function composeComment(methodData, matchMethod, enMode) {
     if (params.length > 0) {
         comment += "//\n";
         comment += (enMode ? "// Parameters:\n" : "// Параметры:\n");
-    }
-    for (const element of params) {
-        comment += "//   " + element.name;
-        if (enMode) {
-            comment += " - <Type.Subtype> - <parameter description>";
-        } else {
-            comment += " - <Тип.Вид> - <описание параметра>";
-        }
-        comment += "\n";
+        comment = fillParams(params, comment, enMode);
     }
     if (isFunc) {
         comment += "//\n";
@@ -662,5 +654,18 @@ function composeComment(methodData, matchMethod, enMode) {
         }
     }
     comment += "//\n";
+    return comment;
+}
+
+function fillParams(params, comment, enMode) {
+    for (const element of params) {
+        comment += "//   " + element.name;
+        if (enMode) {
+            comment += " - <Type.Subtype> - <parameter description>";
+        } else {
+            comment += " - <Тип.Вид> - <описание параметра>";
+        }
+        comment += "\n";
+    }
     return comment;
 }
