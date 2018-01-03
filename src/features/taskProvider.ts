@@ -36,7 +36,7 @@ export default class TaskProvider {
                 if (this.isEnabled(folder)
                     && folder === vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri)) {
                     allTasks.push(...this.fillDefaultTasks(folder.uri.fsPath));
-                    let tasks = this.provideBslScriptsForFolder(folder.uri.fsPath);
+                    const tasks = this.provideBslScriptsForFolder(folder.uri.fsPath);
                     allTasks.push(...tasks);
                 }
             }
@@ -48,7 +48,7 @@ export default class TaskProvider {
     }
 
     private isEnabled(folder: vscode.WorkspaceFolder): boolean {
-        return vscode.workspace.getConfiguration('language-1c-bsl', folder.uri).get("autoDetect") === "on";
+        return vscode.workspace.getConfiguration("language-1c-bsl", folder.uri).get("autoDetect") === "on";
     }
 
     private fillDefaultTasks(workspaceRoot) {

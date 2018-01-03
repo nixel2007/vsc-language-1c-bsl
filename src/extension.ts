@@ -210,7 +210,7 @@ export function activate(context: vscode.ExtensionContext) {
         if (!global.cache.getCollection(textEditor.document.fileName)) {
             global.getRefsLocal(textEditor.document.fileName, textEditor.document.getText());
         }
-        if (vscode.workspace.rootPath) {
+        if (vscode.workspace.workspaceFolders) {
             for (const element of vscode.workspace.textDocuments) {
                 if (element.isDirty && element.languageId === "bsl") {
                     global.customUpdateCache(element.getText(), element.fileName);
@@ -220,7 +220,7 @@ export function activate(context: vscode.ExtensionContext) {
     }));
 
     context.subscriptions.push(vscode.workspace.onDidSaveTextDocument((document: vscode.TextDocument) => {
-        if (vscode.workspace.rootPath) {
+        if (vscode.workspace.workspaceFolders) {
             global.customUpdateCache(document.getText(), document.fileName);
         }
     }));

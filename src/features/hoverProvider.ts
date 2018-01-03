@@ -79,7 +79,7 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
             description.push({ language: "bsl", value: retValue + entry.name + signature[element].СтрокаПараметров });
             // description.push("Параметры");
             for (const param in signature[element].Параметры) {
-                description.push("***" + param + "***: " + signature[element].Параметры[param]);
+                description.push(`***${param}***: ${signature[element].Параметры[param]}`);
             }
         }
         return new vscode.Hover(description);
@@ -111,7 +111,7 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
         );
         for (const param of entry._method.Params) {
             const documentationParam = this._global.GetDocParam(arraySignature.description, param.name);
-            description.push("***" + param.name + "***: " + documentationParam.descriptionParam);
+            description.push(`***${param.name}***: ${documentationParam.descriptionParam}`);
         }
         return new vscode.Hover(description);
     }

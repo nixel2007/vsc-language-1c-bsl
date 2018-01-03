@@ -12,7 +12,7 @@ abstract class AbstractSyntaxContent {
 
     public fillSegmentData(segmentDescription, segment, strSegment, headerSegment, nameID) {
         if (segment[strSegment]) {
-            segmentDescription = segmentDescription + "<h1 style = 'font-size: 1em;'>" + headerSegment + "</h1><ul>";
+            segmentDescription = `${segmentDescription}<h1 style = 'font-size: 1em;'>${headerSegment}</h1><ul>`;
             let counter = 0;
             for (const elem in segment[strSegment]) {
                 counter = counter + 1;
@@ -24,8 +24,8 @@ abstract class AbstractSyntaxContent {
                 }
                 const alias = (nameID === "constructor")
                 ? "" : (segment[strSegment][elem].alias !== "") ? (" / " + segment[strSegment][elem].alias) : "";
-                segmentDescription = segmentDescription + "<li><span class='a' id = " + "'" + nameID
-                + counter + "' " + " onclick='fill(this)'>" + elem + alias + "</span>" + onlyOs + "</li>";
+                segmentDescription = `${segmentDescription}<li><span class='a' id = '${nameID}
+                ${counter}' onclick='fill(this)'>${elem}${alias}</span>${onlyOs}</li>`;
             }
             segmentDescription = segmentDescription + "</ul>";
         }
