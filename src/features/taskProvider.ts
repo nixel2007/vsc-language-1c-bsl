@@ -129,7 +129,7 @@ export default class TaskProvider {
         const emptyTasks: vscode.Task[] = [];
         const tasksFolder = path.join(workspaceRoot, "tasks");
 
-        if (!this.exists(tasksFolder)) {
+        if (!fs.existsSync(tasksFolder)) {
             return emptyTasks;
         }
 
@@ -154,11 +154,4 @@ export default class TaskProvider {
         }
     }
 
-    private exists(file: string): Promise<boolean> {
-        return new Promise<boolean>((resolve) => {
-            fs.exists(file, (value) => {
-                resolve(value);
-            });
-        });
-    }
 }
