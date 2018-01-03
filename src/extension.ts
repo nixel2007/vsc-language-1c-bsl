@@ -105,7 +105,7 @@ export function activate(context: vscode.ExtensionContext) {
                 const methodDescription = (enMode)
                     ? (isFunc) ? "Function description" : "Procedure description"
                     : (isFunc) ? "Описание функции" : "Описание процедуры";
-                comment += "// <" + methodDescription + ">\n";
+                comment += `// <${methodDescription}>\n`;
                 const methodData = global.getCacheLocal(
                     matchMethod[2],
                     editor.document.getText(),
@@ -139,6 +139,7 @@ export function activate(context: vscode.ExtensionContext) {
                 editor.edit((editBuilder) => {
                     editBuilder.replace(new vscode.Position(indexLine, 0), comment);
                 });
+                break;
             }
         }
     }));
@@ -209,7 +210,7 @@ export function activate(context: vscode.ExtensionContext) {
                     const point = contentChange.range.start.character + contentChange.text.length;
                     const position = new vscode.Position(editor.selection.active.line, point);
                     if (autoClosingBrackets) {
-                        await editor.edit((editBuilder) => {
+                        editor.edit((editBuilder) => {
                             editBuilder.insert(new vscode.Position(position.line, position.character), ")");
                         });
                     }
@@ -244,7 +245,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         if (line.text.match(/^\s*\/\/.*$/)) {
             editor.edit((editBuilder) => {
-                editBuilder.insert(new vscode.Position(position.line, position.character), "\n" + indent + "//");
+                editBuilder.insert(new vscode.Position(position.line, position.character), `\n${indent}//`);
             });
         } else {
             editor.edit((editBuilder) => {
@@ -330,7 +331,7 @@ export function activate(context: vscode.ExtensionContext) {
                             ),
                             position
                         ),
-                    word + " = " + word + postfix
+                    `${word} = ${word}${postfix}`
                 );
             }).then(() => {
                 const newPosition = editor.selection.isReversed
@@ -531,7 +532,7 @@ export function activate(context: vscode.ExtensionContext) {
                     }
                     for (const element in class1C[sectionTitle]) {
                         items.push({
-                            label: elementSegment + "." + element,
+                            label: `${elementSegment}.${element}`,
                             description: "1С/Классы/" + elementSegment
                         });
                     }
@@ -546,7 +547,7 @@ export function activate(context: vscode.ExtensionContext) {
                     }
                     for (const element in class1C[sectionTitle]) {
                         items.push({
-                            label: elementSegment + "." + element,
+                            label: `${elementSegment}.${element}`,
                             description: "1С/Системные перечисления/" + elementSegment
                         });
                     }
@@ -574,7 +575,7 @@ export function activate(context: vscode.ExtensionContext) {
                     for (const indexMethod in classOscript[sectionTitle]) {
                         const method = classOscript[sectionTitle][indexMethod];
                         items.push({
-                            label: classOscript["name" + postfix] + "." + method["name" + postfix],
+                            label: `${classOscript["name" + postfix]}.${method["name" + postfix]}`,
                             description: "OneScript/Классы/" + element
                         });
                     }

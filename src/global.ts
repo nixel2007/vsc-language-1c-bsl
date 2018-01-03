@@ -34,8 +34,8 @@ export class Global {
     public classes: IClasses;
     public toreplaced: any;
     public methodForDescription: any = undefined;
-    public syntaxFilled: string = "";
-    public hoverTrue: boolean = true;
+    public syntaxFilled = "";
+    public hoverTrue = true;
     public autocompleteLanguage: any;
     public dllData: object;
     public libData: object = {};
@@ -363,8 +363,8 @@ export class Global {
     public getCacheLocal(
         word: string,
         source,
-        allToEnd: boolean = true,
-        fromFirst: boolean = true
+        allToEnd = true,
+        fromFirst = true
     ) {
         const suffix = allToEnd ? "" : "$";
         const prefix = fromFirst ? "^" : "";
@@ -787,7 +787,7 @@ export class Global {
         }
     }
 
-    public queryref(word: string, collection: any, local: boolean = false): any {
+    public queryref(word: string, collection: any, local = false): any {
         if (!collection) {
             return new Array();
         }
@@ -797,7 +797,7 @@ export class Global {
         return search;
     }
 
-    public querydef(module: string, all: boolean = true, lazy: boolean = false): any {
+    public querydef(module: string, all = true, lazy = false): any {
         // Проверяем локальный кэш.
         // Проверяем глобальный кэш на модули.
         if (!this.cacheUpdated()) {
@@ -815,7 +815,7 @@ export class Global {
         }
     }
 
-    public query(word: string, module: string, all: boolean = true, lazy: boolean = false): any {
+    public query(word: string, module: string, all = true, lazy = false): any {
         const prefix = lazy ? "" : "^";
         const suffix = all ? "" : "$";
         const querystring: any = {
@@ -825,10 +825,10 @@ export class Global {
         };
         if (module && module.length > 0) {
             querystring.module = {
-                $regex: new RegExp("^" + module + "", "i")
+                $regex: new RegExp(`^${module}`, "i")
             };
         }
-        const moduleRegexp = new RegExp("^" + module + "$", "i");
+        const moduleRegexp = new RegExp(`^${module}$`, "i");
         function filterByModule(obj) {
             if (module && module.length > 0) {
                 if (moduleRegexp.exec(obj.module) !== null) {
@@ -867,14 +867,14 @@ export class Global {
             paramsString += (nameParam.byval ? "Знач " : "");
             paramsString += nameParam.name;
             const re = new RegExp(
-                "^\\s*(Параметры|Parameters)(.|\\n)*\\n\\s*" + nameParam.name + "\\s*(-|–)\\s*([<\\wа-яА-Я\\.>]+)",
+                `^\\s*(Параметры|Parameters)(.|\\n)*\\n\\s*${nameParam.name}\\s*(-|–)\\s*([<\\wа-яА-Я\\.>]+)`,
                 "gm"
             );
             const match: RegExpExecArray = re.exec(description);
             if (match) {
                 paramsString = paramsString + ": " + match[4];
             }
-            paramsString += (nameParam.default ? " = " + nameParam.default : "");
+            paramsString += (nameParam.default ? ` = ${nameParam.default}` : "");
         }
         paramsString = paramsString + ")";
         if (strRetState) {
@@ -894,7 +894,7 @@ export class Global {
         const optional = false;
         let descriptionParam = "";
         const re = new RegExp(
-            "(Параметры|Parameters)(.|\\n)*\\n\\s*" + param + "\\s*(-|–)\\s*([<\\wа-яА-Я\\.>]+)\\s*-?\\s*((.|\\n)*)",
+            `(Параметры|Parameters)(.|\\n)*\\n\\s*${param}\\s*(-|–)\\s*([<\\wа-яА-Я\\.>]+)\\s*-?\\s*((.|\\n)*)`,
             "g"
         );
         const match: RegExpExecArray = re.exec(description);

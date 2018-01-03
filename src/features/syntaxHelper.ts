@@ -45,7 +45,7 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
         this.onDidChangeEvent.fire(uri);
     }
 
-    public provideTextDocumentContent(): Promise<string> {
+    public provideTextDocumentContent(): Promise<string> | undefined {
         if (!this._global.methodForDescription) {
             return;
         }

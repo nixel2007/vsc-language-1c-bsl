@@ -7,7 +7,8 @@ abstract class AbstractSyntaxContent {
 
     public abstract getSyntaxContentItems(dllData: object, libData: object): string;
 
-    public abstract getStructure(textSyntax: string, dllData_syntaxObject: object, libData_oscriptMethods: object): any;
+    public abstract getStructure(textSyntax: string, dllDataOrSyntaxObject: object,
+        libDataOrOscriptMethods: object): any;
 
     public fillSegmentData(segmentDescription, segment, strSegment, headerSegment, nameID) {
         if (segment[strSegment]) {
