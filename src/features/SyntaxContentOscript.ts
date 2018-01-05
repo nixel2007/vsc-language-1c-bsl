@@ -206,10 +206,7 @@ export default class SyntaxContentOscript extends AbstractSyntaxContent {
         for (const segmentClass in structureGlobContext.classes) {
             classes = classes + "<h2 style='font-size: 1em;'><em>" + segmentClass + "</em></h2><ul>";
             for (const currentClass in structureGlobContext.classes[segmentClass]) {
-                let onlyOs = "";
-                if (!libProvider.bslglobals.classes[currentClass]) {
-                    onlyOs = "*";
-                }
+                const onlyOs = (!libProvider.bslglobals.classes[currentClass]) ? "*" : "";
                 classes = classes + `<li><span class="a" onclick="fillDescription(this)">
                 ${currentClass + " / " + classesOscript[currentClass].name_en}</span>${onlyOs}</li>`;
                 added[currentClass] = true;
@@ -232,18 +229,16 @@ export default class SyntaxContentOscript extends AbstractSyntaxContent {
             if (!added[element]) {
                 const onlyOs = (!libProvider.bslglobals.classes[element]) ? "*" : "";
                 const alias = (classesOscript[element].name_en !== "")
-                ? (" / " + classesOscript[element].name_en) : "";
+                    ? (" / " + classesOscript[element].name_en) : "";
                 classes = classes
                 + `<li><span class="a" onclick="fillDescription(this)">${element + alias}</span>${onlyOs}</li>`;
             }
         }
         classes = classes + "</ul><h1 style='font-size: 1em;'>Системные перечисления</h1><ul>";
         for (const element in systemEnum) {
-            let onlyOs = "";
-            if (!systemEnum[element]) {
-                onlyOs = "*";
-            }
-            const alias = (systemEnum[element].name_en !== "") ? (" / " + systemEnum[element].name_en) : "";
+            const onlyOs = (!libProvider.bslglobals.systemEnum[element]) ? "*" : "";
+            const alias = (systemEnum[element].name_en !== "")
+                ? (" / " + systemEnum[element].name_en) : "";
             classes = classes
             + `<li><span class="a" onclick="fillDescription(this)">${element + alias}</span>${onlyOs}</li>`;
         }

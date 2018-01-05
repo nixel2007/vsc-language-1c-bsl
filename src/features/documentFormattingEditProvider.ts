@@ -136,8 +136,8 @@ export default class DocumentFormattingEditProvider
             while (ArrStrings) {
                 if (ArrStrings[6]) {
                     indexValue = ArrStrings.index;
-                    ArrStrings[6].replace(new RegExp(keywords, "ig"), replacer);
-                    ArrStrings[6].replace(new RegExp(separator, "g"), spaceInserter);
+                    ArrStrings[6] = ArrStrings[6].replace(new RegExp(keywords, "ig"), replacer);
+                    ArrStrings[6] = ArrStrings[6].replace(new RegExp(separator, "g"), spaceInserter);
                 }
                 ArrStrings = Regex.exec(formattingValue);
             }
@@ -189,29 +189,25 @@ export default class DocumentFormattingEditProvider
             return match;
         }
 
-        const eol = this.getEOL(document);
-        const arrayValue = value.split(new RegExp(eol));
-        for (const key in arrayValue) {
-            const element = arrayValue[key];
-            const firstWord = element.toLowerCase().trim().split(/[^\wа-яё\(\)]/)[0];
-            if (this.indentWord.has(firstWord)) {
-                addEdit(element, +key + range.start.line);
-                indentLevel++;
-            } else if (this.reindentWord.has(firstWord)) {
-                if (+key !== 0 && indentLevel !== 0) {
+        function findConstruction(indentWord, reindentWord, unindentWord) {
+            for (const key in arrayValue) {
+                const element = arrayValue[key];
+                const firstWord = element.toLowerCase().trim().split(/[^\wа-яё\(\)]/)[0];
+                if (+key !== 0 && indentLevel !== 0
+                    && (reindentWord.has(firstWord) || unindentWord.has(firstWord))) {
                     indentLevel--;
                 }
                 addEdit(element, +key + range.start.line);
-            } else if (this.unindentWord.has(firstWord)) {
-                if (+key !== 0 && indentLevel !== 0) {
-                    indentLevel--;
+                if (indentWord.has(firstWord) || unindentWord.has(firstWord)) {
+                    indentLevel++;
                 }
-                addEdit(element, +key + range.start.line);
-                indentLevel++;
-            } else {
-                addEdit(element, +key + range.start.line);
             }
         }
+
+        const eol = this.getEOL(document);
+        const arrayValue = value.split(new RegExp(eol));
+        findConstruction(this.indentWord, this.reindentWord, this.unindentWord);
+
         return editOperations;
     }
 

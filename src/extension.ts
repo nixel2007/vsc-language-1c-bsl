@@ -19,8 +19,9 @@ import TaskProvider from "./features/taskProvider";
 import WorkspaseSymbolProvider from "./features/workspaceSymbolProvider";
 
 import { CodeBeautyfier } from "./features/codeBeautifier";
-import { MethodDetect, MethodController } from "./features/methodController";
 import * as dynamicSnippets from "./features/dynamicSnippets";
+import { MethodController } from "./features/methodController";
+import { MethodDetect } from "./features/methodDetect";
 import * as vscAdapter from "./vscAdapter";
 
 import LibProvider from "./libProvider";
@@ -176,8 +177,8 @@ export function activate(context: vscode.ExtensionContext) {
         )
     );
 
-    let methodDetect = new MethodDetect();
-    let controller = new MethodController(methodDetect);
+    const methodDetect = new MethodDetect();
+    const controller = new MethodController(methodDetect);
     context.subscriptions.push(controller);
     context.subscriptions.push(methodDetect);
 
@@ -317,7 +318,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
         const configuration = vscode.workspace.getConfiguration("language-1c-bsl");
         const userDynamicSnippetsList: string[] = configuration.get("dynamicSnippets", []);
-        for (const index in userDynamicSnippetsList) {
+        for (const index of userDynamicSnippetsList) {
             try {
                 const userDynamicSnippetsString = fs.readFileSync(userDynamicSnippetsList[index], "utf-8");
                 const snippetsData = JSON.parse(userDynamicSnippetsString);
@@ -474,7 +475,7 @@ export function activate(context: vscode.ExtensionContext) {
         } else if (isBsl || global.syntaxFilled === "1C" || global.syntaxFilled === "BSL") {
             for (const elementSegment in libProvider.bslglobals.structureMenu.global) {
                 const segment = libProvider.bslglobals.structureMenu.global[elementSegment];
-                for (const element in segment) {
+                for (const element of segment) {
                     items.push({ label: element, description: "1С/Глобальный контекст/" + elementSegment });
                 }
             }
@@ -513,7 +514,7 @@ export function activate(context: vscode.ExtensionContext) {
             || global.syntaxFilled === "OneScript" || global.syntaxFilled === "oscript-library") {
             for (const element in libProvider.oscriptStdLib.structureMenu.global) {
                 const segment = libProvider.oscriptStdLib.structureMenu.global[element];
-                for (const sectionTitle in segment) {
+                for (const sectionTitle of segment) {
                     items.push({
                         label: sectionTitle,
                         description: "OneScript/Глобальный контекст/" + element
@@ -603,27 +604,31 @@ function createComments(global, all: boolean) {
             (positionStart.line > positionEnd.line) ? positionStart.line + 1 : positionEnd.line + 1;
         const re = /^(Процедура|Функция|procedure|function)\s*([\wа-яё]+)/im;
         const arrComment = [];
-        for (let indexLine = lineMethod; indexLine >= 0; --indexLine) {
-            const matchMethod = re.exec(editor.document.lineAt(indexLine).text);
-            if (!matchMethod) {
-                continue;
-            }
-            const methodData = global.getCacheLocal(
-                matchMethod[2],
-                editor.document.getText(),
-                false
-            )[0];
-            if (all && (!methodData.isexport || methodData.description !== "")) {
-                continue;
-            }
-            const comment = composeComment(methodData, matchMethod, enMode);
-            const dataComment = { comment, indexLine };
-            arrComment.push(dataComment);
-            if (!all) {
-                break;
-            }
-        }
+        findMethod(lineMethod, re, editor, global, arrComment, all, enMode);
         insertComments(editor, arrComment);
+    }
+}
+
+function findMethod(lineMethod, re, editor, global, arrComment, all, enMode) {
+    for (let indexLine = lineMethod; indexLine >= 0; --indexLine) {
+        const matchMethod = re.exec(editor.document.lineAt(indexLine).text);
+        if (!matchMethod) {
+            continue;
+        }
+        const methodData = global.getCacheLocal(
+            matchMethod[2],
+            editor.document.getText(),
+            false
+        )[0];
+        if (all && (!methodData.isexport || methodData.description !== "")) {
+            continue;
+        }
+        const comment = composeComment(methodData, matchMethod, enMode);
+        const dataComment = { comment, indexLine };
+        arrComment.push(dataComment);
+        if (!all) {
+            break;
+        }
     }
 }
 
