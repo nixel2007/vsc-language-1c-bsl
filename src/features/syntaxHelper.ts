@@ -1,4 +1,3 @@
-import * as fs from "fs-extra";
 import * as glob from "glob";
 import * as path from "path";
 import * as vscode from "vscode";
@@ -82,7 +81,7 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
         for (const md of this.metadata) {
             let listMod = this._global.db.find(
                 {
-                    filename: { $regex: "." + md + "." },
+                    filename: { $regex: `.${md}.` },
                     isExport: true,
                     module: { $ne: "" }
                 });
@@ -146,7 +145,7 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
             if (!humanMetadata) {
                 continue;
             }
-            let humanModule = humanMetadata + "." + el.split(".")[1];
+            let humanModule = `${humanMetadata}.${el.split(".")[1]}`;
             humanModule = humanModule.replace("ОбщиеМодули.", "");
             const exportMethods = this._global.db.find({ isExport: true, module: humanModule });
             if (exportMethods.length > 0) {
@@ -204,7 +203,7 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
         const searchPattern = `Subsystems/${label}/**/Subsystems/*.xml`;
         const globOptions: glob.IOptions = {};
         globOptions.dot = true;
-        globOptions.cwd = vscode.workspace.rootPath;
+        globOptions.cwd = vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri).uri.fsPath;
         globOptions.nocase = true;
         globOptions.absolute = true;
         const files = glob.sync(searchPattern, globOptions);
@@ -217,20 +216,7 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
         const filesLength = files.length;
         const substrIndex = (process.platform === "win32") ? 8 : 7;
         for (let i = 0; i < filesLength; ++i) {
-            let fullpath = files[i].toString();
-            fullpath = decodeURIComponent(fullpath);
-            if (fullpath.startsWith("file:")) {
-                fullpath = fullpath.substr(substrIndex);
-            }
-            let data;
-            try {
-                data = fs.readFileSync(fullpath);
-            } catch (err) {
-                if (err) {
-                    console.log(err);
-                    continue;
-                }
-            }
+            const data = this._global.readFileSync(files[i].toString(), substrIndex);
             let result;
             try {
                 result = fastXmlParser.parse(data);
@@ -269,18 +255,18 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
             this.oscriptMethods = this.syntaxContent.getSyntaxContentItems(
                 (this.syntax === "BSL") ? subsystems : this._global.dllData,
                 (this.syntax === "BSL") ? metadata : this._global.libData);
-            const bbb = "'"
-                + JSON.stringify(this.oscriptMethods)
-                .replace(/[\\]/g, "\\\\")
-                .replace(/[\"]/g, "\\\"")
-                .replace(/[\']/g, "\\\'")
-                .replace(/[\/]/g, "\\/")
-                .replace(/[\b]/g, "\\b")
-                .replace(/[\f]/g, "\\f")
-                .replace(/[\n]/g, "\\n")
-                .replace(/[\r]/g, "\\r")
-                .replace(/[\t]/g, "\\t") + "'";
-            textSyntax = ` window.localStorage.setItem("bsl-language", ${bbb});
+            let jsonString = JSON.stringify(this.oscriptMethods)
+                                .replace(/[\\]/g, "\\\\")
+                                .replace(/[\"]/g, "\\\"")
+                                .replace(/[\']/g, "\\\'")
+                                .replace(/[\/]/g, "\\/")
+                                .replace(/[\b]/g, "\\b")
+                                .replace(/[\f]/g, "\\f")
+                                .replace(/[\n]/g, "\\n")
+                                .replace(/[\r]/g, "\\r")
+                                .replace(/[\t]/g, "\\t");
+            jsonString = `'${jsonString}'`;
+            textSyntax = ` window.localStorage.setItem("bsl-language", ${jsonString});
                 `;
         }
 

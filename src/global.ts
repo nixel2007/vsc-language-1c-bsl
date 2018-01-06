@@ -981,24 +981,27 @@ export class Global {
         });
     }
 
+    public readFileSync(fullpath, substrIndex) {
+        fullpath = decodeURIComponent(fullpath);
+        if (fullpath.startsWith("file:")) {
+            fullpath = fullpath.substr(substrIndex);
+        }
+        let data;
+        try {
+            data = fs.readFileSync(fullpath);
+        } catch (err) {
+            if (err) {
+                console.log(err);
+            }
+        }
+        return data;
+    }
+
     private async addSubsystemsToCache(files: string[]) {
         const filesLength = files.length;
         const substrIndex = (process.platform === "win32") ? 8 : 7;
         for (let i = 0; i < filesLength; ++i) {
-            let fullpath = files[i].toString();
-            fullpath = decodeURIComponent(fullpath);
-            if (fullpath.startsWith("file:")) {
-                fullpath = fullpath.substr(substrIndex);
-            }
-            let data;
-            try {
-                data = fs.readFileSync(fullpath);
-            } catch (err) {
-                if (err) {
-                    console.log(err);
-                    continue;
-                }
-            }
+            const data = this.readFileSync(files[i].toString(), substrIndex);
             let result;
             try {
                 result = await this.xml2json(data);
