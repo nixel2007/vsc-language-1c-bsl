@@ -475,7 +475,7 @@ export function activate(context: vscode.ExtensionContext) {
         } else if (isBsl || global.syntaxFilled === "1C" || global.syntaxFilled === "BSL") {
             for (const elementSegment in libProvider.bslglobals.structureMenu.global) {
                 const segment = libProvider.bslglobals.structureMenu.global[elementSegment];
-                for (const element of segment) {
+                for (const element in segment) {
                     items.push({ label: element, description: "1С/Глобальный контекст/" + elementSegment });
                 }
             }
@@ -514,7 +514,7 @@ export function activate(context: vscode.ExtensionContext) {
             || global.syntaxFilled === "OneScript" || global.syntaxFilled === "oscript-library") {
             for (const element in libProvider.oscriptStdLib.structureMenu.global) {
                 const segment = libProvider.oscriptStdLib.structureMenu.global[element];
-                for (const sectionTitle of segment) {
+                for (const sectionTitle in segment) {
                     items.push({
                         label: sectionTitle,
                         description: "OneScript/Глобальный контекст/" + element

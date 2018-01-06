@@ -8,7 +8,7 @@ import SyntaxContentBSL from "./SyntaxContentBSL";
 import SyntaxContentOscript from "./SyntaxContentOscript";
 import SyntaxContentOscriptLibrary from "./SyntaxContentOscriptLibrary";
 
-import fastXmlParser = require("fast-xml-parser");
+import * as fastXmlParser from "fast-xml-parser";
 
 export default class SyntaxHelperProvider extends AbstractProvider implements vscode.TextDocumentContentProvider {
     private onDidChangeEvent = new vscode.EventEmitter<vscode.Uri>();
@@ -203,7 +203,7 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
         const searchPattern = `Subsystems/${label}/**/Subsystems/*.xml`;
         const globOptions: glob.IOptions = {};
         globOptions.dot = true;
-        globOptions.cwd = vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri).uri.fsPath;
+        globOptions.cwd = vscode.workspace.workspaceFolders[0].uri.fsPath;
         globOptions.nocase = true;
         globOptions.absolute = true;
         const files = glob.sync(searchPattern, globOptions);
