@@ -1,8 +1,6 @@
 import * as vscode from "vscode";
 
 const _NL = "\n".charCodeAt(0);
-const _TAB = "\t".charCodeAt(0);
-const _WSB = " ".charCodeAt(0);
 
 export default class BackwardIterator {
     public lineNumber: number;

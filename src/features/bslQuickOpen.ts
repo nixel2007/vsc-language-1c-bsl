@@ -28,9 +28,9 @@ export default class BslQuickOpen extends AbstractProvider {
                 $regex: new RegExp(".*", "i")
             }
         };
-        let firstproject: string = "";
+        let firstproject = "";
         const search = await this._global.dbmodules.chain().find(querystring).simplesort("module").data();
-        search.forEach((value, index, array) => {
+        search.forEach((value) => {
             const locLabel: string = this._global.getHumanMetadata(value);
             let fullpath: string = String(value.fullpath);
             if (fullpath.startsWith(this._global.getRootPath())) {

@@ -6,20 +6,16 @@ export default class TaskProvider {
 
     public onConfigurationChanged() {
         type AutoDetect = "on" | "off";
-        let taskProvider: vscode.Disposable | undefined;
         const autoDetect = vscode.workspace.getConfiguration("language-1c-bsl").get<AutoDetect>("autoDetect");
         if (!vscode.workspace.workspaceFolders) {
             return;
         }
-        if (taskProvider && autoDetect === "off") {
-            taskProvider.dispose();
-            taskProvider = undefined;
-        } else if (!taskProvider && autoDetect === "on") {
-            taskProvider = vscode.workspace.registerTaskProvider("bsl", {
+        if (autoDetect === "on") {
+            vscode.workspace.registerTaskProvider("bsl", {
                 provideTasks: () => {
                     return this.provideBslScripts();
                 },
-                resolveTask(taskD: vscode.Task): vscode.Task | undefined {
+                resolveTask(): vscode.Task | undefined {
                     return undefined;
                 }
             });
@@ -29,17 +25,30 @@ export default class TaskProvider {
     private provideBslScripts(): vscode.Task[] {
         const emptyTasks: vscode.Task[] = [];
         const allTasks: vscode.Task[] = [];
-        const workspaceRoot = vscode.workspace.rootPath;
+        const folders = vscode.workspace.workspaceFolders;
 
-        if (!workspaceRoot) {
+        if (!folders) {
             return emptyTasks;
         }
 
-        allTasks.push(...this.fillDefaultTasks(workspaceRoot));
+        try {
+            for (const folder of folders) {
+                if (this.isEnabled(folder)
+                    && folder === vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri)) {
+                    allTasks.push(...this.fillDefaultTasks(folder.uri.fsPath));
+                    const tasks = this.provideBslScriptsForFolder(folder.uri.fsPath);
+                    allTasks.push(...tasks);
+                }
+            }
+            return allTasks;
+        } catch (error) {
+            return error;
+        }
 
-        const tasks = this.provideBslScriptsForFolder(workspaceRoot);
-        allTasks.push(...tasks);
-        return allTasks;
+    }
+
+    private isEnabled(folder: vscode.WorkspaceFolder): boolean {
+        return vscode.workspace.getConfiguration("language-1c-bsl", folder.uri).get("autoDetect") === "on";
     }
 
     private fillDefaultTasks(workspaceRoot) {
@@ -124,8 +133,13 @@ export default class TaskProvider {
             kind.group = "test";
         }
 
-        return new vscode.Task(kind, taskName, command,
-        new vscode.ProcessExecution(command, args, { cwd: workspaceRoot }), problemMatcher);
+        return new vscode.Task(
+            kind,
+            vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri),
+            taskName,
+            command,
+            new vscode.ProcessExecution(command, args, { cwd: workspaceRoot }),
+            problemMatcher);
 
     }
 
@@ -133,7 +147,7 @@ export default class TaskProvider {
         const emptyTasks: vscode.Task[] = [];
         const tasksFolder = path.join(workspaceRoot, "tasks");
 
-        if (!this.exists(tasksFolder)) {
+        if (!fs.existsSync(tasksFolder)) {
             return emptyTasks;
         }
 
@@ -141,14 +155,13 @@ export default class TaskProvider {
 
             const result: vscode.Task[] = [];
             const taskFiles = fs.readdirSync(tasksFolder);
-            // tslint:disable-next-line:prefer-for-of
-            for (let i = 0; i < taskFiles.length; i++) {
-                const filename = path.join(tasksFolder, taskFiles[i]);
+            for (const taskFile of taskFiles) {
+                const filename = path.join(tasksFolder, taskFile);
                 const stat = fs.lstatSync(filename);
                 if (stat.isDirectory()) {
                    continue;
                 }
-                const taskName = taskFiles[i];
+                const taskName = taskFile;
                 result.push(this.createTask("opm task: " + taskName,
                 workspaceRoot, "cmd", ["opm", "run", taskName.replace(".os", "")], ["$OneScript Linter"]));
             }
@@ -158,11 +171,4 @@ export default class TaskProvider {
         }
     }
 
-    private exists(file: string): Promise<boolean> {
-        return new Promise<boolean>((resolve, reject) => {
-            fs.exists(file, (value) => {
-                resolve(value);
-            });
-        });
-    }
 }

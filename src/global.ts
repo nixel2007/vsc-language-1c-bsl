@@ -34,8 +34,8 @@ export class Global {
     public classes: IClasses;
     public toreplaced: any;
     public methodForDescription: any = undefined;
-    public syntaxFilled: string = "";
-    public hoverTrue: boolean = true;
+    public syntaxFilled = "";
+    public hoverTrue = true;
     public autocompleteLanguage: any;
     public dllData: object;
     public libData: object = {};
@@ -361,12 +361,10 @@ export class Global {
     }
 
     public getCacheLocal(
-        filename: string,
         word: string,
         source,
-        update: boolean = false,
-        allToEnd: boolean = true,
-        fromFirst: boolean = true
+        allToEnd = true,
+        fromFirst = true
     ) {
         const suffix = allToEnd ? "" : "$";
         const prefix = fromFirst ? "^" : "";
@@ -597,8 +595,7 @@ export class Global {
                         this.dbmodules.insert(metacollection);
                     }
                 }
-                let parsesModule = new Parser().parse(source);
-                source = undefined;
+                const parsesModule = new Parser().parse(source);
                 const entries = parsesModule.getMethodsTable().find();
                 if (i % 100 === 0) {
                     this.postMessage("Обновляем кэш файла № " + i + " из " + filesLength, 2000);
@@ -606,7 +603,6 @@ export class Global {
                 if (parsesModule.context.CallsPosition.length > 0) {
                     this.updateReferenceCalls(parsesModule.context.CallsPosition, "GlobalModuleText", fullpath);
                 }
-                parsesModule = undefined;
                 for (const item of entries) {
                     const method = {
                         name: item.name,
@@ -715,7 +711,7 @@ export class Global {
                             console.error(err);
                             return;
                         }
-                        this.addOscriptDll(globOptions.cwd, files);
+                        this.addOscriptDll(files);
                     });
                 }
 
@@ -791,7 +787,7 @@ export class Global {
         }
     }
 
-    public queryref(word: string, collection: any, local: boolean = false): any {
+    public queryref(word: string, collection: any, local = false): any {
         if (!collection) {
             return new Array();
         }
@@ -801,7 +797,7 @@ export class Global {
         return search;
     }
 
-    public querydef(module: string, all: boolean = true, lazy: boolean = false): any {
+    public querydef(module: string, all = true, lazy = false): any {
         // Проверяем локальный кэш.
         // Проверяем глобальный кэш на модули.
         if (!this.cacheUpdated()) {
@@ -819,7 +815,7 @@ export class Global {
         }
     }
 
-    public query(word: string, module: string, all: boolean = true, lazy: boolean = false): any {
+    public query(word: string, module: string, all = true, lazy = false): any {
         const prefix = lazy ? "" : "^";
         const suffix = all ? "" : "$";
         const querystring: any = {
@@ -829,10 +825,10 @@ export class Global {
         };
         if (module && module.length > 0) {
             querystring.module = {
-                $regex: new RegExp("^" + module + "", "i")
+                $regex: new RegExp(`^${module}`, "i")
             };
         }
-        const moduleRegexp = new RegExp("^" + module + "$", "i");
+        const moduleRegexp = new RegExp(`^${module}$`, "i");
         function filterByModule(obj) {
             if (module && module.length > 0) {
                 if (moduleRegexp.exec(obj.module) !== null) {
@@ -871,14 +867,14 @@ export class Global {
             paramsString += (nameParam.byval ? "Знач " : "");
             paramsString += nameParam.name;
             const re = new RegExp(
-                "^\\s*(Параметры|Parameters)(.|\\n)*\\n\\s*" + nameParam.name + "\\s*(-|–)\\s*([<\\wа-яА-Я\\.>]+)",
+                `^\\s*(Параметры|Parameters)(.|\\n)*\\n\\s*${nameParam.name}\\s*(-|–)\\s*([<\\wа-яА-Я\\.>]+)`,
                 "gm"
             );
             const match: RegExpExecArray = re.exec(description);
             if (match) {
                 paramsString = paramsString + ": " + match[4];
             }
-            paramsString += (nameParam.default ? " = " + nameParam.default : "");
+            paramsString += (nameParam.default ? ` = ${nameParam.default}` : "");
         }
         paramsString = paramsString + ")";
         if (strRetState) {
@@ -898,7 +894,7 @@ export class Global {
         const optional = false;
         let descriptionParam = "";
         const re = new RegExp(
-            "(Параметры|Parameters)(.|\\n)*\\n\\s*" + param + "\\s*(-|–)\\s*([<\\wа-яА-Я\\.>]+)\\s*-?\\s*((.|\\n)*)",
+            `(Параметры|Parameters)(.|\\n)*\\n\\s*${param}\\s*(-|–)\\s*([<\\wа-яА-Я\\.>]+)\\s*-?\\s*((.|\\n)*)`,
             "g"
         );
         const match: RegExpExecArray = re.exec(description);
@@ -929,23 +925,23 @@ export class Global {
         });
     }
 
-    public postMessage(description: string, interval?: number) { } // tslint:disable-line:no-empty
+    public postMessage(_description: string, _interval?: number) { } // tslint:disable-line:no-empty
 
-    public getConfiguration(section: string) { } // tslint:disable-line:no-empty
+    public getConfiguration(_section: string): any { } // tslint:disable-line:no-empty
 
-    public getConfigurationKey(configuration, key: string) { } // tslint:disable-line:no-empty
+    public getConfigurationKey(_configuration, _key: string): any { } // tslint:disable-line:no-empty
 
     public getRootPath(): string {
         return "";
     }
 
-    public fullNameRecursor(word: string, document, range, left: boolean): string {
+    public fullNameRecursor(_word: string, _document, _range, _left: boolean): string {
         return "";
     }
 
-    public findFilesForCache(searchPattern: string, rootPath: string) { } // tslint:disable-line:no-empty
+    public findFilesForCache(_searchPattern: string, _rootPath: string) { } // tslint:disable-line:no-empty
 
-    private addOscriptDll(pathLib, files: string[]) {
+    private addOscriptDll(files: string[]) {
         const dataDll = {};
         for (const syntaxHelp of files) {
             let data;
@@ -985,24 +981,27 @@ export class Global {
         });
     }
 
+    public readFileSync(fullpath, substrIndex) {
+        fullpath = decodeURIComponent(fullpath);
+        if (fullpath.startsWith("file:")) {
+            fullpath = fullpath.substr(substrIndex);
+        }
+        let data;
+        try {
+            data = fs.readFileSync(fullpath);
+        } catch (err) {
+            if (err) {
+                console.log(err);
+            }
+        }
+        return data;
+    }
+
     private async addSubsystemsToCache(files: string[]) {
         const filesLength = files.length;
         const substrIndex = (process.platform === "win32") ? 8 : 7;
         for (let i = 0; i < filesLength; ++i) {
-            let fullpath = files[i].toString();
-            fullpath = decodeURIComponent(fullpath);
-            if (fullpath.startsWith("file:")) {
-                fullpath = fullpath.substr(substrIndex);
-            }
-            let data;
-            try {
-                data = fs.readFileSync(fullpath);
-            } catch (err) {
-                if (err) {
-                    console.log(err);
-                    continue;
-                }
-            }
+            const data = this.readFileSync(files[i].toString(), substrIndex);
             let result;
             try {
                 result = await this.xml2json(data);
@@ -1150,8 +1149,7 @@ export class Global {
                 }
                 const moduleStr = module.$.name;
                 source = source.replace(/\r\n?/g, "\n");
-                let parsesModule = new Parser().parse(source);
-                source = undefined;
+                const parsesModule = new Parser().parse(source);
                 const entries = parsesModule.getMethodsTable().find();
                 // if (parsesModule.context.CallsPosition.length > 0) {
                 //     this.updateReferenceCalls(parsesModule.context.CallsPosition, "GlobalModuleText", fullpath);
@@ -1181,14 +1179,7 @@ export class Global {
                         };
                     }
                 }
-                parsesModule = undefined;
                 for (const item of entries) {
-                    const method = {
-                        name: item.name,
-                        endline: item.endline,
-                        context: item.context,
-                        isproc: item.isproc
-                    };
                     // if (item._method.CallsPosition.length > 0) {
                     //     this.updateReferenceCalls(item._method.CallsPosition, method, fullpath);
                     // }
@@ -1381,11 +1372,6 @@ interface IConstructorDefinition {
     signature: string;
     oscript_description?: string;
     params?: ISignatureParameters;
-}
-
-interface IKeywords {
-    ru: IKeywordsForLanguage;
-    en: IKeywordsForLanguage;
 }
 
 interface IKeywordsForLanguage {

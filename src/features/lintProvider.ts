@@ -52,7 +52,9 @@ export default class LintProvider {
         const args = this.args.slice();
         args.push(filename);
         if (linterEntryPoint) {
-            args.push("-env=" + path.join(vscode.workspace.rootPath, linterEntryPoint));
+            args.push("-env=" + path.join(
+                vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri).uri.fsPath,
+                linterEntryPoint));
         }
         const options = {
             cwd: path.dirname(filename),
@@ -73,9 +75,9 @@ export default class LintProvider {
                 const regex = /^\{Модуль\s+(.*)\s\/\s.*:\s+(\d+)\s+\/\s+(.*)\}/;
                 const errorFiles = {};
                 let countErrors = 0;
-                for (const line in lines) {
+                for (const line of lines) {
                     let match;
-                    match = lines[line].match(regex);
+                    match = line.match(regex);
                     if (match) {
                         const range = new vscode.Range(
                                 new vscode.Position(+match[2] - 1, 0),
@@ -100,8 +102,8 @@ export default class LintProvider {
                     const vscodeDiagnosticArray = errorFiles[file];
                     this.diagnosticCollection.set(vscode.Uri.file(file), vscodeDiagnosticArray);
                 }
-                if (countErrors !== 0 && !vscode.workspace.rootPath) {
-                    this.statusBarItem.text = "$(alert) " + countErrors + " Errors";
+                if (countErrors !== 0 && !vscode.workspace.workspaceFolders) {
+                    this.statusBarItem.text = `$(alert) ${countErrors} Errors`;
                     this.statusBarItem.show();
                 } else {
                     this.statusBarItem.hide();

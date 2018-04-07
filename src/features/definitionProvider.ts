@@ -4,15 +4,13 @@ import AbstractProvider from "./abstractProvider";
 export default class GlobalDefinitionProvider extends AbstractProvider implements vscode.DefinitionProvider {
     public provideDefinition(
         document: vscode.TextDocument,
-        position: vscode.Position,
-        token: vscode.CancellationToken
+        position: vscode.Position
     ): Thenable<vscode.Location[]> {
         const word = document.getText(document.getWordRangeAtPosition(position)).split(/\r?\n/)[0];
         this._global.hoverTrue = false;
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             const result: vscode.Location[] = [];
             const added = {};
-            const filename = document.fileName;
             const wordPosition = document.getWordRangeAtPosition(position);
             let wordAtPosition = document.getText(wordPosition);
             if (!wordPosition) {
@@ -34,10 +32,10 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                 wordAtPosition = dotArray.pop();
                 module = dotArray.join(".");
             }
-            let d: any[] = new Array();
+            let d: any[];
             if (module.length === 0) {
                 const source = document.getText();
-                d = this._global.getCacheLocal(filename, wordAtPosition, source, false, false);
+                d = this._global.getCacheLocal(wordAtPosition, source, false);
             } else {
                 d = this._global.query(wordAtPosition, module, false, false);
                 if (d.length > 1) {
@@ -55,7 +53,6 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                 d = this._global.query(word, "", false, false);
             }
             if (d) {
-                const bucket = new Array<any>();
                 for (const element of d) {
                     if (module.length !== 0 && element._method.IsExport === false) {
                         continue;

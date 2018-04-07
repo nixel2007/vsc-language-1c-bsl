@@ -48,23 +48,20 @@ export default class DocumentFormattingEditProvider
     ]);
 
     public provideDocumentFormattingEdits(document: vscode.TextDocument,
-                                          options: vscode.FormattingOptions,
-                                          token: vscode.CancellationToken): vscode.TextEdit[] {
-        return this.format(document, undefined, options, token);
+                                          options: vscode.FormattingOptions): vscode.TextEdit[] {
+        return this.format(document, undefined, options);
     }
 
     public provideDocumentRangeFormattingEdits(document: vscode.TextDocument,
                                                range: vscode.Range,
-                                               options: vscode.FormattingOptions,
-                                               token: vscode.CancellationToken): vscode.TextEdit[] {
-        return this.format(document, range, options, token);
+                                               options: vscode.FormattingOptions): vscode.TextEdit[] {
+        return this.format(document, range, options);
     }
 
     public provideOnTypeFormattingEdits(document: vscode.TextDocument,
                                         position: vscode.Position,
                                         ch: string,
-                                        options: vscode.FormattingOptions,
-                                        token: vscode.CancellationToken): vscode.TextEdit[] {
+                                        options: vscode.FormattingOptions): vscode.TextEdit[] {
         const iterator = new BackwardIterator(document, 0, position.line - 1);
         if (ch === "\n") {
             while (iterator.hasNext()) {
@@ -80,14 +77,13 @@ export default class DocumentFormattingEditProvider
             new vscode.Range(
                 new vscode.Position(iterator.lineNumber, 0),
                 position),
-            options,
-            token);
+            options
+            );
     }
 
     private format(document: vscode.TextDocument,
                    range: vscode.Range,
-                   options: vscode.FormattingOptions,
-                   token: vscode.CancellationToken): vscode.TextEdit[] {
+                   options: vscode.FormattingOptions): vscode.TextEdit[] {
         const documentText = document.getText();
         let initialIndentLevel: number;
         const globals = this._global;
@@ -103,7 +99,7 @@ export default class DocumentFormattingEditProvider
             const endOffset = document.offsetAt(endPosition);
             range = new vscode.Range(startPosition, endPosition);
             value = documentText.substring(rangeOffset, endOffset);
-            initialIndentLevel = this.computeIndentLevel(value, 0, options);
+            initialIndentLevel = this.computeIndentLevel(value, options);
             if (true) {
                 value = wizard(value);
             }
@@ -140,8 +136,8 @@ export default class DocumentFormattingEditProvider
             while (ArrStrings) {
                 if (ArrStrings[6]) {
                     indexValue = ArrStrings.index;
-                    ArrStrings[6].replace(new RegExp(keywords, "ig"), replacer);
-                    ArrStrings[6].replace(new RegExp(separator, "g"), spaceInserter);
+                    ArrStrings[6] = ArrStrings[6].replace(new RegExp(keywords, "ig"), replacer);
+                    ArrStrings[6] = ArrStrings[6].replace(new RegExp(separator, "g"), spaceInserter);
                 }
                 ArrStrings = Regex.exec(formattingValue);
             }
@@ -193,29 +189,25 @@ export default class DocumentFormattingEditProvider
             return match;
         }
 
-        const eol = this.getEOL(document);
-        const arrayValue = value.split(new RegExp(eol));
-        for (const key in arrayValue) {
-            const element = arrayValue[key];
-            const firstWord = element.toLowerCase().trim().split(/[^\wа-яё\(\)]/)[0];
-            if (this.indentWord.has(firstWord)) {
-                addEdit(element, +key + range.start.line);
-                indentLevel++;
-            } else if (this.reindentWord.has(firstWord)) {
-                if (+key !== 0 && indentLevel !== 0) {
+        function findConstruction(indentWord, reindentWord, unindentWord) {
+            for (const key in arrayValue) {
+                const element = arrayValue[key];
+                const firstWord = element.toLowerCase().trim().split(/[^\wа-яё\(\)]/)[0];
+                if (+key !== 0 && indentLevel !== 0
+                    && (reindentWord.has(firstWord) || unindentWord.has(firstWord))) {
                     indentLevel--;
                 }
                 addEdit(element, +key + range.start.line);
-            } else if (this.unindentWord.has(firstWord)) {
-                if (+key !== 0 && indentLevel !== 0) {
-                    indentLevel--;
+                if (indentWord.has(firstWord) || unindentWord.has(firstWord)) {
+                    indentLevel++;
                 }
-                addEdit(element, +key + range.start.line);
-                indentLevel++;
-            } else {
-                addEdit(element, +key + range.start.line);
             }
         }
+
+        const eol = this.getEOL(document);
+        const arrayValue = value.split(new RegExp(eol));
+        findConstruction(this.indentWord, this.reindentWord, this.unindentWord);
+
         return editOperations;
     }
 
@@ -227,7 +219,7 @@ export default class DocumentFormattingEditProvider
         return result;
     }
 
-    private computeIndentLevel(content: string, offset: number, options: vscode.FormattingOptions): number {
+    private computeIndentLevel(content: string, options: vscode.FormattingOptions): number {
         let i = 0;
         let nChars = 0;
         const tabSize = options.tabSize || 4;

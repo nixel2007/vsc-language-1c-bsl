@@ -6,7 +6,7 @@ const libProvider = new LibProvider();
 
 export default class SyntaxContentOscript extends AbstractSyntaxContent {
 
-    public getSyntaxContentItems(globalDllData): any {
+    public getSyntaxContentItems(): any {
         const items = {};
         const structureGlobContext = libProvider.oscriptStdLib.structureMenu;
         const globalfunctions = libProvider.oscriptStdLib.globalfunctions;
@@ -15,7 +15,6 @@ export default class SyntaxContentOscript extends AbstractSyntaxContent {
         for (const element in structureGlobContext.global) {
             const segment = structureGlobContext.global[element];
             const segmentChar = {};
-            const methodsGlobalContext = {};
             for (const key in segment) {
                 let signature1C;
                 let description1C;
@@ -84,7 +83,7 @@ export default class SyntaxContentOscript extends AbstractSyntaxContent {
         return items;
     }
 
-    public getStructure(textSyntax: string, syntaxObject: any, oscriptMethods: object, dllData: object): any {
+    public getStructure(textSyntax: string, syntaxObject: any, oscriptMethods: object): any {
         let fillStructure = {
             globalHeader: "Стандартная библиотека классов и функций OneScript",
             textSyntax,
@@ -103,10 +102,9 @@ export default class SyntaxContentOscript extends AbstractSyntaxContent {
             onlyOs: ""
         };
         if (syntaxObject.label === "OneScript") {
-            return this.fillStructureSyntax(fillStructure, dllData);
+            return this.fillStructureSyntax(fillStructure);
         }
         let switch1C = "Только для OneScript";
-        let segmentDescription = "Очень много текста";
         let methodDescription = "Очень много текста";
         const descClass = syntaxObject.description.split("/")[syntaxObject.description.split("/").length - 1];
         const descMethod = syntaxObject.label.split(".")[syntaxObject.label.split(".").length - 1];
@@ -114,7 +112,7 @@ export default class SyntaxContentOscript extends AbstractSyntaxContent {
         ? (" / " + oscriptMethods[descClass].alias) : "";
         const segmentHeader = descClass + alias;
         const segment = oscriptMethods[descClass];
-        segmentDescription = (segment.description) ? ("<p>" + segment.description + "</p>") : "";
+        let segmentDescription = (segment.description) ? ("<p>" + segment.description + "</p>") : "";
         segmentDescription = this.fillSegmentData(segmentDescription, segment,
             "methods", "Методы", "method");
         segmentDescription = this.fillSegmentData(segmentDescription, segment,
@@ -190,10 +188,10 @@ export default class SyntaxContentOscript extends AbstractSyntaxContent {
             methodDescription,
             onlyOs: ""
         };
-        return this.fillStructureSyntax(fillStructure, dllData);
+        return this.fillStructureSyntax(fillStructure);
     }
 
-    private fillStructureSyntax(fillStructure, dllData) {
+    private fillStructureSyntax(fillStructure) {
         let globCont = "<h1 style='font-size: 1em;'>Глобальный контекст</h1><ul>";
         const structureGlobContext = libProvider.oscriptStdLib.structureMenu;
         const classesOscript = libProvider.oscriptStdLib.classes;
@@ -208,10 +206,7 @@ export default class SyntaxContentOscript extends AbstractSyntaxContent {
         for (const segmentClass in structureGlobContext.classes) {
             classes = classes + "<h2 style='font-size: 1em;'><em>" + segmentClass + "</em></h2><ul>";
             for (const currentClass in structureGlobContext.classes[segmentClass]) {
-                let onlyOs = "";
-                if (!libProvider.bslglobals.classes[currentClass]) {
-                    onlyOs = "*";
-                }
+                const onlyOs = (!libProvider.bslglobals.classes[currentClass]) ? "*" : "";
                 classes = classes + `<li><span class="a" onclick="fillDescription(this)">
                 ${currentClass + " / " + classesOscript[currentClass].name_en}</span>${onlyOs}</li>`;
                 added[currentClass] = true;
@@ -234,18 +229,16 @@ export default class SyntaxContentOscript extends AbstractSyntaxContent {
             if (!added[element]) {
                 const onlyOs = (!libProvider.bslglobals.classes[element]) ? "*" : "";
                 const alias = (classesOscript[element].name_en !== "")
-                ? (" / " + classesOscript[element].name_en) : "";
+                    ? (" / " + classesOscript[element].name_en) : "";
                 classes = classes
                 + `<li><span class="a" onclick="fillDescription(this)">${element + alias}</span>${onlyOs}</li>`;
             }
         }
         classes = classes + "</ul><h1 style='font-size: 1em;'>Системные перечисления</h1><ul>";
         for (const element in systemEnum) {
-            let onlyOs = "";
-            if (!systemEnum[element]) {
-                onlyOs = "*";
-            }
-            const alias = (systemEnum[element].name_en !== "") ? (" / " + systemEnum[element].name_en) : "";
+            const onlyOs = (!libProvider.bslglobals.systemEnum[element]) ? "*" : "";
+            const alias = (systemEnum[element].name_en !== "")
+                ? (" / " + systemEnum[element].name_en) : "";
             classes = classes
             + `<li><span class="a" onclick="fillDescription(this)">${element + alias}</span>${onlyOs}</li>`;
         }

@@ -20,6 +20,8 @@ import WorkspaseSymbolProvider from "./features/workspaceSymbolProvider";
 
 import { CodeBeautyfier } from "./features/codeBeautifier";
 import * as dynamicSnippets from "./features/dynamicSnippets";
+import { MethodController } from "./features/methodController";
+import { MethodDetect } from "./features/methodDetect";
 import * as vscAdapter from "./vscAdapter";
 
 import LibProvider from "./libProvider";
@@ -31,6 +33,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     const CMD_UPDATE = "language-1c-bsl.update";
     const CMD_CREATECOMMENTS = "language-1c-bsl.createComments";
+    const CMD_CREATEDESCRIPTIONAPIMODULE = "language-1c-bsl.createDescriptionAPIModule";
     const CMD_ADDCOMMENT = "language-1c-bsl.addComment";
     const CMD_EXPANDABBREVIATION = "language-1c-bsl.expandAbbreviation";
     const CMD_QUICKOPEN = "language-1c-bsl.quickopen";
@@ -84,65 +87,12 @@ export function activate(context: vscode.ExtensionContext) {
         global.updateCache();
     }));
 
+    context.subscriptions.push(vscode.commands.registerCommand(CMD_CREATEDESCRIPTIONAPIMODULE, () => {
+        createComments(global, true);
+    }));
+
     context.subscriptions.push(vscode.commands.registerCommand(CMD_CREATECOMMENTS, () => {
-        if (vscode.window.activeTextEditor.document.languageId === "bsl") {
-            const configuration = vscode.workspace.getConfiguration("language-1c-bsl");
-            const aL: any = configuration.get("languageAutocomplete");
-            const enMode: boolean = aL === "en";
-            const editor = vscode.window.activeTextEditor;
-            const positionStart = vscode.window.activeTextEditor.selection.anchor;
-            const positionEnd = vscode.window.activeTextEditor.selection.active;
-            const lineMethod = (positionStart.line > positionEnd.line) ? positionStart.line + 1 : positionEnd.line + 1;
-            const re = /^(Процедура|Функция|procedure|function)\s*([\wа-яё]+)/im;
-            for (let indexLine = lineMethod; indexLine >= 0; --indexLine) {
-                const matchMethod = re.exec(editor.document.lineAt(indexLine).text);
-                if (!matchMethod) {
-                    continue;
-                }
-                const functionKeyword = matchMethod[1].toLowerCase();
-                const isFunc = (functionKeyword === "function" || functionKeyword === "функция");
-                let comment = "";
-                const methodDescription = (enMode)
-                    ? (isFunc) ? "Function description" : "Procedure description"
-                    : (isFunc) ? "Описание функции" : "Описание процедуры";
-                comment += "// <" + methodDescription + ">\n";
-                const methodData = global.getCacheLocal(
-                    editor.document.fileName,
-                    matchMethod[2],
-                    editor.document.getText(),
-                    false,
-                    false
-                )[0];
-                const params = methodData._method.Params;
-                if (params.length > 0) {
-                    comment += "//\n";
-                    comment += (enMode ? "// Parameters:\n" : "// Параметры:\n");
-                }
-                for (const element of params) {
-                    comment += "//   " + element.name;
-                    if (enMode) {
-                        comment += " - <Type.Subtype> - <parameter description>";
-                    } else {
-                        comment += " - <Тип.Вид> - <описание параметра>";
-                    }
-                    comment += "\n";
-                }
-                if (isFunc) {
-                    comment += "//\n";
-                    if (enMode) {
-                        comment += "//  Returns:\n";
-                        comment += "//   <Type.Subtype> - <returned value description>\n";
-                    } else {
-                        comment += "//  Возвращаемое значение:\n";
-                        comment += "//   <Тип.Вид> - <описание возвращаемого значения>\n";
-                    }
-                }
-                comment += "//\n";
-                editor.edit((editBuilder) => {
-                    editBuilder.replace(new vscode.Position(indexLine, 0), comment);
-                });
-            }
-        }
+        createComments(global, false);
     }));
 
     vscode.languages.setLanguageConfiguration("bsl", {
@@ -204,13 +154,14 @@ export function activate(context: vscode.ExtensionContext) {
                     return;
                 }
 
-                const autoClosingBrackets = Boolean(vscode.workspace.getConfiguration("editor.autoClosingBrackets", vscode.workspace.getWorkspaceFolder(editor.document.uri).uri));
+                const autoClosingBrackets = Boolean(vscode.workspace.getConfiguration
+                    ("editor.autoClosingBrackets", vscode.workspace.getWorkspaceFolder(editor.document.uri).uri));
                 if (textDocumentChangeEvent.contentChanges[0].text.slice(-1) === "(") {
                     const contentChange = textDocumentChangeEvent.contentChanges[0];
                     const point = contentChange.range.start.character + contentChange.text.length;
                     const position = new vscode.Position(editor.selection.active.line, point);
                     if (autoClosingBrackets) {
-                        await editor.edit((editBuilder) => {
+                        editor.edit((editBuilder) => {
                             editBuilder.insert(new vscode.Position(position.line, position.character), ")");
                         });
                     }
@@ -225,6 +176,11 @@ export function activate(context: vscode.ExtensionContext) {
             }
         )
     );
+
+    const methodDetect = new MethodDetect();
+    const controller = new MethodController(methodDetect);
+    context.subscriptions.push(controller);
+    context.subscriptions.push(methodDetect);
 
     context.subscriptions.push(vscode.commands.registerCommand(CMD_ADDCOMMENT, () => {
         const editor = vscode.window.activeTextEditor;
@@ -245,7 +201,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         if (line.text.match(/^\s*\/\/.*$/)) {
             editor.edit((editBuilder) => {
-                editBuilder.insert(new vscode.Position(position.line, position.character), "\n" + indent + "//");
+                editBuilder.insert(new vscode.Position(position.line, position.character), `\n${indent}//`);
             });
         } else {
             editor.edit((editBuilder) => {
@@ -261,7 +217,7 @@ export function activate(context: vscode.ExtensionContext) {
         if (!global.cache.getCollection(textEditor.document.fileName)) {
             global.getRefsLocal(textEditor.document.fileName, textEditor.document.getText());
         }
-        if (vscode.workspace.rootPath) {
+        if (vscode.workspace.workspaceFolders) {
             for (const element of vscode.workspace.textDocuments) {
                 if (element.isDirty && element.languageId === "bsl") {
                     global.customUpdateCache(element.getText(), element.fileName);
@@ -271,7 +227,7 @@ export function activate(context: vscode.ExtensionContext) {
     }));
 
     context.subscriptions.push(vscode.workspace.onDidSaveTextDocument((document: vscode.TextDocument) => {
-        if (vscode.workspace.rootPath) {
+        if (vscode.workspace.workspaceFolders) {
             global.customUpdateCache(document.getText(), document.fileName);
         }
     }));
@@ -331,7 +287,7 @@ export function activate(context: vscode.ExtensionContext) {
                             ),
                             position
                         ),
-                    word + " = " + word + postfix
+                    `${word} = ${word}${postfix}`
                 );
             }).then(() => {
                 const newPosition = editor.selection.isReversed
@@ -362,7 +318,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
         const configuration = vscode.workspace.getConfiguration("language-1c-bsl");
         const userDynamicSnippetsList: string[] = configuration.get("dynamicSnippets", []);
-        for (const index in userDynamicSnippetsList) {
+        for (const index of userDynamicSnippetsList) {
             try {
                 const userDynamicSnippetsString = fs.readFileSync(userDynamicSnippetsList[index], "utf-8");
                 const snippetsData = JSON.parse(userDynamicSnippetsString);
@@ -490,8 +446,6 @@ export function activate(context: vscode.ExtensionContext) {
         const postfix = ""; // (autocompleteLanguage === "en") ? "_en" : "";
         const isBsl: boolean = vscode.window.activeTextEditor
             && vscode.window.activeTextEditor.document.fileName.endsWith(".bsl");
-        const isOs: boolean = vscode.window.activeTextEditor
-            && vscode.window.activeTextEditor.document.fileName.endsWith(".os");
         if (isBsl && globalMethod) {
             for (const element in libProvider.bslglobals.structureMenu.global) {
                 const segment = libProvider.bslglobals.structureMenu.global[element];
@@ -534,7 +488,7 @@ export function activate(context: vscode.ExtensionContext) {
                     }
                     for (const element in class1C[sectionTitle]) {
                         items.push({
-                            label: elementSegment + "." + element,
+                            label: `${elementSegment}.${element}`,
                             description: "1С/Классы/" + elementSegment
                         });
                     }
@@ -549,7 +503,7 @@ export function activate(context: vscode.ExtensionContext) {
                     }
                     for (const element in class1C[sectionTitle]) {
                         items.push({
-                            label: elementSegment + "." + element,
+                            label: `${elementSegment}.${element}`,
                             description: "1С/Системные перечисления/" + elementSegment
                         });
                     }
@@ -577,7 +531,7 @@ export function activate(context: vscode.ExtensionContext) {
                     for (const indexMethod in classOscript[sectionTitle]) {
                         const method = classOscript[sectionTitle][indexMethod];
                         items.push({
-                            label: classOscript["name" + postfix] + "." + method["name" + postfix],
+                            label: `${classOscript["name" + postfix]}.${method["name" + postfix]}`,
                             description: "OneScript/Классы/" + element
                         });
                     }
@@ -596,7 +550,7 @@ export function activate(context: vscode.ExtensionContext) {
                     for (const indexMethod in classOscript[sectionTitle]) {
                         const method = classOscript[sectionTitle][indexMethod];
                         items.push({
-                            label: classOscript["name" + postfix] + "." + method["name" + postfix],
+                            label: `${classOscript["name" + postfix]}.${method["name" + postfix]}`,
                             description: "OneScript/Системные перечисления/" + element
                         });
                     }
@@ -636,4 +590,93 @@ export function activate(context: vscode.ExtensionContext) {
         );
     }
     global.updateCache();
+}
+
+function createComments(global, all: boolean) {
+    const editor = vscode.window.activeTextEditor;
+    if (editor.document.languageId === "bsl") {
+        const configuration = vscode.workspace.getConfiguration("language-1c-bsl");
+        const aL: any = configuration.get("languageAutocomplete");
+        const enMode: boolean = aL === "en";
+        const positionStart = editor.selection.anchor;
+        const positionEnd = editor.selection.active;
+        const lineMethod = (all) ? editor.document.lineCount - 1 :
+            (positionStart.line > positionEnd.line) ? positionStart.line + 1 : positionEnd.line + 1;
+        const re = /^(Процедура|Функция|procedure|function)\s*([\wа-яё]+)/im;
+        const arrComment = [];
+        findMethod(lineMethod, re, editor, global, arrComment, all, enMode);
+        insertComments(editor, arrComment);
+    }
+}
+
+function findMethod(lineMethod, re, editor, global, arrComment, all, enMode) {
+    for (let indexLine = lineMethod; indexLine >= 0; --indexLine) {
+        const matchMethod = re.exec(editor.document.lineAt(indexLine).text);
+        if (!matchMethod) {
+            continue;
+        }
+        const methodData = global.getCacheLocal(
+            matchMethod[2],
+            editor.document.getText(),
+            false
+        )[0];
+        if (all && (!methodData.isexport || methodData.description !== "")) {
+            continue;
+        }
+        const comment = composeComment(methodData, matchMethod, enMode);
+        const dataComment = { comment, indexLine };
+        arrComment.push(dataComment);
+        if (!all) {
+            break;
+        }
+    }
+}
+
+function insertComments(editor, arrComment) {
+    editor.edit((editBuilder) => {
+        for (const iterator of arrComment) {
+            editBuilder.replace(new vscode.Position(iterator.indexLine, 0), iterator.comment);
+        }
+    });
+}
+
+function composeComment(methodData, matchMethod, enMode) {
+    const functionKeyword = matchMethod[1].toLowerCase();
+    const isFunc = (functionKeyword === "function" || functionKeyword === "функция");
+    let comment = "";
+    const methodDescription = (enMode)
+        ? (isFunc) ? "Function description" : "Procedure description"
+        : (isFunc) ? "Описание функции" : "Описание процедуры";
+    comment += `// <${methodDescription}>\n`;
+    const params = methodData._method.Params;
+    if (params.length > 0) {
+        comment += "//\n";
+        comment += (enMode ? "// Parameters:\n" : "// Параметры:\n");
+        comment = fillParams(params, comment, enMode);
+    }
+    if (isFunc) {
+        comment += "//\n";
+        if (enMode) {
+            comment += "//  Returns:\n";
+            comment += "//   <Type.Subtype> - <returned value description>\n";
+        } else {
+            comment += "//  Возвращаемое значение:\n";
+            comment += "//   <Тип.Вид> - <описание возвращаемого значения>\n";
+        }
+    }
+    comment += "//\n";
+    return comment;
+}
+
+function fillParams(params, comment, enMode) {
+    for (const element of params) {
+        comment += "//   " + element.name;
+        if (enMode) {
+            comment += " - <Type.Subtype> - <parameter description>";
+        } else {
+            comment += " - <Тип.Вид> - <описание параметра>";
+        }
+        comment += "\n";
+    }
+    return comment;
 }

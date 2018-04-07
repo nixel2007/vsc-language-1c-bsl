@@ -11,6 +11,8 @@
         ],
         "no-console": false,
         "forin": false,
-        "no-var-requires": false
+        "no-var-requires": false,
+        "no-implicit-dependencies": [true, "dev"],
+        "deprecation": true
     }
 }

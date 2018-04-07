@@ -28,8 +28,7 @@ export default class SyntaxContentOscriptLibrary extends AbstractSyntaxContent {
         return items;
     }
 
-    public getStructure(textSyntax: string, syntaxObject: any,
-                        oscriptMethods: object, dllData: object, libData: object): any {
+    public getStructure(textSyntax: string, dllData: object, libData: object): any {
         const fillStructure = {
             globalHeader: "Описание пакетов и библиотек oscript-library",
             textSyntax,
