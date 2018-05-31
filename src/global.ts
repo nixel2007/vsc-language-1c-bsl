@@ -38,6 +38,7 @@ export class Global {
     public hoverTrue = true;
     public autocompleteLanguage: any;
     public dllData: object;
+    public syntaxHelpersData: object= {};
     public libData: object = {};
     public subsystems: object = {};
     public oscriptCacheUpdated: boolean;
@@ -711,10 +712,14 @@ export class Global {
                             console.error(err);
                             return;
                         }
-                        this.addOscriptDll(files);
+                        this.dllData = this.addOscriptDll(files);
                     });
                 }
-
+                const syntaxHelpers = this.getConfiguration("language-1c-bsl").syntaxHelpers;
+                if (syntaxHelpers.length) {
+                    this.syntaxHelpersData = this.addOscriptDll(syntaxHelpers);
+                }
+        
             } catch (e) {
                 console.error(e);
             }
@@ -963,7 +968,7 @@ export class Global {
                 }
             }
         }
-        this.dllData = dataDll;
+        return dataDll;
     }
 
     private findSubsystems(searchPattern: string, rootPath: string) {
