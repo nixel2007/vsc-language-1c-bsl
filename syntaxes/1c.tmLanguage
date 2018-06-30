@@ -65,6 +65,10 @@
         <array>
           <dict>
             <key>include</key>
+            <string>#annotations</string>
+          </dict>
+          <dict>
+            <key>include</key>
             <string>#basic</string>
           </dict>
           <dict>
@@ -263,25 +267,8 @@
         <string>(?i:&amp;(НаКлиенте((НаСервере(БезКонтекста)?)?)|AtClient((AtServer(NoContext)?)?)|НаСервере(БезКонтекста)?|AtServer(NoContext)?))</string>
       </dict>
       <dict>
-        <key>comment</key>
-        <string>Annotations</string>
-        <key>begin</key>
-        <string>(?i)(&amp;(Перед|Before|После|After|Вместо|Around))\s*\((.*)\)</string>
-        <key>beginCaptures</key>
-        <dict>
-          <key>1</key>
-          <dict>
-            <key>name</key>
-            <string>storage.type.annotation.bsl</string>
-          </dict>
-          <key>3</key>
-          <dict>
-            <key>name</key>
-            <string>string.quoted.double.bsl</string>
-          </dict>
-        </dict>
-        <key>end</key>
-        <string>$</string>
+        <key>include</key>
+        <string>#annotations</string>
       </dict>
       <dict>
         <key>name</key>
@@ -1123,6 +1110,80 @@ WSСсылки|WSReferences|
             <string>punctuation.bracket.end.bsl</string>
             <key>match</key>
             <string>(\))</string>
+          </dict>
+        </array>
+      </dict>
+      <key>annotations</key>
+      <dict>
+        <key>patterns</key>
+        <array>
+          <dict>
+            <key>comment</key>
+            <string>Annotations with parameters</string>
+            <key>begin</key>
+            <string>(?i)(&amp;([a-zа-яё0-9_]+))\s*(\()</string>
+            <key>beginCaptures</key>
+            <dict>
+              <key>1</key>
+              <dict>
+                <key>name</key>
+                <string>storage.type.annotation.bsl</string>
+              </dict>
+              <key>3</key>
+              <dict>
+                <key>name</key>
+                <string>punctuation.bracket.begin.bsl</string>
+              </dict>
+            </dict>
+            <key>end</key>
+            <string>(\))</string>
+            <key>endCaptures</key>
+            <dict>
+              <key>1</key>
+              <dict>
+                <key>name</key>
+                <string>punctuation.bracket.end.bsl</string>
+              </dict>
+            </dict>
+            <key>patterns</key>
+            <array>
+              <dict>
+                <key>include</key>
+                <string>#basic</string>
+              </dict>
+              <dict>
+                <key>name</key>
+                <string>keyword.operator.assignment.bsl</string>
+                <key>match</key>
+                <string>(=)</string>
+              </dict>
+              <dict>
+                <key>name</key>
+                <string>invalid.illegal.bsl</string>
+                <key>match</key>
+                <string>(?&lt;=[^\wа-яё\.]|^)((?&lt;==)(?i)[a-zа-яё0-9_]+)(?=[^\wа-яё\.]|$)</string>
+              </dict>
+              <dict>
+                <key>name</key>
+                <string>invalid.illegal.bsl</string>
+                <key>match</key>
+                <string>(?&lt;=[^\wа-яё\.]|^)((?&lt;==\s)\s*(?i)[a-zа-яё0-9_]+)(?=[^\wа-яё\.]|$)</string>
+              </dict>
+              <dict>
+                <key>name</key>
+                <string>variable.annotation.bsl</string>
+                <key>match</key>
+                <string>(?i)[a-zа-яё0-9_]+</string>
+              </dict>
+            </array>
+          </dict>
+          <dict>
+            <key>comment</key>
+            <string>Annotations without parameters</string>
+            <key>name</key>
+            <string>storage.type.annotation.bsl</string>
+            <key>match</key>
+            <string>(?i)(&amp;([a-zа-яё0-9_]+))</string>
           </dict>
         </array>
       </dict>
