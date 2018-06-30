@@ -12,9 +12,11 @@ prop='version'
 
 jsonval
 
-if [ "$TRAVIS_PULL_REQUEST" != "false" ] && [ "$TRAVIS_REPO_SLUG" == xDrivenDevelopment* ]; then
-  sonar-scanner \
-      -Dsonar.host.url=http://sonar.silverbulleters.org \
+if [ "$TRAVIS_PULL_REQUEST" != "false" ] && [ "$TRAVIS_REPO_SLUG" == 1c-syntax* ]; then
+    sonar-scanner \
+      -Dsonar.projectKey=vsc-language-bsl-plugin \
+      -Dsonar.organization=1c-syntax \
+      -Dsonar.host.url=https://sonarcloud.io \
       -Dsonar.analysis.mode=issues \
       -Dsonar.github.pullRequest=$TRAVIS_PULL_REQUEST \
       -Dsonar.github.repository=$TRAVIS_REPO_SLUG \
@@ -23,9 +25,11 @@ if [ "$TRAVIS_PULL_REQUEST" != "false" ] && [ "$TRAVIS_REPO_SLUG" == xDrivenDeve
       -Dsonar.scanner.skip=false
 
 elif [ "$TRAVIS_BRANCH" == "develop" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
-  sonar-scanner \
-      -Dsonar.host.url=http://sonar.silverbulleters.org \
-      -Dsonar.login=$SONAR_OAUTH \
-      -Dsonar.projectVersion=$version\
-      -Dsonar.scanner.skip=false
+    sonar-scanner \
+    -Dsonar.projectKey=vsc-language-bsl-plugin \
+    -Dsonar.organization=1c-syntax \
+    -Dsonar.host.url=https://sonarcloud.io \
+    -Dsonar.projectVersion=$version \
+    -Dsonar.login=$SONAR_OAUTH \
+    -Dsonar.scanner.skip=false
 fi
