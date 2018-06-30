@@ -33,6 +33,6 @@ elif [ "$TRAVIS_BRANCH" == "develop" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ];
     -Dsonar.host.url=https://sonarcloud.io \
     -Dsonar.projectVersion=$version \
     -Dsonar.login=$SONAR_OAUTH \
-    -Dsonar.branch.name=$TRAVIS_BRANCH
+    -Dsonar.branch.name=$TRAVIS_BRANCH \
     -Dsonar.scanner.skip=false
 fi
