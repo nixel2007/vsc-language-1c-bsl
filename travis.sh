@@ -22,6 +22,8 @@ if [ "$TRAVIS_PULL_REQUEST" != "false" ] && [ "$TRAVIS_REPO_SLUG" == 1c-syntax* 
       -Dsonar.github.repository=$TRAVIS_REPO_SLUG \
       -Dsonar.github.oauth=$GITHUB_TOKEN \
       -Dsonar.login=$SONAR_OAUTH \
+      -Dsonar.branch.name=$TRAVIS_PULL_REQUEST_BRANCH \
+      -Dsonar.branch.target=$TRAVIS_BRANCH \
       -Dsonar.scanner.skip=false
 
 elif [ "$TRAVIS_BRANCH" == "develop" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
@@ -31,5 +33,6 @@ elif [ "$TRAVIS_BRANCH" == "develop" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ];
     -Dsonar.host.url=https://sonarcloud.io \
     -Dsonar.projectVersion=$version \
     -Dsonar.login=$SONAR_OAUTH \
+    -Dsonar.branch.name=$TRAVIS_BRANCH
     -Dsonar.scanner.skip=false
 fi
