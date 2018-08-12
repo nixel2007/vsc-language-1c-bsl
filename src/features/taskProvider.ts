@@ -96,11 +96,11 @@ export default class TaskProvider {
         return result;
     }
 
-    private createTask(taskName: string, workspaceRoot, command, args?: string[],
+    private createTask(label: string, workspaceRoot, command, args?: string[],
                        problemMatcher?: string[], isBuildCommand?: boolean, isTestCommand?: boolean): vscode.Task {
 
         const kind: vscode.TaskDefinition = {
-            taskName,
+            label,
             type: "process",
             problemMatcher
         };
@@ -136,7 +136,7 @@ export default class TaskProvider {
         return new vscode.Task(
             kind,
             vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri),
-            taskName,
+            label,
             command,
             new vscode.ProcessExecution(command, args, { cwd: workspaceRoot }),
             problemMatcher);
@@ -161,9 +161,9 @@ export default class TaskProvider {
                 if (stat.isDirectory()) {
                    continue;
                 }
-                const taskName = taskFile;
-                result.push(this.createTask("opm task: " + taskName,
-                workspaceRoot, "cmd", ["opm", "run", taskName.replace(".os", "")], ["$OneScript Linter"]));
+                const label = taskFile;
+                result.push(this.createTask("opm task: " + label,
+                workspaceRoot, "cmd", ["opm", "run", label.slice(0, -3)], ["$OneScript Linter"]));
             }
             return result;
         } catch (e) {
