@@ -149,13 +149,13 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.workspace.onDidChangeTextDocument(
             async (textDocumentChangeEvent: vscode.TextDocumentChangeEvent) => {
                 const editor = vscode.window.activeTextEditor;
-                if (!editor || editor.document.languageId !== "bsl"
-                    || textDocumentChangeEvent.contentChanges.length === 0) {
+                if (!editor || editor.document.languageId !== "bsl" ||
+                    textDocumentChangeEvent.contentChanges.length === 0) {
                     return;
                 }
 
                 const autoClosingBrackets = Boolean(vscode.workspace.getConfiguration
-                    ("editor.autoClosingBrackets", vscode.workspace.getWorkspaceFolder(editor.document.uri).uri));
+                        ("editor.autoClosingBrackets"));
                 if (textDocumentChangeEvent.contentChanges[0].text.slice(-1) === "(") {
                     const contentChange = textDocumentChangeEvent.contentChanges[0];
                     const point = contentChange.range.start.character + contentChange.text.length;

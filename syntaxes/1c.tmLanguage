@@ -211,7 +211,7 @@
           </dict>
         </dict>
         <key>end</key>
-        <string>(?=;)</string>
+        <string>(?i:(?=(;|Иначе|Конец|Els|End)))</string>
         <key>patterns</key>
         <array>
           <dict>
