@@ -7,7 +7,7 @@ node_js:
   - "node"
 
 addons:
-  sonarqube: true
+  sonarcloud: true
 
 jdk:
   - oraclejdk8
