@@ -35,11 +35,11 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                             bucket = this.getAllWords(word, document.getText(), bucket);
                             for (const key in this._global.systemEnum) {
                                 const full = this._global.systemEnum[key];
-                                if (vscode.window.activeTextEditor.document.fileName.endsWith(".bsl")
-                                    && !full.description) {
+                                if (vscode.window.activeTextEditor.document.fileName
+                                    .toLowerCase().endsWith(".bsl") && !full.description) {
                                     continue;
-                                } else if (vscode.window.activeTextEditor.document.fileName.endsWith(".os")
-                                && !full.oscript_description) {
+                                } else if (vscode.window.activeTextEditor.document.fileName
+                                    .toLowerCase().endsWith(".os") && !full.oscript_description) {
                                     continue;
                                 }
                                 const item = new vscode.CompletionItem(full.name);
@@ -55,11 +55,11 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                                 if (!full.constructors) {
                                     continue;
                                 }
-                                if (vscode.window.activeTextEditor.document.fileName.endsWith(".bsl")
-                                    && !full.description) {
+                                if (vscode.window.activeTextEditor.document.fileName
+                                    .toLowerCase().endsWith(".bsl") && !full.description) {
                                     continue;
-                                } else if (vscode.window.activeTextEditor.document.fileName.endsWith(".os")
-                                && !full.oscript_description) {
+                                } else if (vscode.window.activeTextEditor.document.fileName
+                                    .toLowerCase().endsWith(".os") && !full.oscript_description) {
                                     continue;
                                 }
                                 const item = new vscode.CompletionItem(full.name);
@@ -159,10 +159,11 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                     continue;
                 }
                 const full = completionDictFunctions[name];
-                if (vscode.window.activeTextEditor.document.fileName.endsWith(".bsl") && !full.description) {
+                if (vscode.window.activeTextEditor.document.fileName
+                    .toLowerCase().endsWith(".bsl") && !full.description) {
                     continue;
-                } else if (vscode.window.activeTextEditor.document.fileName.endsWith(".os")
-                && !full.oscript_signature) {
+                } else if (vscode.window.activeTextEditor.document.fileName
+                    .toLowerCase().endsWith(".os") && !full.oscript_signature) {
                     continue;
                 }
                 const completion = new vscode.CompletionItem(full.name);
@@ -198,9 +199,11 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
         for (const name in completionDictVariables) {
             if (wordMatch.exec(name)) {
                 const full = completionDictVariables[name];
-                if (vscode.window.activeTextEditor.document.fileName.endsWith(".bsl") && full.oscript_access) {
+                if (vscode.window.activeTextEditor.document.fileName
+                    .toLowerCase().endsWith(".bsl") && full.oscript_access) {
                     continue;
-                } else if (vscode.window.activeTextEditor.document.fileName.endsWith(".os") && !full.oscript_access) {
+                } else if (vscode.window.activeTextEditor.document.fileName
+                    .toLowerCase().endsWith(".os") && !full.oscript_access) {
                     continue;
                 }
                 const completion = new vscode.CompletionItem(full.name);
