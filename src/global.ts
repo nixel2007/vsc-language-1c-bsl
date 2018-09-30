@@ -1198,7 +1198,7 @@ export class Global {
                         oscriptLib: true,
                         oscriptClass: isClasses
                     };
-                    if (item._method.IsExport) {
+                    if (item.name === "ПриСозданииОбъекта" || item._method.IsExport) {
                         const signature = this.GetSignature(newItem);
                         if (!this.libData[lib]) {
                             const readme = fs.readdirSync(
@@ -1212,16 +1212,33 @@ export class Global {
                         if (!this.libData[lib].modules[moduleDescr]) {
                             this.libData[lib].modules[moduleDescr] = {};
                         }
-                        if (!this.libData[lib].modules[moduleDescr].methods) {
-                            this.libData[lib].modules[moduleDescr].methods = {};
-                            this.libData[lib].modules[moduleDescr].description = "";
-                        }
                         const regExpParams = new RegExp("^\\s*(Параметры|Parameters)\\:?\s*\n*((.|\\n)*)", "gm");
                         const paramsDesc = regExpParams.exec(signature.description);
                         let strParamsDesc = "";
                         if (paramsDesc) {
                             strParamsDesc = paramsDesc[2];
                             signature.description = signature.description.substr(0, paramsDesc.index);
+                        }
+                        if (item.name === "ПриСозданииОбъекта") {
+                            if (!this.libData[lib].modules[moduleDescr].constructors) {
+                                this.libData[lib].modules[moduleDescr].constructors = {};
+                                this.libData[lib].modules[moduleDescr].constructors["По умолчанию"] = {
+                                    description: signature.description.replace(/((.|\n)*.+)\n*/m, "$1")
+                                        .replace(/\n/g, "<br>").replace(/\t/g, ""),
+                                    signature: {
+                                        default: {
+                                            СтрокаПараметров: signature.paramsString,
+                                            Параметры: strParamsDesc.replace(/((.|\n)*.+)\n*/m, "$1")
+                                                .replace(/\n/g, "<br>").replace(/\t/g, "")
+                                        }
+                                    }
+                                };
+                            }
+                            continue;
+                        }
+                        if (!this.libData[lib].modules[moduleDescr].methods) {
+                            this.libData[lib].modules[moduleDescr].methods = {};
+                            this.libData[lib].modules[moduleDescr].description = "";
                         }
                         const returnData = signature.fullRetState.substring(25)
                             .replace(/((.|\n)*.+)\n*/m, "$1")
