@@ -162,8 +162,10 @@ export default class TaskProvider {
                    continue;
                 }
                 const label = taskFile;
-                result.push(this.createTask("opm task: " + label,
-                workspaceRoot, "cmd", ["opm", "run", label.slice(0, -3)], ["$OneScript Linter"]));
+                result.push(this.createTask("Execute task: " + label,
+                // tslint:disable-next-line:no-invalid-template-strings
+                workspaceRoot, "cmd", ["oscript", "${workspaceRoot}/tasks/" + label],
+                ["$OneScript Linter"], true));
             }
             return result;
         } catch (e) {
