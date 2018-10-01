@@ -29,6 +29,6 @@ elif [[ "$TRAVIS_BRANCH" == "develop" ]] && [[ "$TRAVIS_PULL_REQUEST" == "false"
     -Dsonar.organization=1c-syntax \
     -Dsonar.host.url=https://sonarcloud.io \
     -Dsonar.projectVersion=$version \
-    -Dsonar.branch.name=$TRAVIS_BRANCH
+    -Dsonar.branch.name=$TRAVIS_BRANCH \
     -Dsonar.scanner.skip=false
 fi
