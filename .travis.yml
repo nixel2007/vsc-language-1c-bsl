@@ -40,7 +40,9 @@ cache:
 
 script:
   - export SONARQUBE_SKIPPED=false
-  - ./travis.sh 
+  - npm test --silent
+  - tslint -t json -o report.json --project . --force
+  - ./sonar.sh 
 
 after_script:
   - bash <(curl -s https://codecov.io/bash)
