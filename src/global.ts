@@ -1259,7 +1259,7 @@ export class Global {
                             returns: returnData
                         };
                     }
-                    if (this.libData[lib].modules[moduleDescr] && isClasses) {
+                    if (this.libData[lib] && this.libData[lib].modules[moduleDescr] && isClasses) {
                         this.libClasses[moduleStr.toLowerCase()] = {name: moduleStr};
                         if (this.libData[lib].modules[moduleDescr].constructors) {
                             this.libClasses[moduleStr.toLowerCase()].constructors = this.libData[lib].modules[moduleDescr].constructors;
