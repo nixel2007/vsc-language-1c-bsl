@@ -540,7 +540,7 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
                             JSON.parse(window.localStorage.getItem('bsl-language'))[strSegment][charSegment][str];
                             var depp = "";
                             if (charSegment === "constructors") {
-                                str = strSegment;
+                                str = strSegment.replace(', класс', '');
                             }
                             depp = fillDescriptionData(
                                 methodData, depp, "description", "signature", "returns", str, charSegment);

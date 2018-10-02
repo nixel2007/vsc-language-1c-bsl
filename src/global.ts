@@ -39,6 +39,7 @@ export class Global {
     public autocompleteLanguage: any;
     public dllData: object;
     public libData: object = {};
+    public libClasses: object = {};
     public subsystems: object = {};
     public oscriptCacheUpdated: boolean;
     public bslCacheUpdated: boolean;
@@ -1225,6 +1226,7 @@ export class Global {
                                 this.libData[lib].modules[moduleDescr].constructors["По умолчанию"] = {
                                     description: signature.description.replace(/((.|\n)*.+)\n*/m, "$1")
                                         .replace(/\n/g, "<br>").replace(/\t/g, ""),
+                                    name: moduleStr,
                                     signature: {
                                         default: {
                                             СтрокаПараметров: signature.paramsString,
@@ -1256,6 +1258,12 @@ export class Global {
                             },
                             returns: returnData
                         };
+                    }
+                    if (this.libData[lib].modules[moduleDescr] && isClasses) {
+                        this.libClasses[moduleStr.toLowerCase()] = {name: moduleStr};
+                        if (this.libData[lib].modules[moduleDescr].constructors) {
+                            this.libClasses[moduleStr.toLowerCase()].constructors = this.libData[lib].modules[moduleDescr].constructors;
+                        }
                     }
                     this.db.insert(newItem);
                 }

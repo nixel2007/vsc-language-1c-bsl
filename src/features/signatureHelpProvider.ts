@@ -43,7 +43,12 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
                 return resolve(undefined);
             }
 
-            let entry = this._global.globalfunctions[ident.toLowerCase()];
+            let entry = undefined;
+            if (this._global.libClasses[ident.toLowerCase()]) {
+                entry = this._global.libClasses[ident.toLowerCase()].constructors["По умолчанию"]; 
+            } else if (this._global.globalfunctions[ident.toLowerCase()]) {
+                entry = this._global.globalfunctions[ident.toLowerCase()];
+            }
             let entries;
             if (!entry) {
                 let module = "";

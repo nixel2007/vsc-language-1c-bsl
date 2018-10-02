@@ -65,7 +65,21 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                                 const item = new vscode.CompletionItem(full.name);
                                 item.documentation = full.description;
                                 item.kind = vscode.CompletionItemKind.Class;
+                                item.insertText = (full.constructors)
+                                    ? (full.name + "(") : (full.name + "()");
                                 bucket.push(item);
+                            }
+                            if (vscode.window.activeTextEditor.document.fileName
+                                .toLowerCase().endsWith(".os")) {
+                                for (const key in this._global.libClasses) {
+                                    const full = this._global.libClasses[key];
+                                    const item = new vscode.CompletionItem(full.name);
+                                    item.documentation = "";
+                                    item.kind = vscode.CompletionItemKind.Class;
+                                    item.insertText = (full.constructors)
+                                        ? (full.name + "(") : (full.name + "()");
+                                    bucket.push(item);
+                                }
                             }
                             return resolve(bucket);
                         } else {
