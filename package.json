@@ -130,6 +130,11 @@
           "type": "boolean",
           "default": true
         },
+        "language-1c-bsl.syntaxHelpers": {
+          "description": "Paths to syntax helpers' files",
+          "type": "array",
+          "default": []
+        },
         "language-1c-bsl.onescriptPath": {
           "description": "Full path to oscript binary. Fill this only if oscript is not in your $PATH",
           "type": "string"
