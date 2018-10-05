@@ -128,7 +128,7 @@ export default class SyntaxExternalHelper extends AbstractSyntaxContent {
                     }
                     const structureGlobContext = defDll.structureMenu;
                     if (structureGlobContext.global) {
-                        globCont = globCont + "<h2 style='font-size: 1em;'>Глобальный контекст</h1><ul>";
+                        globCont = globCont + "<h2 style='font-size: 1em;'>Глобальный контекст</h2><ul>";
                         for (const element in structureGlobContext.global) {
                             globCont = globCont + `<li><span class="a" onclick="fillDescription(this)">${element}</span></li>`;
                         }
