@@ -26,6 +26,7 @@ export class Global {
     public cache: any;
     public db: any;
     public dbmodules: any;
+    public dbvars: any;
     public dbcalls: Map<string, any[]>;
     public globalfunctions: IMethods;
     public globalvariables: IPropertyDefinitions;
@@ -372,7 +373,6 @@ export class Global {
         const prefix = fromFirst ? "^" : "";
         const querystring = { name: { $regex: new RegExp(prefix + word + suffix, "i") } };
         return new Parser().parse(source).getMethodsTable().find(querystring);
-        // return entries;
     }
 
     public getRefsLocal(filename: string, source: string) {
@@ -483,15 +483,15 @@ export class Global {
                 result = meta;
             } else if (moduleArray[hierarchy - 1].startsWith("Module.bsl")
                 && moduleArray[hierarchy - 2].startsWith("Form")) {
-            const meta: IMetaData = {
-                type: "FormModule",
-                parenttype: moduleArray[hierarchy - 7],
-                fullpath: filepath,
-                module: moduleArray[hierarchy - 7] + "."
-                        + moduleArray[hierarchy - 6] + "." + moduleArray[hierarchy - 4],
-                project: moduleArray.slice(0, hierarchy - 7).join("/")
-            };
-            result = meta;
+                const meta: IMetaData = {
+                    type: "FormModule",
+                    parenttype: moduleArray[hierarchy - 7],
+                    fullpath: filepath,
+                    module: moduleArray[hierarchy - 7] + "."
+                            + moduleArray[hierarchy - 6] + "." + moduleArray[hierarchy - 4],
+                    project: moduleArray.slice(0, hierarchy - 7).join("/")
+                };
+                result = meta;
             } else if (moduleArray[hierarchy - 1].startsWith("Module.bsl")
                 && moduleArray[hierarchy - 2].startsWith("Ext")
                 && moduleArray[hierarchy - 4].startsWith("WebServices")) {
@@ -653,6 +653,7 @@ export class Global {
         }
 
         this.db = this.cache.addCollection("ValueTable");
+        this.dbvars = this.cache.addCollection("ValueVars");
         this.dbcalls = new Map();
         this.dbmodules = this.cache.addCollection("ValueTableModules");
 
@@ -802,7 +803,7 @@ export class Global {
         return collection.chain().find(querystring).simplesort("name").data();
     }
 
-    public querydef(module: string, all = true, lazy = false): any {
+    public querydef(module: string, all = true, lazy = false, db = this.db): any {
         // Проверяем локальный кэш.
         // Проверяем глобальный кэш на модули.
         if (!this.cacheUpdated()) {
@@ -815,7 +816,7 @@ export class Global {
                     $regex: new RegExp(prefix + module + suffix, "i")
                 }
             };
-            return this.db.chain().find(querystring).simplesort("name").data();
+            return db.chain().find(querystring).simplesort("name").data();
         }
     }
 
@@ -1181,6 +1182,16 @@ export class Global {
                             description: parsesModule.context.ModuleVars[exportVar].description,
                             alias: ""
                         };
+                        const varItem: IVarsValue = {
+                            name: String(exportVar),
+                            _method: {IsExport: true},
+                            filename: fullpath,
+                            module: moduleStr,
+                            description: parsesModule.context.ModuleVars[exportVar].description,
+                            oscriptLib: true,
+                            oscriptClass: isClasses
+                        };
+                        this.dbvars.insert(varItem);
                     }
                 }
                 for (const item of entries) {
@@ -1308,6 +1319,17 @@ interface IMethodValue {
     oscriptLib?: boolean;
     oscriptClass?: boolean;
 }
+
+interface IVarsValue {
+    name: string;
+    _method: Object;
+    filename: string;
+    module: string;
+    description: string;
+    oscriptLib?: boolean;
+    oscriptClass?: boolean;
+};
+
 
 interface IMethods {
     [index: string]: IMethod;

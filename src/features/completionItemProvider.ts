@@ -98,10 +98,14 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                             });
                             bucket = this.getAllWords(word, document.getText(), bucket);
                             result = this._global.querydef(word);
+                            result.push(...this._global.querydef(word, undefined, undefined, this._global.dbvars));
                             result.forEach((value) => {
                                 const moduleDescription = (value.module && value.module.length > 0)
                                     ? value.module + "."
                                     : "";
+                                if (value.oscriptClass) {
+                                    return;
+                                }
                                 let fullName = moduleDescription + value.name;
                                 let description = value.description;
                                 if (moduleDescription.length > 0) {
@@ -273,8 +277,10 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                 wordAtPosition = arrayName.join(".");
             }
             let queryResult: any[] = this._global.querydef(wordAtPosition + "\\.");
-            result = this.customDotComplection(queryResult, wordAtPosition, result);
+            this.customDotComplection(queryResult, wordAtPosition, result);
             this.checkSystemEnums(wordAtPosition, result);
+            queryResult = this._global.querydef(wordAtPosition, undefined, undefined, this._global.dbvars);
+            this.customDotComplection(queryResult, wordAtPosition, result, false);
             // Получим все общие модули, у которых не заканчивается на точку.
             queryResult = this._global.querydef(wordAtPosition, false, false);
             for (const element of queryResult) {
@@ -295,7 +301,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
         return result;
     }
 
-    private customDotComplection(queryResult, wordAtPosition, result) {
+    private customDotComplection(queryResult, wordAtPosition, result, isMethod = true) {
         const metadata = {};
         for (const element of queryResult) {
             if (element.module) {
@@ -312,20 +318,20 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                     if (!element._method.IsExport) {
                         continue;
                     }
-                    if (!this.isModuleAccessable(element.filename)) {
+                    if (isMethod && !this.isModuleAccessable(element.filename)) {
                         continue;
                     }
                     const item: vscode.CompletionItem = new vscode.CompletionItem(element.name);
-                    item.kind = vscode.CompletionItemKind.Function;
+                    item.kind = isMethod ? vscode.CompletionItemKind.Function 
+                    : vscode.CompletionItemKind.Variable;
                     item.documentation = element.description;
                     item.insertText = element.name + "(";
                     result.push(item);
-                    metadata[moduleArray[0] + (moduleArray.length > 1) ? ("." + moduleArray[1]) : ""] = true;
+                    metadata[moduleArray[0] + ((moduleArray.length > 1) ? ("." + moduleArray[1]) : "")] = true;
                     continue;
                 }
             }
         }
-        return result;
     }
 
     private isModuleAccessable(filename: string): boolean {
