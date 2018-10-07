@@ -19,7 +19,7 @@
     "url": "https://github.com/1c-syntax/vsc-language-1c-bsl.git"
   },
   "categories": [
-    "Languages"
+    "Programming Languages"
   ],
   "engines": {
     "vscode": "^1.17.0"
@@ -129,11 +129,6 @@
           "description": "Lint files through `OneScript -check` command",
           "type": "boolean",
           "default": true
-        },
-        "language-1c-bsl.syntaxHelpers": {
-          "description": "Paths to syntax helpers' files",
-          "type": "array",
-          "default": []
         },
         "language-1c-bsl.onescriptPath": {
           "description": "Full path to oscript binary. Fill this only if oscript is not in your $PATH",

@@ -38,7 +38,7 @@ export class Global {
     public hoverTrue = true;
     public autocompleteLanguage: any;
     public dllData: object;
-    public syntaxHelpersData: object= {};
+    public syntaxHelpersData: object = {};
     public libData: object = {};
     public libClasses: object = {};
     public subsystems: object = {};
@@ -371,8 +371,8 @@ export class Global {
         const suffix = allToEnd ? "" : "$";
         const prefix = fromFirst ? "^" : "";
         const querystring = { name: { $regex: new RegExp(prefix + word + suffix, "i") } };
-        const entries = new Parser().parse(source).getMethodsTable().find(querystring);
-        return entries;
+        return new Parser().parse(source).getMethodsTable().find(querystring);
+        // return entries;
     }
 
     public getRefsLocal(filename: string, source: string) {
@@ -516,7 +516,7 @@ export class Global {
                 };
                 result = meta;
             }  else {
-               // console.error("error set metadata for " + fullpath);
+               console.error("error set metadata for " + fullpath);
             }
         }
         return result;
@@ -716,11 +716,11 @@ export class Global {
                         this.dllData = this.addOscriptDll(files);
                     });
                 }
-                const syntaxHelpers = this.getConfiguration("language-1c-bsl").syntaxHelpers;
-                if (syntaxHelpers.length) {
-                    this.syntaxHelpersData = this.addOscriptDll(syntaxHelpers);
-                }
-        
+                const syntaxHelpers = [path.join(path.join(path.join(__dirname, "..", "..", "OneScript.Web"),
+                 "syntaxhelp"), "syntaxhelp.WebHost.json")];
+
+                this.syntaxHelpersData = this.addOscriptDll(syntaxHelpers);
+
             } catch (e) {
                 console.error(e);
             }
@@ -799,8 +799,7 @@ export class Global {
         }
         const prefix = local ? "" : ".";
         const querystring = { call: { $regex: new RegExp(prefix + word + "$", "i") } };
-        const search = collection.chain().find(querystring).simplesort("name").data();
-        return search;
+        return collection.chain().find(querystring).simplesort("name").data();
     }
 
     public querydef(module: string, all = true, lazy = false): any {
@@ -816,8 +815,7 @@ export class Global {
                     $regex: new RegExp(prefix + module + suffix, "i")
                 }
             };
-            const search = this.db.chain().find(querystring).simplesort("name").data();
-            return search;
+            return this.db.chain().find(querystring).simplesort("name").data();
         }
     }
 
@@ -845,8 +843,7 @@ export class Global {
             }
             return true;
         }
-        const search = this.db.chain().find(querystring).where(filterByModule).simplesort("name").data();
-        return search;
+        return this.db.chain().find(querystring).where(filterByModule).simplesort("name").data();
     }
 
     public GetSignature(entry) {
@@ -911,8 +908,7 @@ export class Global {
                 descriptionParam = descriptionParam.substr(0, cast.index);
             }
         }
-        const documentationParam = { optional, descriptionParam };
-        return documentationParam;
+        return { optional, descriptionParam };
     }
 
     public redefineMethods(adapter) {
@@ -931,21 +927,42 @@ export class Global {
         });
     }
 
+    // tslint:disable-next-line:variable-name
     public postMessage(_description: string, _interval?: number) { } // tslint:disable-line:no-empty
 
+    // tslint:disable-next-line:variable-name
     public getConfiguration(_section: string): any { } // tslint:disable-line:no-empty
 
+    // tslint:disable-next-line:variable-name
     public getConfigurationKey(_configuration, _key: string): any { } // tslint:disable-line:no-empty
 
     public getRootPath(): string {
         return "";
     }
 
+    // tslint:disable-next-line:variable-name
     public fullNameRecursor(_word: string, _document, _range, _left: boolean): string {
         return "";
     }
 
+    // tslint:disable-next-line:variable-name
     public findFilesForCache(_searchPattern: string, _rootPath: string) { } // tslint:disable-line:no-empty
+
+    public readFileSync(fullpath, substrIndex) {
+        fullpath = decodeURIComponent(fullpath);
+        if (fullpath.startsWith("file:")) {
+            fullpath = fullpath.substr(substrIndex);
+        }
+        let data;
+        try {
+            data = fs.readFileSync(fullpath);
+        } catch (err) {
+            if (err) {
+                console.log(err);
+            }
+        }
+        return data;
+    }
 
     private addOscriptDll(files: string[]) {
         const dataDll = {};
@@ -985,22 +1002,6 @@ export class Global {
             }
             this.addSubsystemsToCache(files);
         });
-    }
-
-    public readFileSync(fullpath, substrIndex) {
-        fullpath = decodeURIComponent(fullpath);
-        if (fullpath.startsWith("file:")) {
-            fullpath = fullpath.substr(substrIndex);
-        }
-        let data;
-        try {
-            data = fs.readFileSync(fullpath);
-        } catch (err) {
-            if (err) {
-                console.log(err);
-            }
-        }
-        return data;
     }
 
     private async addSubsystemsToCache(files: string[]) {
@@ -1157,9 +1158,6 @@ export class Global {
                 source = source.replace(/\r\n?/g, "\n");
                 const parsesModule = new Parser().parse(source);
                 const entries = parsesModule.getMethodsTable().find();
-                // if (parsesModule.context.CallsPosition.length > 0) {
-                //     this.updateReferenceCalls(parsesModule.context.CallsPosition, "GlobalModuleText", fullpath);
-                // }
                 const moduleDescr = moduleStr + ", " + ((isClasses) ? "класс" : "модуль");
                 for (const exportVar in parsesModule.context.ModuleVars) {
                     if (parsesModule.context.ModuleVars[exportVar].isExport) {
@@ -1186,9 +1184,6 @@ export class Global {
                     }
                 }
                 for (const item of entries) {
-                    // if (item._method.CallsPosition.length > 0) {
-                    //     this.updateReferenceCalls(item._method.CallsPosition, method, fullpath);
-                    // }
                     const dbMethod = { Params: item._method.Params, IsExport: item._method.IsExport };
                     const newItem: IMethodValue = {
                         name: String(item.name),
@@ -1267,7 +1262,8 @@ export class Global {
                     if (this.libData[lib] && this.libData[lib].modules[moduleDescr] && isClasses) {
                         this.libClasses[moduleStr.toLowerCase()] = {name: moduleStr};
                         if (this.libData[lib].modules[moduleDescr].constructors) {
-                            this.libClasses[moduleStr.toLowerCase()].constructors = this.libData[lib].modules[moduleDescr].constructors;
+                            this.libClasses[moduleStr.toLowerCase()].constructors =
+                            this.libData[lib].modules[moduleDescr].constructors;
                         }
                     }
                     this.db.insert(newItem);

@@ -443,13 +443,13 @@ export function activate(context: vscode.ExtensionContext) {
             || global.db.find({ isExport: true, module: { $ne: "" } }).length > 0) {
             items.push({ label: "Экспортные методы bsl", description: "Экспортные методы bsl" });
         }
-        const syntaxHelpers = global.syntaxHelpersData;//vscode.workspace.getConfiguration("language-1c-bsl").syntaxHelpers;
+        const syntaxHelpers = global.syntaxHelpersData;
         if (Object.keys(syntaxHelpers).length > 0) {
             for (const iterator in syntaxHelpers) {
                 items.push({ label: iterator, description: "Внешний СП" });
             }
         }
-        const postfix = ""; // (autocompleteLanguage === "en") ? "_en" : "";
+        const postfix = "";
         const isBsl: boolean = vscode.window.activeTextEditor
             && vscode.window.activeTextEditor.document.fileName.endsWith(".bsl");
         if (isBsl && globalMethod) {

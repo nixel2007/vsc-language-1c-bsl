@@ -55,7 +55,7 @@ export default class SyntaxExternalHelper extends AbstractSyntaxContent {
                         if (libProvider.bslglobals.globalvariables[key]) {
                             description1C = libProvider.bslglobals.globalvariables[key].description;
                         }
-    
+
                         // tslint:disable-next-line:no-string-literal
                         segmentChar["properties"][key] = {
                             description: (methodData.description) ? methodData.description : "",
@@ -69,7 +69,7 @@ export default class SyntaxExternalHelper extends AbstractSyntaxContent {
                 }
                 items[element] = segmentChar;
             }
-    
+
             for (const element in globalDllData[dll].classes) {
                 const segment = globalDllData[dll].classes[element];
                 const segmentChar = this.getSegmentData(segment, false, "OneScript",
@@ -78,12 +78,6 @@ export default class SyntaxExternalHelper extends AbstractSyntaxContent {
                 items[element].oscriptLib = dll;
             }
         }
-        // for (const lib in libData) {
-        //     for (const modul in libData[lib].modules) {
-        //         items[modul] = libData[lib].modules[modul];
-        //         items[modul].oscriptLib = lib;
-        //     }
-        // }
 
         return items;
     }
@@ -122,24 +116,25 @@ export default class SyntaxExternalHelper extends AbstractSyntaxContent {
                         globCont = globCont + "<h2 class='a' style='font-size: 1em;' onclick=\"readFile('"
                             + libData[classDll].description.replace(/[\\]/g, "\\\\").replace(/[\/]/g, "\\/")
                             + "', '" + path.sep.replace(/[\\]/g, "\\\\").replace(/[\/]/g, "\\/")
-                            + "');\" > <em>" + classDll + " </em></h2 > <ul>";
+                            + "');\" > " + classDll + " </h2 >";
                     } else {
-                        globCont = globCont + "<h2 style='font-size: 1em;'> <em>" + classDll + " </em></h2 > <ul>";
+                        globCont = globCont + "<h2 style='font-size: 1em;'> " + classDll + " </h2 > <ul>";
                     }
                     const structureGlobContext = defDll.structureMenu;
                     if (structureGlobContext.global) {
                         globCont = globCont + "<h2 style='font-size: 1em;'>Глобальный контекст</h2><ul>";
                         for (const element in structureGlobContext.global) {
-                            globCont = globCont + `<li><span class="a" onclick="fillDescription(this)">${element}</span></li>`;
+                            globCont = globCont + `<li><span class="a"
+                            onclick="fillDescription(this)">${element}</span></li>`;
                         }
                         globCont = globCont + `</ul>`;
-                    } 
+                    }
 
                     for (const segmentClass in structureGlobContext.classes) {
                         if (segmentClass === "Прочее") {
                             continue;
                         }
-                        classes = classes + "<h2 style='font-size: 1em;'><em>" + segmentClass + "</em></h2><ul>";
+                        classes = classes + "<h2 style='font-size: 1em;'>" + segmentClass + "</h2><ul>";
                         for (const currentClass in structureGlobContext.classes[segmentClass]) {
                             const onlyOs = (!libProvider.bslglobals.classes[currentClass]) ? "*" : "";
                             classes = classes + `<li><span class="a" onclick="fillDescription(this)">
