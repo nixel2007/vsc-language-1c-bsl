@@ -248,119 +248,7 @@ export class Global {
             this.classes[newName.toLowerCase()] = newElement;
         }
         const classesOscript: IBSLClasses = libProvider.oscriptStdLib.classes;
-        for (const element in classesOscript) {
-            if (!classesOscript.hasOwnProperty(element)) {
-                continue;
-            }
-            const segment = classesOscript[element];
-            const newName = segment["name" + postfix];
-            if (this.classes[newName.toLowerCase()]) {
-                const findClass = this.classes[newName.toLowerCase()];
-                findClass.oscript_description = (segment.description) ? (segment.description) : findClass.description;
-                for (const key in segment.methods) {
-                    const nameMethod = segment.methods[key]["name" + postfix];
-                    if (!findClass.methods) {
-                        findClass.methods = {};
-                    }
-                    let findMethod = findClass.methods[nameMethod.toLowerCase()];
-                    if (!findMethod) {
-                        findMethod = {
-                            name: nameMethod,
-                            alias: (postfix === "_en")
-                                ? segment.methods[key].name
-                                : segment.methods[key].name_en,
-                            description: undefined,
-                            oscript_description: segment.methods[key].description,
-                            // TODO: ?
-                            signature: undefined,
-                        };
-                        findClass.methods[nameMethod.toLowerCase()] = findMethod;
-                    } else {
-                        findMethod.oscript_description = segment.methods[key].description;
-                    }
-                }
-                for (const key in segment.properties) {
-                    const nameProp = segment.properties[key]["name" + postfix];
-                    if (!findClass.properties) {
-                        findClass.properties = {};
-                    }
-                    let findProp = findClass.properties[nameProp.toLowerCase()];
-                    if (!findProp) {
-                        findProp = {
-                            name: nameProp,
-                            alias: (postfix === "_en")
-                                ? segment.properties[key].name
-                                : segment.properties[key].name_en,
-                            description: undefined,
-                            oscript_description: segment.properties[key].description,
-                        };
-                        findClass.properties[nameProp.toLowerCase()] = findProp;
-                    } else {
-                        findProp.oscript_description = segment.properties[key].description;
-                    }
-                }
-                for (const key in segment.constructors) {
-                    if (!findClass.constructors) {
-                        findClass.constructors = {};
-                    }
-                    let findCntr = findClass.constructors[key.toLowerCase()];
-                    if (!findCntr) {
-                        findCntr = {
-                            description: undefined,
-                            oscript_description: segment.constructors[key].description,
-                            // TODO ?
-                            signature: undefined,
-                        };
-                        findClass.constructors[key.toLowerCase()] = findCntr;
-                    } else {
-                        findCntr.oscript_description = segment.constructors[key].description;
-                    }
-                }
-            } else {
-                const newElement: IClass = {
-                    name: newName,
-                    alias: (postfix === "_en") ? segment.name : segment.name_en,
-                    description: undefined,
-                    oscript_description: segment.description,
-                    methods: (segment.methods) ? {} : undefined,
-                    properties: (segment.properties) ? {} : undefined,
-                    constructors: (segment.constructors) ? {} : undefined,
-                };
-                for (const key in segment.constructors) {
-                    const newCntr: IConstructorDefinition = {
-                        signature: segment.constructors[key].signature,
-                        description: undefined,
-                        oscript_description: segment.constructors[key].description,
-                    };
-                    newElement.constructors[key.toLowerCase()] = newCntr;
-                }
-                for (const key in segment.properties) {
-                    const newNameProp = segment.properties[key]["name" + postfix];
-                    const newProp: IPropertyDefinition = {
-                        name: newName,
-                        alias: (postfix === "_en")
-                            ? segment.properties[key].name
-                            : segment.properties[key].name_en,
-                        description: undefined,
-                        oscript_description: segment.properties[key].description,
-                    };
-                    newElement.properties[newNameProp.toLowerCase()] = newProp;
-                }
-                for (const key in segment.methods) {
-                    const newNameMethod = segment.methods[key]["name" + postfix];
-                    const newMethod: IMethod = {
-                        name: newName,
-                        alias: (postfix === "_en") ? segment.methods[key].name : segment.methods[key].name_en,
-                        description: undefined,
-                        oscript_description: segment.methods[key].description,
-                        // TODO ?
-                        signature: undefined,
-                    };
-                    newElement.methods[newNameMethod.toLowerCase()] = newMethod;
-                }
-                this.classes[newName.toLowerCase()] = newElement;
-            }
-        }
+        this.addOscriptClasses(classesOscript, postfix);
     }
 
     public getCacheLocal(
@@ -979,7 +867,10 @@ export class Global {
                 if (readme) {
                     dataDll[pathDll].description = ((process.platform === "win32") ? "" : "file://")
                         + path.join(path.dirname(path.dirname(syntaxHelp)), readme[0]);
-                }
+                };
+                const classesOscript: Object = dllDesc["classes"];
+                const postfix = (this.autocompleteLanguage === "en") ? "_en" : "";
+                this.addOscriptClasses(classesOscript, postfix)
             } catch (err) {
                 if (err) {
                     console.log(err);
@@ -988,6 +879,130 @@ export class Global {
             }
         }
         return dataDll;
+    }
+
+    private addOscriptClasses(classesOscript, postfix) {
+        for (const element in classesOscript) {
+            if (!classesOscript.hasOwnProperty(element)) {
+                continue;
+            }
+            const segment = classesOscript[element];
+            const newName = segment["name" + postfix];
+            if (this.classes[newName.toLowerCase()]) {
+                const findClass = this.classes[newName.toLowerCase()];
+                findClass.oscript_description = (segment.description) ? (segment.description) : findClass.description;
+                for (const key in segment.methods) {
+                    const nameMethod = segment.methods[key]["name" + postfix];
+                    if (!findClass.methods) {
+                        findClass.methods = {};
+                    }
+                    let findMethod = findClass.methods[nameMethod.toLowerCase()];
+                    const desc = segment.methods[key].description;
+                    if (!findMethod) {
+                        findMethod = {
+                            name: nameMethod,
+                            alias: (postfix === "_en")
+                                ? segment.methods[key].name
+                                : segment.methods[key].name_en,
+                            description: undefined,
+                            oscript_description: desc ? desc : "",
+                            // TODO: ?
+                            signature: undefined,
+                        };
+                        findClass.methods[nameMethod.toLowerCase()] = findMethod;
+                    } else {
+                        findMethod.oscript_description = desc ? desc : "";
+                    }
+                }
+                for (const key in segment.properties) {
+                    const nameProp = segment.properties[key]["name" + postfix];
+                    if (!findClass.properties) {
+                        findClass.properties = {};
+                    }
+                    let findProp = findClass.properties[nameProp.toLowerCase()];
+                    const desc = segment.properties[key].description;
+                    if (!findProp) {
+                        findProp = {
+                            name: nameProp,
+                            alias: (postfix === "_en")
+                                ? segment.properties[key].name
+                                : segment.properties[key].name_en,
+                            description: undefined,
+                            oscript_description: desc ? desc : "",
+                        };
+                        findClass.properties[nameProp.toLowerCase()] = findProp;
+                    } else {
+                        findProp.oscript_description = desc ? desc : "";
+                    }
+                }
+                for (const key in segment.constructors) {
+                    if (!findClass.constructors) {
+                        findClass.constructors = {};
+                    }
+                    let findCntr = findClass.constructors[key.toLowerCase()];
+                    const desc = segment.constructors[key].description
+                    if (!findCntr) {
+                        findCntr = {
+                            description: undefined,
+                            oscript_description: desc ? desc : "",
+                            // TODO ?
+                            signature: undefined,
+                        };
+                        findClass.constructors[key.toLowerCase()] = findCntr;
+                    } else {
+                        findCntr.oscript_description = desc ? desc : "";
+                    }
+                }
+            } else {
+                const oscript_description = segment.description;
+                const newElement: IClass = {
+                    name: newName,
+                    alias: (postfix === "_en") ? segment.name : segment.name_en,
+                    description: undefined,
+                    oscript_description: oscript_description ? oscript_description : "",
+                    methods: (segment.methods) ? {} : undefined,
+                    properties: (segment.properties) ? {} : undefined,
+                    constructors: (segment.constructors) ? {} : undefined,
+                };
+                for (const key in segment.constructors) {
+                    const desc = segment.constructors[key].description;
+                    const newCntr: IConstructorDefinition = {
+                        signature: segment.constructors[key].signature,
+                        description: undefined,
+                        oscript_description: desc ? desc : "",
+                    };
+                    newElement.constructors[key.toLowerCase()] = newCntr;
+                }
+                for (const key in segment.properties) {
+                    const desc = segment.properties[key].description;
+                    const newNameProp = segment.properties[key]["name" + postfix];
+                    const newProp: IPropertyDefinition = {
+                        name: newName,
+                        alias: (postfix === "_en")
+                            ? segment.properties[key].name
+                            : segment.properties[key].name_en,
+                        description: undefined,
+                        oscript_description: desc ? desc : "",
+                    };
+                    newElement.properties[newNameProp.toLowerCase()] = newProp;
+                }
+                for (const key in segment.methods) {
+                    const desc = segment.methods[key].description;
+                    const newNameMethod = segment.methods[key]["name" + postfix];
+                    const newMethod: IMethod = {
+                        name: newName,
+                        alias: (postfix === "_en") ? segment.methods[key].name : segment.methods[key].name_en,
+                        description: undefined,
+                        oscript_description: desc ? desc : "",
+                        // TODO ?
+                        signature: undefined,
+                    };
+                    newElement.methods[newNameMethod.toLowerCase()] = newMethod;
+                }
+                this.classes[newName.toLowerCase()] = newElement;
+            }
+        }
+
     }
 
     private findSubsystems(searchPattern: string, rootPath: string) {

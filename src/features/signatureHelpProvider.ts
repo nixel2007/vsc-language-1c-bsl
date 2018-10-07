@@ -48,6 +48,9 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
                 entry = this._global.libClasses[ident.toLowerCase()].constructors["По умолчанию"]; 
             } else if (this._global.globalfunctions[ident.toLowerCase()]) {
                 entry = this._global.globalfunctions[ident.toLowerCase()];
+            } else if (this._global.classes[ident.toLowerCase()]){
+                entry = this._global.classes[ident.toLowerCase()];
+                return resolve(this.signatureOfClasses(entry, paramCount));
             }
             let entries;
             if (!entry) {
@@ -113,6 +116,34 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
             }
             return resolve(ret);
         });
+    }
+
+    private signatureOfClasses(entry, paramCount) {
+        const ret = new SignatureHelp();
+        for (const elem in entry.constructors) {
+            const signature = entry.constructors[elem]
+                const paramsString = signature.signature;
+                const signatureInfo = new SignatureInformation(entry.name + paramsString, "");
+
+                const re = /(?:Знач )?([\wа-яА-Я]+)\??([^,]+)?/g;
+                let match: RegExpExecArray = re.exec(paramsString);
+                while (match) {
+                    signatureInfo.parameters.push({
+                        label: match[0],
+                        documentation: ""
+                    });
+                    match = re.exec(paramsString);
+                }
+
+                if (signatureInfo.parameters.length - 1 < paramCount) {
+                    continue;
+                }
+                ret.signatures.push(signatureInfo);
+                ret.activeSignature = 0;
+                ret.activeParameter = Math.min(paramCount, signatureInfo.parameters.length - 1);
+
+        }
+        return ret;
     }
 
     private GetSignature(entry, paramCount): SignatureHelp {

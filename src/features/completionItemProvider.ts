@@ -59,7 +59,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                                     .toLowerCase().endsWith(".bsl") && !full.description) {
                                     continue;
                                 } else if (vscode.window.activeTextEditor.document.fileName
-                                    .toLowerCase().endsWith(".os") && !full.oscript_description) {
+                                    .toLowerCase().endsWith(".os") && full.oscript_description === undefined) {
                                     continue;
                                 }
                                 const item = new vscode.CompletionItem(full.name);
