@@ -1,5 +1,5 @@
 // tslint:disable:variable-name
-import {Position, SignatureHelp, SignatureHelpProvider,
+import {Position, Range, SignatureHelp, SignatureHelpProvider,
     SignatureInformation, TextDocument} from "vscode";
 import AbstractProvider from "./abstractProvider";
 import BackwardIterator from "./backwardIterator";
@@ -44,11 +44,15 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
             }
 
             let entry = undefined;
-            if (this._global.libClasses[ident.toLowerCase()]) {
+            const ch = ident.length;
+            const wordOfPosition = document.getText(new Range(position.line, 0, position.line, position.character - ch - 1));
+            if (this._global.libClasses[ident.toLowerCase()] &&
+                wordOfPosition.trim().endsWith("Новый")) {
                 entry = this._global.libClasses[ident.toLowerCase()].constructors["По умолчанию"]; 
             } else if (this._global.globalfunctions[ident.toLowerCase()]) {
                 entry = this._global.globalfunctions[ident.toLowerCase()];
-            } else if (this._global.classes[ident.toLowerCase()]){
+            } else if (this._global.classes[ident.toLowerCase()] &&
+                wordOfPosition.trim().endsWith("Новый")){
                 entry = this._global.classes[ident.toLowerCase()];
                 return resolve(this.signatureOfClasses(entry, paramCount));
             }
