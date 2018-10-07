@@ -219,7 +219,7 @@ export class Global {
                 const method = segment.methods[key];
                 const newNameMethod = method["name" + postfix];
                 const newMethod: IMethod = {
-                    name: newName,
+                    name:newNameMethod,
                     alias: (postfix === "_en") ? method.name : method.name_en,
                     description: method.description,
                     // TODO: undefined?
@@ -231,7 +231,7 @@ export class Global {
                 const property = segment.properties[key];
                 const newNameProp = property["name" + postfix];
                 const newProp: IPropertyDefinition = {
-                    name: newName,
+                    name: newNameProp,
                     alias: (postfix === "_en") ? property.name : property.name_en,
                     description: property.description,
                 };
@@ -977,7 +977,7 @@ export class Global {
                     const desc = segment.properties[key].description;
                     const newNameProp = segment.properties[key]["name" + postfix];
                     const newProp: IPropertyDefinition = {
-                        name: newName,
+                        name: newNameProp,
                         alias: (postfix === "_en")
                             ? segment.properties[key].name
                             : segment.properties[key].name_en,
@@ -990,7 +990,7 @@ export class Global {
                     const desc = segment.methods[key].description;
                     const newNameMethod = segment.methods[key]["name" + postfix];
                     const newMethod: IMethod = {
-                        name: newName,
+                        name: newNameMethod,
                         alias: (postfix === "_en") ? segment.methods[key].name : segment.methods[key].name_en,
                         description: undefined,
                         oscript_description: desc ? desc : "",

@@ -279,6 +279,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
             let queryResult: any[] = this._global.querydef(wordAtPosition + "\\.");
             this.customDotComplection(queryResult, wordAtPosition, result);
             this.checkSystemEnums(wordAtPosition, result);
+            this.checkOscriptClasses(wordAtPosition, result);
             queryResult = this._global.querydef(wordAtPosition, undefined, undefined, this._global.dbvars);
             this.customDotComplection(queryResult, wordAtPosition, result, false);
             // Получим все общие модули, у которых не заканчивается на точку.
@@ -325,7 +326,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                     item.kind = isMethod ? vscode.CompletionItemKind.Function 
                     : vscode.CompletionItemKind.Variable;
                     item.documentation = element.description;
-                    item.insertText = element.name + "(";
+                    item.insertText = element.name + (isMethod ? "(" : "");
                     result.push(item);
                     metadata[moduleArray[0] + ((moduleArray.length > 1) ? ("." + moduleArray[1]) : "")] = true;
                     continue;
@@ -337,6 +338,31 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
     private isModuleAccessable(filename: string): boolean {
         const arrayFilename = filename.split("/");
         return arrayFilename[arrayFilename.length - 4] === "CommonModules" || filename.endsWith("ManagerModule.bsl");
+    }
+
+    private checkOscriptClasses (wordAtPosition: string, result): void {
+        const classOneScript = this._global.classes[wordAtPosition.toLowerCase()];
+        if (!classOneScript) {
+            return;
+        }
+        for (const key in classOneScript.methods) {
+            const element = classOneScript.methods[key];
+            const item: vscode.CompletionItem = new vscode.CompletionItem(element.name);
+            item.kind = vscode.CompletionItemKind.Function ;
+            item.documentation = element.description;
+            item.insertText = element.name + "(";
+            result.push(item);
+            continue;
+}
+        for (const key in classOneScript.properties) {
+            const element = classOneScript.properties[key];
+            const item: vscode.CompletionItem = new vscode.CompletionItem(element.name);
+            item.kind = vscode.CompletionItemKind.Variable;
+            item.documentation = element.description;
+            item.insertText = element.name;
+            result.push(item);
+            continue;
+        }
     }
 
     private checkSystemEnums(wordAtPosition: string, result): void {
