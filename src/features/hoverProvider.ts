@@ -17,7 +17,24 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
             return undefined;
         }
         word = this._global.fullNameRecursor(word, document, wordRange, true);
-        const entry = this._global.globalfunctions[word.toLowerCase()];
+        let entry = undefined;
+        const ch = word.length;
+        let verify = true;
+        if (wordRange.start.character - ch > 0) {
+                const wordOfPosition = document.getText(new vscode.Range(wordRange.start.line, 0, wordRange.start.line, wordRange.start.character - ch - 1));
+                if (!wordOfPosition.trim().endsWith("Новый")) {
+                    verify = false
+                }
+            }
+        if (this._global.libClasses[word.toLowerCase()] && verify) {
+            entry = this._global.libClasses[word.toLowerCase()].constructors["По умолчанию"];
+            return  this.hoverOfClasses(entry, "os");
+        } else if (this._global.globalfunctions[word.toLowerCase()]) {
+            entry = this._global.globalfunctions[word.toLowerCase()];
+        } else if (this._global.classes[word.toLowerCase()] && verify){
+            entry = this._global.classes[word.toLowerCase()];
+            return  this.hoverOfClasses(entry, "bsl");
+        }
         let entries;
         if (!entry) {
             let module = "";
@@ -81,6 +98,34 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
             for (const param in signature[element].Параметры) {
                 description.push(`***${param}***: ${signature[element].Параметры[param]}`);
             }
+        }
+        return new vscode.Hover(description);
+    }
+
+    private hoverOfClasses(entry, context){
+        const description = [];
+        if (context === "os") {
+            description.push("Конструктор класса oscript-library");
+            description.push(
+                {
+                    language: "bsl",
+                    value: (entry.name + entry.signature.default["СтрокаПараметров"])
+                });
+    
+
+        } else if (context === "bsl") {
+            let desc = "Конструктор класса 1C"
+            if (entry.oscript_description !== undefined) {
+                desc = desc + " (доступен в OneScript)"
+            }
+            description.push(desc);
+            for (const key in entry.constructors) {
+                description.push(
+                    {
+                        language: "bsl",
+                        value: (entry.name + entry.constructors[key].signature)
+                    });
+                }
         }
         return new vscode.Hover(description);
     }
