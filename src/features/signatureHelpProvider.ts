@@ -45,14 +45,18 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
 
             let entry = undefined;
             const ch = ident.length;
-            const wordOfPosition = document.getText(new Range(position.line, 0, position.line, position.character - ch - 1));
-            if (this._global.libClasses[ident.toLowerCase()] &&
-                wordOfPosition.trim().endsWith("Новый")) {
+            let verify = true;
+            if (paramCount === 0) {
+                const wordOfPosition = document.getText(new Range(position.line, 0, position.line, position.character - ch - 1));
+                if (!wordOfPosition.trim().endsWith("Новый")) {
+                    verify = false
+                }
+            }
+            if (this._global.libClasses[ident.toLowerCase()] && verify) {
                 entry = this._global.libClasses[ident.toLowerCase()].constructors["По умолчанию"]; 
             } else if (this._global.globalfunctions[ident.toLowerCase()]) {
                 entry = this._global.globalfunctions[ident.toLowerCase()];
-            } else if (this._global.classes[ident.toLowerCase()] &&
-                wordOfPosition.trim().endsWith("Новый")){
+            } else if (this._global.classes[ident.toLowerCase()] && verify){
                 entry = this._global.classes[ident.toLowerCase()];
                 return resolve(this.signatureOfClasses(entry, paramCount));
             }
