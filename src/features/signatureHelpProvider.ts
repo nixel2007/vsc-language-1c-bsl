@@ -104,7 +104,7 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
                 const paramsString = signature[element].СтрокаПараметров;
                 const signatureInfo = new SignatureInformation(entry.name + paramsString, "");
 
-                const re = /(?:Знач )?([\wа-яА-Я]+)\??([^,]+)?/g;
+                const re = /(?:Знач )?([\wа-яА-Я]+)\??([^,)]+)?/g;
                 let match: RegExpExecArray = re.exec(paramsString);
                 while (match) {
                     signatureInfo.parameters.push({
@@ -133,7 +133,7 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
                 const paramsString = signature.signature;
                 const signatureInfo = new SignatureInformation(entry.name + paramsString, "");
 
-                const re = /(?:Знач )?([\wа-яА-Я]+)\??([^,]+)?/g;
+                const re = /(?:Знач )?([\wа-яА-Я]+)\??([^,)]+)?/g;
                 let match: RegExpExecArray = re.exec(paramsString);
                 while (match) {
                     signatureInfo.parameters.push({
