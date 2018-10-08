@@ -47,9 +47,11 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
             const ch = ident.length;
             let verify = true;
             if (paramCount === 0) {
-                const wordOfPosition = document.getText(new Range(position.line, 0, position.line, position.character - ch - 1));
-                if (!wordOfPosition.trim().endsWith("Новый")) {
-                    verify = false
+                if (iterator.lineNumber === position.line) {
+                    const wordOfPosition = document.getText(new Range(position.line, 0, position.line, position.character - ch - 1));
+                    if (!wordOfPosition.trim().endsWith("Новый")) {
+                        verify = false
+                    }
                 }
             }
             if (this._global.libClasses[ident.toLowerCase()] && verify) {
