@@ -222,8 +222,7 @@ export class Global {
                     name:newNameMethod,
                     alias: (postfix === "_en") ? method.name : method.name_en,
                     description: method.description,
-                    // TODO: undefined?
-                    signature: undefined,
+                    signature: method.signature,
                 };
                 newElement.methods[newNameMethod.toLowerCase()] = newMethod;
             }
@@ -906,8 +905,7 @@ export class Global {
                                 : segment.methods[key].name_en,
                             description: undefined,
                             oscript_description: desc ? desc : "",
-                            // TODO: ?
-                            signature: undefined,
+                            signature: segment.methods[key].signature,
                         };
                         findClass.methods[nameMethod.toLowerCase()] = findMethod;
                     } else {
@@ -945,8 +943,7 @@ export class Global {
                         findCntr = {
                             description: undefined,
                             oscript_description: desc ? desc : "",
-                            // TODO ?
-                            signature: undefined,
+                            signature: segment.constructors[key].signature,
                         };
                         findClass.constructors[key.toLowerCase()] = findCntr;
                     } else {
@@ -995,7 +992,7 @@ export class Global {
                         description: undefined,
                         oscript_description: desc ? desc : "",
                         // TODO ?
-                        signature: undefined,
+                        signature: segment.methods[key].signature,
                     };
                     newElement.methods[newNameMethod.toLowerCase()] = newMethod;
                 }

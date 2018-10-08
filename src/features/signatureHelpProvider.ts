@@ -65,6 +65,7 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
             let entries;
             if (!entry) {
                 let module = "";
+                let methodOfClass = undefined;
                 if (ident.indexOf(".") > 0) {
                     const dotArray: string[] = ident.split(".");
                     ident = dotArray.pop();
@@ -72,6 +73,7 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
                         dotArray[0] = this._global.toreplaced[dotArray[0]];
                     }
                     module = dotArray.join(".");
+                    methodOfClass = this._global.classes[module.toLowerCase()];
                 }
                 if (module.length === 0) {
                     const source = document.getText();
@@ -79,11 +81,13 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
                 } else {
                     entries = this._global.query(ident, module, false, false);
                 }
-                if (!entry && entries.length === 0) {
+                if (entries.length === 0 && !methodOfClass) {
                     return resolve(undefined);
                 } else if (module.length === 0) {
                     entry = entries[0];
                     return resolve(this.GetSignature(entry, paramCount));
+                } else if (methodOfClass && methodOfClass.methods[ident.toLowerCase()]) {
+                    entry = methodOfClass.methods[ident.toLowerCase()];
                 } else {
                     for (const signatureElement of entries) {
                         const arrayFilename = signatureElement.filename.split("/");

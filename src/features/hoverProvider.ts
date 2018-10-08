@@ -115,7 +115,9 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
 
         } else if (context === "bsl") {
             let desc = "Конструктор класса 1C"
-            if (entry.oscript_description !== undefined) {
+            if (!entry.description) {
+                desc = "Конструктор класса OneScript";
+            } else if (entry.oscript_description !== undefined) {
                 desc = desc + " (доступен в OneScript)"
             }
             description.push(desc);
