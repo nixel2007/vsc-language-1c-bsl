@@ -23,8 +23,25 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                     wordAtPosition = arrayName.join(".");
                 }
             }
+            let d: any[];
             if (this._global.globalfunctions[wordAtPosition.toLowerCase()]) {
                 return resolve(result);
+            } else if (wordPosition.start.character > 0) {
+                const wordOfPosition = document.getText(new vscode.Range(wordPosition.start.line, 0, wordPosition.start.line, wordPosition.start.character - 1));
+                if (wordOfPosition.trim().endsWith("Новый")) {
+                    const entry = this._global.libClasses[wordAtPosition.toLowerCase()];
+                    if (entry) {
+                        d = this._global.querydef(word);
+                        if (d) {
+                            const location =
+                                new vscode.Location(
+                                    vscode.Uri.file(d[0].filename),
+                                    new vscode.Position(0, 0)
+                                );
+                            result.push(location);
+                        }
+                    }
+                }
             }
             let module = "";
             if (wordAtPosition.indexOf(".") > 0) {
@@ -32,7 +49,6 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                 wordAtPosition = dotArray.pop();
                 module = dotArray.join(".");
             }
-            let d: any[];
             if (module.length === 0) {
                 const source = document.getText();
                 d = this._global.getCacheLocal(wordAtPosition, source, false);
