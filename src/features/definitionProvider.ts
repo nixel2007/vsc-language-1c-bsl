@@ -39,6 +39,7 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                                     new vscode.Position(0, 0)
                                 );
                             result.push(location);
+                            return resolve(result);
                         }
                     }
                 }
