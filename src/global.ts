@@ -78,26 +78,7 @@ export class Global {
             this.globalfunctions[newName.toLowerCase()] = newElement;
         }
         const osGlobalfunctions: IBSLMethods = libProvider.oscriptStdLib.globalfunctions;
-        for (const methodKey in osGlobalfunctions) {
-            const method = osGlobalfunctions[methodKey];
-            if (this.globalfunctions[method["name" + postfix].toLowerCase()]) {
-                const globMethod = this.globalfunctions[method["name" + postfix].toLowerCase()];
-                globMethod.oscript_signature = method.signature;
-                globMethod.oscript_description = method.description;
-            } else {
-                const newName = method["name" + postfix];
-                const newElement: IMethod = {
-                    name: newName,
-                    alias: (postfix === "_en") ? method.name : method.name_en,
-                    description: undefined,
-                    signature: undefined,
-                    returns: method.returns,
-                    oscript_signature: method.signature,
-                    oscript_description: method.description
-                };
-                this.globalfunctions[newName.toLowerCase()] = newElement;
-            }
-        }
+        this.addOscriptGlobalFunction(osGlobalfunctions, postfix);
         for (const element in globalvariables) {
             if (!globalvariables.hasOwnProperty(element)) {
                 continue;
@@ -615,6 +596,32 @@ export class Global {
         });
 
         if (rootPath) {
+            let searchPattern = basePath !== "" ? basePath.substr(2) + "**/{classes,классы}/*.os"
+            : "**/{classes,классы}/*.os";
+            const globOptions: glob.IOptions = {};
+            globOptions.dot = true;
+            globOptions.cwd = rootPath;
+            globOptions.nocase = true;
+            globOptions.absolute = true;
+            glob(searchPattern, globOptions, (err, files) => {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+                this.addOscriptFilesToCache("", files, true);
+                });
+            searchPattern = basePath !== "" ? basePath.substr(2) + "**/{modules,модули}/*.os"
+            : "**/{modules,модули}/*.os";
+            glob(searchPattern, globOptions, (err, files) => {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+                this.addOscriptFilesToCache("", files);
+                });
+        }
+
+        if (rootPath) {
             let searchPattern = basePath !== "" ? basePath.substr(2) + "/Subsystems/*.xml"
             : "Subsystems/*.xml";
             this.findSubsystems(searchPattern, rootPath);
@@ -869,6 +876,7 @@ export class Global {
                 };
                 const classesOscript: Object = dllDesc["classes"];
                 const postfix = (this.autocompleteLanguage === "en") ? "_en" : "";
+                this.addOscriptGlobalFunction(dllDesc["globalfunctions"], postfix)
                 this.addOscriptClasses(classesOscript, postfix)
             } catch (err) {
                 if (err) {
@@ -878,6 +886,29 @@ export class Global {
             }
         }
         return dataDll;
+    }
+
+    private addOscriptGlobalFunction(osGlobalfunctions, postfix) {
+        for (const methodKey in osGlobalfunctions) {
+            const method = osGlobalfunctions[methodKey];
+            if (this.globalfunctions[method["name" + postfix].toLowerCase()]) {
+                const globMethod = this.globalfunctions[method["name" + postfix].toLowerCase()];
+                globMethod.oscript_signature = method.signature;
+                globMethod.oscript_description = method.description;
+            } else {
+                const newName = method["name" + postfix];
+                const newElement: IMethod = {
+                    name: newName,
+                    alias: (postfix === "_en") ? method.name : method.name_en,
+                    description: undefined,
+                    signature: undefined,
+                    returns: method.returns,
+                    oscript_signature: method.signature,
+                    oscript_description: method.description
+                };
+                this.globalfunctions[newName.toLowerCase()] = newElement;
+            }
+        }
     }
 
     private addOscriptClasses(classesOscript, postfix) {
@@ -991,7 +1022,6 @@ export class Global {
                         alias: (postfix === "_en") ? segment.methods[key].name : segment.methods[key].name_en,
                         description: undefined,
                         oscript_description: desc ? desc : "",
-                        // TODO ?
                         signature: segment.methods[key].signature,
                     };
                     newElement.methods[newNameMethod.toLowerCase()] = newMethod;
@@ -1162,12 +1192,12 @@ export class Global {
     private addOscriptFilesToCache(libConfig, modules, isClasses = false) {
         const lib = path.basename(path.dirname(libConfig));
         for (const module of modules) {
-            const fullpath = path.join(path.dirname(libConfig), module.$.file);
+            const fullpath = (libConfig) ? path.join(path.dirname(libConfig), module.$.file) : module;
             fq.readFile(fullpath, { encoding: "utf8" }, (err, source) => {
                 if (err) {
                     throw err;
                 }
-                const moduleStr = module.$.name;
+                const moduleStr = (libConfig) ? module.$.name : path.parse(module).name;
                 source = source.replace(/\r\n?/g, "\n");
                 const parsesModule = new Parser().parse(source);
                 const entries = parsesModule.getMethodsTable().find();
