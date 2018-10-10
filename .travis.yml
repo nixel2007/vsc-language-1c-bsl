@@ -7,10 +7,13 @@ node_js:
   - "node"
 
 addons:
-  sonarqube: true
+  sonarcloud: true
 
 jdk:
   - oraclejdk8
+
+git:
+  depth: false
 
 before_install: 
   - if [ $TRAVIS_OS_NAME == "linux" ]; then 
@@ -37,7 +40,9 @@ cache:
 
 script:
   - export SONARQUBE_SKIPPED=false
-  - ./travis.sh 
+  - npm test --silent
+  - tslint -t json -o report.json --project . --force
+  - ./sonar.sh 
 
 after_script:
   - bash <(curl -s https://codecov.io/bash)

@@ -149,13 +149,13 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.workspace.onDidChangeTextDocument(
             async (textDocumentChangeEvent: vscode.TextDocumentChangeEvent) => {
                 const editor = vscode.window.activeTextEditor;
-                if (!editor || editor.document.languageId !== "bsl"
-                    || textDocumentChangeEvent.contentChanges.length === 0) {
+                if (!editor || editor.document.languageId !== "bsl" ||
+                    textDocumentChangeEvent.contentChanges.length === 0) {
                     return;
                 }
 
                 const autoClosingBrackets = Boolean(vscode.workspace.getConfiguration
-                    ("editor.autoClosingBrackets", vscode.workspace.getWorkspaceFolder(editor.document.uri).uri));
+                        ("editor.autoClosingBrackets"));
                 if (textDocumentChangeEvent.contentChanges[0].text.slice(-1) === "(") {
                     const contentChange = textDocumentChangeEvent.contentChanges[0];
                     const point = contentChange.range.start.character + contentChange.text.length;
@@ -443,7 +443,13 @@ export function activate(context: vscode.ExtensionContext) {
             || global.db.find({ isExport: true, module: { $ne: "" } }).length > 0) {
             items.push({ label: "Экспортные методы bsl", description: "Экспортные методы bsl" });
         }
-        const postfix = ""; // (autocompleteLanguage === "en") ? "_en" : "";
+        const syntaxHelpers = global.syntaxHelpersData;
+        if (Object.keys(syntaxHelpers).length > 0) {
+            for (const iterator in syntaxHelpers) {
+                items.push({ label: iterator, description: "Внешний СП" });
+            }
+        }
+        const postfix = "";
         const isBsl: boolean = vscode.window.activeTextEditor
             && vscode.window.activeTextEditor.document.fileName.endsWith(".bsl");
         if (isBsl && globalMethod) {

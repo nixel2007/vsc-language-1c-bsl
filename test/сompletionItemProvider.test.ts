@@ -42,7 +42,7 @@ describe("Completion", function() {
     // Defines a Mocha unit test
     it("should show global functions", async () => {
 
-        await addText("Сообщи");
+        await addText("Сообщит");
 
         const completionList = await getCompletionListFromCurrentPosition();
         const completions = completionList.items;

@@ -7,6 +7,7 @@ import SyntaxContent1C from "./SyntaxContent1C";
 import SyntaxContentBSL from "./SyntaxContentBSL";
 import SyntaxContentOscript from "./SyntaxContentOscript";
 import SyntaxContentOscriptLibrary from "./SyntaxContentOscriptLibrary";
+import SyntaxExternalHelper from "./SyntaxExternalHelper";
 
 import * as fastXmlParser from "fast-xml-parser";
 
@@ -64,6 +65,9 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
         } else if (desc.split("/")[0] === "oscript-library") {
             this.syntaxContent = new SyntaxContentOscriptLibrary();
             this.syntax = "oscript-library";
+        } else if (desc.split("/")[0] === "Внешний СП") {
+            this.syntaxContent = new SyntaxExternalHelper();
+            this.syntax = "Внешний СП";
         } else {
             this.syntaxContent = new SyntaxContentOscript();
             this.syntax = "OneScript";
@@ -253,7 +257,8 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
             || (this.syntax === "BSL")) {
             this._global.syntaxFilled = this.syntax;
             this.oscriptMethods = this.syntaxContent.getSyntaxContentItems(
-                (this.syntax === "BSL") ? subsystems : this._global.dllData,
+                (this.syntax === "BSL") ? subsystems : (this.syntax === "Внешний СП")
+                        ? this._global.syntaxHelpersData : this._global.dllData,
                 (this.syntax === "BSL") ? metadata : this._global.libData);
             let jsonString = JSON.stringify(this.oscriptMethods)
                                 .replace(/[\\]/g, "\\\\")
@@ -285,7 +290,8 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
             (this.syntax === "BSL") ? subsystems : (this.syntax === "oscript-library")
                 ? this._global.dllData : syntaxObject,
             (this.syntax === "BSL") ? metadata : (this.syntax === "oscript-library")
-                ? this._global.libData : this.oscriptMethods);
+                ? this._global.libData : (this.syntax === "Внешний СП")
+                ? this._global.syntaxHelpersData : this.oscriptMethods);
     }
 
     private async getHTML(fillStructure): Promise<string> {
@@ -540,7 +546,7 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
                             JSON.parse(window.localStorage.getItem('bsl-language'))[strSegment][charSegment][str];
                             var depp = "";
                             if (charSegment === "constructors") {
-                                str = strSegment;
+                                str = strSegment.replace(', класс', '');
                             }
                             depp = fillDescriptionData(
                                 methodData, depp, "description", "signature", "returns", str, charSegment);

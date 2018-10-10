@@ -3,7 +3,7 @@
   "displayName": "Language 1C (BSL)",
   "description": "Syntax highlighting for 1C:Enterprise 8.",
   "icon": "images/xDDIcon.png",
-  "version": "1.11.1",
+  "version": "1.12.0",
   "publisher": "xDrivenDevelopment",
   "galleryBanner": {
     "color": "#0000FF",
@@ -19,7 +19,7 @@
     "url": "https://github.com/1c-syntax/vsc-language-1c-bsl.git"
   },
   "categories": [
-    "Languages"
+    "Programming Languages"
   ],
   "engines": {
     "vscode": "^1.17.0"
@@ -259,29 +259,29 @@
     }
   },
   "devDependencies": {
-    "@types/glob": "^5.0.35",
-    "@types/mocha": "^5.2.4",
-    "@types/node": "^10.5.1",
+    "@types/glob": "^7.1.1",
+    "@types/mocha": "^5.2.5",
+    "@types/node": "^10.11.6",
     "cross-env": "^5.2.0",
     "decache": "^4.4.0",
     "istanbul": "^0.4.5",
-    "remap-istanbul": "^0.11.1",
-    "should": "^13.2.1",
-    "tslint": "^5.10.0",
-    "tslint-sonarts": "^1.7.0",
-    "typescript": "^2.9.2",
-    "vscode": "^1.1.18"
+    "remap-istanbul": "^0.12.0",
+    "should": "^13.2.3",
+    "tslint": "^5.11.0",
+    "tslint-sonarts": "^1.8.0",
+    "typescript": "^3.1.2",
+    "vscode": "^1.1.21"
   },
   "dependencies": {
     "cross-spawn": "^6.0.5",
     "filequeue": "^0.5.0",
-    "fs-extra": "^6.0.1",
-    "glob": "^7.1.2",
-    "iconv-lite": "^0.4.23",
+    "fs-extra": "^7.0.0",
+    "glob": "^7.1.3",
+    "iconv-lite": "^0.4.24",
     "lokijs": "^1.5.5",
     "onec-syntaxparser": "0.1.11",
     "xml2js": "^0.4.19",
-    "fast-xml-parser": "^3.3.6",
+    "fast-xml-parser": "3.12.5",
     "alignment": "0.0.1"
   }
 }

@@ -35,11 +35,11 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                             bucket = this.getAllWords(word, document.getText(), bucket);
                             for (const key in this._global.systemEnum) {
                                 const full = this._global.systemEnum[key];
-                                if (vscode.window.activeTextEditor.document.fileName.endsWith(".bsl")
-                                    && !full.description) {
+                                if (vscode.window.activeTextEditor.document.fileName
+                                    .toLowerCase().endsWith(".bsl") && !full.description) {
                                     continue;
-                                } else if (vscode.window.activeTextEditor.document.fileName.endsWith(".os")
-                                && !full.oscript_description) {
+                                } else if (vscode.window.activeTextEditor.document.fileName
+                                    .toLowerCase().endsWith(".os") && !full.oscript_description) {
                                     continue;
                                 }
                                 const item = new vscode.CompletionItem(full.name);
@@ -55,17 +55,31 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                                 if (!full.constructors) {
                                     continue;
                                 }
-                                if (vscode.window.activeTextEditor.document.fileName.endsWith(".bsl")
-                                    && !full.description) {
+                                if (vscode.window.activeTextEditor.document.fileName
+                                    .toLowerCase().endsWith(".bsl") && !full.description) {
                                     continue;
-                                } else if (vscode.window.activeTextEditor.document.fileName.endsWith(".os")
-                                && !full.oscript_description) {
+                                } else if (vscode.window.activeTextEditor.document.fileName
+                                    .toLowerCase().endsWith(".os") && full.oscript_description === undefined) {
                                     continue;
                                 }
                                 const item = new vscode.CompletionItem(full.name);
                                 item.documentation = full.description;
                                 item.kind = vscode.CompletionItemKind.Class;
+                                item.insertText = (full.constructors)
+                                    ? (full.name + "(") : (full.name + "()");
                                 bucket.push(item);
+                            }
+                            if (vscode.window.activeTextEditor.document.fileName
+                                .toLowerCase().endsWith(".os")) {
+                                for (const key in this._global.libClasses) {
+                                    const full = this._global.libClasses[key];
+                                    const item = new vscode.CompletionItem(full.name);
+                                    item.documentation = "";
+                                    item.kind = vscode.CompletionItemKind.Class;
+                                    item.insertText = (full.constructors)
+                                        ? (full.name + "(") : (full.name + "()");
+                                    bucket.push(item);
+                                }
                             }
                             return resolve(bucket);
                         } else {
@@ -84,10 +98,14 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                             });
                             bucket = this.getAllWords(word, document.getText(), bucket);
                             result = this._global.querydef(word);
+                            result.push(...this._global.querydef(word, undefined, undefined, this._global.dbvars));
                             result.forEach((value) => {
                                 const moduleDescription = (value.module && value.module.length > 0)
                                     ? value.module + "."
                                     : "";
+                                if (value.oscriptClass) {
+                                    return;
+                                }
                                 let fullName = moduleDescription + value.name;
                                 let description = value.description;
                                 if (moduleDescription.length > 0) {
@@ -159,10 +177,11 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                     continue;
                 }
                 const full = completionDictFunctions[name];
-                if (vscode.window.activeTextEditor.document.fileName.endsWith(".bsl") && !full.description) {
+                if (vscode.window.activeTextEditor.document.fileName
+                    .toLowerCase().endsWith(".bsl") && !full.description) {
                     continue;
-                } else if (vscode.window.activeTextEditor.document.fileName.endsWith(".os")
-                && !full.oscript_signature) {
+                } else if (vscode.window.activeTextEditor.document.fileName
+                    .toLowerCase().endsWith(".os") && !full.oscript_signature) {
                     continue;
                 }
                 const completion = new vscode.CompletionItem(full.name);
@@ -198,9 +217,11 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
         for (const name in completionDictVariables) {
             if (wordMatch.exec(name)) {
                 const full = completionDictVariables[name];
-                if (vscode.window.activeTextEditor.document.fileName.endsWith(".bsl") && full.oscript_access) {
+                if (vscode.window.activeTextEditor.document.fileName
+                    .toLowerCase().endsWith(".bsl") && full.oscript_access) {
                     continue;
-                } else if (vscode.window.activeTextEditor.document.fileName.endsWith(".os") && !full.oscript_access) {
+                } else if (vscode.window.activeTextEditor.document.fileName
+                    .toLowerCase().endsWith(".os") && !full.oscript_access) {
                     continue;
                 }
                 const completion = new vscode.CompletionItem(full.name);
@@ -256,8 +277,11 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                 wordAtPosition = arrayName.join(".");
             }
             let queryResult: any[] = this._global.querydef(wordAtPosition + "\\.");
-            result = this.customDotComplection(queryResult, wordAtPosition, result);
+            this.customDotComplection(queryResult, wordAtPosition, result);
             this.checkSystemEnums(wordAtPosition, result);
+            this.checkOscriptClasses(wordAtPosition, result);
+            queryResult = this._global.querydef(wordAtPosition, undefined, undefined, this._global.dbvars);
+            this.customDotComplection(queryResult, wordAtPosition, result, false);
             // Получим все общие модули, у которых не заканчивается на точку.
             queryResult = this._global.querydef(wordAtPosition, false, false);
             for (const element of queryResult) {
@@ -278,7 +302,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
         return result;
     }
 
-    private customDotComplection(queryResult, wordAtPosition, result) {
+    private customDotComplection(queryResult, wordAtPosition, result, isMethod = true) {
         const metadata = {};
         for (const element of queryResult) {
             if (element.module) {
@@ -295,25 +319,50 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                     if (!element._method.IsExport) {
                         continue;
                     }
-                    if (!this.isModuleAccessable(element.filename)) {
+                    if (isMethod && !this.isModuleAccessable(element.filename)) {
                         continue;
                     }
                     const item: vscode.CompletionItem = new vscode.CompletionItem(element.name);
-                    item.kind = vscode.CompletionItemKind.Function;
+                    item.kind = isMethod ? vscode.CompletionItemKind.Function 
+                    : vscode.CompletionItemKind.Variable;
                     item.documentation = element.description;
-                    item.insertText = element.name + "(";
+                    item.insertText = element.name + (isMethod ? "(" : "");
                     result.push(item);
-                    metadata[moduleArray[0] + (moduleArray.length > 1) ? ("." + moduleArray[1]) : ""] = true;
+                    metadata[moduleArray[0] + ((moduleArray.length > 1) ? ("." + moduleArray[1]) : "")] = true;
                     continue;
                 }
             }
         }
-        return result;
     }
 
     private isModuleAccessable(filename: string): boolean {
         const arrayFilename = filename.split("/");
         return arrayFilename[arrayFilename.length - 4] === "CommonModules" || filename.endsWith("ManagerModule.bsl");
+    }
+
+    private checkOscriptClasses (wordAtPosition: string, result): void {
+        const classOneScript = this._global.classes[wordAtPosition.toLowerCase()];
+        if (!classOneScript) {
+            return;
+        }
+        for (const key in classOneScript.methods) {
+            const element = classOneScript.methods[key];
+            const item: vscode.CompletionItem = new vscode.CompletionItem(element.name);
+            item.kind = vscode.CompletionItemKind.Function ;
+            item.documentation = element.description;
+            item.insertText = element.name + "(";
+            result.push(item);
+            continue;
+}
+        for (const key in classOneScript.properties) {
+            const element = classOneScript.properties[key];
+            const item: vscode.CompletionItem = new vscode.CompletionItem(element.name);
+            item.kind = vscode.CompletionItemKind.Variable;
+            item.documentation = element.description;
+            item.insertText = element.name;
+            result.push(item);
+            continue;
+        }
     }
 
     private checkSystemEnums(wordAtPosition: string, result): void {

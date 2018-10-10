@@ -45,7 +45,7 @@ export default class LintProvider {
         if (arrFilename.length === 0) {
             return;
         }
-        const extension = arrFilename[arrFilename.length - 1];
+        const extension = arrFilename[arrFilename.length - 1].toLowerCase();
         if (extension !== "os" && !otherExtensions.includes(extension)) {
             return;
         }
