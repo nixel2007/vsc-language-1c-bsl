@@ -21,7 +21,7 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
         const ch = word.length;
         let verify = true;
         if (wordRange.start.character - ch > 0) {
-                const wordOfPosition = document.getText(new vscode.Range(wordRange.start.line, 0, wordRange.start.line, wordRange.start.character - ch - 1));
+                const wordOfPosition = document.getText(new vscode.Range(wordRange.start.line, 0, wordRange.start.line, wordRange.start.character - 1));
                 if (!wordOfPosition.trim().endsWith("Новый")) {
                     verify = false
                 }
