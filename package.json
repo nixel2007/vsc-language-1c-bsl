@@ -58,6 +58,11 @@
         "category": "Language 1C (BSL)"
       },
       {
+        "command": "language-1c-bsl.createMarkdownTextWithAPI",
+        "title": "Create a Markdown text of the module's API",
+        "category": "Language 1C (BSL)"
+      },
+      {
         "command": "language-1c-bsl.dynamicSnippets",
         "title": "Show dynamic snippets list",
         "category": "Language 1C (BSL)"

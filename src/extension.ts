@@ -1,6 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as fs from "fs";
+import * as Path from "path";
 import * as vscode from "vscode";
 import { BSL_MODE } from "./const";
 import { Global } from "./global";
@@ -34,6 +35,8 @@ export function activate(context: vscode.ExtensionContext) {
     const CMD_UPDATE = "language-1c-bsl.update";
     const CMD_CREATECOMMENTS = "language-1c-bsl.createComments";
     const CMD_CREATEDESCRIPTIONAPIMODULE = "language-1c-bsl.createDescriptionAPIModule";
+    const CMD_CREATEMARKDOWNTEXTAPI =
+        "language-1c-bsl.createMarkdownTextWithAPI";
     const CMD_ADDCOMMENT = "language-1c-bsl.addComment";
     const CMD_EXPANDABBREVIATION = "language-1c-bsl.expandAbbreviation";
     const CMD_QUICKOPEN = "language-1c-bsl.quickopen";
@@ -94,6 +97,12 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerCommand(CMD_CREATECOMMENTS, () => {
         createComments(global, false);
     }));
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand(CMD_CREATEMARKDOWNTEXTAPI, () => {
+            createMarkdown(global);
+        })
+    );
 
     vscode.languages.setLanguageConfiguration("bsl", {
         indentationRules: {
@@ -612,6 +621,66 @@ function createComments(global, all: boolean) {
         const arrComment = [];
         findMethod(lineMethod, re, editor, global, arrComment, all, enMode);
         insertComments(editor, arrComment);
+    }
+}
+
+async function createMarkdown(global): Promise<void> {
+    const editor = vscode.window.activeTextEditor;
+    if (editor.document.languageId !== "bsl") {
+        return;
+    }
+    const filepath = editor.document.fileName.replace(/\\/g, "/");
+    const filename = Path.basename(filepath, Path.extname(filepath));
+    const methods = global.db.find({
+        filename: filepath,
+        isExport: true
+    });
+
+    let md = "";
+    md = `## ${filename}\n\n`;
+
+    for (const method of methods) {
+        if (!method._method.IsExport) {
+            continue;
+        }
+        let methodDefinition = "";
+        const isProc = method.isproc ? "Процедура" : "Функция";
+        const isExport = method.isExport ? "Экспорт" : ""; 
+        let params = "";
+        method._method.Params.forEach((param) => {
+            if (param.byval) {
+                params += "Знач ";
+            }
+            params += param.name;
+            if (param.default) {
+                params += ` = ${param.default}`;
+            }
+            params += ", ";
+        });
+        if (params.length > 0) {
+            params = params.slice(0, params.length - 2);
+        }
+
+        methodDefinition += `${isProc} ${method.name}(${params}) ${isExport}`;
+
+        md += `### ${method.name}\n`;
+        md += "\n";
+        md += "```bsl\n";
+        md += method.description + "\n";
+        md += methodDefinition + "\n";
+        md += "```\n";
+        md += "\n";
+    }
+
+    const uri: vscode.Uri = vscode.Uri.parse(`untitled:/docs/${filename}.md`);
+    try {
+        const textDocument: vscode.TextDocument = await vscode.workspace.openTextDocument(uri);
+        const openedEditor: vscode.TextEditor = await vscode.window.showTextDocument(textDocument, 1, false);
+        openedEditor.edit((edit) => {
+            edit.insert(new vscode.Position(0, 0), md);
+        });
+    } catch (error) {
+        console.error(error);
     }
 }
 
