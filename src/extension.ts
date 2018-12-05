@@ -632,22 +632,34 @@ async function createMarkdown(global): Promise<void> {
     const filepath = editor.document.fileName.replace(/\\/g, "/");
     const filename = Path.basename(filepath, Path.extname(filepath));
     const methods = global.db.find({
-        filename: filepath,
+        filename: filepath
         isExport: true
     });
 
     let md = "";
     md = `## ${filename}\n\n`;
 
+    let constructor = "";
+    let methodsDefinitions = "";
+    const addedMethods = new Set<string>();
+
     for (const method of methods) {
-        if (!method._method.IsExport) {
+
+        const isConstructor = (method.name as string).toUpperCase() === "ПРИСОЗДАНИИОБЪЕКТА";
+        if (!(isConstructor || method._method.IsExport)) {
             continue;
         }
-        let methodDefinition = "";
-        const isProc = method.isproc ? "Процедура" : "Функция";
-        const isExport = method.isExport ? "Экспорт" : ""; 
+
+        if (addedMethods.has(method.name)) {
+            continue;
+        } else {
+            addedMethods.add(method.name);
+        }
+
+        const procPrefix = method.isproc ? "Процедура" : "Функция";
+        const isExport = method.isExport ? "Экспорт" : "";
         let params = "";
-        method._method.Params.forEach((param) => {
+        method._method.Params.forEach(param => {
             if (param.byval) {
                 params += "Знач ";
             }
@@ -661,22 +673,37 @@ async function createMarkdown(global): Promise<void> {
             params = params.slice(0, params.length - 2);
         }
 
-        methodDefinition += `${isProc} ${method.name}(${params}) ${isExport}`;
+        const procDefinition = `${procPrefix} ${method.name}(${params}) ${isExport}`;
 
-        md += `### ${method.name}\n`;
-        md += "\n";
-        md += "```bsl\n";
-        md += method.description + "\n";
-        md += methodDefinition + "\n";
-        md += "```\n";
-        md += "\n";
+        let methodDefinition = `### ${method.name}\n`;
+        methodDefinition += "\n";
+        methodDefinition += "```bsl\n";
+        methodDefinition += method.description + "\n";
+        methodDefinition += procDefinition + "\n";
+        methodDefinition += "```\n";
+        methodDefinition += "\n";
+
+        if (isConstructor) {
+            constructor = methodDefinition;
+        } else {
+            methodsDefinitions += methodDefinition;
+        }
     }
 
-    const uri: vscode.Uri = vscode.Uri.parse(`untitled:/docs/${filename}.md`);
+    md += constructor;
+    md += methodsDefinitions;
+
+    const uri: vscode.Uri = vscode.Uri.parse(`untitled:docs/${filename}.md`);
     try {
-        const textDocument: vscode.TextDocument = await vscode.workspace.openTextDocument(uri);
-        const openedEditor: vscode.TextEditor = await vscode.window.showTextDocument(textDocument, 1, false);
-        openedEditor.edit((edit) => {
+        const textDocument: vscode.TextDocument = await vscode.workspace.openTextDocument(
+            uri
+        );
+        const openedEditor: vscode.TextEditor = await vscode.window.showTextDocument(
+            textDocument,
+            1,
+            false
+        );
+        openedEditor.edit(edit => {
             edit.insert(new vscode.Position(0, 0), md);
         });
     } catch (error) {

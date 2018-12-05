@@ -13,6 +13,10 @@
         "forin": false,
         "no-var-requires": false,
         "no-implicit-dependencies": [true, "dev"],
+        "arrow-parens": [
+            true,
+            "ban-single-arg-parens"
+        ],
         "deprecation": true
     }
 }
