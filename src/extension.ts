@@ -170,7 +170,7 @@ export function activate(context: vscode.ExtensionContext) {
                     const point = contentChange.range.start.character + contentChange.text.length;
                     const position = new vscode.Position(editor.selection.active.line, point);
                     if (autoClosingBrackets) {
-                        editor.edit((editBuilder) => {
+                        editor.edit(editBuilder => {
                             editBuilder.insert(new vscode.Position(position.line, position.character), ")");
                         });
                     }
@@ -209,11 +209,11 @@ export function activate(context: vscode.ExtensionContext) {
         );
 
         if (line.text.match(/^\s*\/\/.*$/)) {
-            editor.edit((editBuilder) => {
+            editor.edit(editBuilder => {
                 editBuilder.insert(new vscode.Position(position.line, position.character), `\n${indent}//`);
             });
         } else {
-            editor.edit((editBuilder) => {
+            editor.edit(editBuilder => {
                 editBuilder.insert(new vscode.Position(position.line, position.character), "\n" + indent);
             });
         }
@@ -287,7 +287,7 @@ export function activate(context: vscode.ExtensionContext) {
                     return;
                     }
             const word = arrStrings[1];
-            editor.edit((editBuilder) => {
+            editor.edit(editBuilder => {
                     editBuilder.replace(
                         new vscode.Range(
                             new vscode.Position(
@@ -346,7 +346,7 @@ export function activate(context: vscode.ExtensionContext) {
             items.push({ label: element, description });
         }
 
-        vscode.window.showQuickPick(items).then((selection) => {
+        vscode.window.showQuickPick(items).then(selection => {
             if (!selection) {
                 return;
             }
@@ -363,7 +363,7 @@ export function activate(context: vscode.ExtensionContext) {
             const t = editor.document.getText(editor.selection);
             const arrSnippet = snippetBody.split("$1");
             if (arrSnippet.length === 1) {
-                editor.edit((editBuilder) => {
+                editor.edit(editBuilder => {
                     editBuilder.replace(editor.selection, snippetBody.replace("$0", t));
                 }).then(() => {
                     const position = editor.selection.isReversed ? editor.selection.anchor : editor.selection.active;
@@ -375,7 +375,7 @@ export function activate(context: vscode.ExtensionContext) {
                     );
                 });
             } else {
-                editor.edit((editBuilder) => {
+                editor.edit(editBuilder => {
                     editBuilder.replace(editor.selection, snippetBody.split("$1")[1].replace("$0", t));
                 }).then(() => {
                     const position = editor.selection.isReversed ? editor.selection.active : editor.selection.anchor;
@@ -385,7 +385,7 @@ export function activate(context: vscode.ExtensionContext) {
                         position.line,
                         position.character
                     );
-                    editor.edit((editBuilder) => {
+                    editor.edit(editBuilder => {
                         editBuilder.insert(editor.selection.active, snippetBody.split("$1")[0].replace("$0", t));
                     });
                 });
@@ -401,7 +401,7 @@ export function activate(context: vscode.ExtensionContext) {
         quickOpen.quickOpen();
     }));
 
-    context.subscriptions.push(vscode.commands.registerCommand(CMD_OPENCONT, (label) => {
+    context.subscriptions.push(vscode.commands.registerCommand(CMD_OPENCONT, label => {
         global.methodForDescription = { label, description: "Экспортные методы bsl" };
         syntaxHelper.update(previewUri);
         vscode.commands.executeCommand("vscode.previewHtml", previewUri, vscode.ViewColumn.Two);
@@ -587,7 +587,7 @@ export function activate(context: vscode.ExtensionContext) {
                 fillLabel("OneScript", "OneScript");
             }
         } else {
-            vscode.window.showQuickPick(items, options).then((selection) => {
+            vscode.window.showQuickPick(items, options).then(selection => {
                 if (typeof selection === "undefined") {
                     return;
                 }
@@ -632,7 +632,7 @@ async function createMarkdown(global): Promise<void> {
     const filepath = editor.document.fileName.replace(/\\/g, "/");
     const filename = Path.basename(filepath, Path.extname(filepath));
     const methods = global.db.find({
-        filename: filepath
+        filename: filepath,
         isExport: true
     });
 
@@ -693,10 +693,20 @@ async function createMarkdown(global): Promise<void> {
     md += constructor;
     md += methodsDefinitions;
 
-    const uri: vscode.Uri = vscode.Uri.parse(`untitled:docs/${filename}.md`);
+    const saveDialogOptions: vscode.SaveDialogOptions = {
+        filters: { Markdown: ["md"] }
+    };
+    vscode.window.showSaveDialog(saveDialogOptions).then(fileUri => {
+        openEditor(fileUri, md);
+    });
+
+}
+
+async function openEditor(fileUri, md) {
     try {
+        fileUri.scheme = "untitled";
         const textDocument: vscode.TextDocument = await vscode.workspace.openTextDocument(
-            uri
+            fileUri
         );
         const openedEditor: vscode.TextEditor = await vscode.window.showTextDocument(
             textDocument,
@@ -735,7 +745,7 @@ function findMethod(lineMethod, re, editor, global, arrComment, all, enMode) {
 }
 
 function insertComments(editor, arrComment) {
-    editor.edit((editBuilder) => {
+    editor.edit(editBuilder => {
         for (const iterator of arrComment) {
             editBuilder.replace(new vscode.Position(iterator.indexLine, 0), iterator.comment);
         }
