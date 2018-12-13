@@ -9,11 +9,15 @@ import Parser = require("onec-syntaxparser");
 import xml2js = require("xml2js");
 const fq = new FileQueue(500);
 
-import LibProvider, { IBSLClasses, IBSLMethods, IBSLPropertyDefinitions, IBSLSystemEnums } from "./libProvider";
+import LibProvider, {
+    IBSLClasses,
+    IBSLMethods,
+    IBSLPropertyDefinitions,
+    IBSLSystemEnums
+} from "./libProvider";
 const libProvider = new LibProvider();
 
 export class Global {
-
     public static create(adapter?: any): Global {
         if (!Global.instance) {
             Global.instance = new Global(adapter);
@@ -52,7 +56,7 @@ export class Global {
         }
         const configuration = this.getConfiguration("language-1c-bsl");
         this.autocompleteLanguage = this.getConfigurationKey(configuration, "languageAutocomplete");
-        const postfix = (this.autocompleteLanguage === "en") ? "_en" : "";
+        const postfix = this.autocompleteLanguage === "en" ? "_en" : "";
         this.toreplaced = this.getReplaceMetadata();
         this.cache = new loki("gtags.json");
         this.globalfunctions = {};
@@ -70,10 +74,10 @@ export class Global {
             const newName = globalFunction["name" + postfix];
             const newElement: IMethod = {
                 name: newName,
-                alias: (postfix === "_en") ? globalFunction.name : globalFunction.name_en,
+                alias: postfix === "_en" ? globalFunction.name : globalFunction.name_en,
                 description: globalFunction.description,
                 signature: globalFunction.signature,
-                returns: globalFunction.returns,
+                returns: globalFunction.returns
             };
             this.globalfunctions[newName.toLowerCase()] = newElement;
         }
@@ -86,12 +90,16 @@ export class Global {
             const newName = globalvariables[element]["name" + postfix];
             const newElement: IPropertyDefinition = {
                 name: newName,
-                alias: (postfix === "_en") ? globalvariables[element].name : globalvariables[element].name_en,
+                alias:
+                    postfix === "_en"
+                        ? globalvariables[element].name
+                        : globalvariables[element].name_en,
                 description: globalvariables[element].description
             };
             this.globalvariables[newName.toLowerCase()] = newElement;
         }
-        const osGlobalvariables: IBSLPropertyDefinitions = libProvider.oscriptStdLib.globalvariables;
+        const osGlobalvariables: IBSLPropertyDefinitions =
+            libProvider.oscriptStdLib.globalvariables;
         for (const key in osGlobalvariables) {
             if (!osGlobalvariables.hasOwnProperty(key)) {
                 continue;
@@ -105,9 +113,7 @@ export class Global {
                 const newName = variable["name" + postfix];
                 const newElement: IPropertyDefinition = {
                     name: newName,
-                    alias: (postfix === "_en")
-                        ? variable.name
-                        : variable.name_en,
+                    alias: postfix === "_en" ? variable.name : variable.name_en,
                     description: undefined,
                     oscript_description: variable.description,
                     oscript_access: variable.access
@@ -124,9 +130,9 @@ export class Global {
             const newName = segment["name" + postfix];
             const newElement: ISystemEnum = {
                 name: newName,
-                alias: (postfix === "_en") ? segment.name : segment.name_en,
+                alias: postfix === "_en" ? segment.name : segment.name_en,
                 description: segment.description,
-                values: [],
+                values: []
             };
             const values = segment.values;
             for (const key in values) {
@@ -136,8 +142,8 @@ export class Global {
                 const newNameValues = values[key]["name" + postfix];
                 const elementValue: ISystemEnumValue = {
                     name: newNameValues,
-                    alias: (postfix === "_en") ? values[key].name : values[key].name_en,
-                    description: values[key].description,
+                    alias: postfix === "_en" ? values[key].name : values[key].name_en,
+                    description: values[key].description
                 };
                 newElement.values.push(elementValue);
             }
@@ -157,7 +163,7 @@ export class Global {
             } else {
                 findEnum = {
                     name: newName,
-                    alias: (postfix === "_en") ? segment.name : segment.name_en,
+                    alias: postfix === "_en" ? segment.name : segment.name_en,
                     description: undefined,
                     values: [],
                     oscript_values: []
@@ -172,8 +178,8 @@ export class Global {
                 const newNameValues = values[key]["name" + postfix];
                 const elementValue: ISystemEnumValue = {
                     name: newNameValues,
-                    alias: (postfix === "_en") ? values[key].name : values[key].name_en,
-                    description: values[key].description,
+                    alias: postfix === "_en" ? values[key].name : values[key].name_en,
+                    description: values[key].description
                 };
                 findEnum.oscript_values.push(elementValue);
             }
@@ -190,20 +196,20 @@ export class Global {
             const newName = segment["name" + postfix];
             const newElement: IClass = {
                 name: newName,
-                alias: (postfix === "_en") ? segment.name : segment.name_en,
+                alias: postfix === "_en" ? segment.name : segment.name_en,
                 description: segment.description,
-                methods: (segment.methods) ? {} : undefined,
-                properties: (segment.properties) ? {} : undefined,
-                constructors: (segment.constructors) ? {} : undefined,
+                methods: segment.methods ? {} : undefined,
+                properties: segment.properties ? {} : undefined,
+                constructors: segment.constructors ? {} : undefined
             };
             for (const key in segment.methods) {
                 const method = segment.methods[key];
                 const newNameMethod = method["name" + postfix];
                 const newMethod: IMethod = {
-                    name:newNameMethod,
-                    alias: (postfix === "_en") ? method.name : method.name_en,
+                    name: newNameMethod,
+                    alias: postfix === "_en" ? method.name : method.name_en,
                     description: method.description,
-                    signature: method.signature,
+                    signature: method.signature
                 };
                 newElement.methods[newNameMethod.toLowerCase()] = newMethod;
             }
@@ -212,8 +218,8 @@ export class Global {
                 const newNameProp = property["name" + postfix];
                 const newProp: IPropertyDefinition = {
                     name: newNameProp,
-                    alias: (postfix === "_en") ? property.name : property.name_en,
-                    description: property.description,
+                    alias: postfix === "_en" ? property.name : property.name_en,
+                    description: property.description
                 };
                 newElement.properties[newNameProp.toLowerCase()] = newProp;
             }
@@ -221,7 +227,7 @@ export class Global {
                 const constructor = segment.constructors[key];
                 const newCntr: IConstructorDefinition = {
                     signature: constructor.signature,
-                    description: constructor.description,
+                    description: constructor.description
                 };
                 newElement.constructors[key.toLowerCase()] = newCntr;
             }
@@ -231,23 +237,28 @@ export class Global {
         this.addOscriptClasses(classesOscript, postfix);
     }
 
-    public getCacheLocal(
-        word: string,
-        source,
-        allToEnd = true,
-        fromFirst = true
-    ) {
+    public getCacheLocal(word: string, source, allToEnd = true, fromFirst = true) {
         const suffix = allToEnd ? "" : "$";
         const prefix = fromFirst ? "^" : "";
-        const querystring = { name: { $regex: new RegExp(prefix + word + suffix, "i") } };
-        return new Parser().parse(source).getMethodsTable().find(querystring);
+        const querystring = {
+            name: { $regex: new RegExp(prefix + word + suffix, "i") }
+        };
+        return new Parser()
+            .parse(source)
+            .getMethodsTable()
+            .find(querystring);
     }
 
     public getRefsLocal(filename: string, source: string) {
         const parsesModule = new Parser().parse(source);
         const entries = parsesModule.getMethodsTable().find();
         const collection = this.cache.addCollection(filename);
-        this.updateReferenceCallsOld(collection, parsesModule.context.CallsPosition, "GlobalModuleText", filename);
+        this.updateReferenceCallsOld(
+            collection,
+            parsesModule.context.CallsPosition,
+            "GlobalModuleText",
+            filename
+        );
         for (const item of entries) {
             this.updateReferenceCallsOld(collection, item._method.CallsPosition, item, filename);
         }
@@ -280,15 +291,17 @@ export class Global {
 
     public getMetadataForPath(fullpath: string, rootPath: string): any {
         const splitsymbol = "/";
-        const moduleArray: string[] = fullpath.substr(
-            rootPath.length + (rootPath.slice(-1) === "\\" ? 0 : 1)
-        ).split(splitsymbol);
+        const moduleArray: string[] = fullpath
+            .substr(rootPath.length + (rootPath.slice(-1) === "\\" ? 0 : 1))
+            .split(splitsymbol);
         const filepath = fullpath;
         const hierarchy = moduleArray.length;
         let result: any;
         if (hierarchy > 3) {
-            if (moduleArray[hierarchy - 1].startsWith("ObjectModule.bsl")
-                && moduleArray[hierarchy - 2].startsWith("Ext")) {
+            if (
+                moduleArray[hierarchy - 1].startsWith("ObjectModule.bsl") &&
+                moduleArray[hierarchy - 2].startsWith("Ext")
+            ) {
                 const meta: IMetaData = {
                     type: "ObjectModule",
                     fullpath: filepath,
@@ -297,20 +310,24 @@ export class Global {
                     project: moduleArray.slice(0, hierarchy - 4).join("/")
                 };
                 result = meta;
-            } else if (moduleArray[hierarchy - 1].startsWith("ManagerModule.bsl")
-                && hierarchy > 3
-                && moduleArray[hierarchy - 2].startsWith("Ext")) {
+            } else if (
+                moduleArray[hierarchy - 1].startsWith("ManagerModule.bsl") &&
+                hierarchy > 3 &&
+                moduleArray[hierarchy - 2].startsWith("Ext")
+            ) {
                 const meta: IMetaData = {
                     type: "ManagerModule",
                     parenttype: moduleArray[hierarchy - 4],
                     fullpath: filepath,
-                    module: moduleArray[hierarchy  - 4] + "." + moduleArray[hierarchy - 3],
+                    module: moduleArray[hierarchy - 4] + "." + moduleArray[hierarchy - 3],
                     project: moduleArray.slice(0, hierarchy - 4).join("/")
                 };
                 result = meta;
-            } else if (moduleArray[hierarchy - 1].startsWith("RecordSetModule.bsl")
-                && hierarchy > 3
-                && moduleArray[hierarchy - 2].startsWith("Ext")) {
+            } else if (
+                moduleArray[hierarchy - 1].startsWith("RecordSetModule.bsl") &&
+                hierarchy > 3 &&
+                moduleArray[hierarchy - 2].startsWith("Ext")
+            ) {
                 const meta: IMetaData = {
                     type: "RecordSetModule",
                     parenttype: moduleArray[hierarchy - 4],
@@ -319,18 +336,27 @@ export class Global {
                     project: moduleArray.slice(0, hierarchy - 4).join("/")
                 };
                 result = meta;
-            } else if (moduleArray[hierarchy - 1].startsWith("CommandModule.bsl") && hierarchy > 5) {
+            } else if (
+                moduleArray[hierarchy - 1].startsWith("CommandModule.bsl") &&
+                hierarchy > 5
+            ) {
                 const meta: IMetaData = {
                     type: "CommandModule",
                     parenttype: moduleArray[hierarchy - 6],
                     fullpath: filepath,
-                    module: moduleArray[hierarchy - 6] + "."
-                            + moduleArray[hierarchy - 5] + "." + moduleArray[hierarchy - 3],
+                    module:
+                        moduleArray[hierarchy - 6] +
+                        "." +
+                        moduleArray[hierarchy - 5] +
+                        "." +
+                        moduleArray[hierarchy - 3],
                     project: moduleArray.slice(0, hierarchy - 6).join("/")
                 };
                 result = meta;
-            } else if (moduleArray[hierarchy - 1].startsWith("CommandModule.bsl")
-                && moduleArray[hierarchy - 4].startsWith("CommonCommands")) {
+            } else if (
+                moduleArray[hierarchy - 1].startsWith("CommandModule.bsl") &&
+                moduleArray[hierarchy - 4].startsWith("CommonCommands")
+            ) {
                 const meta: IMetaData = {
                     type: "CommandModule",
                     parenttype: moduleArray[hierarchy - 4],
@@ -339,8 +365,10 @@ export class Global {
                     project: moduleArray.slice(0, hierarchy - 4).join("/")
                 };
                 result = meta;
-            } else if (moduleArray[hierarchy - 1].startsWith("Module.bsl")
-                && moduleArray[hierarchy - 4].startsWith("CommonModules")) {
+            } else if (
+                moduleArray[hierarchy - 1].startsWith("Module.bsl") &&
+                moduleArray[hierarchy - 4].startsWith("CommonModules")
+            ) {
                 const meta: IMetaData = {
                     type: "CommonModule",
                     parenttype: moduleArray[hierarchy - 4],
@@ -349,32 +377,41 @@ export class Global {
                     project: moduleArray.slice(0, hierarchy - 4).join("/")
                 };
                 result = meta;
-            } else if (moduleArray[hierarchy - 1].startsWith("Module.bsl")
-                && moduleArray[hierarchy - 2].startsWith("Form")) {
+            } else if (
+                moduleArray[hierarchy - 1].startsWith("Module.bsl") &&
+                moduleArray[hierarchy - 2].startsWith("Form")
+            ) {
                 const meta: IMetaData = {
                     type: "FormModule",
                     parenttype: moduleArray[hierarchy - 7],
                     fullpath: filepath,
-                    module: moduleArray[hierarchy - 7] + "."
-                            + moduleArray[hierarchy - 6] + "." + moduleArray[hierarchy - 4],
+                    module:
+                        moduleArray[hierarchy - 7] +
+                        "." +
+                        moduleArray[hierarchy - 6] +
+                        "." +
+                        moduleArray[hierarchy - 4],
                     project: moduleArray.slice(0, hierarchy - 7).join("/")
                 };
                 result = meta;
-            } else if (moduleArray[hierarchy - 1].startsWith("Module.bsl")
-                && moduleArray[hierarchy - 2].startsWith("Ext")
-                && moduleArray[hierarchy - 4].startsWith("WebServices")) {
+            } else if (
+                moduleArray[hierarchy - 1].startsWith("Module.bsl") &&
+                moduleArray[hierarchy - 2].startsWith("Ext") &&
+                moduleArray[hierarchy - 4].startsWith("WebServices")
+            ) {
                 const meta: IMetaData = {
                     type: "CommonModule",
                     parenttype: moduleArray[hierarchy - 4],
                     fullpath: filepath,
-                    module: moduleArray[hierarchy - 4]
-                            + "." + moduleArray[hierarchy - 3],
+                    module: moduleArray[hierarchy - 4] + "." + moduleArray[hierarchy - 3],
                     project: moduleArray.slice(0, hierarchy - 4).join("/")
                 };
                 this.dbmodules.insert(meta);
-            } else if (moduleArray[hierarchy - 1].startsWith("ValueManagerModule.bsl")
-                && hierarchy > 3
-                && moduleArray[hierarchy - 2].startsWith("Ext")) {
+            } else if (
+                moduleArray[hierarchy - 1].startsWith("ValueManagerModule.bsl") &&
+                hierarchy > 3 &&
+                moduleArray[hierarchy - 2].startsWith("Ext")
+            ) {
                 const meta: IMetaData = {
                     type: "ValueManagerModule",
                     parenttype: moduleArray[hierarchy - 4],
@@ -383,8 +420,8 @@ export class Global {
                     project: moduleArray.slice(0, hierarchy - 4).join("/")
                 };
                 result = meta;
-            }  else {
-               console.error("error set metadata for " + fullpath);
+            } else {
+                console.error("error set metadata for " + fullpath);
             }
         }
         return result;
@@ -392,16 +429,17 @@ export class Global {
 
     public getModuleForPath(fullpath: string, rootPath: string): string {
         const splitsymbol = "/";
-        const moduleArray: string[] = fullpath.substr(
-            rootPath.length + (rootPath.slice(-1) === "\\" ? 0 : 1)
-        ).split(splitsymbol);
+        const moduleArray: string[] = fullpath
+            .substr(rootPath.length + (rootPath.slice(-1) === "\\" ? 0 : 1))
+            .split(splitsymbol);
         let moduleStr: string = "";
         const hierarchy = moduleArray.length;
         if (hierarchy > 3) {
             if (moduleArray[hierarchy - 4].startsWith("CommonModules")) {
                 moduleStr = moduleArray[hierarchy - 3];
             } else if (hierarchy > 3 && this.toreplaced[moduleArray[hierarchy - 4]] !== undefined) {
-                moduleStr = this.toreplaced[moduleArray[hierarchy - 4]] + "." + moduleArray[hierarchy - 3];
+                moduleStr =
+                    this.toreplaced[moduleArray[hierarchy - 4]] + "." + moduleArray[hierarchy - 3];
             }
         }
         return moduleStr;
@@ -424,9 +462,11 @@ export class Global {
             locLabel = locLabel.replace(meta.parenttype + ".", ""); // Для внешних обработок уберем "метаданные"
         }
         if (this.autocompleteLanguage === "ru") {
-
             if (toReplacedPrefix[meta.parenttype]) {
-                locLabel = locLabel.replace(meta.parenttype + ".", toReplacedPrefix[meta.parenttype] + ".");
+                locLabel = locLabel.replace(
+                    meta.parenttype + ".",
+                    toReplacedPrefix[meta.parenttype] + "."
+                );
             }
 
             if (toReplacedSuffix[meta.type]) {
@@ -446,7 +486,7 @@ export class Global {
 
     public addtocachefiles(files: string[], rootPath: string): any {
         const filesLength = files.length;
-        const substrIndex = (process.platform === "win32") ? 8 : 7;
+        const substrIndex = process.platform === "win32" ? 8 : 7;
         for (let i = 0; i < filesLength; ++i) {
             let fullpath = files[i].toString();
             fullpath = decodeURIComponent(fullpath);
@@ -457,7 +497,9 @@ export class Global {
                 if (err) {
                     throw err;
                 }
-                const moduleStr: string = fullpath.endsWith(".bsl") ? this.getModuleForPath(fullpath, rootPath) : "";
+                const moduleStr: string = fullpath.endsWith(".bsl")
+                    ? this.getModuleForPath(fullpath, rootPath)
+                    : "";
                 source = source.replace(/\r\n?/g, "\n");
                 if (fullpath.endsWith(".bsl") && source.trim().length > 0) {
                     const metacollection = this.getMetadataForPath(fullpath, rootPath);
@@ -471,7 +513,11 @@ export class Global {
                     this.postMessage("Обновляем кэш файла № " + i + " из " + filesLength, 2000);
                 }
                 if (parsesModule.context.CallsPosition.length > 0) {
-                    this.updateReferenceCalls(parsesModule.context.CallsPosition, "GlobalModuleText", fullpath);
+                    this.updateReferenceCalls(
+                        parsesModule.context.CallsPosition,
+                        "GlobalModuleText",
+                        fullpath
+                    );
                 }
                 for (const item of entries) {
                     const method = {
@@ -540,17 +586,17 @@ export class Global {
         };
         let result = "";
         const oscriptConfig = cp.spawn("oscript-config", args, options);
-        oscriptConfig.on("error", (error) => {
+        oscriptConfig.on("error", error => {
             if (error.toString().indexOf("ENOENT") > 0) {
                 console.log("oscript-config isn't found. Is it installed?");
             } else {
                 console.error(error);
             }
         });
-        oscriptConfig.stderr.on("data", (buffer) => {
+        oscriptConfig.stderr.on("data", buffer => {
             result += buffer.toString();
         });
-        oscriptConfig.stdout.on("data", (buffer) => {
+        oscriptConfig.stdout.on("data", buffer => {
             result += buffer.toString();
         });
         oscriptConfig.on("close", () => {
@@ -585,19 +631,24 @@ export class Global {
                         this.dllData = this.addOscriptDll(files);
                     });
                 }
-                const syntaxHelpers = [path.join(path.join(path.join(__dirname, "..", "..", "OneScript.Web"),
-                 "syntaxhelp"), "syntaxhelp.WebHost.json")];
+                const syntaxHelpers = [
+                    path.join(
+                        path.join(path.join(__dirname, "..", "..", "OneScript.Web"), "syntaxhelp"),
+                        "syntaxhelp.WebHost.json"
+                    )
+                ];
 
                 this.syntaxHelpersData = this.addOscriptDll(syntaxHelpers);
-
             } catch (e) {
                 console.error(e);
             }
         });
 
         if (rootPath) {
-            let searchPattern = basePath !== "" ? basePath.substr(2) + "**/{classes,классы}/*.os"
-            : "**/{classes,классы}/*.os";
+            let searchPattern =
+                basePath !== ""
+                    ? basePath.substr(2) + "**/{classes,классы}/*.os"
+                    : "**/{classes,классы}/*.os";
             const globOptions: glob.IOptions = {};
             globOptions.dot = true;
             globOptions.cwd = rootPath;
@@ -609,30 +660,32 @@ export class Global {
                     return;
                 }
                 this.addOscriptFilesToCache("", files, true);
-                });
-            searchPattern = basePath !== "" ? basePath.substr(2) + "**/{modules,модули}/*.os"
-            : "**/{modules,модули}/*.os";
+            });
+            searchPattern =
+                basePath !== ""
+                    ? basePath.substr(2) + "**/{modules,модули}/*.os"
+                    : "**/{modules,модули}/*.os";
             glob(searchPattern, globOptions, (err, files) => {
                 if (err) {
                     console.error(err);
                     return;
                 }
                 this.addOscriptFilesToCache("", files);
-                });
+            });
         }
 
         if (rootPath) {
-            let searchPattern = basePath !== "" ? basePath.substr(2) + "/Subsystems/*.xml"
-            : "Subsystems/*.xml";
+            let searchPattern =
+                basePath !== "" ? basePath.substr(2) + "/Subsystems/*.xml" : "Subsystems/*.xml";
             this.findSubsystems(searchPattern, rootPath);
             this.postMessage("Запущено заполнение кеша", 3000);
             rootPath = path.join(rootPath, basePath);
-            searchPattern = basePath !== "" ? basePath.substr(2) + "/**/*.{bsl,os}" : "**/*.{bsl,os}";
+            searchPattern =
+                basePath !== "" ? basePath.substr(2) + "/**/*.{bsl,os}" : "**/*.{bsl,os}";
             this.findFilesForCache(searchPattern, rootPath);
         } else {
             this.bslCacheUpdated = true;
         }
-
     }
 
     public customUpdateCache(source: string, filename: string) {
@@ -672,7 +725,10 @@ export class Global {
         this.updateReferenceCalls(parsesModule.context.CallsPosition, "GlobalModuleText", fullpath);
         for (const item of entries) {
             this.updateReferenceCalls(item._method.CallsPosition, item, fullpath);
-            const method = { Params: item._method.Params, IsExport: item._method.IsExport };
+            const method = {
+                Params: item._method.Params,
+                IsExport: item._method.IsExport
+            };
             const newItem = {
                 name: String(item.name),
                 isproc: Boolean(item.isproc),
@@ -693,8 +749,14 @@ export class Global {
             return new Array();
         }
         const prefix = local ? "" : ".";
-        const querystring = { call: { $regex: new RegExp(prefix + word + "$", "i") } };
-        return collection.chain().find(querystring).simplesort("name").data();
+        const querystring = {
+            call: { $regex: new RegExp(prefix + word + "$", "i") }
+        };
+        return collection
+            .chain()
+            .find(querystring)
+            .simplesort("name")
+            .data();
     }
 
     public querydef(module: string, all = true, lazy = false, db = this.db): any {
@@ -710,7 +772,11 @@ export class Global {
                     $regex: new RegExp(prefix + module + suffix, "i")
                 }
             };
-            return db.chain().find(querystring).simplesort("name").data();
+            return db
+                .chain()
+                .find(querystring)
+                .simplesort("name")
+                .data();
         }
     }
 
@@ -738,7 +804,12 @@ export class Global {
             }
             return true;
         }
-        return this.db.chain().find(querystring).where(filterByModule).simplesort("name").data();
+        return this.db
+            .chain()
+            .find(querystring)
+            .where(filterByModule)
+            .simplesort("name")
+            .data();
     }
 
     public GetSignature(entry) {
@@ -761,18 +832,20 @@ export class Global {
                 continue;
             }
             const nameParam = params[element];
-            paramsString += (paramsString === "(" ? "" : ", ");
-            paramsString += (nameParam.byval ? "Знач " : "");
+            paramsString += paramsString === "(" ? "" : ", ";
+            paramsString += nameParam.byval ? "Знач " : "";
             paramsString += nameParam.name;
             const re = new RegExp(
-                `^\\s*(Параметры|Parameters)(.|\\n)*\\n\\s*${nameParam.name}\\s*(-|–)\\s*([<\\wа-яА-Я\\.>]+)`,
+                `^\\s*(Параметры|Parameters)(.|\\n)*\\n\\s*${
+                    nameParam.name
+                }\\s*(-|–)\\s*([<\\wа-яА-Я\\.>]+)`,
                 "gm"
             );
             const match: RegExpExecArray = re.exec(description);
             if (match) {
                 paramsString = paramsString + ": " + match[4];
             }
-            paramsString += (nameParam.default ? ` = ${nameParam.default}` : "");
+            paramsString += nameParam.default ? ` = ${nameParam.default}` : "";
         }
         paramsString = paramsString + ")";
         if (strRetState) {
@@ -784,7 +857,7 @@ export class Global {
             description,
             paramsString,
             strRetState,
-            fullRetState: (!retState) ? "" : retState[0]
+            fullRetState: !retState ? "" : retState[0]
         };
     }
 
@@ -798,7 +871,9 @@ export class Global {
         const match: RegExpExecArray = re.exec(description);
         if (match) {
             descriptionParam = match[5];
-            const cast = (new RegExp("\\n\\s*[<\\wа-яА-Я\\.>]+\\s*(-|–)\\s*", "g")).exec(descriptionParam);
+            const cast = new RegExp("\\n\\s*[<\\wа-яА-Я\\.>]+\\s*(-|–)\\s*", "g").exec(
+                descriptionParam
+            );
             if (cast) {
                 descriptionParam = descriptionParam.substr(0, cast.index);
             }
@@ -815,7 +890,7 @@ export class Global {
             "fullNameRecursor",
             "findFilesForCache"
         ];
-        methodsList.forEach((element) => {
+        methodsList.forEach(element => {
             if (adapter.hasOwnProperty(element)) {
                 this[element] = adapter[element];
             }
@@ -823,13 +898,13 @@ export class Global {
     }
 
     // tslint:disable-next-line:variable-name
-    public postMessage(_description: string, _interval?: number) { } // tslint:disable-line:no-empty
+    public postMessage(_description: string, _interval?: number) {} // tslint:disable-line:no-empty
 
     // tslint:disable-next-line:variable-name
-    public getConfiguration(_section: string): any { } // tslint:disable-line:no-empty
+    public getConfiguration(_section: string): any {} // tslint:disable-line:no-empty
 
     // tslint:disable-next-line:variable-name
-    public getConfigurationKey(_configuration, _key: string): any { } // tslint:disable-line:no-empty
+    public getConfigurationKey(_configuration, _key: string): any {} // tslint:disable-line:no-empty
 
     public getRootPath(): string {
         return "";
@@ -841,7 +916,7 @@ export class Global {
     }
 
     // tslint:disable-next-line:variable-name
-    public findFilesForCache(_searchPattern: string, _rootPath: string) { } // tslint:disable-line:no-empty
+    public findFilesForCache(_searchPattern: string, _rootPath: string) {} // tslint:disable-line:no-empty
 
     public readFileSync(fullpath, substrIndex) {
         fullpath = decodeURIComponent(fullpath);
@@ -867,17 +942,20 @@ export class Global {
                 data = fs.readFileSync(syntaxHelp);
                 const pathDll = path.basename(path.dirname(path.dirname(syntaxHelp)));
                 const dllDesc = JSON.parse(data);
-                const readme = fs.readdirSync(
-                    path.join(path.dirname(path.dirname(syntaxHelp)))).join(";").match(/readme\.md/i);
+                const readme = fs
+                    .readdirSync(path.join(path.dirname(path.dirname(syntaxHelp))))
+                    .join(";")
+                    .match(/readme\.md/i);
                 dataDll[pathDll] = dllDesc;
                 if (readme) {
-                    dataDll[pathDll].description = ((process.platform === "win32") ? "" : "file://")
-                        + path.join(path.dirname(path.dirname(syntaxHelp)), readme[0]);
-                };
+                    dataDll[pathDll].description =
+                        (process.platform === "win32" ? "" : "file://") +
+                        path.join(path.dirname(path.dirname(syntaxHelp)), readme[0]);
+                }
                 const classesOscript: Object = dllDesc["classes"];
-                const postfix = (this.autocompleteLanguage === "en") ? "_en" : "";
-                this.addOscriptGlobalFunction(dllDesc["globalfunctions"], postfix)
-                this.addOscriptClasses(classesOscript, postfix)
+                const postfix = this.autocompleteLanguage === "en" ? "_en" : "";
+                this.addOscriptGlobalFunction(dllDesc["globalfunctions"], postfix);
+                this.addOscriptClasses(classesOscript, postfix);
             } catch (err) {
                 if (err) {
                     console.log(err);
@@ -899,7 +977,7 @@ export class Global {
                 const newName = method["name" + postfix];
                 const newElement: IMethod = {
                     name: newName,
-                    alias: (postfix === "_en") ? method.name : method.name_en,
+                    alias: postfix === "_en" ? method.name : method.name_en,
                     description: undefined,
                     signature: undefined,
                     returns: method.returns,
@@ -920,7 +998,9 @@ export class Global {
             const newName = segment["name" + postfix];
             if (this.classes[newName.toLowerCase()]) {
                 const findClass = this.classes[newName.toLowerCase()];
-                findClass.oscript_description = (segment.description) ? (segment.description) : findClass.description;
+                findClass.oscript_description = segment.description
+                    ? segment.description
+                    : findClass.description;
                 for (const key in segment.methods) {
                     const nameMethod = segment.methods[key]["name" + postfix];
                     if (!findClass.methods) {
@@ -931,12 +1011,13 @@ export class Global {
                     if (!findMethod) {
                         findMethod = {
                             name: nameMethod,
-                            alias: (postfix === "_en")
-                                ? segment.methods[key].name
-                                : segment.methods[key].name_en,
+                            alias:
+                                postfix === "_en"
+                                    ? segment.methods[key].name
+                                    : segment.methods[key].name_en,
                             description: undefined,
                             oscript_description: desc ? desc : "",
-                            signature: segment.methods[key].signature,
+                            signature: segment.methods[key].signature
                         };
                         findClass.methods[nameMethod.toLowerCase()] = findMethod;
                     } else {
@@ -953,11 +1034,12 @@ export class Global {
                     if (!findProp) {
                         findProp = {
                             name: nameProp,
-                            alias: (postfix === "_en")
-                                ? segment.properties[key].name
-                                : segment.properties[key].name_en,
+                            alias:
+                                postfix === "_en"
+                                    ? segment.properties[key].name
+                                    : segment.properties[key].name_en,
                             description: undefined,
-                            oscript_description: desc ? desc : "",
+                            oscript_description: desc ? desc : ""
                         };
                         findClass.properties[nameProp.toLowerCase()] = findProp;
                     } else {
@@ -969,12 +1051,12 @@ export class Global {
                         findClass.constructors = {};
                     }
                     let findCntr = findClass.constructors[key.toLowerCase()];
-                    const desc = segment.constructors[key].description
+                    const desc = segment.constructors[key].description;
                     if (!findCntr) {
                         findCntr = {
                             description: undefined,
                             oscript_description: desc ? desc : "",
-                            signature: segment.constructors[key].signature,
+                            signature: segment.constructors[key].signature
                         };
                         findClass.constructors[key.toLowerCase()] = findCntr;
                     } else {
@@ -985,19 +1067,19 @@ export class Global {
                 const oscript_description = segment.description;
                 const newElement: IClass = {
                     name: newName,
-                    alias: (postfix === "_en") ? segment.name : segment.name_en,
+                    alias: postfix === "_en" ? segment.name : segment.name_en,
                     description: undefined,
                     oscript_description: oscript_description ? oscript_description : "",
-                    methods: (segment.methods) ? {} : undefined,
-                    properties: (segment.properties) ? {} : undefined,
-                    constructors: (segment.constructors) ? {} : undefined,
+                    methods: segment.methods ? {} : undefined,
+                    properties: segment.properties ? {} : undefined,
+                    constructors: segment.constructors ? {} : undefined
                 };
                 for (const key in segment.constructors) {
                     const desc = segment.constructors[key].description;
                     const newCntr: IConstructorDefinition = {
                         signature: segment.constructors[key].signature,
                         description: undefined,
-                        oscript_description: desc ? desc : "",
+                        oscript_description: desc ? desc : ""
                     };
                     newElement.constructors[key.toLowerCase()] = newCntr;
                 }
@@ -1006,11 +1088,12 @@ export class Global {
                     const newNameProp = segment.properties[key]["name" + postfix];
                     const newProp: IPropertyDefinition = {
                         name: newNameProp,
-                        alias: (postfix === "_en")
-                            ? segment.properties[key].name
-                            : segment.properties[key].name_en,
+                        alias:
+                            postfix === "_en"
+                                ? segment.properties[key].name
+                                : segment.properties[key].name_en,
                         description: undefined,
-                        oscript_description: desc ? desc : "",
+                        oscript_description: desc ? desc : ""
                     };
                     newElement.properties[newNameProp.toLowerCase()] = newProp;
                 }
@@ -1019,17 +1102,19 @@ export class Global {
                     const newNameMethod = segment.methods[key]["name" + postfix];
                     const newMethod: IMethod = {
                         name: newNameMethod,
-                        alias: (postfix === "_en") ? segment.methods[key].name : segment.methods[key].name_en,
+                        alias:
+                            postfix === "_en"
+                                ? segment.methods[key].name
+                                : segment.methods[key].name_en,
                         description: undefined,
                         oscript_description: desc ? desc : "",
-                        signature: segment.methods[key].signature,
+                        signature: segment.methods[key].signature
                     };
                     newElement.methods[newNameMethod.toLowerCase()] = newMethod;
                 }
                 this.classes[newName.toLowerCase()] = newElement;
             }
         }
-
     }
 
     private findSubsystems(searchPattern: string, rootPath: string) {
@@ -1049,7 +1134,7 @@ export class Global {
 
     private async addSubsystemsToCache(files: string[]) {
         const filesLength = files.length;
-        const substrIndex = (process.platform === "win32") ? 8 : 7;
+        const substrIndex = process.platform === "win32" ? 8 : 7;
         for (let i = 0; i < filesLength; ++i) {
             const data = this.readFileSync(files[i].toString(), substrIndex);
             let result;
@@ -1063,8 +1148,10 @@ export class Global {
             }
             const propSubsys = result.MetaDataObject.Subsystem[0].Properties[0];
             const ChildObjects = result.MetaDataObject.Subsystem[0].ChildObjects[0];
-            const content = (propSubsys.Content.length === 0 || !propSubsys.Content[0].hasOwnProperty("xr:Item"))
-            ? [] : propSubsys.Content[0]["xr:Item"];
+            const content =
+                propSubsys.Content.length === 0 || !propSubsys.Content[0].hasOwnProperty("xr:Item")
+                    ? []
+                    : propSubsys.Content[0]["xr:Item"];
             const object = [];
             for (const obj of content) {
                 object.push(obj._);
@@ -1072,14 +1159,14 @@ export class Global {
             const item = {
                 name: propSubsys.Name[0],
                 object,
-                subsystems: (ChildObjects.Subsystem) ? ChildObjects.Subsystem : []
+                subsystems: ChildObjects.Subsystem ? ChildObjects.Subsystem : []
             };
             this.subsystems[item.name] = item;
         }
     }
 
     private delay(milliseconds: number) {
-        return new Promise<void>((resolve) => {
+        return new Promise<void>(resolve => {
             setTimeout(resolve, milliseconds);
         });
     }
@@ -1101,15 +1188,13 @@ export class Global {
                 this.dbcalls.set(value.call, []);
                 arrCalls = this.dbcalls.get(value.call);
             }
-            arrCalls.push(
-                {
-                    filename: file,
-                    call: value.call,
-                    line: value.line,
-                    character: value.character,
-                    name: String(method.name)
-                }
-            );
+            arrCalls.push({
+                filename: file,
+                call: value.call,
+                line: value.line,
+                character: value.character,
+                name: String(method.name)
+            });
         }
     }
 
@@ -1192,25 +1277,28 @@ export class Global {
     private addOscriptFilesToCache(libConfig, modules, isClasses = false) {
         const lib = path.basename(path.dirname(libConfig));
         for (const module of modules) {
-            const fullpath = (libConfig) ? path.join(path.dirname(libConfig), module.$.file) : module;
+            const fullpath = libConfig ? path.join(path.dirname(libConfig), module.$.file) : module;
             fq.readFile(fullpath, { encoding: "utf8" }, (err, source) => {
                 if (err) {
                     throw err;
                 }
-                const moduleStr = (libConfig) ? module.$.name : path.parse(module).name;
+                const moduleStr = libConfig ? module.$.name : path.parse(module).name;
                 source = source.replace(/\r\n?/g, "\n");
                 const parsesModule = new Parser().parse(source);
                 const entries = parsesModule.getMethodsTable().find();
-                const moduleDescr = moduleStr + ", " + ((isClasses) ? "класс" : "модуль");
+                const moduleDescr = moduleStr + ", " + (isClasses ? "класс" : "модуль");
                 for (const exportVar in parsesModule.context.ModuleVars) {
                     if (parsesModule.context.ModuleVars[exportVar].isExport) {
                         if (!this.libData[lib]) {
-                            const readme = fs.readdirSync(
-                                path.join(path.dirname(libConfig))).join(";").match(/readme\.md/i);
+                            const readme = fs
+                                .readdirSync(path.join(path.dirname(libConfig)))
+                                .join(";")
+                                .match(/readme\.md/i);
                             this.libData[lib] = { modules: {} };
                             if (readme) {
-                                this.libData[lib].description = ((process.platform === "win32") ? "" : "file://")
-                                    + path.join(path.dirname(libConfig), readme[0]);
+                                this.libData[lib].description =
+                                    (process.platform === "win32" ? "" : "file://") +
+                                    path.join(path.dirname(libConfig), readme[0]);
                             }
                         }
                         if (!this.libData[lib].modules[moduleDescr]) {
@@ -1226,7 +1314,7 @@ export class Global {
                         };
                         const varItem: IVarsValue = {
                             name: String(exportVar),
-                            _method: {IsExport: true},
+                            _method: { IsExport: true },
                             filename: fullpath,
                             module: moduleStr,
                             description: parsesModule.context.ModuleVars[exportVar].description,
@@ -1237,7 +1325,10 @@ export class Global {
                     }
                 }
                 for (const item of entries) {
-                    const dbMethod = { Params: item._method.Params, IsExport: item._method.IsExport };
+                    const dbMethod = {
+                        Params: item._method.Params,
+                        IsExport: item._method.IsExport
+                    };
                     const newItem: IMethodValue = {
                         name: String(item.name),
                         isproc: Boolean(item.isproc),
@@ -1255,36 +1346,51 @@ export class Global {
                     if (item.name === "ПриСозданииОбъекта" || item._method.IsExport) {
                         const signature = this.GetSignature(newItem);
                         if (!this.libData[lib]) {
-                            const readme = fs.readdirSync(
-                                path.join(path.dirname(libConfig))).join(";").match(/readme\.md/i);
+                            const readme = fs
+                                .readdirSync(path.join(path.dirname(libConfig)))
+                                .join(";")
+                                .match(/readme\.md/i);
                             this.libData[lib] = { modules: {} };
                             if (readme) {
-                                this.libData[lib].description = ((process.platform === "win32") ? "" : "file://")
-                                    + path.join(path.dirname(libConfig), readme[0]);
+                                this.libData[lib].description =
+                                    (process.platform === "win32" ? "" : "file://") +
+                                    path.join(path.dirname(libConfig), readme[0]);
                             }
                         }
                         if (!this.libData[lib].modules[moduleDescr]) {
                             this.libData[lib].modules[moduleDescr] = {};
                         }
-                        const regExpParams = new RegExp("^\\s*(Параметры|Parameters)\\:?\s*\n*((.|\\n)*)", "gm");
+                        const regExpParams = new RegExp(
+                            "^\\s*(Параметры|Parameters)\\:?s*\n*((.|\\n)*)",
+                            "gm"
+                        );
                         const paramsDesc = regExpParams.exec(signature.description);
                         let strParamsDesc = "";
                         if (paramsDesc) {
                             strParamsDesc = paramsDesc[2];
-                            signature.description = signature.description.substr(0, paramsDesc.index);
+                            signature.description = signature.description.substr(
+                                0,
+                                paramsDesc.index
+                            );
                         }
                         if (item.name === "ПриСозданииОбъекта") {
                             if (!this.libData[lib].modules[moduleDescr].constructors) {
                                 this.libData[lib].modules[moduleDescr].constructors = {};
-                                this.libData[lib].modules[moduleDescr].constructors["По умолчанию"] = {
-                                    description: signature.description.replace(/((.|\n)*.+)\n*/m, "$1")
-                                        .replace(/\n/g, "<br>").replace(/\t/g, ""),
+                                this.libData[lib].modules[moduleDescr].constructors[
+                                    "По умолчанию"
+                                ] = {
+                                    description: signature.description
+                                        .replace(/((.|\n)*.+)\n*/m, "$1")
+                                        .replace(/\n/g, "<br>")
+                                        .replace(/\t/g, ""),
                                     name: moduleStr,
                                     signature: {
                                         default: {
                                             СтрокаПараметров: signature.paramsString,
-                                            Параметры: strParamsDesc.replace(/((.|\n)*.+)\n*/m, "$1")
-                                                .replace(/\n/g, "<br>").replace(/\t/g, "")
+                                            Параметры: strParamsDesc
+                                                .replace(/((.|\n)*.+)\n*/m, "$1")
+                                                .replace(/\n/g, "<br>")
+                                                .replace(/\t/g, "")
                                         }
                                     }
                                 };
@@ -1295,28 +1401,37 @@ export class Global {
                             this.libData[lib].modules[moduleDescr].methods = {};
                             this.libData[lib].modules[moduleDescr].description = "";
                         }
-                        const returnData = signature.fullRetState.substring(25)
+                        const returnData = signature.fullRetState
+                            .substring(25)
                             .replace(/((.|\n)*.+)\n*/m, "$1")
-                            .replace(/\n/g, "<br>").replace(/\t/g, "");
+                            .replace(/\n/g, "<br>")
+                            .replace(/\t/g, "");
                         this.libData[lib].modules[moduleDescr].methods[item.name] = {
-                            description: signature.description.replace(/((.|\n)*.+)\n*/m, "$1")
-                                .replace(/\n/g, "<br>").replace(/\t/g, ""),
+                            description: signature.description
+                                .replace(/((.|\n)*.+)\n*/m, "$1")
+                                .replace(/\n/g, "<br>")
+                                .replace(/\t/g, ""),
                             alias: "",
                             signature: {
                                 default: {
                                     СтрокаПараметров: signature.paramsString,
-                                    Параметры: strParamsDesc.replace(/((.|\n)*.+)\n*/m, "$1")
-                                        .replace(/\n/g, "<br>").replace(/\t/g, "")
+                                    Параметры: strParamsDesc
+                                        .replace(/((.|\n)*.+)\n*/m, "$1")
+                                        .replace(/\n/g, "<br>")
+                                        .replace(/\t/g, "")
                                 }
                             },
                             returns: returnData
                         };
                     }
                     if (this.libData[lib] && this.libData[lib].modules[moduleDescr] && isClasses) {
-                        this.libClasses[moduleStr.toLowerCase()] = {name: moduleStr};
+                        this.libClasses[moduleStr.toLowerCase()] = {
+                            name: moduleStr
+                        };
                         if (this.libData[lib].modules[moduleDescr].constructors) {
-                            this.libClasses[moduleStr.toLowerCase()].constructors =
-                            this.libData[lib].modules[moduleDescr].constructors;
+                            this.libClasses[moduleStr.toLowerCase()].constructors = this.libData[
+                                lib
+                            ].modules[moduleDescr].constructors;
                         }
                     }
                     this.db.insert(newItem);
@@ -1370,8 +1485,7 @@ interface IVarsValue {
     description: string;
     oscriptLib?: boolean;
     oscriptClass?: boolean;
-};
-
+}
 
 interface IMethods {
     [index: string]: IMethod;

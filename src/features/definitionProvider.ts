@@ -1,14 +1,15 @@
 import * as vscode from "vscode";
 import AbstractProvider from "./abstractProvider";
 
-export default class GlobalDefinitionProvider extends AbstractProvider implements vscode.DefinitionProvider {
+export default class GlobalDefinitionProvider extends AbstractProvider
+    implements vscode.DefinitionProvider {
     public provideDefinition(
         document: vscode.TextDocument,
         position: vscode.Position
     ): Thenable<vscode.Location[]> {
         const word = document.getText(document.getWordRangeAtPosition(position)).split(/\r?\n/)[0];
         this._global.hoverTrue = false;
-        return new Promise((resolve) => {
+        return new Promise(resolve => {
             const result: vscode.Location[] = [];
             const added = {};
             const wordPosition = document.getWordRangeAtPosition(position);
@@ -16,7 +17,12 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
             if (!wordPosition) {
                 wordAtPosition = "";
             } else {
-                wordAtPosition = this._global.fullNameRecursor(wordAtPosition, document, wordPosition, true);
+                wordAtPosition = this._global.fullNameRecursor(
+                    wordAtPosition,
+                    document,
+                    wordPosition,
+                    true
+                );
                 if (this._global.toreplaced[wordAtPosition.split(".")[0]]) {
                     const arrayName = wordAtPosition.split(".");
                     arrayName.splice(0, 1, this._global.toreplaced[arrayName[0]]);
@@ -27,17 +33,23 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
             if (this._global.globalfunctions[wordAtPosition.toLowerCase()]) {
                 return resolve(result);
             } else if (wordPosition.start.character > 0) {
-                const wordOfPosition = document.getText(new vscode.Range(wordPosition.start.line, 0, wordPosition.start.line, wordPosition.start.character - 1));
+                const wordOfPosition = document.getText(
+                    new vscode.Range(
+                        wordPosition.start.line,
+                        0,
+                        wordPosition.start.line,
+                        wordPosition.start.character - 1
+                    )
+                );
                 if (wordOfPosition.trim().endsWith("Новый")) {
                     const entry = this._global.libClasses[wordAtPosition.toLowerCase()];
                     if (entry) {
                         d = this._global.querydef(word);
                         if (d) {
-                            const location =
-                                new vscode.Location(
-                                    vscode.Uri.file(d[0].filename),
-                                    new vscode.Position(0, 0)
-                                );
+                            const location = new vscode.Location(
+                                vscode.Uri.file(d[0].filename),
+                                new vscode.Position(0, 0)
+                            );
                             result.push(location);
                             return resolve(result);
                         }
@@ -58,8 +70,11 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                 if (d.length > 1) {
                     for (const targetModule of d) {
                         const arrayFilename = targetModule.filename.split("/");
-                        if (!targetModule.oscriptLib && arrayFilename[arrayFilename.length - 4] === "CommonModules"
-                            || targetModule.filename.endsWith("ManagerModule.bsl")) {
+                        if (
+                            (!targetModule.oscriptLib &&
+                                arrayFilename[arrayFilename.length - 4] === "CommonModules") ||
+                            targetModule.filename.endsWith("ManagerModule.bsl")
+                        ) {
                             d = [targetModule];
                             break;
                         }
@@ -78,11 +93,10 @@ export default class GlobalDefinitionProvider extends AbstractProvider implement
                     //     continue;
                     // }
                     added[element.name] = true;
-                    const location =
-                            new vscode.Location(
-                                (element.filename) ? vscode.Uri.file(element.filename) : document.uri,
-                                new vscode.Position(element.line, (element.isproc ? 9 : 7) + 1)
-                            );
+                    const location = new vscode.Location(
+                        element.filename ? vscode.Uri.file(element.filename) : document.uri,
+                        new vscode.Position(element.line, (element.isproc ? 9 : 7) + 1)
+                    );
                     result.push(location);
                 }
             }

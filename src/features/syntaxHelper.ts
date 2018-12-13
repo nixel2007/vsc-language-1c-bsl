@@ -11,7 +11,8 @@ import SyntaxExternalHelper from "./SyntaxExternalHelper";
 
 import * as fastXmlParser from "fast-xml-parser";
 
-export default class SyntaxHelperProvider extends AbstractProvider implements vscode.TextDocumentContentProvider {
+export default class SyntaxHelperProvider extends AbstractProvider
+    implements vscode.TextDocumentContentProvider {
     private onDidChangeEvent = new vscode.EventEmitter<vscode.Uri>();
     private syntaxContent: AbstractSyntaxContent;
     private syntax: string;
@@ -35,7 +36,8 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
         "AccountingRegisters",
         "CalculationRegisters",
         "BusinessProcesses",
-        "Tasks"];
+        "Tasks"
+    ];
 
     get onDidChange(): vscode.Event<vscode.Uri> {
         return this.onDidChangeEvent.event;
@@ -76,19 +78,22 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
 
     private createListMd(label): object {
         function compareModules(a, b) {
-            if (a.module > b.module) { return 1; }
-            if (a.module < b.module) { return -1; }
+            if (a.module > b.module) {
+                return 1;
+            }
+            if (a.module < b.module) {
+                return -1;
+            }
         }
         const items = {};
-        const fillMD = (label.indexOf("Metadata.") === -1) ? false : true;
+        const fillMD = label.indexOf("Metadata.") === -1 ? false : true;
         const labelMD = label.replace("Metadata.", "");
         for (const md of this.metadata) {
-            let listMod = this._global.db.find(
-                {
-                    filename: { $regex: `.${md}.` },
-                    isExport: true,
-                    module: { $ne: "" }
-                });
+            let listMod = this._global.db.find({
+                filename: { $regex: `.${md}.` },
+                isExport: true,
+                module: { $ne: "" }
+            });
             if (listMod.length > 0) {
                 items[this._global.toreplaced[md]] = [];
                 if (fillMD && this._global.toreplaced[md] === labelMD) {
@@ -104,7 +109,7 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
 
     private createListSubsystems(label) {
         const subsystems = {};
-        const fillSubsystem = (label.indexOf("Subsystem.") === -1) ? false : true;
+        const fillSubsystem = label.indexOf("Subsystem.") === -1 ? false : true;
         const labelSubsystem = label.replace("Subsystem.", "");
         for (const sub in this._global.subsystems) {
             if (this._global.subsystems.hasOwnProperty(sub)) {
@@ -115,8 +120,10 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
                     this.fillObject(element.object, items);
                     subsystems[sub].object = items;
                     const parentSubsystem = this._global.subsystems[labelSubsystem];
-                    subsystems[sub].subsystems = (parentSubsystem.subsystems.length > 0)
-                    ? this.getSubsystems(labelSubsystem) : [];
+                    subsystems[sub].subsystems =
+                        parentSubsystem.subsystems.length > 0
+                            ? this.getSubsystems(labelSubsystem)
+                            : [];
                 }
             }
         }
@@ -143,7 +150,8 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
             AccountingRegisters: "РегистрыБухгалтерии",
             CalculationRegisters: "РегистрыРасчета",
             BusinessProcesses: "БизнесПроцессы",
-            Tasks: "Задачи"};
+            Tasks: "Задачи"
+        };
         for (const el of element) {
             const humanMetadata = humanMeta[el.split(".")[0]];
             if (!humanMetadata) {
@@ -151,7 +159,10 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
             }
             let humanModule = `${humanMetadata}.${el.split(".")[1]}`;
             humanModule = humanModule.replace("ОбщиеМодули.", "");
-            const exportMethods = this._global.db.find({ isExport: true, module: humanModule });
+            const exportMethods = this._global.db.find({
+                isExport: true,
+                module: humanModule
+            });
             if (exportMethods.length > 0) {
                 this.fillExportMethods(items, exportMethods);
             }
@@ -160,8 +171,12 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
 
     private fillExportMethods(items, exportMethods) {
         function compareMethods(a, b) {
-            if (a.name > b.name) { return 1; }
-            if (a.name < b.name) { return -1; }
+            if (a.name > b.name) {
+                return 1;
+            }
+            if (a.name < b.name) {
+                return -1;
+            }
         }
         exportMethods = exportMethods.sort(compareMethods);
         for (const expMethod of exportMethods) {
@@ -172,30 +187,36 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
             }
             const moduleDesc = items[expMethod.module];
             const isManager = expMethod.filename.endsWith("ManagerModule.bsl");
-            const segment = (isManager) ? "manager" : "object";
+            const segment = isManager ? "manager" : "object";
             if (!moduleDesc[segment]) {
                 moduleDesc[segment] = {};
             }
             const signature = this._global.GetSignature(expMethod);
-            const regExpParams = new RegExp("^\\s*(Параметры|Parameters)\\:?\s*\n*((.|\\n)*)", "gm");
+            const regExpParams = new RegExp("^\\s*(Параметры|Parameters)\\:?s*\n*((.|\\n)*)", "gm");
             const paramsDesc = regExpParams.exec(signature.description);
             let strParamsDesc = "";
             if (paramsDesc) {
                 strParamsDesc = paramsDesc[2];
                 signature.description = signature.description.substr(0, paramsDesc.index);
             }
-            const returnData = signature.fullRetState.substring(25)
+            const returnData = signature.fullRetState
+                .substring(25)
                 .replace(/((.|\n)*.+)\n*/m, "$1")
-                .replace(/\n/g, "<br>").replace(/\t/g, "");
+                .replace(/\n/g, "<br>")
+                .replace(/\t/g, "");
             moduleDesc[segment][expMethod.name] = {
-                description: signature.description.replace(/((.|\n)*.+)\n*/m, "$1")
-                    .replace(/\n/g, "<br>").replace(/\t/g, ""),
+                description: signature.description
+                    .replace(/((.|\n)*.+)\n*/m, "$1")
+                    .replace(/\n/g, "<br>")
+                    .replace(/\t/g, ""),
                 alias: "",
                 signature: {
                     default: {
                         СтрокаПараметров: signature.paramsString,
-                        Параметры: strParamsDesc.replace(/((.|\n)*.+)\n*/m, "$1")
-                            .replace(/\n/g, "<br>").replace(/\t/g, "")
+                        Параметры: strParamsDesc
+                            .replace(/((.|\n)*.+)\n*/m, "$1")
+                            .replace(/\n/g, "<br>")
+                            .replace(/\t/g, "")
                     }
                 },
                 returns: returnData
@@ -218,7 +239,7 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
     private addSubsystems(files) {
         const subsystems = [];
         const filesLength = files.length;
-        const substrIndex = (process.platform === "win32") ? 8 : 7;
+        const substrIndex = process.platform === "win32" ? 8 : 7;
         for (let i = 0; i < filesLength; ++i) {
             const data = this._global.readFileSync(files[i].toString(), substrIndex);
             let result;
@@ -231,15 +252,16 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
                 }
             }
             const propSubsys = result.MetaDataObject.Subsystem.Properties;
-            const content = (propSubsys.Content.length === 0 || !propSubsys.Content.hasOwnProperty("xr:Item"))
-                ? [] : propSubsys.Content["xr:Item"];
+            const content =
+                propSubsys.Content.length === 0 || !propSubsys.Content.hasOwnProperty("xr:Item")
+                    ? []
+                    : propSubsys.Content["xr:Item"];
             const items = {};
             this.fillObject(content, items);
             const item = {
                 name: propSubsys.Name,
                 content: items,
-                subsystems: (propSubsys.ChildObjects)
-                ? propSubsys.ChildObjects.Subsystem : []
+                subsystems: propSubsys.ChildObjects ? propSubsys.ChildObjects.Subsystem : []
             };
             subsystems.push(item);
         }
@@ -248,28 +270,38 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
 
     private buildHTMLDocument(): Promise<string> {
         let textSyntax = "";
-        const metadata = (this.syntax === "BSL")
-            ? this.createListMd(this._global.methodForDescription.label) : undefined;
-        const subsystems = (this.syntax === "BSL")
-            ? this.createListSubsystems(this._global.methodForDescription.label) : undefined;
-        if ((this._global.syntaxFilled === "")
-            || (this._global.syntaxFilled !== this.syntax)
-            || (this.syntax === "BSL")) {
+        const metadata =
+            this.syntax === "BSL"
+                ? this.createListMd(this._global.methodForDescription.label)
+                : undefined;
+        const subsystems =
+            this.syntax === "BSL"
+                ? this.createListSubsystems(this._global.methodForDescription.label)
+                : undefined;
+        if (
+            this._global.syntaxFilled === "" ||
+            this._global.syntaxFilled !== this.syntax ||
+            this.syntax === "BSL"
+        ) {
             this._global.syntaxFilled = this.syntax;
             this.oscriptMethods = this.syntaxContent.getSyntaxContentItems(
-                (this.syntax === "BSL") ? subsystems : (this.syntax === "Внешний СП")
-                        ? this._global.syntaxHelpersData : this._global.dllData,
-                (this.syntax === "BSL") ? metadata : this._global.libData);
+                this.syntax === "BSL"
+                    ? subsystems
+                    : this.syntax === "Внешний СП"
+                    ? this._global.syntaxHelpersData
+                    : this._global.dllData,
+                this.syntax === "BSL" ? metadata : this._global.libData
+            );
             let jsonString = JSON.stringify(this.oscriptMethods)
-                                .replace(/[\\]/g, "\\\\")
-                                .replace(/[\"]/g, "\\\"")
-                                .replace(/[\']/g, "\\\'")
-                                .replace(/[\/]/g, "\\/")
-                                .replace(/[\b]/g, "\\b")
-                                .replace(/[\f]/g, "\\f")
-                                .replace(/[\n]/g, "\\n")
-                                .replace(/[\r]/g, "\\r")
-                                .replace(/[\t]/g, "\\t");
+                .replace(/[\\]/g, "\\\\")
+                .replace(/[\"]/g, '\\"')
+                .replace(/[\']/g, "\\'")
+                .replace(/[\/]/g, "\\/")
+                .replace(/[\b]/g, "\\b")
+                .replace(/[\f]/g, "\\f")
+                .replace(/[\n]/g, "\\n")
+                .replace(/[\r]/g, "\\r")
+                .replace(/[\t]/g, "\\t");
             jsonString = `'${jsonString}'`;
             textSyntax = ` window.localStorage.setItem("bsl-language", ${jsonString});
                 `;
@@ -286,19 +318,34 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
     }
 
     private getFillStructure(textSyntax, syntaxObject, subsystems, metadata) {
-        return this.syntaxContent.getStructure(textSyntax,
-            (this.syntax === "BSL") ? subsystems : (this.syntax === "oscript-library")
-                ? this._global.dllData : syntaxObject,
-            (this.syntax === "BSL") ? metadata : (this.syntax === "oscript-library")
-                ? this._global.libData : (this.syntax === "Внешний СП")
-                ? this._global.syntaxHelpersData : this.oscriptMethods);
+        return this.syntaxContent.getStructure(
+            textSyntax,
+            this.syntax === "BSL"
+                ? subsystems
+                : this.syntax === "oscript-library"
+                ? this._global.dllData
+                : syntaxObject,
+            this.syntax === "BSL"
+                ? metadata
+                : this.syntax === "oscript-library"
+                ? this._global.libData
+                : this.syntax === "Внешний СП"
+                ? this._global.syntaxHelpersData
+                : this.oscriptMethods
+        );
     }
 
     private async getHTML(fillStructure): Promise<string> {
-        const hljs = path.join(vscode.extensions.getExtension("xDrivenDevelopment.language-1c-bsl").extensionPath,
-        "lib", "highlight.pack.js");
-        const mdit = path.join(vscode.extensions.getExtension("xDrivenDevelopment.language-1c-bsl").extensionPath,
-        "lib", "markdown-it.js");
+        const hljs = path.join(
+            vscode.extensions.getExtension("xDrivenDevelopment.language-1c-bsl").extensionPath,
+            "lib",
+            "highlight.pack.js"
+        );
+        const mdit = path.join(
+            vscode.extensions.getExtension("xDrivenDevelopment.language-1c-bsl").extensionPath,
+            "lib",
+            "markdown-it.js"
+        );
 
         return `<head>
                     <style>
@@ -780,7 +827,9 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
                         })();
                     </script>
                     <h1 id="hjh" style="font-size: 1em; margin-left:5px; margin-top: 20px; float:left;
-                    display: inline-block; width:calc(90% - 80px);">${fillStructure.globalHeader}</h1>
+                    display: inline-block; width:calc(90% - 80px);">${
+                        fillStructure.globalHeader
+                    }</h1>
                     <a href="command:language-1c-bsl.syntaxHelper" style = "margin: 20px 10px 10px 10px;
                     padding: 5px 15px 5px 5px; float:right; width:55px; height:15px; white-space: nowrap;
                     background: #007acc; text-decoration:none; color: white; "><svg xmlns="http://www.w3.org/2000/svg"
@@ -795,7 +844,9 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
                         ${fillStructure.globCont}
                         ${fillStructure.classes}</ul>
                     </div>
-                    <div id = "splitter1" style = "background: #9A9A9A; display:${fillStructure.classVisible};
+                    <div id = "splitter1" style = "background: #9A9A9A; display:${
+                        fillStructure.classVisible
+                    };
                     cursor: n-resize; height:2px; margin-top:4px;" onmousedown="drag(this, event);"></div>
                     <div id="cont" style = "display:${fillStructure.classVisible};">
                         <h1 id="header" style="font-size: 1em; float:left; margin-left:5px; width:90%;
@@ -805,10 +856,14 @@ export default class SyntaxHelperProvider extends AbstractProvider implements vs
                         document.getElementById('splitter1').style.display = 'none';
                         document.getElementById('struct').style.height = '100%'" style="float: right; margin-top: 6px">
                         <hr style = "clear:both">
-                        <div id="el" style = "overflow-y: scroll; margin-left:5px; height: ${fillStructure.elHeight}">
+                        <div id="el" style = "overflow-y: scroll; margin-left:5px; height: ${
+                            fillStructure.elHeight
+                        }">
                             ${fillStructure.segmentDescription}
                         </div>
-                    <div id = "splitter2" style = "background: #9A9A9A; display:${fillStructure.methodVisible};
+                    <div id = "splitter2" style = "background: #9A9A9A; display:${
+                        fillStructure.methodVisible
+                    };
                     cursor: n-resize; height:2px; margin-top:4px;" onmousedown="drag(this, event);"></div>
                     <div id="contMethod" style = "display:${fillStructure.methodVisible};">
                         <div style="float:left; width:calc(100% - 30px); margin-right:0px; margin-left:5px">

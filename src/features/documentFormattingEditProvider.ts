@@ -6,10 +6,8 @@ const _NL = "\n".charCodeAt(0);
 const _TAB = "\t".charCodeAt(0);
 const _WSB = " ".charCodeAt(0);
 
-export default class DocumentFormattingEditProvider
-    extends AbstractProvider
+export default class DocumentFormattingEditProvider extends AbstractProvider
     implements vscode.DocumentFormattingEditProvider, vscode.DocumentRangeFormattingEditProvider {
-
     private indentWord: Set<string> = new Set([
         "(",
         "процедура",
@@ -47,21 +45,27 @@ export default class DocumentFormattingEditProvider
         "except"
     ]);
 
-    public provideDocumentFormattingEdits(document: vscode.TextDocument,
-                                          options: vscode.FormattingOptions): vscode.TextEdit[] {
+    public provideDocumentFormattingEdits(
+        document: vscode.TextDocument,
+        options: vscode.FormattingOptions
+    ): vscode.TextEdit[] {
         return this.format(document, undefined, options);
     }
 
-    public provideDocumentRangeFormattingEdits(document: vscode.TextDocument,
-                                               range: vscode.Range,
-                                               options: vscode.FormattingOptions): vscode.TextEdit[] {
+    public provideDocumentRangeFormattingEdits(
+        document: vscode.TextDocument,
+        range: vscode.Range,
+        options: vscode.FormattingOptions
+    ): vscode.TextEdit[] {
         return this.format(document, range, options);
     }
 
-    public provideOnTypeFormattingEdits(document: vscode.TextDocument,
-                                        position: vscode.Position,
-                                        ch: string,
-                                        options: vscode.FormattingOptions): vscode.TextEdit[] {
+    public provideOnTypeFormattingEdits(
+        document: vscode.TextDocument,
+        position: vscode.Position,
+        ch: string,
+        options: vscode.FormattingOptions
+    ): vscode.TextEdit[] {
         const iterator = new BackwardIterator(document, 0, position.line - 1);
         if (ch === "\n") {
             while (iterator.hasNext()) {
@@ -74,16 +78,16 @@ export default class DocumentFormattingEditProvider
         }
         return this.format(
             document,
-            new vscode.Range(
-                new vscode.Position(iterator.lineNumber, 0),
-                position),
+            new vscode.Range(new vscode.Position(iterator.lineNumber, 0), position),
             options
-            );
+        );
     }
 
-    private format(document: vscode.TextDocument,
-                   range: vscode.Range,
-                   options: vscode.FormattingOptions): vscode.TextEdit[] {
+    private format(
+        document: vscode.TextDocument,
+        range: vscode.Range,
+        options: vscode.FormattingOptions
+    ): vscode.TextEdit[] {
         const documentText = document.getText();
         let initialIndentLevel: number;
         const globals = this._global;
@@ -94,8 +98,10 @@ export default class DocumentFormattingEditProvider
         if (range) {
             const startPosition = new vscode.Position(range.start.line, 0);
             rangeOffset = document.offsetAt(startPosition);
-            const endPosition =  new vscode.Position(
-                range.end.line, document.lineAt(range.end.line).text.length);
+            const endPosition = new vscode.Position(
+                range.end.line,
+                document.lineAt(range.end.line).text.length
+            );
             const endOffset = document.offsetAt(endPosition);
             range = new vscode.Range(startPosition, endPosition);
             value = documentText.substring(rangeOffset, endOffset);
@@ -110,7 +116,9 @@ export default class DocumentFormattingEditProvider
         }
 
         let indentLevel = initialIndentLevel;
-        const indentValue: string = (options.insertSpaces) ? this.repeat(" ", options.tabSize).toString() : "\t";
+        const indentValue: string = options.insertSpaces
+            ? this.repeat(" ", options.tabSize).toString()
+            : "\t";
 
         function addEdit(text: string, lineNumber: number) {
             const oldIndent = /^\s*/.exec(text)[0];
@@ -119,7 +127,8 @@ export default class DocumentFormattingEditProvider
                     vscode.TextEdit.replace(
                         new vscode.Range(
                             new vscode.Position(lineNumber, 0),
-                            new vscode.Position(lineNumber, oldIndent.length)),
+                            new vscode.Position(lineNumber, oldIndent.length)
+                        ),
                         indentValue.repeat(indentLevel)
                     )
                 );
@@ -127,9 +136,10 @@ export default class DocumentFormattingEditProvider
         }
 
         function wizard(formattingValue) {
-            const keywords = "(?:[^\wа-яё\.]|^)(Процедура|Функция|КонецПроцедуры|КонецФункции|Если|Иначе"
-            + "|ИначеЕсли|КонецЕсли|Тогда|Для|Каждого|Пока|Цикл|КонецЦикла|Попытка|Исключение|КонецПопытки"
-            + "|Экспорт|Возврат|Истина|Ложь|Сообщить|Новый|СообщениеПользователю|Неопределено)(?=[^\wа-яё\.]|$)";
+            const keywords =
+                "(?:[^wа-яё.]|^)(Процедура|Функция|КонецПроцедуры|КонецФункции|Если|Иначе" +
+                "|ИначеЕсли|КонецЕсли|Тогда|Для|Каждого|Пока|Цикл|КонецЦикла|Попытка|Исключение|КонецПопытки" +
+                "|Экспорт|Возврат|Истина|Ложь|Сообщить|Новый|СообщениеПользователю|Неопределено)(?=[^wа-яё.]|$)";
             const Regex = /(\/\/.*$)|(\/\/.*\r?\n)|("[^"]*$)|("(""|[^"]*)*")|((\/[^\/"]|[^\/"])+)/g;
             const separator = /(^|.)(<>|<=|>=|,|=|\+|-|\*|\/|%|<|>)(.|$)/g;
             let ArrStrings = Regex.exec(formattingValue);
@@ -137,7 +147,10 @@ export default class DocumentFormattingEditProvider
                 if (ArrStrings[6]) {
                     indexValue = ArrStrings.index;
                     ArrStrings[6] = ArrStrings[6].replace(new RegExp(keywords, "ig"), replacer);
-                    ArrStrings[6] = ArrStrings[6].replace(new RegExp(separator, "g"), spaceInserter);
+                    ArrStrings[6] = ArrStrings[6].replace(
+                        new RegExp(separator, "g"),
+                        spaceInserter
+                    );
                 }
                 ArrStrings = Regex.exec(formattingValue);
             }
@@ -149,7 +162,9 @@ export default class DocumentFormattingEditProvider
                 return match;
             }
             const startPosition = document.positionAt(rangeOffset + indexValue + offset);
-            const endPosition = document.positionAt(rangeOffset + indexValue + offset + match.length);
+            const endPosition = document.positionAt(
+                rangeOffset + indexValue + offset + match.length
+            );
             if (match1.match(/\s/) || match2 === ",") {
                 editOperations.push(
                     vscode.TextEdit.replace(
@@ -183,8 +198,12 @@ export default class DocumentFormattingEditProvider
                 const startPosition = document.positionAt(
                     rangeOffset + indexValue + offset + match.length - match1.length
                 );
-                const endPosition = document.positionAt(rangeOffset + indexValue + offset + match.length);
-                editOperations.push(vscode.TextEdit.replace(new vscode.Range(startPosition, endPosition), match1));
+                const endPosition = document.positionAt(
+                    rangeOffset + indexValue + offset + match.length
+                );
+                editOperations.push(
+                    vscode.TextEdit.replace(new vscode.Range(startPosition, endPosition), match1)
+                );
             }
             return match;
         }
@@ -192,9 +211,15 @@ export default class DocumentFormattingEditProvider
         function findConstruction(indentWord, reindentWord, unindentWord) {
             for (const key in arrayValue) {
                 const element = arrayValue[key];
-                const firstWord = element.toLowerCase().trim().split(/[^\wа-яё\(\)]/)[0];
-                if (+key !== 0 && indentLevel !== 0
-                    && (reindentWord.has(firstWord) || unindentWord.has(firstWord))) {
+                const firstWord = element
+                    .toLowerCase()
+                    .trim()
+                    .split(/[^\wа-яё\(\)]/)[0];
+                if (
+                    +key !== 0 &&
+                    indentLevel !== 0 &&
+                    (reindentWord.has(firstWord) || unindentWord.has(firstWord))
+                ) {
                     indentLevel--;
                 }
                 addEdit(element, +key + range.start.line);

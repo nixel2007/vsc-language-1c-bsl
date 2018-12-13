@@ -7,13 +7,14 @@ import * as vscode from "vscode";
 import { BSL_MODE } from "../const";
 
 export default class LintProvider {
-
     private commandId: string = this.getCommandId();
     private args: string[] = ["-encoding=utf-8", "-check"];
-    private diagnosticCollection: vscode.DiagnosticCollection =
-        vscode.languages.createDiagnosticCollection("OneScript Linter");
-    private statusBarItem: vscode.StatusBarItem =
-        vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
+    private diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection(
+        "OneScript Linter"
+    );
+    private statusBarItem: vscode.StatusBarItem = vscode.window.createStatusBarItem(
+        vscode.StatusBarAlignment.Left
+    );
 
     public activate(subscriptions: vscode.Disposable[]) {
         vscode.workspace.onDidOpenTextDocument(this.doBsllint, this, subscriptions);
@@ -52,9 +53,15 @@ export default class LintProvider {
         const args = this.args.slice();
         args.push(filename);
         if (linterEntryPoint) {
-            args.push("-env=" + path.join(
-                vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri).uri.fsPath,
-                linterEntryPoint));
+            args.push(
+                "-env=" +
+                    path.join(
+                        vscode.workspace.getWorkspaceFolder(
+                            vscode.window.activeTextEditor.document.uri
+                        ).uri.fsPath,
+                        linterEntryPoint
+                    )
+            );
         }
         const options = {
             cwd: path.dirname(filename),
@@ -62,10 +69,10 @@ export default class LintProvider {
         };
         let result = "";
         const phpcs = cp.spawn(this.commandId, args, options);
-        phpcs.stderr.on("data", (buffer) => {
+        phpcs.stderr.on("data", buffer => {
             result += buffer.toString();
         });
-        phpcs.stdout.on("data", (buffer) => {
+        phpcs.stdout.on("data", buffer => {
             result += buffer.toString();
         });
         phpcs.on("close", () => {
@@ -80,12 +87,14 @@ export default class LintProvider {
                     match = line.match(regex);
                     if (match) {
                         const range = new vscode.Range(
-                                new vscode.Position(+match[2] - 1, 0),
-                                new vscode.Position(
-                                    +match[2] - 1,
-                                    vscode.window.activeTextEditor.document.lineAt(+match[2] - 1).text.length
-                                )
-                            );
+                            new vscode.Position(+match[2] - 1, 0),
+                            new vscode.Position(
+                                +match[2] - 1,
+                                vscode.window.activeTextEditor.document.lineAt(
+                                    +match[2] - 1
+                                ).text.length
+                            )
+                        );
                         const vscodeDiagnostic = new vscode.Diagnostic(
                             range,
                             match[3],
@@ -112,7 +121,6 @@ export default class LintProvider {
                 console.error(e);
             }
         });
-
     }
 
     public async getDiagnosticData(uri: vscode.Uri) {
@@ -123,16 +131,19 @@ export default class LintProvider {
     }
 
     private delay(milliseconds: number) {
-        return new Promise<void>((resolve) => {
+        return new Promise<void>(resolve => {
             setTimeout(resolve, milliseconds);
         });
     }
 
     private getCommandId(): string {
-        const commandConfig = vscode.workspace.getConfiguration("language-1c-bsl").get("onescriptPath");
-        const command = (!commandConfig || String(commandConfig).length === 0)
-            ? "oscript" : String(commandConfig);
+        const commandConfig = vscode.workspace
+            .getConfiguration("language-1c-bsl")
+            .get("onescriptPath");
+        const command =
+            !commandConfig || String(commandConfig).length === 0
+                ? "oscript"
+                : String(commandConfig);
         return command;
     }
-
 }

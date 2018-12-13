@@ -5,10 +5,18 @@ export default class LibProvider {
     public bslglobals: ISyntaxHelper;
     public oscriptStdLib: ISyntaxHelper;
     constructor() {
-        this.bslglobals = JSON.parse(fs.readFileSync(
-            path.join(path.join(__dirname, "..", "..", "lib"), "bslGlobals.json"), "utf8"));
-        this.oscriptStdLib = JSON.parse(fs.readFileSync(
-            path.join(path.join(__dirname, "..", "..", "lib"), "oscriptStdLib.json"), "utf8"));
+        this.bslglobals = JSON.parse(
+            fs.readFileSync(
+                path.join(path.join(__dirname, "..", "..", "lib"), "bslGlobals.json"),
+                "utf8"
+            )
+        );
+        this.oscriptStdLib = JSON.parse(
+            fs.readFileSync(
+                path.join(path.join(__dirname, "..", "..", "lib"), "oscriptStdLib.json"),
+                "utf8"
+            )
+        );
     }
 }
 
@@ -21,7 +29,7 @@ interface ISyntaxHelper {
     structureMenu?: ISyntaxHelperMenu;
 }
 
-interface ISyntaxHelperMenu  {
+interface ISyntaxHelperMenu {
     global: ISyntaxHelperGlobalSections;
     classes: ISyntaxHelperClass[];
 }

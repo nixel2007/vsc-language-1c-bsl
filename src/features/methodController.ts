@@ -2,7 +2,6 @@ import { Disposable, window } from "vscode";
 import { MethodDetect } from "./methodDetect";
 
 export class MethodController {
-
     private methodDetect: MethodDetect;
     private disposable: Disposable;
 
@@ -26,5 +25,4 @@ export class MethodController {
     private _onEvent() {
         this.methodDetect.updateMethodLabel();
     }
-
 }

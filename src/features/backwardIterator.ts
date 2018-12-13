@@ -34,5 +34,4 @@ export default class BackwardIterator {
         this.offset--;
         return ch;
     }
-
 }
