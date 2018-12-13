@@ -632,8 +632,7 @@ async function createMarkdown(global): Promise<void> {
     const filepath = editor.document.fileName.replace(/\\/g, "/");
     const filename = Path.basename(filepath, Path.extname(filepath));
     const methods = global.db.find({
-        filename: filepath,
-        isExport: true
+        filename: filepath
     });
 
     let md = "";
