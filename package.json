@@ -270,7 +270,7 @@
     "cross-env": "^5.2.0",
     "decache": "^4.5.0",
     "istanbul": "^0.4.5",
-    "remap-istanbul": "^0.12.0",
+    "remap-istanbul": "^0.13.0",
     "should": "^13.2.3",
     "tslint": "^5.11.0",
     "tslint-sonarts": "^1.8.0",
