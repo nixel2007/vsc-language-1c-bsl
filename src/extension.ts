@@ -12,6 +12,7 @@ import DefinitionProvider from "./features/definitionProvider";
 import DocumentFormattingEditProvider from "./features/documentFormattingEditProvider";
 import DocumentSymbolProvider from "./features/documentSymbolProvider";
 import HoverProvider from "./features/hoverProvider";
+import LanguageClientProvider from "./features/languageClientProvider";
 import LintProvider from "./features/lintProvider";
 import ReferenceProvider from "./features/referenceProvider";
 import SignatureHelpProvider from "./features/signatureHelpProvider";
@@ -93,6 +94,9 @@ export function activate(context: vscode.ExtensionContext) {
             new DocumentFormattingEditProvider(global)
         )
     );
+    
+    const languageClientProvider = new LanguageClientProvider();
+    languageClientProvider.registerLanguageClient(context);
 
     const syntaxHelper = new SyntaxHelper(global);
     context.subscriptions.push(
