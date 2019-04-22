@@ -196,7 +196,7 @@ export function activate(context: vscode.ExtensionContext) {
                 }
 
                 const autoClosingBrackets = Boolean(
-                    vscode.workspace.getConfiguration("editor.autoClosingBrackets")
+                    vscode.workspace.getConfiguration("editor.autoClosingBrackets", editor.document.uri)
                 );
                 if (textDocumentChangeEvent.contentChanges[0].text.slice(-1) === "(") {
                     const contentChange = textDocumentChangeEvent.contentChanges[0];
