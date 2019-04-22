@@ -1,25 +1,25 @@
-import {
-    Executable,
-    LanguageClientOptions,
-    LanguageClient,
-    ServerOptions
-} from "vscode-languageclient";
 import * as Path from "path";
 import { ExtensionContext, workspace } from "vscode";
+import {
+    Executable,
+    LanguageClient,
+    LanguageClientOptions,
+    ServerOptions
+} from "vscode-languageclient";
 
 export default class LanguageClientProvider {
     public registerLanguageClient(context: ExtensionContext) {
-        
+
         const languageServerPath = context.asAbsolutePath(
             Path.join("languageserver", "bsl-language-server.jar")
         );
 
         const executable: Executable = {
             command: "java",
-            args: ["-Xmx4g", "-jar", languageServerPath, "-d", "ru"],
+            args: ["-Xmx4g", "-jar", languageServerPath],
             options: { env: process.env, stdio: "pipe", shell: true }
         };
-        
+
         const serverOptions: ServerOptions = {
             run: executable,
             debug: executable
