@@ -3,7 +3,7 @@
 import * as fs from "fs";
 import * as Path from "path";
 import * as vscode from "vscode";
-import { BSL_MODE } from "./const";
+import { BSL_MODE, LANGUAGE_1C_BSL_CONFIG } from "./const";
 import { Global } from "./global";
 
 import BslQuickOpen from "./features/bslQuickOpen";
@@ -381,7 +381,7 @@ export function activate(context: vscode.ExtensionContext) {
                 const snippet = dynamicSnippets.dynamicSnippets()[element];
                 dynamicSnippetsCollection[element] = snippet;
             }
-            const configuration = vscode.workspace.getConfiguration("language-1c-bsl");
+            const configuration = vscode.workspace.getConfiguration(LANGUAGE_1C_BSL_CONFIG);
             const userDynamicSnippetsList: string[] = configuration.get("dynamicSnippets", []);
             for (const index of userDynamicSnippetsList) {
                 try {
@@ -744,7 +744,7 @@ export function activate(context: vscode.ExtensionContext) {
 function createComments(global, all: boolean) {
     const editor = vscode.window.activeTextEditor;
     if (editor.document.languageId === "bsl") {
-        const configuration = vscode.workspace.getConfiguration("language-1c-bsl");
+        const configuration = vscode.workspace.getConfiguration(LANGUAGE_1C_BSL_CONFIG);
         const aL: any = configuration.get("languageAutocomplete");
         const enMode: boolean = aL === "en";
         const positionStart = editor.selection.anchor;
