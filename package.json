@@ -22,7 +22,7 @@
     "Programming Languages"
   ],
   "engines": {
-    "vscode": "^1.30.0"
+    "vscode": "^1.33.1"
   },
   "main": "./out/src/extension",
   "scripts": {
@@ -265,17 +265,17 @@
   },
   "devDependencies": {
     "@types/glob": "^7.1.1",
-    "@types/mocha": "^5.2.5",
-    "@types/node": "^10.12.19",
+    "@types/mocha": "^5.2.6",
+    "@types/node": "^10.14.5",
     "cross-env": "^5.2.0",
     "decache": "^4.5.1",
     "istanbul": "^0.4.5",
     "remap-istanbul": "^0.13.0",
     "should": "^13.2.3",
-    "tslint": "^5.12.1",
+    "tslint": "^5.16.0",
     "tslint-sonarts": "^1.9.0",
-    "typescript": "^3.2.4",
-    "vscode": "^1.1.28"
+    "typescript": "^3.4.4",
+    "vscode": "^1.1.33"
   },
   "dependencies": {
     "cross-spawn": "^6.0.5",
@@ -286,7 +286,7 @@
     "lokijs": "^1.5.6",
     "onec-syntaxparser": "0.1.11",
     "xml2js": "^0.4.19",
-    "fast-xml-parser": "3.12.12",
+    "fast-xml-parser": "3.12.16",
     "alignment": "0.0.1",
     "vscode-languageclient": "^5.2.1"
   }
