@@ -82,19 +82,25 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.languages.registerHoverProvider(BSL_MODE, new HoverProvider(global))
     );
-    context.subscriptions.push(
-        vscode.languages.registerDocumentFormattingEditProvider(
-            BSL_MODE,
-            new DocumentFormattingEditProvider(global)
-        )
-    );
-    context.subscriptions.push(
-        vscode.languages.registerDocumentRangeFormattingEditProvider(
-            BSL_MODE,
-            new DocumentFormattingEditProvider(global)
-        )
-    );
-    
+
+    const configuration = vscode.workspace.getConfiguration(LANGUAGE_1C_BSL_CONFIG);
+    const languageServerEnabled = Boolean(configuration.get("languageServerEnabled"));
+
+    if (!languageServerEnabled) {
+        context.subscriptions.push(
+            vscode.languages.registerDocumentFormattingEditProvider(
+                BSL_MODE,
+                new DocumentFormattingEditProvider(global)
+            )
+        );
+        context.subscriptions.push(
+            vscode.languages.registerDocumentRangeFormattingEditProvider(
+                BSL_MODE,
+                new DocumentFormattingEditProvider(global)
+            )
+        );
+    }
+
     const languageClientProvider = new LanguageClientProvider();
     languageClientProvider.registerLanguageClient(context);
 

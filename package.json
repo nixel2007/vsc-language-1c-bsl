@@ -170,6 +170,33 @@
           ],
           "default": "on",
           "description": "Controls whether auto detection of opm scripts is on or off. Default is on."
+        },
+        "language-1c-bsl.languageServerEnabled": {
+          "description": "BSL Language Server enabled",
+          "type": "boolean",
+          "default": true
+        },
+        "language-1c-bsl.languageServerPath": {
+          "description": "Path to BSL Language Server jar-file. Leave default value to use bundled language server. Relative to vsc-language-1c-bsl folder.",
+          "type": "string",
+          "default": "languageserver/bsl-language-server.jar"
+        },
+        "language-1c-bsl.languageServerConfiguration": {
+          "description": "Path to BSL Language Server configuration file. Relative to workspace folder.",
+          "type": "string",
+          "default": ".bsl-language-server.json"
+        },
+        "language-1c-bsl.javaPath": {
+          "description": "Path to Java runtime binary. Leave default value to use java from PATH.",
+          "type": "string",
+          "default": "java"
+        },
+        "language-1c-bsl.javaOpts": {
+          "description": "Addititonal java options.",
+          "type": "array",
+          "default": [
+            "-Xmx2g"
+          ]
         }
       }
     },
