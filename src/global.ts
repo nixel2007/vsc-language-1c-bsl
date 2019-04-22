@@ -925,7 +925,7 @@ export class Global {
         }
         let data;
         try {
-            data = fs.readFileSync(fullpath);
+            data = fs.readFileSync(fullpath, { encoding: "utf8"});
         } catch (err) {
             if (err) {
                 console.log(err);
@@ -939,7 +939,7 @@ export class Global {
         for (const syntaxHelp of files) {
             let data;
             try {
-                data = fs.readFileSync(syntaxHelp);
+                data = fs.readFileSync(syntaxHelp, { encoding: "utf8" });
                 const pathDll = path.basename(path.dirname(path.dirname(syntaxHelp)));
                 const dllDesc = JSON.parse(data);
                 const readme = fs
@@ -1222,7 +1222,7 @@ export class Global {
         for (const libConfig of files) {
             let data;
             try {
-                data = fs.readFileSync(libConfig);
+                data = fs.readFileSync(libConfig, { encoding: "utf8" });
             } catch (err) {
                 if (err) {
                     console.log(err);
