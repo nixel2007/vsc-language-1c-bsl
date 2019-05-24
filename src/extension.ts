@@ -3,7 +3,7 @@
 import * as fs from "fs";
 import * as Path from "path";
 import * as vscode from "vscode";
-import { BSL_MODE } from "./const";
+import { BSL_MODE, LANGUAGE_1C_BSL_CONFIG } from "./const";
 import { Global } from "./global";
 
 import BslQuickOpen from "./features/bslQuickOpen";
@@ -12,6 +12,7 @@ import DefinitionProvider from "./features/definitionProvider";
 import DocumentFormattingEditProvider from "./features/documentFormattingEditProvider";
 import DocumentSymbolProvider from "./features/documentSymbolProvider";
 import HoverProvider from "./features/hoverProvider";
+import LanguageClientProvider from "./features/languageClientProvider";
 import LintProvider from "./features/lintProvider";
 import ReferenceProvider from "./features/referenceProvider";
 import SignatureHelpProvider from "./features/signatureHelpProvider";
@@ -81,18 +82,27 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.languages.registerHoverProvider(BSL_MODE, new HoverProvider(global))
     );
-    context.subscriptions.push(
-        vscode.languages.registerDocumentFormattingEditProvider(
-            BSL_MODE,
-            new DocumentFormattingEditProvider(global)
-        )
-    );
-    context.subscriptions.push(
-        vscode.languages.registerDocumentRangeFormattingEditProvider(
-            BSL_MODE,
-            new DocumentFormattingEditProvider(global)
-        )
-    );
+
+    const configuration = vscode.workspace.getConfiguration(LANGUAGE_1C_BSL_CONFIG);
+    const languageServerEnabled = Boolean(configuration.get("languageServerEnabled"));
+
+    if (!languageServerEnabled) {
+        context.subscriptions.push(
+            vscode.languages.registerDocumentFormattingEditProvider(
+                BSL_MODE,
+                new DocumentFormattingEditProvider(global)
+            )
+        );
+        context.subscriptions.push(
+            vscode.languages.registerDocumentRangeFormattingEditProvider(
+                BSL_MODE,
+                new DocumentFormattingEditProvider(global)
+            )
+        );
+    }
+
+    const languageClientProvider = new LanguageClientProvider();
+    languageClientProvider.registerLanguageClient(context);
 
     const syntaxHelper = new SyntaxHelper(global);
     context.subscriptions.push(
@@ -192,7 +202,7 @@ export function activate(context: vscode.ExtensionContext) {
                 }
 
                 const autoClosingBrackets = Boolean(
-                    vscode.workspace.getConfiguration("editor.autoClosingBrackets")
+                    vscode.workspace.getConfiguration("editor.autoClosingBrackets", editor.document.uri)
                 );
                 if (textDocumentChangeEvent.contentChanges[0].text.slice(-1) === "(") {
                     const contentChange = textDocumentChangeEvent.contentChanges[0];
@@ -377,7 +387,7 @@ export function activate(context: vscode.ExtensionContext) {
                 const snippet = dynamicSnippets.dynamicSnippets()[element];
                 dynamicSnippetsCollection[element] = snippet;
             }
-            const configuration = vscode.workspace.getConfiguration("language-1c-bsl");
+            const configuration = vscode.workspace.getConfiguration(LANGUAGE_1C_BSL_CONFIG);
             const userDynamicSnippetsList: string[] = configuration.get("dynamicSnippets", []);
             for (const index of userDynamicSnippetsList) {
                 try {
@@ -740,7 +750,7 @@ export function activate(context: vscode.ExtensionContext) {
 function createComments(global, all: boolean) {
     const editor = vscode.window.activeTextEditor;
     if (editor.document.languageId === "bsl") {
-        const configuration = vscode.workspace.getConfiguration("language-1c-bsl");
+        const configuration = vscode.workspace.getConfiguration(LANGUAGE_1C_BSL_CONFIG);
         const aL: any = configuration.get("languageAutocomplete");
         const enMode: boolean = aL === "en";
         const positionStart = editor.selection.anchor;
