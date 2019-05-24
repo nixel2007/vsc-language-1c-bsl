@@ -1,3 +1,4 @@
+import * as fs from "fs-extra";
 import * as Paths from "path";
 import * as vscode from "vscode";
 import {
@@ -6,6 +7,7 @@ import {
     LanguageClientOptions,
     ServerOptions
 } from "vscode-languageclient";
+import * as which from "which";
 
 export default class LanguageClientProvider {
     public async registerLanguageClient(context: vscode.ExtensionContext) {
@@ -20,6 +22,20 @@ export default class LanguageClientProvider {
         const languageServerPath = context.asAbsolutePath(
             String(configuration.get("languageServerPath"))
         );
+
+        const javaInPath = which.sync(command, { nothrow: true });
+        if (!javaInPath) {
+            const javaPathExists = await fs.pathExists(command);
+            if (!javaPathExists) {
+                const errorMessage = `BSL Language Server is NOT running!\n
+                Configuration error! Can't find "java" executable at: ${command}`;
+                console.error(errorMessage);
+
+                vscode.window.showErrorMessage(errorMessage);
+                return;
+            }
+        }
+
         const javaOpts = Array(configuration.get("javaOpts"));
         const configurationFile = Paths.join(
             vscode.workspace.rootPath,
