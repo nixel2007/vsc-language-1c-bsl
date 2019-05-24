@@ -1,9 +1,12 @@
 import * as vscode from "vscode";
 import AbstractProvider from "./abstractProvider";
 
-export default class GlobalReferenceProvider extends AbstractProvider implements vscode.ReferenceProvider {
-    public provideReferences(document: vscode.TextDocument,
-                             position: vscode.Position): Thenable<vscode.Location[]> {
+export default class GlobalReferenceProvider extends AbstractProvider
+    implements vscode.ReferenceProvider {
+    public provideReferences(
+        document: vscode.TextDocument,
+        position: vscode.Position
+    ): Thenable<vscode.Location[]> {
         return this.doFindReferences(document, position);
     }
 
@@ -19,17 +22,21 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
                 const colStr = element.character;
                 const referenceResource = vscode.Uri.file(result.path);
                 const range = new vscode.Range(
-                    result.line, +colStr, result.line, +colStr + element.call.length
+                    result.line,
+                    +colStr,
+                    result.line,
+                    +colStr + element.call.length
                 );
                 results.push(new vscode.Location(referenceResource, range));
-
             }
         }
     }
 
-    private doFindReferences(document: vscode.TextDocument,
-                             position: vscode.Position): Thenable<vscode.Location[]> {
-        return new Promise((resolve) => {
+    private doFindReferences(
+        document: vscode.TextDocument,
+        position: vscode.Position
+    ): Thenable<vscode.Location[]> {
+        return new Promise(resolve => {
             const filename = document.fileName;
             const workspaceRoot = vscode.workspace.rootPath;
             // get current word
@@ -52,14 +59,20 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
                 // resolve(results);
             }
             if (workspaceRoot) {
-                const fullmodule = this._global.getModuleForPath(filename.replace(/\\/g, "/"),
-                    vscode.workspace.rootPath);
+                const fullmodule = this._global.getModuleForPath(
+                    filename.replace(/\\/g, "/"),
+                    vscode.workspace.rootPath
+                );
                 let enTextAtPosition;
                 if (fullmodule.length !== 0) {
                     const arrName = filename.substr(vscode.workspace.rootPath.length).split("\\");
                     if (this._global.toreplaced[arrName[arrName.length - 4]]) {
-                        enTextAtPosition = arrName[arrName.length - 4] + "."
-                            + arrName[arrName.length - 3] + "." + textAtPosition;
+                        enTextAtPosition =
+                            arrName[arrName.length - 4] +
+                            "." +
+                            arrName[arrName.length - 3] +
+                            "." +
+                            textAtPosition;
                     }
                     textAtPosition = fullmodule + "." + textAtPosition;
                 }

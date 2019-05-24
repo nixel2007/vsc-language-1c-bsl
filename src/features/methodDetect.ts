@@ -1,7 +1,6 @@
 import { StatusBarAlignment, StatusBarItem, window } from "vscode";
 
 export class MethodDetect {
-
     private currentLine: number;
     private methodLabel: string;
     private statusBarItem: StatusBarItem;
@@ -57,5 +56,4 @@ export class MethodDetect {
     public dispose() {
         this.statusBarItem.dispose();
     }
-
 }

@@ -2,13 +2,15 @@ import LibProvider from "../libProvider";
 const libProvider = new LibProvider();
 
 abstract class AbstractSyntaxContent {
-
     public syntaxFilled: string;
 
     public abstract getSyntaxContentItems(dllData: object, libData: object): string;
 
-    public abstract getStructure(textSyntax: string, dllDataOrSyntaxObject: object,
-        libDataOrOscriptMethods: object): any;
+    public abstract getStructure(
+        textSyntax: string,
+        dllDataOrSyntaxObject: object,
+        libDataOrOscriptMethods: object
+    ): any;
 
     public fillSegmentData(segmentDescription, segment, strSegment, headerSegment, nameID) {
         if (segment[strSegment]) {
@@ -17,13 +19,19 @@ abstract class AbstractSyntaxContent {
             for (const elem in segment[strSegment]) {
                 counter = counter + 1;
                 let onlyOs = "";
-                if (this.syntaxFilled === "OneScript"
-                    && !segment[strSegment][elem].description1C
-                && !segment[strSegment][elem].signature1C) {
+                if (
+                    this.syntaxFilled === "OneScript" &&
+                    !segment[strSegment][elem].description1C &&
+                    !segment[strSegment][elem].signature1C
+                ) {
                     onlyOs = "*";
                 }
-                const alias = (nameID === "constructor")
-                ? "" : (segment[strSegment][elem].alias !== "") ? (" / " + segment[strSegment][elem].alias) : "";
+                const alias =
+                    nameID === "constructor"
+                        ? ""
+                        : segment[strSegment][elem].alias !== ""
+                        ? " / " + segment[strSegment][elem].alias
+                        : "";
                 segmentDescription = `${segmentDescription}<li><span class='a' id = '${nameID}
                 ${counter}' onclick='fill(this)'>${elem}${alias}</span>${onlyOs}</li>`;
             }
@@ -57,7 +65,8 @@ abstract class AbstractSyntaxContent {
                     returns = helper.returns;
                     example = helper.example;
                     signature = helper.signature;
-                    helper1C = (segment1C && segment1C.methods) ? segment1C.methods[indexMethod] : undefined;
+                    helper1C =
+                        segment1C && segment1C.methods ? segment1C.methods[indexMethod] : undefined;
                     if (helper1C) {
                         signature1C = helper1C.signature;
                         description1C = helper1C.description;
@@ -85,15 +94,19 @@ abstract class AbstractSyntaxContent {
             const variableGlobalContext = {};
             for (const indexMethod in segment.properties) {
                 const helper = segment.properties[indexMethod];
-                const access = (helper.access) ? (helper.access) : undefined;
+                const access = helper.access ? helper.access : undefined;
                 let example;
                 let description1C;
                 let helper1C;
                 if (context === "OneScript") {
-                    example = (helper.example) ? (helper.example) : undefined;
-                    helper1C = (globalContext)
-                    ? libProvider.bslglobals.globalvariables[indexMethod] : (segment1C)
-                    ? (segment1C.properties ? segment1C.properties[indexMethod] : undefined) : undefined;
+                    example = helper.example ? helper.example : undefined;
+                    helper1C = globalContext
+                        ? libProvider.bslglobals.globalvariables[indexMethod]
+                        : segment1C
+                        ? segment1C.properties
+                            ? segment1C.properties[indexMethod]
+                            : undefined
+                        : undefined;
                     if (helper1C && helper1C.description) {
                         description1C = helper1C.description;
                     }
@@ -116,9 +129,13 @@ abstract class AbstractSyntaxContent {
                 let description1C;
                 let helper1C;
                 if (context === "OneScript") {
-                    helper1C = (globalContext)
-                    ? libProvider.bslglobals.globalvariables[indexMethod] : (segment1C)
-                    ? (segment1C.values ? segment1C.values[indexMethod] : undefined) : undefined;
+                    helper1C = globalContext
+                        ? libProvider.bslglobals.globalvariables[indexMethod]
+                        : segment1C
+                        ? segment1C.values
+                            ? segment1C.values[indexMethod]
+                            : undefined
+                        : undefined;
                     if (helper1C && helper1C.description) {
                         description1C = helper1C.description;
                     }
@@ -137,23 +154,36 @@ abstract class AbstractSyntaxContent {
             for (const indexMethod in segment.constructors) {
                 const helper = segment.constructors[indexMethod];
                 const signature = {
-                    default: { СтрокаПараметров: helper.signature, Параметры: helper.params }
+                    default: {
+                        СтрокаПараметров: helper.signature,
+                        Параметры: helper.params
+                    }
                 };
                 let signature1C;
                 let description1C;
                 let helper1C;
                 if (context === "OneScript") {
-                    helper1C = (segment1C)
-                    ? (segment1C.constructors
-                    ? segment1C.constructors[indexMethod] : undefined) : undefined;
+                    helper1C = segment1C
+                        ? segment1C.constructors
+                            ? segment1C.constructors[indexMethod]
+                            : undefined
+                        : undefined;
                     if (helper1C) {
                         description1C = helper1C.description;
                         signature1C = {
-                            default: { СтрокаПараметров: helper1C.signature, Параметры: helper1C.params }
+                            default: {
+                                СтрокаПараметров: helper1C.signature,
+                                Параметры: helper1C.params
+                            }
                         };
                     }
                 }
-                classOs[indexMethod] = { description: helper.description, signature, description1C, signature1C };
+                classOs[indexMethod] = {
+                    description: helper.description,
+                    signature,
+                    description1C,
+                    signature1C
+                };
             }
             // tslint:disable-next-line:no-string-literal
             segmentChar["constructors"] = classOs;

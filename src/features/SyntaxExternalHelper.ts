@@ -6,7 +6,6 @@ import LibProvider from "../libProvider";
 const libProvider = new LibProvider();
 
 export default class SyntaxExternalHelper extends AbstractSyntaxContent {
-
     public getSyntaxContentItems(globalDllData, libData): any {
         const items = {};
         for (const dll in globalDllData) {
@@ -36,7 +35,7 @@ export default class SyntaxExternalHelper extends AbstractSyntaxContent {
                         }
                         // tslint:disable-next-line:no-string-literal
                         segmentChar["methods"][key] = {
-                            description: (methodData.description) ? methodData.description : "",
+                            description: methodData.description ? methodData.description : "",
                             alias: methodData.name_en,
                             signature: methodData.signature,
                             returns: methodData.returns,
@@ -58,7 +57,7 @@ export default class SyntaxExternalHelper extends AbstractSyntaxContent {
 
                         // tslint:disable-next-line:no-string-literal
                         segmentChar["properties"][key] = {
-                            description: (methodData.description) ? methodData.description : "",
+                            description: methodData.description ? methodData.description : "",
                             alias: methodData.name_en,
                             Доступ: methodData.access,
                             signature: undefined,
@@ -72,8 +71,12 @@ export default class SyntaxExternalHelper extends AbstractSyntaxContent {
 
             for (const element in globalDllData[dll].classes) {
                 const segment = globalDllData[dll].classes[element];
-                const segmentChar = this.getSegmentData(segment, false, "OneScript",
-                    libProvider.bslglobals.classes[segment.name]);
+                const segmentChar = this.getSegmentData(
+                    segment,
+                    false,
+                    "OneScript",
+                    libProvider.bslglobals.classes[segment.name]
+                );
                 items[element] = segmentChar;
                 items[element].oscriptLib = dll;
             }
@@ -113,18 +116,29 @@ export default class SyntaxExternalHelper extends AbstractSyntaxContent {
                 if (classDll === dllData.label) {
                     const defDll = libData[classDll];
                     if (libData[classDll].description) {
-                        globCont = globCont + "<h2 class='a' style='font-size: 1em;' onclick=\"readFile('"
-                            + libData[classDll].description.replace(/[\\]/g, "\\\\").replace(/[\/]/g, "\\/")
-                            + "', '" + path.sep.replace(/[\\]/g, "\\\\").replace(/[\/]/g, "\\/")
-                            + "');\" > " + classDll + " </h2 >";
+                        globCont =
+                            globCont +
+                            "<h2 class='a' style='font-size: 1em;' onclick=\"readFile('" +
+                            libData[classDll].description
+                                .replace(/[\\]/g, "\\\\")
+                                .replace(/[\/]/g, "\\/") +
+                            "', '" +
+                            path.sep.replace(/[\\]/g, "\\\\").replace(/[\/]/g, "\\/") +
+                            "');\" > " +
+                            classDll +
+                            " </h2 >";
                     } else {
-                        globCont = globCont + "<h2 style='font-size: 1em;'> " + classDll + " </h2 > <ul>";
+                        globCont =
+                            globCont + "<h2 style='font-size: 1em;'> " + classDll + " </h2 > <ul>";
                     }
                     const structureGlobContext = defDll.structureMenu;
                     if (structureGlobContext.global) {
-                        globCont = globCont + "<h2 style='font-size: 1em;'>Глобальный контекст</h2><ul>";
+                        globCont =
+                            globCont + "<h2 style='font-size: 1em;'>Глобальный контекст</h2><ul>";
                         for (const element in structureGlobContext.global) {
-                            globCont = globCont + `<li><span class="a"
+                            globCont =
+                                globCont +
+                                `<li><span class="a"
                             onclick="fillDescription(this)">${element}</span></li>`;
                         }
                         globCont = globCont + `</ul>`;
@@ -134,19 +148,29 @@ export default class SyntaxExternalHelper extends AbstractSyntaxContent {
                         if (segmentClass === "Прочее") {
                             continue;
                         }
-                        classes = classes + "<h2 style='font-size: 1em;'>" + segmentClass + "</h2><ul>";
+                        classes =
+                            classes + "<h2 style='font-size: 1em;'>" + segmentClass + "</h2><ul>";
                         for (const currentClass in structureGlobContext.classes[segmentClass]) {
-                            const onlyOs = (!libProvider.bslglobals.classes[currentClass]) ? "*" : "";
-                            classes = classes + `<li><span class="a" onclick="fillDescription(this)">
-                            ${currentClass + " / " + defDll.classes[currentClass].name_en}</span>${onlyOs}</li>`;
+                            const onlyOs = !libProvider.bslglobals.classes[currentClass] ? "*" : "";
+                            classes =
+                                classes +
+                                `<li><span class="a" onclick="fillDescription(this)">
+                            ${currentClass +
+                                " / " +
+                                defDll.classes[currentClass].name_en}</span>${onlyOs}</li>`;
                             added[currentClass] = true;
                             if (structureGlobContext.classes[segmentClass][currentClass] !== "") {
                                 classes = classes + "<ul>";
-                                for (const childClass in structureGlobContext.classes[segmentClass][currentClass]) {
+                                for (const childClass in structureGlobContext.classes[segmentClass][
+                                    currentClass
+                                ]) {
                                     added[childClass] = true;
-                                    classes = classes
-                                    + `<li><span class="a" onclick="fillDescription(this)">
-                                    ${childClass + " / " + defDll.classes[childClass].name_en}</span></li>`;
+                                    classes =
+                                        classes +
+                                        `<li><span class="a" onclick="fillDescription(this)">
+                                    ${childClass +
+                                        " / " +
+                                        defDll.classes[childClass].name_en}</span></li>`;
                                 }
                                 classes = classes + "</ul>";
                             }
@@ -161,10 +185,13 @@ export default class SyntaxExternalHelper extends AbstractSyntaxContent {
                             if (!libProvider.bslglobals.classes[element]) {
                                 onlyOs = "*";
                             }
-                            const alias = (defDll.classes[element].name_en !== "")
-                                ? (" / " + defDll.classes[element].name_en) : "";
-                            classes = classes
-                                + `<li><span class="a" onclick="fillDescription(this)">
+                            const alias =
+                                defDll.classes[element].name_en !== ""
+                                    ? " / " + defDll.classes[element].name_en
+                                    : "";
+                            classes =
+                                classes +
+                                `<li><span class="a" onclick="fillDescription(this)">
                             ${element + alias}</span>${onlyOs}</li>`;
                         }
                     }
@@ -176,5 +203,4 @@ export default class SyntaxExternalHelper extends AbstractSyntaxContent {
         fillStructure.classes = classes;
         return fillStructure;
     }
-
 }

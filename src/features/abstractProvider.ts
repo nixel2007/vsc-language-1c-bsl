@@ -1,8 +1,7 @@
-import {Disposable} from "vscode";
-import {Global} from "../global";
+import { Disposable } from "vscode";
+import { Global } from "../global";
 
 export default class AbstractProvider {
-
     // tslint:disable-next-line:variable-name
     protected _global: Global;
     // tslint:disable-next-line:variable-name

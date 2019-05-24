@@ -1,6 +1,12 @@
 // tslint:disable:variable-name
-import {Position, Range, SignatureHelp, SignatureHelpProvider,
-    SignatureInformation, TextDocument} from "vscode";
+import {
+    Position,
+    Range,
+    SignatureHelp,
+    SignatureHelpProvider,
+    SignatureInformation,
+    TextDocument
+} from "vscode";
 import AbstractProvider from "./abstractProvider";
 import BackwardIterator from "./backwardIterator";
 
@@ -15,7 +21,7 @@ const _LParent = "(".charCodeAt(0);
 const _RParent = ")".charCodeAt(0);
 const _Comma = ",".charCodeAt(0);
 const _Quote = "'".charCodeAt(0);
-const _DQuote = "\"".charCodeAt(0);
+const _DQuote = '"'.charCodeAt(0);
 const _USC = "_".charCodeAt(0);
 const _a = "a".charCodeAt(0);
 const _z = "z".charCodeAt(0);
@@ -25,12 +31,13 @@ const _0 = "0".charCodeAt(0);
 const _9 = "9".charCodeAt(0);
 const _Dot = ".".charCodeAt(0);
 
-export default class GlobalSignatureHelpProvider extends AbstractProvider implements SignatureHelpProvider {
-
-    public provideSignatureHelp(document: TextDocument,
-                                position: Position): Thenable<SignatureHelp> {
-
-        return new Promise((resolve) => {
+export default class GlobalSignatureHelpProvider extends AbstractProvider
+    implements SignatureHelpProvider {
+    public provideSignatureHelp(
+        document: TextDocument,
+        position: Position
+    ): Thenable<SignatureHelp> {
+        return new Promise(resolve => {
             const iterator = new BackwardIterator(document, position.character - 1, position.line);
 
             const paramCount = this.readArguments(iterator);
@@ -48,17 +55,19 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
             let verify = true;
             if (paramCount === 0) {
                 if (iterator.lineNumber === position.line) {
-                    const wordOfPosition = document.getText(new Range(position.line, 0, position.line, position.character - ch - 1));
+                    const wordOfPosition = document.getText(
+                        new Range(position.line, 0, position.line, position.character - ch - 1)
+                    );
                     if (!wordOfPosition.trim().endsWith("Новый")) {
-                        verify = false
+                        verify = false;
                     }
                 }
             }
             if (this._global.libClasses[ident.toLowerCase()] && verify) {
-                entry = this._global.libClasses[ident.toLowerCase()].constructors["По умолчанию"]; 
+                entry = this._global.libClasses[ident.toLowerCase()].constructors["По умолчанию"];
             } else if (this._global.globalfunctions[ident.toLowerCase()]) {
                 entry = this._global.globalfunctions[ident.toLowerCase()];
-            } else if (this._global.classes[ident.toLowerCase()] && verify){
+            } else if (this._global.classes[ident.toLowerCase()] && verify) {
                 entry = this._global.classes[ident.toLowerCase()];
                 return resolve(this.signatureOfClasses(entry, paramCount));
             }
@@ -91,9 +100,11 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
                 } else {
                     for (const signatureElement of entries) {
                         const arrayFilename = signatureElement.filename.split("/");
-                        if (!signatureElement.oscriptLib
-                            && arrayFilename[arrayFilename.length - 4] !== "CommonModules"
-                            && !signatureElement.filename.endsWith("ManagerModule.bsl")) {
+                        if (
+                            !signatureElement.oscriptLib &&
+                            arrayFilename[arrayFilename.length - 4] !== "CommonModules" &&
+                            !signatureElement.filename.endsWith("ManagerModule.bsl")
+                        ) {
                             continue;
                         }
                         if (signatureElement._method.IsExport) {
@@ -103,8 +114,10 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
                     return resolve(undefined);
                 }
             }
-            const signature = (!entry.signature) ? entry.oscript_signature : entry.signature;
-            if (!signature) { return resolve(undefined); }
+            const signature = !entry.signature ? entry.oscript_signature : entry.signature;
+            if (!signature) {
+                return resolve(undefined);
+            }
             const ret = new SignatureHelp();
             for (const element in signature) {
                 const paramsString = signature[element].СтрокаПараметров;
@@ -126,7 +139,6 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
                 ret.signatures.push(signatureInfo);
                 ret.activeSignature = 0;
                 ret.activeParameter = Math.min(paramCount, signatureInfo.parameters.length - 1);
-
             }
             return resolve(ret);
         });
@@ -135,27 +147,26 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
     private signatureOfClasses(entry, paramCount) {
         const ret = new SignatureHelp();
         for (const elem in entry.constructors) {
-            const signature = entry.constructors[elem]
-                const paramsString = signature.signature;
-                const signatureInfo = new SignatureInformation(entry.name + paramsString, "");
+            const signature = entry.constructors[elem];
+            const paramsString = signature.signature;
+            const signatureInfo = new SignatureInformation(entry.name + paramsString, "");
 
-                const re = /(?:Знач )?([\wа-яА-Я]+)\??([^,)]+)?/g;
-                let match: RegExpExecArray = re.exec(paramsString);
-                while (match) {
-                    signatureInfo.parameters.push({
-                        label: match[0],
-                        documentation: ""
-                    });
-                    match = re.exec(paramsString);
-                }
+            const re = /(?:Знач )?([\wа-яА-Я]+)\??([^,)]+)?/g;
+            let match: RegExpExecArray = re.exec(paramsString);
+            while (match) {
+                signatureInfo.parameters.push({
+                    label: match[0],
+                    documentation: ""
+                });
+                match = re.exec(paramsString);
+            }
 
-                if (signatureInfo.parameters.length - 1 < paramCount) {
-                    continue;
-                }
-                ret.signatures.push(signatureInfo);
-                ret.activeSignature = 0;
-                ret.activeParameter = Math.min(paramCount, signatureInfo.parameters.length - 1);
-
+            if (signatureInfo.parameters.length - 1 < paramCount) {
+                continue;
+            }
+            ret.signatures.push(signatureInfo);
+            ret.activeSignature = 0;
+            ret.activeParameter = Math.min(paramCount, signatureInfo.parameters.length - 1);
         }
         return ret;
     }
@@ -164,12 +175,18 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
         if (entry._method.Params.length !== 0) {
             const arraySignature = this._global.GetSignature(entry);
             const ret = new SignatureHelp();
-            const signatureInfo = new SignatureInformation(entry.name + arraySignature.paramsString, "");
+            const signatureInfo = new SignatureInformation(
+                entry.name + arraySignature.paramsString,
+                ""
+            );
 
             const re = /((Знач )?[\wа-яА-Я]+)(:\s+[<а-яА-Я\w_\.>\|]+)?( = [^ :]+)?/g;
             let match: RegExpExecArray = re.exec(arraySignature.paramsString);
             while (match) {
-                const documentationParam = this._global.GetDocParam(arraySignature.description, match[1]);
+                const documentationParam = this._global.GetDocParam(
+                    arraySignature.description,
+                    match[1]
+                );
                 signatureInfo.parameters.push({
                     label: match[0] + (documentationParam.optional ? "?" : ""),
                     documentation: documentationParam.descriptionParam
@@ -205,11 +222,21 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
                         return paramCount;
                     }
                     break;
-                case _RParent: parentNesting++; break;
-                case _LCurly: curlyNesting--; break;
-                case _RCurly: curlyNesting++; break;
-                case _LBracket: bracketNesting--; break;
-                case _RBracket: bracketNesting++; break;
+                case _RParent:
+                    parentNesting++;
+                    break;
+                case _LCurly:
+                    curlyNesting--;
+                    break;
+                case _RCurly:
+                    curlyNesting++;
+                    break;
+                case _LBracket:
+                    bracketNesting--;
+                    break;
+                case _RBracket:
+                    bracketNesting++;
+                    break;
                 case _DQuote:
                 case _Quote:
                     break;
@@ -225,12 +252,15 @@ export default class GlobalSignatureHelpProvider extends AbstractProvider implem
     }
 
     private isIdentPart(ch: number): boolean {
-        if (ch === _USC || // _
-            ch >= _a && ch <= _z || // a-z
-            ch >= _A && ch <= _Z || // A-Z
-            ch >= _0 && ch <= _9 || // 0/9
+        if (
+            ch === _USC || // _
+            (ch >= _a && ch <= _z) || // a-z
+            (ch >= _A && ch <= _Z) || // A-Z
+            (ch >= _0 && ch <= _9) || // 0/9
             ch === _Dot ||
-            ch >= 0x80 && ch <= 0xFFFF) { // nonascii
+            (ch >= 0x80 && ch <= 0xffff)
+        ) {
+            // nonascii
 
             return true;
         }

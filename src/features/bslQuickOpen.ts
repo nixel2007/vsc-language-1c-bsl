@@ -4,7 +4,7 @@ import AbstractProvider from "./abstractProvider";
 
 export default class BslQuickOpen extends AbstractProvider {
     public quickOpen() {
-        vscode.window.showQuickPick(this.listOpen()).then((item) => {
+        vscode.window.showQuickPick(this.listOpen()).then(item => {
             if (!item) {
                 console.log("canceled pick");
                 return;
@@ -13,12 +13,11 @@ export default class BslQuickOpen extends AbstractProvider {
             if (file.startsWith(".")) {
                 file = path.join(this._global.getRootPath(), file);
             }
-            vscode.workspace.openTextDocument(file).then((doc) => {
+            vscode.workspace.openTextDocument(file).then(doc => {
                 console.log("openTextDocument success", doc.fileName);
                 vscode.window.showTextDocument(doc);
             });
-        }
-        );
+        });
     }
 
     private async listOpen(): Promise<vscode.QuickPickItem[]> {
@@ -29,8 +28,12 @@ export default class BslQuickOpen extends AbstractProvider {
             }
         };
         let firstproject = "";
-        const search = await this._global.dbmodules.chain().find(querystring).simplesort("module").data();
-        search.forEach((value) => {
+        const search = await this._global.dbmodules
+            .chain()
+            .find(querystring)
+            .simplesort("module")
+            .data();
+        search.forEach(value => {
             const locLabel: string = this._global.getHumanMetadata(value);
             let fullpath: string = String(value.fullpath);
             if (fullpath.startsWith(this._global.getRootPath())) {

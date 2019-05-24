@@ -6,7 +6,7 @@ export class CodeBeautyfier {
         const editor = vscode.window.activeTextEditor;
         const selections = editor.selections;
 
-        selections.forEach((selection) => {
+        selections.forEach(selection => {
             let endLine = selection.end.line;
             if (selection.end.character === 0) {
                 endLine = selection.end.line - 1;
@@ -22,10 +22,9 @@ export class CodeBeautyfier {
                 spaceSeparators: ["="]
             });
 
-            editor.edit((editBuilder) => {
+            editor.edit(editBuilder => {
                 editBuilder.replace(range, newBlock[0]);
             });
         });
-
     }
 }
