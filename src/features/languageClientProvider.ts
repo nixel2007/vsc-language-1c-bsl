@@ -18,13 +18,7 @@ export default class LanguageClientProvider {
             return;
         }
 
-        const command = String(configuration.get("javaPath"));
-        let languageServerPath = context.asAbsolutePath(
-            String(configuration.get("languageServerPath"))
-        );
-        if (languageServerPath.indexOf(" ") > 0) {
-            languageServerPath = "\"" + languageServerPath + "\"";
-        }
+        let command = String(configuration.get("javaPath"));
 
         const javaInPath = which.sync(command, { nothrow: true });
         if (!javaInPath) {
@@ -37,6 +31,18 @@ export default class LanguageClientProvider {
                 vscode.window.showErrorMessage(errorMessage);
                 return;
             }
+        }
+
+        if (command.indexOf(" ") > 0) {
+            command = `"${command}"`;
+        }
+
+        let languageServerPath = String(configuration.get("languageServerPath"));
+        if (!Paths.isAbsolute(languageServerPath)) {
+            languageServerPath = context.asAbsolutePath(languageServerPath);
+        }
+        if (languageServerPath.indexOf(" ") > 0) {
+            languageServerPath = `"${languageServerPath}"`;
         }
 
         const javaOpts = Array(configuration.get("javaOpts"));
