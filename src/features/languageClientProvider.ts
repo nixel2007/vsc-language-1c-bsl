@@ -19,9 +19,12 @@ export default class LanguageClientProvider {
         }
 
         const command = String(configuration.get("javaPath"));
-        const languageServerPath = context.asAbsolutePath(
+        let languageServerPath = context.asAbsolutePath(
             String(configuration.get("languageServerPath"))
         );
+        if (languageServerPath.indexOf(" ") > 0) {
+            languageServerPath = "\"" + languageServerPath + "\"";
+        }
 
         const javaInPath = which.sync(command, { nothrow: true });
         if (!javaInPath) {
