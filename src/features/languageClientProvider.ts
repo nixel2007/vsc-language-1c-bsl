@@ -73,7 +73,10 @@ export default class LanguageClientProvider {
         };
 
         const clientOptions: LanguageClientOptions = {
-            documentSelector: [{ scheme: "file", language: "bsl" }],
+            documentSelector: [
+                { scheme: "file", language: "bsl" },
+                { scheme: "untitled", language: "bsl" }
+            ],
             synchronize: {
                 fileEvents: vscode.workspace.createFileSystemWatcher("**/*.{os,bsl}")
             }
