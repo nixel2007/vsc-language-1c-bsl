@@ -60,12 +60,6 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.languages.registerDefinitionProvider(BSL_MODE, new DefinitionProvider(global))
     );
     context.subscriptions.push(
-        vscode.languages.registerDocumentSymbolProvider(
-            BSL_MODE,
-            new DocumentSymbolProvider(global)
-        )
-    );
-    context.subscriptions.push(
         vscode.languages.registerReferenceProvider(BSL_MODE, new ReferenceProvider(global))
     );
     context.subscriptions.push(
@@ -97,6 +91,12 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.languages.registerDocumentRangeFormattingEditProvider(
                 BSL_MODE,
                 new DocumentFormattingEditProvider(global)
+            )
+        );
+        context.subscriptions.push(
+            vscode.languages.registerDocumentSymbolProvider(
+                BSL_MODE,
+                new DocumentSymbolProvider(global)
             )
         );
     }

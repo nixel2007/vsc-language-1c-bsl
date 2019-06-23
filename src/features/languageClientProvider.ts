@@ -46,15 +46,20 @@ export default class LanguageClientProvider {
         }
 
         const javaOpts = Array(configuration.get("javaOpts"));
-        const configurationFile = Paths.join(
-            vscode.workspace.rootPath,
-            String(configuration.get("languageServerConfiguration"))
-        );
 
         const args: string[] = [];
         args.push(...javaOpts);
         args.push("-jar", languageServerPath);
-        args.push("-c", configurationFile);
+
+        const rootPath = vscode.workspace.rootPath;
+        if (rootPath) {
+            const configurationFile = Paths.join(
+                rootPath,
+                String(configuration.get("languageServerConfiguration"))
+            );
+
+            args.push("-c", configurationFile);
+        }
 
         const executable: Executable = {
             command,
@@ -68,7 +73,10 @@ export default class LanguageClientProvider {
         };
 
         const clientOptions: LanguageClientOptions = {
-            documentSelector: [{ scheme: "file", language: "bsl" }],
+            documentSelector: [
+                { scheme: "file", language: "bsl" },
+                { scheme: "untitled", language: "bsl" }
+            ],
             synchronize: {
                 fileEvents: vscode.workspace.createFileSystemWatcher("**/*.{os,bsl}")
             }
