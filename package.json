@@ -24,7 +24,7 @@
   "engines": {
     "vscode": "^1.33.1"
   },
-  "main": "./out/src/extension",
+  "main": "./dist/src/extension",
   "scripts": {
     "test": "cross-env CODE_TESTS_WORKSPACE=test/fixtures node ./node_modules/vscode/bin/test",
     "vscode:prepublish": "webpack --mode production",
