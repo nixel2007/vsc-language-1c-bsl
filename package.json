@@ -3,7 +3,7 @@
   "displayName": "Language 1C (BSL)",
   "description": "Syntax highlighting for 1C:Enterprise 8.",
   "icon": "images/xDDIcon.png",
-  "version": "1.14.0",
+  "version": "1.15.0",
   "publisher": "xDrivenDevelopment",
   "galleryBanner": {
     "color": "#0000FF",
@@ -24,7 +24,7 @@
   "engines": {
     "vscode": "^1.33.1"
   },
-  "main": "./out/src/extension",
+  "main": "./dist/src/extension",
   "scripts": {
     "test": "cross-env CODE_TESTS_WORKSPACE=test/fixtures node ./node_modules/vscode/bin/test",
     "vscode:prepublish": "webpack --mode production",
