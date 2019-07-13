@@ -16,11 +16,6 @@ git:
   depth: false
 
 before_install: 
-  - |
-    if [ $TRAVIS_OS_NAME == "linux" ]; then
-      export DISPLAY=':99.0'
-      /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-    fi
   - wget -O os.deb https://files.gitter.im/EvilBeaver/OneScript/VreX/onescript-engine_1.0.17_all.deb
   - sudo apt-get install mono-complete mono-devel
   - sudo dpkg -i os.deb; sudo apt install -f
@@ -29,7 +24,12 @@ before_install:
   - sudo opm install strings
   - sudo opm install oscript-config
 
-install: 
+install:
+  - |
+    if [ $TRAVIS_OS_NAME == "linux" ]; then
+      export DISPLAY=':99.0'
+      /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+    fi
   - npm install
   - npm run vscode:prepublish
 
