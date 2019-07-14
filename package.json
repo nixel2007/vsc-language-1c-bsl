@@ -314,7 +314,7 @@
   "dependencies": {
     "alignment": "0.0.1",
     "cross-spawn": "^6.0.5",
-    "fast-xml-parser": "3.12.16",
+    "fast-xml-parser": "3.12.17",
     "filequeue": "^0.5.0",
     "fs-extra": "^8.0.1",
     "glob": "^7.1.4",
