@@ -2,9 +2,9 @@
   "name": "language-1c-bsl",
   "displayName": "Language 1C (BSL)",
   "description": "Syntax highlighting for 1C:Enterprise 8.",
-  "icon": "images/xDDIcon.png",
+  "icon": "images/1c-syntax.png",
   "version": "1.17.1",
-  "publisher": "xDrivenDevelopment",
+  "publisher": "1c-syntax",
   "galleryBanner": {
     "color": "#0000FF",
     "theme": "dark"
