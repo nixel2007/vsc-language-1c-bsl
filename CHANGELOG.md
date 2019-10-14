@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.18.0
+
+* Обновлен BSL Language Server до версии [0.11.0](https://github.com/1c-syntax/bsl-language-server/releases/tag/v0.11.0):
+  * Добавлена возможность игнорирования диагностик в коде с помощью аннотаций `BSLLS-выкл`
+  * Добавлены новые диагностики и быстрые исправления, улучшена работа имеющихся диагностик
+
 ## 1.17.2
 
 * Обновлен BSL Language Server до версии [0.10.2](https://github.com/1c-syntax/bsl-language-server/releases/tag/v0.10.2):
