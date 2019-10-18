@@ -8,4 +8,6 @@ coverage
 .sonarlint
 
 \.scannerwork/
-*.jar
+languageserver
+!languageserver/.gitkeep
+*.vsix
