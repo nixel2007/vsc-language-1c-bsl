@@ -38,8 +38,8 @@ describe("Hover", () => {
         hovers.should.has.length(1);
 
         const hover = hovers[0];
-        hover.contents[0].should.has.a.key("value").which.is.equal("Метод текущего модуля");
-        hover.contents[2].should.has.a.key("value").which.is.equal("```bsl\nПроцедура НеЭкспортнаяПроцедура()\n```\n");
+        hover.contents[0].should.be.equal("Метод текущего модуля");
+        hover.contents[2].should.has.a.key("value").which.is.equal("Процедура НеЭкспортнаяПроцедура()");
 
     });
 
