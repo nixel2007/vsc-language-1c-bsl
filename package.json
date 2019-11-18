@@ -174,7 +174,7 @@
         "language-1c-bsl.languageServerEnabled": {
           "description": "BSL Language Server enabled",
           "type": "boolean",
-          "default": true
+          "default": false
         },
         "language-1c-bsl.languageServerPath": {
           "description": "Path to BSL Language Server jar-file. Leave default value to use bundled language server. Relative to vsc-language-1c-bsl folder.",
