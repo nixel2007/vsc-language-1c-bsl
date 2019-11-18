@@ -68,14 +68,14 @@ export default class LintProvider {
             env: process.env
         };
         let result = "";
-        const phpcs = cp.spawnSync(this.commandId, args, options);
-        // phpcs.stderr.on("data", buffer => {
-            result += phpcs.stderr.toString();
-        // });
-        // phpcs.stdout.on("data", buffer => {
-            result += phpcs.stdout.toString();
-        // });
-        // phpcs.on("close", () => {
+        const phpcs = cp.spawn(this.commandId, args, options);
+        phpcs.stderr.on("data", buffer => {
+            result += buffer.toString();
+        });
+        phpcs.stdout.on("data", buffer => {
+            result += buffer.toString();
+        });
+        phpcs.on("close", () => {
             try {
                 result = result.trim();
                 const lines = result.split(/\r?\n/);
@@ -120,7 +120,7 @@ export default class LintProvider {
             } catch (e) {
                 console.error(e);
             }
-        // });
+        });
     }
 
     public async getDiagnosticData(uri: vscode.Uri) {
