@@ -3,7 +3,7 @@
   "displayName": "Language 1C (BSL)",
   "description": "Syntax highlighting for 1C:Enterprise 8.",
   "icon": "images/1c-syntax.png",
-  "version": "1.18.0",
+  "version": "1.19.0",
   "publisher": "1c-syntax",
   "galleryBanner": {
     "color": "#0000FF",
@@ -24,16 +24,14 @@
   "engines": {
     "vscode": "^1.33.1"
   },
-  "main": "./dist/src/extension",
+  "main": "./out/src/extension",
   "scripts": {
     "test": "cross-env CODE_TESTS_WORKSPACE=test/fixtures node ./node_modules/vscode/bin/test",
-    "vscode:prepublish": "webpack --mode production",
+    "vscode:prepublish": "tsc -p ./",
     "lint": "tslint --project tsconfig.json 'src/**/*.ts' -t verbose",
-    "compile": "webpack --mode none",
+    "compile": "tsc -watch -p ./",
     "preLaunch": "tsc -p ./",
-    "postinstall": "node ./node_modules/vscode/bin/install",
-    "watch": "webpack --mode none --watch",
-    "test-compile": "tsc -p ./"
+    "postinstall": "node ./node_modules/vscode/bin/install"
   },
   "activationEvents": [
     "onLanguage:bsl",
@@ -303,13 +301,10 @@
     "istanbul": "^0.4.5",
     "remap-istanbul": "^0.13.0",
     "should": "^13.2.3",
-    "ts-loader": "^6.0.4",
     "tslint": "^5.18.0",
     "tslint-sonarts": "^1.9.0",
     "typescript": "^3.5.3",
-    "vscode": "^1.1.35",
-    "webpack": "^4.37.0",
-    "webpack-cli": "^3.3.6"
+    "vscode": "^1.1.35"
   },
   "dependencies": {
     "alignment": "0.0.1",

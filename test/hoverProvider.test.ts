@@ -38,8 +38,8 @@ describe("Hover", () => {
         hovers.should.has.length(1);
 
         const hover = hovers[0];
-        hover.contents[0].should.has.a.key("value").which.is.equal("Метод текущего модуля");
-        hover.contents[2].should.has.a.key("value").which.is.equal("```bsl\nПроцедура НеЭкспортнаяПроцедура()\n```\n");
+        hover.contents[0].should.has.a.key("_value").which.is.equal("Метод текущего модуля");
+        hover.contents[2].should.has.a.key("_value").which.is.equal("```bsl\nПроцедура НеЭкспортнаяПроцедура()\n```\n");
 
     });
 
@@ -56,9 +56,9 @@ describe("Hover", () => {
         hovers.should.has.length(1);
 
         const hover = hovers[0];
-        hover.contents[0].should.has.a.key("value").which.startWith("Метод из")
+        hover.contents[0].should.has.a.key("_value").which.startWith("Метод из")
             .and.endWith("Document/Ext/ManagerModule.bsl");
-        hover.contents[2].should.has.a.key("value").which.is
+        hover.contents[2].should.has.a.key("_value").which.is
             .equal("```bsl\nПроцедура ПроцедураМодуляМенеджера()\n```\n");
 
     });
@@ -76,9 +76,9 @@ describe("Hover", () => {
         hovers.should.has.length(1);
 
         const hover = hovers[0];
-        hover.contents[0].should.has.a.key("value").which.startWith("Метод глобального контекста");
-        hover.contents[2].should.has.a.key("value").which.startWith("```bsl\nПроцедура Сообщить(");
-        hover.contents[3].should.has.a.key("value").which.startWith("***ТекстСообщения***");
+        hover.contents[0].should.has.a.key("_value").which.startWith("Метод глобального контекста");
+        hover.contents[2].should.has.a.key("_value").which.startWith("```bsl\nПроцедура Сообщить(");
+        hover.contents[3].should.has.a.key("_value").which.startWith("***ТекстСообщения***");
 
     });
 
