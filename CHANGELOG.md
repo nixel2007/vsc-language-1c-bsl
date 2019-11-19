@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.19.1
+
+* Исправления публикации плагина
+
 ## 1.19.0
 
 * Обновлен BSL Language Server до версии [0.12.2](https://github.com/1c-syntax/bsl-language-server/releases/tag/v0.12.0):
