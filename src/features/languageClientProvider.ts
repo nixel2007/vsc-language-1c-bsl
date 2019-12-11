@@ -9,7 +9,7 @@ import {
     ServerOptions
 } from "vscode-languageclient";
 import * as which from "which";
-import { correctBinname, isOSUnixoid } from "../util/osUtils";
+import { correctBinname, isOSMacOS, isOSUnix, isOSUnixoid, isOSWindows } from "../util/osUtils";
 import { ServerDownloader } from "../util/serverDownloader";
 import { IStatus } from "../util/status";
 
@@ -29,11 +29,24 @@ export default class LanguageClientProvider {
             "bsl-language-server-install"
         );
 
+        let osPostfix: string;
+        if (isOSUnix()) {
+            osPostfix = "unix";
+        } else if (isOSMacOS()) {
+            osPostfix = "mac";
+        } else if (isOSWindows()) {
+            osPostfix = "win";
+        } else {
+            console.error(`Unsupported BSL LS platform ${process.platform}`);
+            vscode.window.showErrorMessage(`Unsupported BSL LS platform ${process.platform}`);
+            return;
+        }
+
         const langServerDownloader = new ServerDownloader(
             "BSL Language Server",
             "1c-syntax",
             "bsl-language-server",
-            "bsl-language-server_win.zip",
+            `bsl-language-server_${osPostfix}.zip`,
             langServerInstallDir
         );
 
@@ -49,8 +62,10 @@ export default class LanguageClientProvider {
 
         status.update("Initializing BSL Language Server...");
 
+        const binaryDir = isOSUnixoid() ? "bin" : ".";
         let binaryName = Paths.resolve(
             langServerInstallDir,
+            binaryDir,
             "bsl-language-server",
             correctBinname("bsl-language-server")
         );

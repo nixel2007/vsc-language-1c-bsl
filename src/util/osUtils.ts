@@ -39,6 +39,19 @@ export function isOSUnixoid(): boolean {
     );
 }
 
+export function isOSUnix(): boolean {
+    const platform = process.platform;
+    return (
+        platform === "linux" ||
+        platform === "freebsd" ||
+        platform === "openbsd"
+    );
+}
+
+export function isOSMacOS(): boolean {
+    return process.platform === "darwin";
+}
+
 export function correctBinname(binname: string): string {
     return binname + (process.platform === "win32" ? ".exe" : "");
 }
