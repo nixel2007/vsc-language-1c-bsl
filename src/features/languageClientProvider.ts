@@ -80,14 +80,12 @@ export default class LanguageClientProvider {
         context: vscode.ExtensionContext,
         binaryName: string
     ): Promise<LanguageClient> {
-        if (isOSUnixoid()) {
-            child_process.exec(`chmod +x ${binaryName}`);
-        }
+        const configuration = vscode.workspace.getConfiguration("language-1c-bsl");
+        const languageServerExternalJar = Boolean(configuration.get("languageServerExternalJar"));
 
-        const useBinary = true;
-        const executable = useBinary
-            ? this.getExecutableBinary(binaryName)
-            : await this.getExecutableJar(context);
+        const executable = languageServerExternalJar
+            ? await this.getExecutableJar(context)
+            : this.getExecutableBinary(binaryName);
 
         const serverOptions: ServerOptions = {
             run: executable,
@@ -107,10 +105,12 @@ export default class LanguageClientProvider {
         return new LanguageClient("bsl", "BSL Language Server", serverOptions, clientOptions);
     }
 
-    private async getExecutableJar(context: vscode.ExtensionContext): Promise<Executable> {
+    private async getExecutableJar(
+        context: vscode.ExtensionContext
+    ): Promise<Executable | undefined> {
         const configuration = vscode.workspace.getConfiguration("language-1c-bsl");
 
-        let command = String(configuration.get("javaPath"));
+        let command = String(configuration.get("languageServerExternalJarJavaPath"));
 
         const javaInPath = which.sync(command, { nothrow: true });
         if (!javaInPath) {
@@ -129,7 +129,7 @@ export default class LanguageClientProvider {
             command = `"${command}"`;
         }
 
-        let languageServerPath = String(configuration.get("languageServerPath"));
+        let languageServerPath = String(configuration.get("languageServerExternalJarPath"));
         if (!Paths.isAbsolute(languageServerPath)) {
             languageServerPath = context.asAbsolutePath(languageServerPath);
         }
@@ -137,19 +137,14 @@ export default class LanguageClientProvider {
             languageServerPath = `"${languageServerPath}"`;
         }
 
-        const javaOpts = Array(configuration.get("javaOpts"));
+        const javaOpts = Array(configuration.get("languageServerExternalJarJavaOpts"));
 
         const args: string[] = [];
         args.push(...javaOpts);
         args.push("-jar", languageServerPath);
 
-        const rootPath = vscode.workspace.rootPath;
-        if (rootPath) {
-            const configurationFile = Paths.join(
-                rootPath,
-                String(configuration.get("languageServerConfiguration"))
-            );
-
+        const configurationFile = this.getConfigurationFile(configuration);
+        if (configurationFile) {
             args.push("-c", configurationFile);
         }
 
@@ -160,11 +155,36 @@ export default class LanguageClientProvider {
         };
     }
 
-    private getExecutableBinary(binaryName: string): Executable {
+    private getExecutableBinary(command: string): Executable | undefined {
+        const args: string[] = [];
+
+        if (isOSUnixoid()) {
+            child_process.exec(`chmod +x ${command}`);
+        }
+
+        const configuration = vscode.workspace.getConfiguration("language-1c-bsl");
+        const configurationFile = this.getConfigurationFile(configuration);
+        if (configurationFile) {
+            args.push("-c", configurationFile);
+        }
+
         return {
-            command: binaryName,
-            args: [],
+            command,
+            args,
             options: { env: process.env, stdio: "pipe", shell: true }
         };
+    }
+
+    private getConfigurationFile(configuration: vscode.WorkspaceConfiguration): string | undefined {
+        const rootPath = vscode.workspace.rootPath;
+        let configurationFile: string;
+        if (rootPath) {
+            configurationFile = Paths.join(
+                rootPath,
+                String(configuration.get("languageServerConfiguration"))
+            );
+        }
+
+        return configurationFile;
     }
 }

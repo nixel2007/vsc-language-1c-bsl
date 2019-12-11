@@ -179,24 +179,29 @@
         "language-1c-bsl.languageServerEnabled": {
           "description": "BSL Language Server enabled",
           "type": "boolean",
-          "default": false
-        },
-        "language-1c-bsl.languageServerPath": {
-          "description": "Path to BSL Language Server jar-file. Leave default value to use bundled language server. Relative to vsc-language-1c-bsl folder.",
-          "type": "string",
-          "default": "languageserver/bsl-language-server.jar"
+          "default": true
         },
         "language-1c-bsl.languageServerConfiguration": {
           "description": "Path to BSL Language Server configuration file. Relative to workspace folder.",
           "type": "string",
           "default": ".bsl-language-server.json"
         },
-        "language-1c-bsl.javaPath": {
+        "language-1c-bsl.languageServerExternalJar": {
+          "description": "Use external bsl-language-server.jar",
+          "type": "boolean",
+          "default": false
+        },
+        "language-1c-bsl.languageServerExternalJarPath": {
+          "description": "Path to BSL Language Server jar-file. Leave default value to use bundled language server. Relative to vsc-language-1c-bsl folder.",
+          "type": "string",
+          "default": ""
+        },
+        "language-1c-bsl.languageServerExternalJarJavaPath": {
           "description": "Path to Java runtime binary. Leave default value to use java from PATH.",
           "type": "string",
           "default": "java"
         },
-        "language-1c-bsl.javaOpts": {
+        "language-1c-bsl.languageServerExternalJarJavaOpts": {
           "description": "Addititonal java options.",
           "type": "array",
           "default": [
