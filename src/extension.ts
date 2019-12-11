@@ -27,6 +27,7 @@ import { MethodDetect } from "./features/methodDetect";
 import * as vscAdapter from "./vscAdapter";
 
 import LibProvider from "./libProvider";
+import { IStatus, StatusBarEntry } from "./util/status";
 const libProvider = new LibProvider();
 
 // this method is called when your extension is activated
@@ -101,8 +102,10 @@ export function activate(context: vscode.ExtensionContext) {
         );
     }
 
-    const languageClientProvider = new LanguageClientProvider();
-    languageClientProvider.registerLanguageClient(context);
+    withSpinningStatus(context, async status => {
+        const languageClientProvider = new LanguageClientProvider();
+        await languageClientProvider.registerLanguageClient(context, status);
+    });
 
     const syntaxHelper = new SyntaxHelper(global);
     context.subscriptions.push(
@@ -933,4 +936,14 @@ function fillParams(params, comment, enMode) {
         comment += "\n";
     }
     return comment;
+}
+
+async function withSpinningStatus(
+    context: vscode.ExtensionContext,
+    action: (status: IStatus) => Promise<void>
+) {
+    const status = new StatusBarEntry(context, "$(sync~spin)");
+    status.show();
+    await action(status);
+    status.dispose();
 }

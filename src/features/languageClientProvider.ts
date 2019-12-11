@@ -1,3 +1,4 @@
+import * as child_process from "child_process";
 import * as fs from "fs-extra";
 import * as Paths from "path";
 import * as vscode from "vscode";
@@ -8,15 +9,96 @@ import {
     ServerOptions
 } from "vscode-languageclient";
 import * as which from "which";
+import { correctBinname, isOSUnixoid } from "../util/osUtils";
+import { ServerDownloader } from "../util/serverDownloader";
+import { IStatus } from "../util/status";
 
 export default class LanguageClientProvider {
-    public async registerLanguageClient(context: vscode.ExtensionContext) {
+    public async registerLanguageClient(context: vscode.ExtensionContext, status: IStatus) {
         const configuration = vscode.workspace.getConfiguration("language-1c-bsl");
         const languageServerEnabled = Boolean(configuration.get("languageServerEnabled"));
 
         if (!languageServerEnabled) {
             return;
         }
+
+        status.update("Activating BSL Language Server...");
+
+        const langServerInstallDir = Paths.join(
+            context.globalStoragePath,
+            "bsl-language-server-install"
+        );
+
+        const langServerDownloader = new ServerDownloader(
+            "BSL Language Server",
+            "1c-syntax",
+            "bsl-language-server",
+            "bsl-language-server_win.zip",
+            langServerInstallDir
+        );
+
+        try {
+            await langServerDownloader.downloadServerIfNeeded(status);
+        } catch (error) {
+            console.error(error);
+            vscode.window.showWarningMessage(
+                `Could not update/download BSL Language Server: ${error}`
+            );
+            return;
+        }
+
+        status.update("Initializing BSL Language Server...");
+
+        let binaryName = Paths.resolve(
+            langServerInstallDir,
+            "bsl-language-server",
+            correctBinname("bsl-language-server")
+        );
+        if (binaryName.indexOf(" ") > 0) {
+            binaryName = `"${binaryName}"`;
+        }
+
+        const languageClient = await this.createLanguageClient(context, binaryName);
+        const disposable = languageClient.start();
+
+        context.subscriptions.push(disposable);
+
+        await languageClient.onReady();
+    }
+
+    private async createLanguageClient(
+        context: vscode.ExtensionContext,
+        binaryName: string
+    ): Promise<LanguageClient> {
+        if (isOSUnixoid()) {
+            child_process.exec(`chmod +x ${binaryName}`);
+        }
+
+        const useBinary = true;
+        const executable = useBinary
+            ? this.getExecutableBinary(binaryName)
+            : await this.getExecutableJar(context);
+
+        const serverOptions: ServerOptions = {
+            run: executable,
+            debug: executable
+        };
+
+        const clientOptions: LanguageClientOptions = {
+            documentSelector: [
+                { scheme: "file", language: "bsl" },
+                { scheme: "untitled", language: "bsl" }
+            ],
+            synchronize: {
+                fileEvents: vscode.workspace.createFileSystemWatcher("**/*.{os,bsl}")
+            }
+        };
+
+        return new LanguageClient("bsl", "BSL Language Server", serverOptions, clientOptions);
+    }
+
+    private async getExecutableJar(context: vscode.ExtensionContext): Promise<Executable> {
+        const configuration = vscode.workspace.getConfiguration("language-1c-bsl");
 
         let command = String(configuration.get("javaPath"));
 
@@ -61,36 +143,18 @@ export default class LanguageClientProvider {
             args.push("-c", configurationFile);
         }
 
-        const executable: Executable = {
+        return {
             command,
             args,
             options: { env: process.env, stdio: "pipe", shell: true }
         };
+    }
 
-        const serverOptions: ServerOptions = {
-            run: executable,
-            debug: executable
+    private getExecutableBinary(binaryName: string): Executable {
+        return {
+            command: binaryName,
+            args: [],
+            options: { env: process.env, stdio: "pipe", shell: true }
         };
-
-        const clientOptions: LanguageClientOptions = {
-            documentSelector: [
-                { scheme: "file", language: "bsl" },
-                { scheme: "untitled", language: "bsl" }
-            ],
-            synchronize: {
-                fileEvents: vscode.workspace.createFileSystemWatcher("**/*.{os,bsl}")
-            }
-        };
-
-        const client = new LanguageClient(
-            "bsl-language-server",
-            "BSL Language Server",
-            serverOptions,
-            clientOptions
-        );
-
-        const disposable = client.start();
-
-        context.subscriptions.push(disposable);
     }
 }
