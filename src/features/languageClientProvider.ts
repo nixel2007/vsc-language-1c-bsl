@@ -59,9 +59,19 @@ export default class LanguageClientProvider {
         }
 
         const languageClient = await this.createLanguageClient(context, binaryName);
-        const disposable = languageClient.start();
+        let languageClientDisposable = languageClient.start();
 
-        context.subscriptions.push(disposable);
+        context.subscriptions.push(
+            vscode.commands.registerCommand("language-1c-bsl.languageServer.restart", async () => {
+                await languageClient.stop();
+                languageClientDisposable.dispose();
+
+                languageClientDisposable = languageClient.start();
+                context.subscriptions.push(languageClientDisposable);
+            })
+        );
+
+        context.subscriptions.push(languageClientDisposable);
 
         await languageClient.onReady();
     }
