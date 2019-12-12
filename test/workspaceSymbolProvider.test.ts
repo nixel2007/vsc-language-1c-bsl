@@ -8,7 +8,7 @@ import { waitForBSLLSActivation } from "../src/extension";
 
 describe("Workspace symbols", function() {
 
-    this.timeout(10000);
+    this.timeout("5m");
 
     before(async () => {
         const uriEmptyFile = vscode.Uri.file(

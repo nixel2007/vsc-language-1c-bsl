@@ -11,7 +11,7 @@ let textDocument: vscode.TextDocument;
 describe("Definitions", () => {
 
     before(async function() {
-        this.timeout(10000);
+        this.timeout("5m");
         const uriEmptyFile = vscode.Uri.file(
             path.join(fixturePath, "emptyFile.bsl")
         );
