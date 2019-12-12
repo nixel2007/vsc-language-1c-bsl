@@ -53,19 +53,22 @@ export class ServerDownloader {
     private githubProjectName: string;
     private assetName: string;
     private installDir: string;
+    private token: string;
 
     constructor(
         displayName: string,
         githubOrganization: string,
         githubProjectName: string,
         assetName: string,
-        installDir: string
+        installDir: string,
+        token: string
     ) {
         this.displayName = displayName;
         this.githubOrganization = githubOrganization;
         this.githubProjectName = githubProjectName;
         this.installDir = installDir;
         this.assetName = assetName;
+        this.token = token;
     }
 
     public async downloadServerIfNeeded(status: IStatus): Promise<void> {
@@ -123,11 +126,14 @@ export class ServerDownloader {
     }
 
     private async latestReleaseInfo(): Promise<IGitHubReleasesAPIResponse> {
+        const headers: any = { "User-Agent": "vsc-language-1c-bsl" };
+        if (this.token) {
+            headers.Authorization = `token ${this.token}`;
+        }
+
         const rawJson = await requestPromise.get(
             `https://api.github.com/repos/${this.githubOrganization}/${this.githubProjectName}/releases/latest`,
-            {
-                headers: { "User-Agent": "vsc-language-1c-bsl" }
-            }
+            { headers }
         );
         return JSON.parse(rawJson) as IGitHubReleasesAPIResponse;
     }

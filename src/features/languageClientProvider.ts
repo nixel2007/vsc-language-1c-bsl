@@ -28,6 +28,11 @@ export default class LanguageClientProvider {
             return;
         }
 
+        let token = String(configuration.get("githubToken"));
+        if (!token) {
+            token = process.env.LANGUAGE_1C_BSL_GITHUB_TOKEN;
+        }
+
         status.update("Activating BSL Language Server...");
 
         const langServerInstallDir = Paths.join(
@@ -53,7 +58,8 @@ export default class LanguageClientProvider {
             "1c-syntax",
             "bsl-language-server",
             `bsl-language-server_${osPostfix}.zip`,
-            langServerInstallDir
+            langServerInstallDir,
+            token
         );
 
         try {
