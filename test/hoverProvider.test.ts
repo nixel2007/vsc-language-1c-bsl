@@ -4,6 +4,7 @@ import * as vscode from "vscode";
 
 import { addText, clearActiveTextEditor, fixturePath, newTextDocument } from "./helpers";
 
+import { waitForBSLLSActivation } from "../src/extension";
 import { Global } from "../src/global";
 import * as vscAdapter from "../src/vscAdapter";
 
@@ -18,7 +19,10 @@ describe("Hover", () => {
             path.join(fixturePath, "CommonModules", "CommonModule", "Ext", "Module.bsl")
         );
         textDocument = await newTextDocument(uriFile);
-        await globals.waitForCacheUpdate();
+        const extension = vscode.extensions.getExtension("1c-syntax.language-1c-bsl");
+        await extension.activate();
+
+        await waitForBSLLSActivation();
     });
 
     beforeEach(() => {

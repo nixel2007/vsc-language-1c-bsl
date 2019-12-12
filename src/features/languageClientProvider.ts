@@ -9,13 +9,19 @@ import {
     ServerOptions
 } from "vscode-languageclient";
 import * as which from "which";
+import { LANGUAGE_1C_BSL_CONFIG } from "../const";
 import { correctBinname, isOSMacOS, isOSUnix, isOSUnixoid, isOSWindows } from "../util/osUtils";
 import { ServerDownloader } from "../util/serverDownloader";
 import { IStatus } from "../util/status";
 
+const RESTART_COMMAND = `${LANGUAGE_1C_BSL_CONFIG}.languageServer.restart`;
+
 export default class LanguageClientProvider {
+
+    private bslLsReady = false;
+
     public async registerLanguageClient(context: vscode.ExtensionContext, status: IStatus) {
-        const configuration = vscode.workspace.getConfiguration("language-1c-bsl");
+        const configuration = vscode.workspace.getConfiguration(LANGUAGE_1C_BSL_CONFIG);
         const languageServerEnabled = Boolean(configuration.get("languageServerEnabled"));
 
         if (!languageServerEnabled) {
@@ -77,25 +83,34 @@ export default class LanguageClientProvider {
         let languageClientDisposable = languageClient.start();
 
         context.subscriptions.push(
-            vscode.commands.registerCommand("language-1c-bsl.languageServer.restart", async () => {
+            vscode.commands.registerCommand(RESTART_COMMAND, async () => {
+                this.bslLsReady = false;
                 await languageClient.stop();
                 languageClientDisposable.dispose();
 
                 languageClientDisposable = languageClient.start();
                 context.subscriptions.push(languageClientDisposable);
+
+                await languageClient.onReady();
+                this.bslLsReady = true;
             })
         );
 
         context.subscriptions.push(languageClientDisposable);
 
         await languageClient.onReady();
+        this.bslLsReady = true;
+    }
+
+    public isBslLsReady() {
+        return this.bslLsReady;
     }
 
     private async createLanguageClient(
         context: vscode.ExtensionContext,
         binaryName: string
     ): Promise<LanguageClient> {
-        const configuration = vscode.workspace.getConfiguration("language-1c-bsl");
+        const configuration = vscode.workspace.getConfiguration(LANGUAGE_1C_BSL_CONFIG);
         const languageServerExternalJar = Boolean(configuration.get("languageServerExternalJar"));
 
         const executable = languageServerExternalJar
@@ -123,7 +138,7 @@ export default class LanguageClientProvider {
     private async getExecutableJar(
         context: vscode.ExtensionContext
     ): Promise<Executable | undefined> {
-        const configuration = vscode.workspace.getConfiguration("language-1c-bsl");
+        const configuration = vscode.workspace.getConfiguration(LANGUAGE_1C_BSL_CONFIG);
 
         let command = String(configuration.get("languageServerExternalJarJavaPath"));
 
@@ -177,7 +192,7 @@ export default class LanguageClientProvider {
             child_process.exec(`chmod +x ${command}`);
         }
 
-        const configuration = vscode.workspace.getConfiguration("language-1c-bsl");
+        const configuration = vscode.workspace.getConfiguration(LANGUAGE_1C_BSL_CONFIG);
         const configurationFile = this.getConfigurationFile(configuration);
         if (configurationFile) {
             args.push("-c", configurationFile);

@@ -28,7 +28,11 @@ import * as vscAdapter from "./vscAdapter";
 
 import LibProvider from "./libProvider";
 import { IStatus, StatusBarEntry } from "./util/status";
+
 const libProvider = new LibProvider();
+const languageClientProvider = new LanguageClientProvider();
+
+export const oscriptLinter = new LintProvider();
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -103,7 +107,6 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     withSpinningStatus(context, async status => {
-        const languageClientProvider = new LanguageClientProvider();
         await languageClientProvider.registerLanguageClient(context, status);
     });
 
@@ -112,8 +115,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.workspace.registerTextDocumentContentProvider("syntax-helper", syntaxHelper)
     );
 
-    const linter = new LintProvider();
-    linter.activate(context.subscriptions);
+    oscriptLinter.activate(context.subscriptions);
 
     context.subscriptions.push(
         vscode.commands.registerCommand(CMD_UPDATE, () => {
@@ -750,6 +752,12 @@ export function activate(context: vscode.ExtensionContext) {
     global.updateCache();
 }
 
+export async function waitForBSLLSActivation() {
+    while (!languageClientProvider.isBslLsReady()) {
+        await delay(100);
+    }
+}
+
 function createComments(global, all: boolean) {
     const editor = vscode.window.activeTextEditor;
     if (editor.document.languageId === "bsl") {
@@ -946,4 +954,10 @@ async function withSpinningStatus(
     status.show();
     await action(status);
     status.dispose();
+}
+
+function delay(milliseconds: number) {
+    return new Promise<void>(resolve => {
+        setTimeout(resolve, milliseconds);
+    });
 }

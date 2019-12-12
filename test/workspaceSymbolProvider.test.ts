@@ -4,10 +4,7 @@ import * as vscode from "vscode";
 
 import { clearActiveTextEditor, fixturePath, newTextDocument } from "./helpers";
 
-import { Global } from "../src/global";
-import * as vscAdapter from "../src/vscAdapter";
-
-const globals = Global.create(vscAdapter);
+import { waitForBSLLSActivation } from "../src/extension";
 
 describe("Workspace symbols", function() {
 
@@ -18,7 +15,10 @@ describe("Workspace symbols", function() {
             path.join(fixturePath, "emptyFile.bsl")
         );
         await newTextDocument(uriEmptyFile);
-        await globals.waitForCacheUpdate();
+        const extension = vscode.extensions.getExtension("1c-syntax.language-1c-bsl");
+        await extension.activate();
+
+        await waitForBSLLSActivation();
     });
 
     beforeEach(async () => {
