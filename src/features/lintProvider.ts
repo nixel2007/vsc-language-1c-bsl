@@ -88,7 +88,12 @@ export default class LintProvider {
                     match = line.match(regex);
                     if (match) {
                         const fileName = match[1];
-                        const startLine = +match[2] - 1;
+
+                        let startLine = +match[2] - 1;
+                        if (startLine < 0) {
+                            startLine = 0;
+                        }
+
                         let startCharacter = +match[3] - 1;
                         if (startCharacter < 0) {
                             startCharacter = 0;
