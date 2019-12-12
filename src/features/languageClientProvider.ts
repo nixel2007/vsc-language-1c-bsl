@@ -31,7 +31,7 @@ export default class LanguageClientProvider {
 
         let osPostfix: string;
         if (isOSUnix()) {
-            osPostfix = "unix";
+            osPostfix = "nix";
         } else if (isOSMacOS()) {
             osPostfix = "mac";
         } else if (isOSWindows()) {
@@ -65,8 +65,8 @@ export default class LanguageClientProvider {
         const binaryDir = isOSUnixoid() ? "bin" : ".";
         let binaryName = Paths.resolve(
             langServerInstallDir,
-            binaryDir,
             "bsl-language-server",
+            binaryDir,
             correctBinname("bsl-language-server")
         );
         if (binaryName.indexOf(" ") > 0) {
