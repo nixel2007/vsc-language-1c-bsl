@@ -17,7 +17,6 @@ import { IStatus } from "../util/status";
 const RESTART_COMMAND = `${LANGUAGE_1C_BSL_CONFIG}.languageServer.restart`;
 
 export default class LanguageClientProvider {
-
     private bslLsReady = false;
 
     public async registerLanguageClient(context: vscode.ExtensionContext, status: IStatus) {
@@ -74,16 +73,7 @@ export default class LanguageClientProvider {
 
         status.update("Initializing BSL Language Server...");
 
-        const binaryDir = isOSUnixoid() ? "bin" : ".";
-        let binaryName = Paths.resolve(
-            langServerInstallDir,
-            "bsl-language-server",
-            binaryDir,
-            correctBinname("bsl-language-server")
-        );
-        if (binaryName.indexOf(" ") > 0) {
-            binaryName = `"${binaryName}"`;
-        }
+        const binaryName = this.getBinaryName(langServerInstallDir);
 
         const languageClient = await this.createLanguageClient(context, binaryName);
         let languageClientDisposable = languageClient.start();
@@ -222,5 +212,30 @@ export default class LanguageClientProvider {
         }
 
         return configurationFile;
+    }
+
+    private getBinaryName(langServerInstallDir: string) {
+        const archiveDir = "bsl-language-server" + (isOSMacOS() ? ".app" : "");
+        let binaryDir: string;
+
+        if (isOSMacOS()) {
+            binaryDir = Paths.join("Contents", "MacOS");
+        } else if (isOSUnix()) {
+            binaryDir = "bin";
+        } else if (isOSWindows()) {
+            binaryDir = ".";
+        }
+
+        let binaryName = Paths.resolve(
+            langServerInstallDir,
+            archiveDir,
+            binaryDir,
+            correctBinname("bsl-language-server")
+        );
+        if (binaryName.indexOf(" ") > 0) {
+            binaryName = `"${binaryName}"`;
+        }
+
+        return binaryName;
     }
 }
