@@ -27,10 +27,12 @@
 //
 import * as extractZipWithCallback from "extract-zip";
 import * as fs from "fs-extra";
+import { jsonDateParser } from "json-date-parser";
 import * as path from "path";
 import * as requestPromise from "request-promise-native";
 import * as semver from "semver";
 import { promisify } from "util";
+import BSLLanguageServerDownloadChannel from "./bsllsDownloadChannel";
 import { download } from "./downloadUtils";
 import { IGitHubReleasesAPIResponse } from "./githubApi";
 import { IStatus } from "./status";
@@ -71,7 +73,7 @@ export class ServerDownloader {
         this.token = token;
     }
 
-    public async downloadServerIfNeeded(status: IStatus): Promise<void> {
+    public async downloadServerIfNeeded(status: IStatus, channel: BSLLanguageServerDownloadChannel): Promise<void> {
         const serverInfo = await this.installedServerInfo();
         const serverInfoOrDefault = serverInfo || {
             version: "0.0.0",
@@ -85,7 +87,14 @@ export class ServerDownloader {
             let releaseInfo: IGitHubReleasesAPIResponse;
 
             try {
-                releaseInfo = await this.latestReleaseInfo();
+                // tslint:disable-next-line: prefer-conditional-expression
+                if (channel === BSLLanguageServerDownloadChannel.Stable) {
+                    releaseInfo = await this.latestStableReleaseInfo();
+                } else if (channel === BSLLanguageServerDownloadChannel.PreRelease) {
+                    releaseInfo = await this.latestReleaseInfo();
+                } else {
+                    throw new Error(`Uknown BSL LS download channel: ${channel}`);
+                }
             } catch (error) {
                 const message = `Could not fetch from GitHub releases API: ${error}.`;
                 if (serverInfo == null) {
@@ -125,14 +134,40 @@ export class ServerDownloader {
         }
     }
 
+    private async latestStableReleaseInfo(): Promise<IGitHubReleasesAPIResponse> {
+        return this.getReleaseInfo("latest");
+    }
+
     private async latestReleaseInfo(): Promise<IGitHubReleasesAPIResponse> {
         const headers: any = { "User-Agent": "vsc-language-1c-bsl" };
         if (this.token) {
             headers.Authorization = `token ${this.token}`;
         }
 
+        const rawJsonReleases = await requestPromise.get(
+            `https://api.github.com/repos/${this.githubOrganization}/${this.githubProjectName}/releases`,
+            { headers }
+        );
+
+        const releases = JSON.parse(rawJsonReleases, jsonDateParser) as IGitHubReleasesAPIResponse[];
+
+        if (releases.length === 0) {
+            throw new Error("Project does'n have releases");
+        }
+
+        releases.sort((a, b) => b.published_at.getTime() - a.published_at.getTime());
+
+        return this.getReleaseInfo(releases[0].id.toString());
+    }
+
+    private async getReleaseInfo(id: string): Promise<IGitHubReleasesAPIResponse> {
+        const headers: any = { "User-Agent": "vsc-language-1c-bsl" };
+        if (this.token) {
+            headers.Authorization = `token ${this.token}`;
+        }
+
         const rawJson = await requestPromise.get(
-            `https://api.github.com/repos/${this.githubOrganization}/${this.githubProjectName}/releases/latest`,
+            `https://api.github.com/repos/${this.githubOrganization}/${this.githubProjectName}/releases/${id}`,
             { headers }
         );
         return JSON.parse(rawJson) as IGitHubReleasesAPIResponse;

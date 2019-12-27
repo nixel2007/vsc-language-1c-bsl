@@ -191,6 +191,15 @@
           "type": "string",
           "default": ""
         },
+        "language-1c-bsl.languageServerReleaseChannel": {
+          "description": "BSL Language server download channel. Use `prerelease` if you want to check latest release candidates",
+          "type": "string",
+          "enum": [
+            "stable",
+            "prerelease"
+          ],
+          "default": "stable"
+        },
         "language-1c-bsl.languageServerExternalJar": {
           "description": "Use external bsl-language-server.jar",
           "type": "boolean",
@@ -334,6 +343,7 @@
     "fs-extra": "^8.1.0",
     "glob": "^7.1.6",
     "iconv-lite": "^0.5.0",
+    "json-date-parser": "^1.0.1",
     "lokijs": "^1.5.8",
     "onec-syntaxparser": "0.1.11",
     "request": "^2.88.0",

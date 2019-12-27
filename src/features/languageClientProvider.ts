@@ -10,6 +10,7 @@ import {
 } from "vscode-languageclient";
 import * as which from "which";
 import { LANGUAGE_1C_BSL_CONFIG } from "../const";
+import BSLLanguageServerDownloadChannel from "../util/bsllsDownloadChannel";
 import { correctBinname, isOSMacOS, isOSUnix, isOSUnixoid, isOSWindows } from "../util/osUtils";
 import { ServerDownloader } from "../util/serverDownloader";
 import { IStatus } from "../util/status";
@@ -52,6 +53,8 @@ export default class LanguageClientProvider {
             return;
         }
 
+        const downloadChannel = configuration.get<BSLLanguageServerDownloadChannel>("languageServerReleaseChannel");
+
         const langServerDownloader = new ServerDownloader(
             "BSL Language Server",
             "1c-syntax",
@@ -62,7 +65,7 @@ export default class LanguageClientProvider {
         );
 
         try {
-            await langServerDownloader.downloadServerIfNeeded(status);
+            await langServerDownloader.downloadServerIfNeeded(status, downloadChannel);
         } catch (error) {
             console.error(error);
             vscode.window.showWarningMessage(

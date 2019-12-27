@@ -38,8 +38,8 @@ export interface IGitHubReleasesAPIResponse {
     draft: boolean;
     author: IGitHubReleasesAPIAuthor;
     prerelease: boolean;
-    created_at: string;
-    published_at: string;
+    created_at: Date;
+    published_at: Date;
     assets: IGitHubReleasesAPIAsset[];
     tarball_url: string;
     zipball_url: string;
