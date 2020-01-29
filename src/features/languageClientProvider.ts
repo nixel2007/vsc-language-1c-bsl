@@ -221,11 +221,11 @@ export default class LanguageClientProvider {
     }
 
     private getConfigurationFile(configuration: vscode.WorkspaceConfiguration): string | undefined {
-        const rootPath = vscode.workspace.rootPath;
+        const workspaceFolders = vscode.workspace.workspaceFolders;
         let configurationFile: string;
-        if (rootPath) {
+        if (workspaceFolders) {
             configurationFile = Paths.join(
-                rootPath,
+                workspaceFolders[0].uri.fsPath,
                 String(configuration.get("languageServerConfiguration"))
             );
         }
