@@ -50,12 +50,12 @@ export interface IServerInfo {
  * updates if necessary.
  */
 export class ServerDownloader {
-    private displayName: string;
-    private githubOrganization: string;
-    private githubProjectName: string;
-    private assetName: string;
-    private installDir: string;
-    private token: string;
+    private readonly displayName: string;
+    private readonly githubOrganization: string;
+    private readonly githubProjectName: string;
+    private readonly assetName: string;
+    private readonly installDir: string;
+    private readonly token: string;
 
     constructor(
         displayName: string,

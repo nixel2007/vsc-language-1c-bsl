@@ -165,12 +165,11 @@ export default class LanguageClientProvider {
                 Configuration error! Can't find "java" executable at: ${command}`;
                 console.error(errorMessage);
 
-                vscode.window.showErrorMessage(errorMessage);
-                return;
+                throw new Error(errorMessage);
             }
         }
 
-        if (command.indexOf(" ") > 0) {
+        if (command.includes(" ")) {
             command = `"${command}"`;
         }
 
@@ -178,7 +177,7 @@ export default class LanguageClientProvider {
         if (!Paths.isAbsolute(languageServerPath)) {
             languageServerPath = context.asAbsolutePath(languageServerPath);
         }
-        if (languageServerPath.indexOf(" ") > 0) {
+        if (languageServerPath.includes(" ")) {
             languageServerPath = `"${languageServerPath}"`;
         }
 
@@ -234,7 +233,8 @@ export default class LanguageClientProvider {
     }
 
     private getBinaryName(langServerInstallDir: string) {
-        const archiveDir = "bsl-language-server" + (isOSMacOS() ? ".app" : "");
+        const postfix = isOSMacOS() ? ".app" : "";
+        const archiveDir = `bsl-language-server${postfix}`;
         let binaryDir: string;
 
         if (isOSMacOS()) {
@@ -251,7 +251,7 @@ export default class LanguageClientProvider {
             binaryDir,
             correctBinname("bsl-language-server")
         );
-        if (binaryName.indexOf(" ") > 0) {
+        if (binaryName.includes(" ")) {
             binaryName = `"${binaryName}"`;
         }
 

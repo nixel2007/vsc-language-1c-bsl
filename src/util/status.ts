@@ -37,7 +37,7 @@ export interface IStatus {
  */
 export class StatusBarEntry implements IStatus {
     private barItem: vscode.StatusBarItem;
-    private prefix?: string;
+    private readonly prefix?: string;
 
     constructor(context: vscode.ExtensionContext, prefix?: string) {
         this.prefix = prefix;
