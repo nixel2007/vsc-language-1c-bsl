@@ -37,7 +37,7 @@ export default class LanguageClientProvider {
 
         const langServerInstallDir = Paths.join(
             context.globalStoragePath,
-            "bsl-language-server-install"
+            "bsl-language-server"
         );
 
         let osPostfix: string;
@@ -64,8 +64,9 @@ export default class LanguageClientProvider {
             token
         );
 
+        let installedVersion: string;
         try {
-            await langServerDownloader.downloadServerIfNeeded(status, downloadChannel);
+            installedVersion = await langServerDownloader.downloadServerIfNeeded(status, downloadChannel);
         } catch (error) {
             console.error(error);
             vscode.window.showWarningMessage(
@@ -74,9 +75,24 @@ export default class LanguageClientProvider {
             return;
         }
 
+        const files = await fs.promises.readdir(langServerInstallDir, {encoding: "utf8"});
+        files
+            .filter(file => file !== "SERVER-INFO")    // todo: протекло
+            .filter(file => file !== installedVersion)
+            .map(file => Paths.join(langServerInstallDir, file))
+            .forEach(async file => {
+                try {
+                    await fs.remove(file);
+                } catch (err) {
+                    vscode.window.showWarningMessage(`Can't clean up old BSL LS file ${file}:\n${err}`);
+                }
+            });
+
+        const languageServerDir = Paths.join(langServerInstallDir, installedVersion);
+
         status.update("Initializing BSL Language Server...");
 
-        const binaryName = this.getBinaryName(langServerInstallDir);
+        const binaryName = this.getBinaryName(languageServerDir);
 
         const languageClient = await this.createLanguageClient(context, binaryName);
         let languageClientDisposable = languageClient.start();

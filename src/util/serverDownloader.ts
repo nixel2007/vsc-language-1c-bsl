@@ -73,7 +73,7 @@ export class ServerDownloader {
         this.token = token;
     }
 
-    public async downloadServerIfNeeded(status: IStatus, channel: BSLLanguageServerDownloadChannel): Promise<void> {
+    public async downloadServerIfNeeded(status: IStatus, channel: BSLLanguageServerDownloadChannel): Promise<string> {
         const serverInfo = await this.installedServerInfo();
         const serverInfoOrDefault = serverInfo || {
             version: "0.0.0",
@@ -81,57 +81,61 @@ export class ServerDownloader {
         };
         const secondsSinceLastUpdate = (Date.now() - serverInfoOrDefault.lastUpdate) / 1000;
 
-        if (secondsSinceLastUpdate > 480) {
-            // Only query GitHub API for latest version if some time has passed
-            console.info(`Querying GitHub API for new ${this.displayName} version...`);
-            let releaseInfo: IGitHubReleasesAPIResponse;
-
-            try {
-                // tslint:disable-next-line: prefer-conditional-expression
-                if (channel === BSLLanguageServerDownloadChannel.Stable) {
-                    releaseInfo = await this.latestStableReleaseInfo();
-                } else if (channel === BSLLanguageServerDownloadChannel.PreRelease) {
-                    releaseInfo = await this.latestReleaseInfo();
-                } else {
-                    throw new Error(`Uknown BSL LS download channel: ${channel}`);
-                }
-            } catch (error) {
-                const message = `Could not fetch from GitHub releases API: ${error}.`;
-                if (serverInfo == null) {
-                    // No server is installed yet, so throw
-                    throw new Error(message);
-                } else {
-                    // Do not throw since user might just be offline
-                    // and a version of the server is already installed
-                    console.warn(message);
-                    return;
-                }
-            }
-
-            const latestVersion = releaseInfo.tag_name;
-            const installedVersion = serverInfoOrDefault.version;
-            const serverNeedsUpdate = semver.gt(latestVersion, installedVersion);
-            let newVersion = installedVersion;
-
-            if (serverNeedsUpdate) {
-                const serverAsset = releaseInfo.assets.find(asset => asset.name === this.assetName);
-                if (serverAsset) {
-                    const downloadUrl = serverAsset.browser_download_url;
-                    await this.downloadServer(downloadUrl, latestVersion, status);
-                } else {
-                    throw new Error(
-                        `Latest GitHub release for ${this.githubProjectName}` +
-                            `does not contain the asset '${this.assetName}'!`
-                    );
-                }
-                newVersion = latestVersion;
-            }
-
-            await this.updateInstalledServerInfo({
-                version: newVersion,
-                lastUpdate: Date.now()
-            });
+        if (secondsSinceLastUpdate < 480) {
+            return serverInfoOrDefault.version;
         }
+
+        // Only query GitHub API for latest version if some time has passed
+        console.info(`Querying GitHub API for new ${this.displayName} version...`);
+        let releaseInfo: IGitHubReleasesAPIResponse;
+
+        try {
+            // tslint:disable-next-line: prefer-conditional-expression
+            if (channel === BSLLanguageServerDownloadChannel.Stable) {
+                releaseInfo = await this.latestStableReleaseInfo();
+            } else if (channel === BSLLanguageServerDownloadChannel.PreRelease) {
+                releaseInfo = await this.latestReleaseInfo();
+            } else {
+                throw new Error(`Uknown BSL LS download channel: ${channel}`);
+            }
+        } catch (error) {
+            const message = `Could not fetch from GitHub releases API: ${error}.`;
+            if (serverInfo == null) {
+                // No server is installed yet, so throw
+                throw new Error(message);
+            } else {
+                // Do not throw since user might just be offline
+                // and a version of the server is already installed
+                console.warn(message);
+                return serverInfoOrDefault.version;
+            }
+        }
+
+        const latestVersion = releaseInfo.tag_name;
+        const installedVersion = serverInfoOrDefault.version;
+        const serverNeedsUpdate = semver.gt(latestVersion, installedVersion);
+        let newVersion = installedVersion;
+
+        if (serverNeedsUpdate) {
+            const serverAsset = releaseInfo.assets.find(asset => asset.name === this.assetName);
+            if (serverAsset) {
+                const downloadUrl = serverAsset.browser_download_url;
+                await this.downloadServer(downloadUrl, latestVersion, status);
+            } else {
+                throw new Error(
+                    `Latest GitHub release for ${this.githubProjectName}` +
+                        `does not contain the asset '${this.assetName}'!`
+                );
+            }
+            newVersion = latestVersion;
+        }
+
+        await this.updateInstalledServerInfo({
+            version: newVersion,
+            lastUpdate: Date.now()
+        });
+
+        return newVersion;
     }
 
     private async latestStableReleaseInfo(): Promise<IGitHubReleasesAPIResponse> {
@@ -203,7 +207,7 @@ export class ServerDownloader {
             await fs.promises.mkdir(this.installDir, { recursive: true });
         }
 
-        const downloadDest = path.join(this.installDir, `download-${this.assetName}`);
+        const downloadDest = path.join(this.installDir, `${version}-download-${this.assetName}`);
         status.update(`Downloading ${this.displayName} ${version}...`);
         await download(downloadUrl, downloadDest, percent => {
             status.update(
@@ -212,7 +216,7 @@ export class ServerDownloader {
         });
 
         status.update(`Unpacking ${this.displayName} ${version}...`);
-        await extractZip(downloadDest, { dir: this.installDir });
+        await extractZip(downloadDest, { dir: path.join(this.installDir, version) });
         await fs.promises.unlink(downloadDest);
 
         status.update(`Initializing ${this.displayName}...`);
