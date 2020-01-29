@@ -196,7 +196,7 @@ export default class LanguageClientProvider {
         return {
             command,
             args,
-            options: { env: process.env, stdio: "pipe", shell: true }
+            options: { env: process.env, shell: true }
         };
     }
 
@@ -216,7 +216,7 @@ export default class LanguageClientProvider {
         return {
             command,
             args,
-            options: { env: process.env, stdio: "pipe", shell: true }
+            options: { env: process.env, shell: true }
         };
     }
 

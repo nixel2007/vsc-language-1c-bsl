@@ -25,7 +25,7 @@ describe("Linter", () => {
     it("should show errors on oscript-files", async () => {
 
         oscriptLinter.doBsllint(textDocument);
-        const diagnosticData: vscode.Diagnostic[] = await oscriptLinter.getDiagnosticData(uriFile);
+        const diagnosticData: ReadonlyArray<vscode.Diagnostic> = await oscriptLinter.getDiagnosticData(uriFile);
 
         diagnosticData.should.matchAny((value: vscode.Diagnostic) => {
             value.message.should.be.equal("Неизвестный символ: Б");

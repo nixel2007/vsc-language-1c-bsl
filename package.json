@@ -22,7 +22,7 @@
     "Programming Languages"
   ],
   "engines": {
-    "vscode": "^1.33.1"
+    "vscode": "^1.41.0"
   },
   "main": "./out/src/extension",
   "scripts": {
@@ -319,19 +319,19 @@
     "@types/fs-extra": "^8.0.1",
     "@types/glob": "^7.1.1",
     "@types/mocha": "^5.2.7",
-    "@types/node": "^12.12.17",
-    "@types/request": "^2.48.3",
+    "@types/node": "13.5.1",
+    "@types/request": "^2.48.4",
     "@types/request-promise-native": "^1.0.17",
-    "@types/semver": "^6.2.0",
+    "@types/semver": "^7.1.0",
     "@types/which": "^1.3.2",
-    "cross-env": "^6.0.3",
+    "cross-env": "^7.0.0",
     "decache": "^4.5.1",
     "istanbul": "^0.4.5",
     "remap-istanbul": "^0.13.0",
     "should": "^13.2.3",
-    "tslint": "^5.20.1",
+    "tslint": "^6.0.0",
     "tslint-sonarts": "^1.9.0",
-    "typescript": "^3.7.3",
+    "typescript": "^3.7.5",
     "vscode": "^1.1.36"
   },
   "dependencies": {
@@ -342,17 +342,17 @@
     "filequeue": "^0.5.0",
     "fs-extra": "^8.1.0",
     "glob": "^7.1.6",
-    "iconv-lite": "^0.5.0",
+    "iconv-lite": "^0.5.1",
     "json-date-parser": "^1.0.1",
     "lokijs": "^1.5.8",
     "onec-syntaxparser": "0.1.11",
     "request": "^2.88.0",
     "request-progress": "^3.0.0",
     "request-promise-native": "^1.0.8",
-    "semver": "^6.3.0",
+    "semver": "^7.1.1",
     "vsce": "^1.71.0",
-    "vscode-languageclient": "^5.2.1",
+    "vscode-languageclient": "^6.1.0",
     "which": "^2.0.2",
-    "xml2js": "^0.4.22"
+    "xml2js": "^0.4.23"
   }
 }
