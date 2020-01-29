@@ -98,6 +98,12 @@ export default class LintProvider {
                         if (startCharacter < 0) {
                             startCharacter = 0;
                         }
+
+                        if (startLine > vscode.window.activeTextEditor.document.lineCount) {
+                            startLine = vscode.window.activeTextEditor.document.lineCount - 1;
+                            startCharacter = 0;
+                        }
+
                         const errorMessage = match[4];
                         const range = new vscode.Range(
                             new vscode.Position(startLine, startCharacter),
