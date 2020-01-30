@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.20.0
+
+* Реализована автоматическая установка и обновление BSL Language Server.
+  * Изменения к последней версии BSL LS доступны [по ссылке](https://github.com/1c-syntax/bsl-language-server/releases/tag/v0.13.0)
+* Запуск BSL LS по умолчанию больше не требует установленной java. Запуск через конкретную версию jar-файла доступен в настройках плагина
+
 ## 1.19.2
 
 * Обновлен BSL Language Server до версии [0.12.3](https://github.com/1c-syntax/bsl-language-server/releases/tag/v0.12.0):

@@ -1,3 +1,4 @@
+import * as child_process from "child_process";
 import * as fs from "fs-extra";
 import * as Paths from "path";
 import * as vscode from "vscode";
@@ -8,64 +9,128 @@ import {
     ServerOptions
 } from "vscode-languageclient";
 import * as which from "which";
+import { LANGUAGE_1C_BSL_CONFIG } from "../const";
+import BSLLanguageServerDownloadChannel from "../util/bsllsDownloadChannel";
+import { correctBinname, isOSMacOS, isOSUnix, isOSUnixoid, isOSWindows } from "../util/osUtils";
+import { ServerDownloader } from "../util/serverDownloader";
+import { IStatus } from "../util/status";
+
+const RESTART_COMMAND = `${LANGUAGE_1C_BSL_CONFIG}.languageServer.restart`;
 
 export default class LanguageClientProvider {
-    public async registerLanguageClient(context: vscode.ExtensionContext) {
-        const configuration = vscode.workspace.getConfiguration("language-1c-bsl");
+    private bslLsReady = false;
+
+    public async registerLanguageClient(context: vscode.ExtensionContext, status: IStatus) {
+        const configuration = vscode.workspace.getConfiguration(LANGUAGE_1C_BSL_CONFIG);
         const languageServerEnabled = Boolean(configuration.get("languageServerEnabled"));
 
         if (!languageServerEnabled) {
             return;
         }
 
-        let command = String(configuration.get("javaPath"));
-
-        const javaInPath = which.sync(command, { nothrow: true });
-        if (!javaInPath) {
-            const javaPathExists = await fs.pathExists(command);
-            if (!javaPathExists) {
-                const errorMessage = `BSL Language Server is NOT running!\n
-                Configuration error! Can't find "java" executable at: ${command}`;
-                console.error(errorMessage);
-
-                vscode.window.showErrorMessage(errorMessage);
-                return;
-            }
+        let token = String(configuration.get("githubToken"));
+        if (!token) {
+            token = process.env.LANGUAGE_1C_BSL_GITHUB_TOKEN;
         }
 
-        if (command.indexOf(" ") > 0) {
-            command = `"${command}"`;
+        status.update("Activating BSL Language Server...");
+
+        const langServerInstallDir = Paths.join(
+            context.globalStoragePath,
+            "bsl-language-server"
+        );
+
+        let osPostfix: string;
+        if (isOSUnix()) {
+            osPostfix = "nix";
+        } else if (isOSMacOS()) {
+            osPostfix = "mac";
+        } else if (isOSWindows()) {
+            osPostfix = "win";
+        } else {
+            console.error(`Unsupported BSL LS platform ${process.platform}`);
+            vscode.window.showErrorMessage(`Unsupported BSL LS platform ${process.platform}`);
+            return;
         }
 
-        let languageServerPath = String(configuration.get("languageServerPath"));
-        if (!Paths.isAbsolute(languageServerPath)) {
-            languageServerPath = context.asAbsolutePath(languageServerPath);
-        }
-        if (languageServerPath.indexOf(" ") > 0) {
-            languageServerPath = `"${languageServerPath}"`;
-        }
+        const downloadChannel = configuration.get<BSLLanguageServerDownloadChannel>("languageServerReleaseChannel");
 
-        const javaOpts = Array(configuration.get("javaOpts"));
+        const langServerDownloader = new ServerDownloader(
+            "BSL Language Server",
+            "1c-syntax",
+            "bsl-language-server",
+            `bsl-language-server_${osPostfix}.zip`,
+            langServerInstallDir,
+            token
+        );
 
-        const args: string[] = [];
-        args.push(...javaOpts);
-        args.push("-jar", languageServerPath);
-
-        const rootPath = vscode.workspace.rootPath;
-        if (rootPath) {
-            const configurationFile = Paths.join(
-                rootPath,
-                String(configuration.get("languageServerConfiguration"))
+        let installedVersion: string;
+        try {
+            installedVersion = await langServerDownloader.downloadServerIfNeeded(status, downloadChannel);
+        } catch (error) {
+            console.error(error);
+            vscode.window.showWarningMessage(
+                `Could not update/download BSL Language Server: ${error}`
             );
-
-            args.push("-c", configurationFile);
+            return;
         }
 
-        const executable: Executable = {
-            command,
-            args,
-            options: { env: process.env, stdio: "pipe", shell: true }
-        };
+        const files = await fs.promises.readdir(langServerInstallDir, {encoding: "utf8"});
+        files
+            .filter(file => file !== "SERVER-INFO")    // todo: протекло
+            .filter(file => file !== installedVersion)
+            .map(file => Paths.join(langServerInstallDir, file))
+            .forEach(async file => {
+                try {
+                    await fs.remove(file);
+                } catch (err) {
+                    vscode.window.showWarningMessage(`Can't clean up old BSL LS file ${file}:\n${err}`);
+                }
+            });
+
+        const languageServerDir = Paths.join(langServerInstallDir, installedVersion);
+
+        status.update("Initializing BSL Language Server...");
+
+        const binaryName = this.getBinaryName(languageServerDir);
+
+        const languageClient = await this.createLanguageClient(context, binaryName);
+        let languageClientDisposable = languageClient.start();
+
+        context.subscriptions.push(
+            vscode.commands.registerCommand(RESTART_COMMAND, async () => {
+                this.bslLsReady = false;
+                await languageClient.stop();
+                languageClientDisposable.dispose();
+
+                languageClientDisposable = languageClient.start();
+                context.subscriptions.push(languageClientDisposable);
+
+                await languageClient.onReady();
+                this.bslLsReady = true;
+            })
+        );
+
+        context.subscriptions.push(languageClientDisposable);
+
+        await languageClient.onReady();
+        this.bslLsReady = true;
+    }
+
+    public isBslLsReady() {
+        return this.bslLsReady;
+    }
+
+    private async createLanguageClient(
+        context: vscode.ExtensionContext,
+        binaryName: string
+    ): Promise<LanguageClient> {
+        const configuration = vscode.workspace.getConfiguration(LANGUAGE_1C_BSL_CONFIG);
+        const languageServerExternalJar = Boolean(configuration.get("languageServerExternalJar"));
+
+        const executable = languageServerExternalJar
+            ? await this.getExecutableJar(context)
+            : this.getExecutableBinary(binaryName);
 
         const serverOptions: ServerOptions = {
             run: executable,
@@ -82,15 +147,114 @@ export default class LanguageClientProvider {
             }
         };
 
-        const client = new LanguageClient(
-            "bsl-language-server",
-            "BSL Language Server",
-            serverOptions,
-            clientOptions
+        return new LanguageClient("bsl", "BSL Language Server", serverOptions, clientOptions);
+    }
+
+    private async getExecutableJar(
+        context: vscode.ExtensionContext
+    ): Promise<Executable | undefined> {
+        const configuration = vscode.workspace.getConfiguration(LANGUAGE_1C_BSL_CONFIG);
+
+        let command = String(configuration.get("languageServerExternalJarJavaPath"));
+
+        const javaInPath = which.sync(command, { nothrow: true });
+        if (!javaInPath) {
+            const javaPathExists = await fs.pathExists(command);
+            if (!javaPathExists) {
+                const errorMessage = `BSL Language Server is NOT running!\n
+                Configuration error! Can't find "java" executable at: ${command}`;
+                console.error(errorMessage);
+
+                throw new Error(errorMessage);
+            }
+        }
+
+        if (command.includes(" ")) {
+            command = `"${command}"`;
+        }
+
+        let languageServerPath = String(configuration.get("languageServerExternalJarPath"));
+        if (!Paths.isAbsolute(languageServerPath)) {
+            languageServerPath = context.asAbsolutePath(languageServerPath);
+        }
+        if (languageServerPath.includes(" ")) {
+            languageServerPath = `"${languageServerPath}"`;
+        }
+
+        const javaOpts = Array(configuration.get("languageServerExternalJarJavaOpts"));
+
+        const args: string[] = [];
+        args.push(...javaOpts);
+        args.push("-jar", languageServerPath);
+
+        const configurationFile = this.getConfigurationFile(configuration);
+        if (configurationFile) {
+            args.push("-c", configurationFile);
+        }
+
+        return {
+            command,
+            args,
+            options: { env: process.env, shell: true }
+        };
+    }
+
+    private getExecutableBinary(command: string): Executable | undefined {
+        const args: string[] = [];
+
+        if (isOSUnixoid()) {
+            child_process.exec(`chmod +x ${command}`);
+        }
+
+        const configuration = vscode.workspace.getConfiguration(LANGUAGE_1C_BSL_CONFIG);
+        const configurationFile = this.getConfigurationFile(configuration);
+        if (configurationFile) {
+            args.push("-c", configurationFile);
+        }
+
+        return {
+            command,
+            args,
+            options: { env: process.env, shell: true }
+        };
+    }
+
+    private getConfigurationFile(configuration: vscode.WorkspaceConfiguration): string | undefined {
+        const workspaceFolders = vscode.workspace.workspaceFolders;
+        let configurationFile: string;
+        if (workspaceFolders) {
+            configurationFile = Paths.join(
+                workspaceFolders[0].uri.fsPath,
+                String(configuration.get("languageServerConfiguration"))
+            );
+        }
+
+        return configurationFile;
+    }
+
+    private getBinaryName(langServerInstallDir: string) {
+        const postfix = isOSMacOS() ? ".app" : "";
+        const archiveDir = `bsl-language-server${postfix}`;
+        let binaryDir: string;
+
+        if (isOSMacOS()) {
+            binaryDir = Paths.join("Contents", "MacOS");
+        } else if (isOSUnix()) {
+            binaryDir = "bin";
+        } else if (isOSWindows()) {
+            binaryDir = ".";
+        }
+
+        let binaryName = Paths.resolve(
+            langServerInstallDir,
+            archiveDir,
+            binaryDir,
+            correctBinname("bsl-language-server")
         );
+        if (binaryName.includes(" ")) {
+            binaryName = `"${binaryName}"`;
+        }
 
-        const disposable = client.start();
-
-        context.subscriptions.push(disposable);
+        return binaryName;
     }
 }

@@ -4,6 +4,7 @@ import * as vscode from "vscode";
 
 import { clearActiveTextEditor, fixturePath, newTextDocument } from "./helpers";
 
+import { waitForBSLLSActivation } from "../src/extension";
 import BslQuickOpen from "../src/features/bslQuickOpen";
 import { Global } from "../src/global";
 import * as vscAdapter from "../src/vscAdapter";
@@ -17,7 +18,10 @@ describe("MetadataParse", () => {
             path.join(fixturePath, "CommonModules", "CommonModule", "Ext", "Module.bsl")
         );
         await newTextDocument(uriFile);
-        await globals.waitForCacheUpdate();
+        const extension = vscode.extensions.getExtension("1c-syntax.language-1c-bsl");
+        await extension.activate();
+
+        await waitForBSLLSActivation();
     });
 
     beforeEach(async () => {

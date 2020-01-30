@@ -68,6 +68,7 @@ export default class LintProvider {
             env: process.env
         };
         let result = "";
+
         const phpcs = cp.spawn(this.commandId, args, options);
         phpcs.stderr.on("data", buffer => {
             result += buffer.toString();
@@ -79,31 +80,49 @@ export default class LintProvider {
             try {
                 result = result.trim();
                 const lines = result.split(/\r?\n/);
-                const regex = /^\{Модуль\s+(.*)\s\/\s.*:\s+(\d+)\s+\/\s+(.*)\}/;
+                const regex = /^\{Модуль\s+(.*)\s\/\s.*:\s+(\d+)(?:,(\d)+)?\s+\/\s+(.*)\}/;
                 const errorFiles = {};
                 let countErrors = 0;
                 for (const line of lines) {
                     let match;
                     match = line.match(regex);
                     if (match) {
+                        const fileName = match[1];
+
+                        let startLine = +match[2] - 1;
+                        if (startLine < 0) {
+                            startLine = 0;
+                        }
+
+                        let startCharacter = +match[3] - 1;
+                        if (startCharacter < 0) {
+                            startCharacter = 0;
+                        }
+
+                        if (startLine > vscode.window.activeTextEditor.document.lineCount) {
+                            startLine = vscode.window.activeTextEditor.document.lineCount - 1;
+                            startCharacter = 0;
+                        }
+
+                        const errorMessage = match[4];
                         const range = new vscode.Range(
-                            new vscode.Position(+match[2] - 1, 0),
+                            new vscode.Position(startLine, startCharacter),
                             new vscode.Position(
-                                +match[2] - 1,
+                                startLine,
                                 vscode.window.activeTextEditor.document.lineAt(
-                                    +match[2] - 1
+                                    startLine
                                 ).text.length
                             )
                         );
                         const vscodeDiagnostic = new vscode.Diagnostic(
                             range,
-                            match[3],
+                            errorMessage,
                             vscode.DiagnosticSeverity.Error
                         );
-                        if (!errorFiles[match[1]]) {
-                            errorFiles[match[1]] = new Array<vscode.Diagnostic>();
+                        if (!errorFiles[fileName]) {
+                            errorFiles[fileName] = new Array<vscode.Diagnostic>();
                         }
-                        errorFiles[match[1]].push(vscodeDiagnostic);
+                        errorFiles[fileName].push(vscodeDiagnostic);
                         countErrors++;
                     }
                 }

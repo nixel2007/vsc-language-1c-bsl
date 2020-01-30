@@ -4,6 +4,7 @@ import * as vscode from "vscode";
 
 import { fixturePath, newTextDocument } from "./helpers";
 
+import { waitForBSLLSActivation } from "../src/extension";
 import { Global } from "../src/global";
 import * as vscAdapter from "../src/vscAdapter";
 
@@ -18,7 +19,10 @@ describe("Document symbols", () => {
             path.join(fixturePath, "CommonModules", "CommonModule", "Ext", "Module.bsl")
         );
         textDocument = await newTextDocument(uriEmptyFile);
-        await globals.waitForCacheUpdate();
+        const extension = vscode.extensions.getExtension("1c-syntax.language-1c-bsl");
+        await extension.activate();
+
+        await waitForBSLLSActivation();
     });
 
     it("should show functions from current document", async () => {
@@ -30,7 +34,7 @@ describe("Document symbols", () => {
 
         symbolInformation.should.matchAny((value: vscode.SymbolInformation) => {
             value.should.has.a.key("name").which.is.equal("ЭкспортнаяПроцедура");
-            value.should.has.a.key("kind").which.is.equal(vscode.SymbolKind.Function);
+            value.should.has.a.key("kind").which.is.equal(vscode.SymbolKind.Method);
         });
 
     });
