@@ -27,7 +27,12 @@ import { MethodDetect } from "./features/methodDetect";
 import * as vscAdapter from "./vscAdapter";
 
 import LibProvider from "./libProvider";
+import { IStatus, StatusBarEntry } from "./util/status";
+
 const libProvider = new LibProvider();
+const languageClientProvider = new LanguageClientProvider();
+
+export const oscriptLinter = new LintProvider();
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -101,16 +106,16 @@ export function activate(context: vscode.ExtensionContext) {
         );
     }
 
-    const languageClientProvider = new LanguageClientProvider();
-    languageClientProvider.registerLanguageClient(context);
+    withSpinningStatus(context, async status => {
+        await languageClientProvider.registerLanguageClient(context, status);
+    });
 
     const syntaxHelper = new SyntaxHelper(global);
     context.subscriptions.push(
         vscode.workspace.registerTextDocumentContentProvider("syntax-helper", syntaxHelper)
     );
 
-    const linter = new LintProvider();
-    linter.activate(context.subscriptions);
+    oscriptLinter.activate(context.subscriptions);
 
     context.subscriptions.push(
         vscode.commands.registerCommand(CMD_UPDATE, () => {
@@ -747,6 +752,12 @@ export function activate(context: vscode.ExtensionContext) {
     global.updateCache();
 }
 
+export async function waitForBSLLSActivation() {
+    while (!languageClientProvider.isBslLsReady()) {
+        await delay(100);
+    }
+}
+
 function createComments(global, all: boolean) {
     const editor = vscode.window.activeTextEditor;
     if (editor.document.languageId === "bsl") {
@@ -933,4 +944,20 @@ function fillParams(params, comment, enMode) {
         comment += "\n";
     }
     return comment;
+}
+
+async function withSpinningStatus(
+    context: vscode.ExtensionContext,
+    action: (status: IStatus) => Promise<void>
+) {
+    const status = new StatusBarEntry(context, "$(sync~spin)");
+    status.show();
+    await action(status);
+    status.dispose();
+}
+
+function delay(milliseconds: number) {
+    return new Promise<void>(resolve => {
+        setTimeout(resolve, milliseconds);
+    });
 }

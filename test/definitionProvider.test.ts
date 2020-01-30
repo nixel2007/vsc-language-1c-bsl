@@ -4,22 +4,22 @@ import * as vscode from "vscode";
 
 import { addText, clearActiveTextEditor, fixturePath, newTextDocument } from "./helpers";
 
-import { Global } from "../src/global";
-import * as vscAdapter from "../src/vscAdapter";
-
-const globals = Global.create(vscAdapter);
+import { waitForBSLLSActivation } from "../src/extension";
 
 let textDocument: vscode.TextDocument;
 
 describe("Definitions", () => {
 
     before(async function() {
-        this.timeout(10000);
+        this.timeout("5m");
         const uriEmptyFile = vscode.Uri.file(
             path.join(fixturePath, "emptyFile.bsl")
         );
         textDocument = await newTextDocument(uriEmptyFile);
-        await globals.waitForCacheUpdate();
+        const extension = vscode.extensions.getExtension("1c-syntax.language-1c-bsl");
+        await extension.activate();
+
+        await waitForBSLLSActivation();
     });
 
     beforeEach(async () => {

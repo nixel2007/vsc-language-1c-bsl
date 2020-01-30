@@ -22,7 +22,7 @@
     "Programming Languages"
   ],
   "engines": {
-    "vscode": "^1.33.1"
+    "vscode": "^1.41.0"
   },
   "main": "./out/src/extension",
   "scripts": {
@@ -100,6 +100,11 @@
         "command": "language-1c-bsl.openContent",
         "title": "OpenContent",
         "category": "Language 1C (BSL)"
+      },
+      {
+        "command": "language-1c-bsl.languageServer.restart",
+        "title": "Restart the BSL Language Server",
+        "category": "Language 1C (BSL)"
       }
     ],
     "menus": {
@@ -174,24 +179,43 @@
         "language-1c-bsl.languageServerEnabled": {
           "description": "BSL Language Server enabled",
           "type": "boolean",
-          "default": false
-        },
-        "language-1c-bsl.languageServerPath": {
-          "description": "Path to BSL Language Server jar-file. Leave default value to use bundled language server. Relative to vsc-language-1c-bsl folder.",
-          "type": "string",
-          "default": "languageserver/bsl-language-server.jar"
+          "default": true
         },
         "language-1c-bsl.languageServerConfiguration": {
           "description": "Path to BSL Language Server configuration file. Relative to workspace folder.",
           "type": "string",
           "default": ".bsl-language-server.json"
         },
-        "language-1c-bsl.javaPath": {
+        "language-1c-bsl.githubToken": {
+          "description": "GitHub OAuth token. Fill property if you get an `API rate limit exceeded` error with BSL LS downloading. Get new token: https://github.com/settings/tokens. No additional scopes are required. Can be obtained from enviroment variable $LANGUAGE_1C_BSL_GITHUB_TOKEN",
+          "type": "string",
+          "default": ""
+        },
+        "language-1c-bsl.languageServerReleaseChannel": {
+          "description": "BSL Language server download channel. Use `prerelease` if you want to check latest release candidates",
+          "type": "string",
+          "enum": [
+            "stable",
+            "prerelease"
+          ],
+          "default": "stable"
+        },
+        "language-1c-bsl.languageServerExternalJar": {
+          "description": "Use external bsl-language-server.jar",
+          "type": "boolean",
+          "default": false
+        },
+        "language-1c-bsl.languageServerExternalJarPath": {
+          "description": "Path to BSL Language Server jar-file. Leave default value to use bundled language server. Relative to vsc-language-1c-bsl folder.",
+          "type": "string",
+          "default": ""
+        },
+        "language-1c-bsl.languageServerExternalJarJavaPath": {
           "description": "Path to Java runtime binary. Leave default value to use java from PATH.",
           "type": "string",
           "default": "java"
         },
-        "language-1c-bsl.javaOpts": {
+        "language-1c-bsl.languageServerExternalJarJavaOpts": {
           "description": "Addititonal java options.",
           "type": "array",
           "default": [
@@ -291,33 +315,44 @@
     }
   },
   "devDependencies": {
-    "@types/fs-extra": "^8.0.0",
+    "@types/extract-zip": "^1.6.2",
+    "@types/fs-extra": "^8.0.1",
     "@types/glob": "^7.1.1",
     "@types/mocha": "^5.2.7",
-    "@types/node": "^12.6.8",
-    "@types/which": "^1.3.1",
-    "cross-env": "^5.2.0",
+    "@types/node": "13.5.1",
+    "@types/request": "^2.48.4",
+    "@types/request-promise-native": "^1.0.17",
+    "@types/semver": "^7.1.0",
+    "@types/which": "^1.3.2",
+    "cross-env": "^7.0.0",
     "decache": "^4.5.1",
     "istanbul": "^0.4.5",
     "remap-istanbul": "^0.13.0",
     "should": "^13.2.3",
-    "tslint": "^5.18.0",
+    "tslint": "^6.0.0",
     "tslint-sonarts": "^1.9.0",
-    "typescript": "^3.5.3",
-    "vscode": "^1.1.35"
+    "typescript": "^3.7.5",
+    "vscode": "^1.1.36"
   },
   "dependencies": {
     "alignment": "0.0.1",
-    "cross-spawn": "^6.0.5",
-    "fast-xml-parser": "3.12.17",
+    "cross-spawn": "^7.0.1",
+    "extract-zip": "^1.6.7",
+    "fast-xml-parser": "3.15.1",
     "filequeue": "^0.5.0",
     "fs-extra": "^8.1.0",
-    "glob": "^7.1.4",
-    "iconv-lite": "^0.5.0",
-    "lokijs": "^1.5.7",
+    "glob": "^7.1.6",
+    "iconv-lite": "^0.5.1",
+    "json-date-parser": "^1.0.1",
+    "lokijs": "^1.5.8",
     "onec-syntaxparser": "0.1.11",
-    "vscode-languageclient": "^5.2.1",
-    "which": "^1.3.1",
-    "xml2js": "^0.4.19"
+    "request": "^2.88.0",
+    "request-progress": "^3.0.0",
+    "request-promise-native": "^1.0.8",
+    "semver": "^7.1.1",
+    "vsce": "^1.71.0",
+    "vscode-languageclient": "^6.1.0",
+    "which": "^2.0.2",
+    "xml2js": "^0.4.23"
   }
 }
