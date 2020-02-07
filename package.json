@@ -41,6 +41,12 @@
     "onCommand:language-1c-bsl.quickopen"
   ],
   "contributes": {
+    "jsonValidation": [
+      {
+        "fileMatch": ".bsl-language-server.json",
+        "url": "https://1c-syntax.github.io/bsl-language-server/configuration/schema.json"
+      }
+    ],
     "commands": [
       {
         "command": "language-1c-bsl.update",
