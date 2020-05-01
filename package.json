@@ -31,7 +31,9 @@
     "lint": "tslint --project tsconfig.json 'src/**/*.ts' -t verbose",
     "compile": "tsc -watch -p ./",
     "preLaunch": "tsc -p ./",
-    "postinstall": "node ./node_modules/vscode/bin/install"
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "activationEvents": [
     "onLanguage:bsl",
@@ -359,6 +361,8 @@
     "vsce": "^1.75.0",
     "vscode-languageclient": "^6.1.0",
     "which": "^2.0.2",
-    "xml2js": "^0.4.23"
-  }
+    "xml2js": "^0.4.23",
+    "snyk": "^1.316.1"
+  },
+  "snyk": true
 }
