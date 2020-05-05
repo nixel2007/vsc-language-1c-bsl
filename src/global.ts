@@ -168,6 +168,7 @@ export class Global {
                     values: [],
                     oscript_values: []
                 };
+                this.systemEnum[newName.toLowerCase()] = findEnum;
             }
             findEnum.oscript_description = segment.description;
             const values = segment.values;
