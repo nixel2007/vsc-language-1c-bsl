@@ -315,6 +315,21 @@
         "path": "./snippets/snippets.json"
       }
     ],
+    "taskDefinitions": [
+      {
+        "type": "bsl",
+        "properties": {
+          "command":{
+            "type": "string",
+            "description": ""
+          },
+          "args": {
+            "type": "array",
+            "description": ""
+          }
+        }
+      }
+    ],
     "configurationDefaults": {
       "[bsl]": {
         "editor.insertSpaces": false,
