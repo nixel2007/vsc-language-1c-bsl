@@ -50,7 +50,7 @@ export function activate(context: vscode.ExtensionContext) {
     const quickOpen = new BslQuickOpen(global);
     const taskProvider = new TaskProvider();
 
-    vscode.workspace.onDidChangeConfiguration(taskProvider.onConfigurationChanged);
+    // vscode.workspace.onDidChangeConfiguration(taskProvider.onConfigurationChanged);
     taskProvider.onConfigurationChanged();
 
     context.subscriptions.push(
