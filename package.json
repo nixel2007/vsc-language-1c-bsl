@@ -302,7 +302,7 @@
         "owner": "bsl",
         "fileLocation": "absolute",
         "pattern": {
-          "regexp": "Модуль\\s+(.*)\\s\\/\\s.*:\\s+(\\d+)\\s+\\/\\s+(.*)",
+          "regexp": "Модуль\\s+(.*)\\s\\/\\s.*:\\s+(\\d+)\\s+\\/\\s+([^}]*)",
           "file": 1,
           "line": 2,
           "message": 3
