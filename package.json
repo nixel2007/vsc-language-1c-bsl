@@ -337,6 +337,7 @@
     "istanbul": "^0.4.5",
     "remap-istanbul": "^0.13.0",
     "should": "^13.2.3",
+    "snyk": "^1.321.0",
     "tslint": "^6.0.0",
     "tslint-sonarts": "^1.9.0",
     "typescript": "^3.7.5",
@@ -361,8 +362,7 @@
     "vsce": "^1.75.0",
     "vscode-languageclient": "^6.1.0",
     "which": "^2.0.2",
-    "xml2js": "^0.4.23",
-    "snyk": "^1.316.1"
+    "xml2js": "^0.4.23"
   },
   "snyk": true
 }
