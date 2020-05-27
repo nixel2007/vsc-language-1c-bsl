@@ -293,7 +293,8 @@ export default class SyntaxHelperProvider extends AbstractProvider
         if (
             this._global.syntaxFilled === "" ||
             this._global.syntaxFilled !== this.syntax ||
-            this.syntax === "BSL"
+            this.syntax === "BSL" ||
+            this.syntax === "1C"
         ) {
             this._global.syntaxFilled = this.syntax;
             this.oscriptMethods = this.syntaxContent.getSyntaxContentItems(
@@ -820,11 +821,11 @@ export default class SyntaxHelperProvider extends AbstractProvider
                         (function() {
                             try {
                                 ${fillStructure.textSyntax}
-                                var theme = window.localStorage.getItem('storage://global/workbench.theme');
-                                if (theme && theme.indexOf('vs-dark') < 0) {
-                                    window.document.body.className = 'monaco-shell';
-                                    // remove the dark theme class if we are on a light theme
-                                }
+                                //var theme = window.localStorage.getItem('storage://global/workbench.theme');
+                                //if (theme && theme.indexOf('vs-dark') < 0) {
+                                //    window.document.body.className = 'monaco-shell';
+                                //    // remove the dark theme class if we are on a light theme
+                                //}
                             } catch (error) {
                                 console.error(error);
                             }
