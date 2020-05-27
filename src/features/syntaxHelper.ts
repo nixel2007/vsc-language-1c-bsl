@@ -821,11 +821,6 @@ export default class SyntaxHelperProvider extends AbstractProvider
                         (function() {
                             try {
                                 ${fillStructure.textSyntax}
-                                //var theme = window.localStorage.getItem('storage://global/workbench.theme');
-                                //if (theme && theme.indexOf('vs-dark') < 0) {
-                                //    window.document.body.className = 'monaco-shell';
-                                //    // remove the dark theme class if we are on a light theme
-                                //}
                             } catch (error) {
                                 console.error(error);
                             }
