@@ -39,12 +39,24 @@ export default class SyntaxHelperProvider extends AbstractProvider
         "Tasks"
     ];
 
+    private webPanel:vscode.WebviewPanel;
+
     get onDidChange(): vscode.Event<vscode.Uri> {
         return this.onDidChangeEvent.event;
     }
 
     public update(uri: vscode.Uri) {
         this.onDidChangeEvent.fire(uri);
+    }
+
+    public updateContentPanel(panel: vscode.WebviewPanel) {   
+        if (this.webPanel == null) {
+            this.webPanel = panel;
+        }
+        var result = this.provideTextDocumentContent();
+        result.then(
+            value => panel.webview.html = value
+        );
     }
 
     public provideTextDocumentContent(): Promise<string> | undefined {
@@ -281,7 +293,8 @@ export default class SyntaxHelperProvider extends AbstractProvider
         if (
             this._global.syntaxFilled === "" ||
             this._global.syntaxFilled !== this.syntax ||
-            this.syntax === "BSL"
+            this.syntax === "BSL" ||
+            this.syntax === "1C"
         ) {
             this._global.syntaxFilled = this.syntax;
             this.oscriptMethods = this.syntaxContent.getSyntaxContentItems(
@@ -302,9 +315,8 @@ export default class SyntaxHelperProvider extends AbstractProvider
                 .replace(/[\n]/g, "\\n")
                 .replace(/[\r]/g, "\\r")
                 .replace(/[\t]/g, "\\t");
-            jsonString = `'${jsonString}'`;
-            textSyntax = ` window.localStorage.setItem("bsl-language", ${jsonString});
-                `;
+            textSyntax = ` window.bsl_language='${jsonString}';
+            `;
         }
 
         this.syntaxContent.syntaxFilled = this._global.syntaxFilled;
@@ -336,16 +348,9 @@ export default class SyntaxHelperProvider extends AbstractProvider
     }
 
     private async getHTML(fillStructure): Promise<string> {
-        const hljs = path.join(
-            vscode.extensions.getExtension("xDrivenDevelopment.language-1c-bsl").extensionPath,
-            "lib",
-            "highlight.pack.js"
-        );
-        const mdit = path.join(
-            vscode.extensions.getExtension("xDrivenDevelopment.language-1c-bsl").extensionPath,
-            "lib",
-            "markdown-it.js"
-        );
+        
+        var hljs = this.getUriForAsset('highlight.pack.js');
+        var mdit = this.getUriForAsset('markdown-it.js');
 
         return `<head>
                     <style>
@@ -522,7 +527,7 @@ export default class SyntaxHelperProvider extends AbstractProvider
                                 document.getElementById('splitter1').style.display = "block";
                                 document.getElementById('struct').style.height = "133px";
                             }
-                            let contextData = JSON.parse(window.localStorage.getItem('bsl-language'));
+                            let contextData = JSON.parse(window.bsl_language);
                             var str = elem.innerHTML.replace(new RegExp('\\n[ ]*','gm'),'').split(" / ")[0];
                             var segment = contextData[str];
                             var segmentDescription = "";
@@ -590,7 +595,7 @@ export default class SyntaxHelperProvider extends AbstractProvider
                                 charSegment = "values";
                             }
                             let methodData =
-                            JSON.parse(window.localStorage.getItem('bsl-language'))[strSegment][charSegment][str];
+                            JSON.parse(window.bsl_language)[strSegment][charSegment][str];
                             var depp = "";
                             if (charSegment === "constructors") {
                                 str = strSegment.replace(', класс', '');
@@ -626,7 +631,7 @@ export default class SyntaxHelperProvider extends AbstractProvider
                             document.getElementById('header').innerHTML.replace(
                                 new RegExp('\\n[ ]*','m'),'').split(" / ")[0];
                             let methodData =
-                            JSON.parse(window.localStorage.getItem('bsl-language'))[strSegment][charSegment][strMethod];
+                            JSON.parse(window.bsl_language)[strSegment][charSegment][strMethod];
                             if (charSegment === "constructors"){
                                 strMethod = strSegment;
                             }
@@ -816,11 +821,6 @@ export default class SyntaxHelperProvider extends AbstractProvider
                         (function() {
                             try {
                                 ${fillStructure.textSyntax}
-                                var theme = window.localStorage.getItem('storage://global/workbench.theme');
-                                if (theme && theme.indexOf('vs-dark') < 0) {
-                                    window.document.body.className = 'monaco-shell';
-                                    // remove the dark theme class if we are on a light theme
-                                }
                             } catch (error) {
                                 console.error(error);
                             }
@@ -887,5 +887,18 @@ export default class SyntaxHelperProvider extends AbstractProvider
                     </div>
                     </div>
                 </body>`;
+    }
+
+    public getTilte(): string {
+        return this.syntax;
+    }
+
+    private getUriForAsset(asset: string): vscode.Uri {
+        var pathToAsset = path.join(
+            vscode.extensions.getExtension("1c-syntax.language-1c-bsl").extensionPath,
+            "lib",
+            asset
+        );
+        return vscode.Uri.file(pathToAsset)
     }
 }

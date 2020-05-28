@@ -50,6 +50,8 @@ export function activate(context: vscode.ExtensionContext) {
     const quickOpen = new BslQuickOpen(global);
     const taskProvider = new TaskProvider();
 
+    var syntaxPanel: vscode.WebviewPanel;
+
     // vscode.workspace.onDidChangeConfiguration(taskProvider.onConfigurationChanged);
     taskProvider.onConfigurationChanged();
 
@@ -496,13 +498,9 @@ export function activate(context: vscode.ExtensionContext) {
                 label,
                 description: "Экспортные методы bsl"
             };
-            syntaxHelper.update(previewUri);
-            vscode.commands.executeCommand("vscode.previewHtml", previewUri, vscode.ViewColumn.Two);
+            openSyntaxHelperPanel(syntaxHelper);
         })
     );
-
-    const previewUriString = "syntax-helper://authority/Синтакс-Помощник";
-    const previewUri = vscode.Uri.parse(previewUriString);
 
     context.subscriptions.push(
         vscode.languages.registerOnTypeFormattingEditProvider(
@@ -517,12 +515,7 @@ export function activate(context: vscode.ExtensionContext) {
             function fillLabel(label, description) {
                 if (global.dllData && global.oscriptCacheUpdated) {
                     global.methodForDescription = { label, description };
-                    syntaxHelper.update(previewUri);
-                    vscode.commands.executeCommand(
-                        "vscode.previewHtml",
-                        previewUri,
-                        vscode.ViewColumn.Two
-                    );
+                    openSyntaxHelperPanel(syntaxHelper);
                 } else {
                     const interval = setInterval(() => {
                         vscode.window.setStatusBarMessage(
@@ -534,12 +527,7 @@ export function activate(context: vscode.ExtensionContext) {
                                 label,
                                 description
                             };
-                            syntaxHelper.update(previewUri);
-                            vscode.commands.executeCommand(
-                                "vscode.previewHtml",
-                                previewUri,
-                                vscode.ViewColumn.Two
-                            );
+                            openSyntaxHelperPanel(syntaxHelper);
                             clearInterval(interval);
                         }
                     }, 1000);
@@ -732,12 +720,7 @@ export function activate(context: vscode.ExtensionContext) {
                         return;
                     }
                     global.methodForDescription = selection;
-                    syntaxHelper.update(previewUri);
-                    vscode.commands.executeCommand(
-                        "vscode.previewHtml",
-                        previewUri,
-                        vscode.ViewColumn.Two
-                    );
+                    openSyntaxHelperPanel(syntaxHelper);
                 });
             }
         })
@@ -750,6 +733,32 @@ export function activate(context: vscode.ExtensionContext) {
         );
     }
     global.updateCache();
+
+    function checkSyntaxWebPanel() {
+        if (syntaxPanel == null) {
+            syntaxPanel = vscode.window.createWebviewPanel(
+                'syntax-bsl',
+                "Синтаксис-помощник 1С", // Синтаксис-помощник 1С
+                vscode.ViewColumn.Two,
+                {enableScripts: true, enableCommandUris: true});    
+            syntaxPanel.onDidDispose(
+                () => {
+                    syntaxPanel = null;    
+                }
+            );
+        }
+    }
+    
+    function openSyntaxHelperPanel(syntaxHelper) {
+        checkSyntaxWebPanel();
+        syntaxPanel.title = global.methodForDescription.description;
+        if (syntaxPanel.title == '' || syntaxPanel.title == null) {
+            syntaxPanel.title = "Синтаксис-помощник 1С";   
+        }
+        syntaxHelper.updateContentPanel(syntaxPanel);
+        syntaxPanel.reveal(vscode.ViewColumn.Two);
+    }
+
 }
 
 export async function waitForBSLLSActivation() {
