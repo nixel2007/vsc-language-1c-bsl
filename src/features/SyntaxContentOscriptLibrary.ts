@@ -61,22 +61,13 @@ export default class SyntaxContentOscriptLibrary extends AbstractSyntaxContent {
             for (const lib in libData) {
                 const dataModul = libData[lib].modules;
                 if (libData[lib].description) {
-                    var pathToReadme = vscode.Uri.file(libData[lib].description);
-                    classes += `
-                        <h2 class='a' style='font-size: 1em;' onclick="readContent('${lib}');"> 
-                        <em>${lib}</em>
-                        </h2> 
-                        <ul>`;
+                    classes += `<h2 class='a' style='font-size: 1em;' onclick="readContent('${lib}');">`;
                 } else {
-                    classes += `
-                    <h2 style='font-size: 1em;'>
-                    <em>${lib}</em>
-                    </h2> 
-                    <ul>`;
+                    classes += "<h2 style='font-size: 1em;'>";
                 }
+                classes += `<em>${lib}</em></h2> <ul>`;
                 for (const modul in dataModul) {
                     const onlyOs = "";
-
                     classes += `
                         <li>
                         <span class="a" onclick="fillDescription(this)">${modul}</span>

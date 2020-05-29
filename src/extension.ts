@@ -50,7 +50,7 @@ export function activate(context: vscode.ExtensionContext) {
     const quickOpen = new BslQuickOpen(global);
     const taskProvider = new TaskProvider();
 
-    var syntaxPanel: vscode.WebviewPanel;
+    let syntaxPanel: vscode.WebviewPanel;
 
     // vscode.workspace.onDidChangeConfiguration(taskProvider.onConfigurationChanged);
     taskProvider.onConfigurationChanged();

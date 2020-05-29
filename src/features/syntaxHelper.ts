@@ -303,29 +303,11 @@ export default class SyntaxHelperProvider extends AbstractProvider
                     : this._global.dllData,
                 this.syntax === "BSL" ? metadata : this._global.libData
             );
-            let jsonString = JSON.stringify(this.oscriptMethods)
-                .replace(/[\\]/g, "\\\\")
-                .replace(/[\"]/g, '\\"')
-                .replace(/[\']/g, "\\'")
-                .replace(/[\/]/g, "\\/")
-                .replace(/[\b]/g, "\\b")
-                .replace(/[\f]/g, "\\f")
-                .replace(/[\n]/g, "\\n")
-                .replace(/[\r]/g, "\\r")
-                .replace(/[\t]/g, "\\t");
+            let jsonString = this.prepareJson(JSON.stringify(this.oscriptMethods));
             textSyntax = ` window.bsl_language='${jsonString}';
             `;
 
-            let jsonLibData = JSON.stringify(this._global.libData)
-                .replace(/[\\]/g, "\\\\")
-                .replace(/[\"]/g, '\\"')
-                .replace(/[\']/g, "\\'")
-                .replace(/[\/]/g, "\\/")
-                .replace(/[\b]/g, "\\b")
-                .replace(/[\f]/g, "\\f")
-                .replace(/[\n]/g, "\\n")
-                .replace(/[\r]/g, "\\r")
-                .replace(/[\t]/g, "\\t");
+            let jsonLibData = this.prepareJson(JSON.stringify(this._global.libData));
             textSyntax += ` window.os_library_data='${jsonLibData}';
             `;
         }
@@ -360,10 +342,10 @@ export default class SyntaxHelperProvider extends AbstractProvider
 
     private async getHTML(fillStructure): Promise<string> {
         
-        var hljs = this.webPanel.webview.asWebviewUri(this.getUriForAsset('highlight.pack.js'));
-        var mdit = this.webPanel.webview.asWebviewUri(this.getUriForAsset('markdown-it.js'));
-        var shjs = this.webPanel.webview.asWebviewUri(this.getUriForAsset('syntaxhelper.js'));
-        var themecss = this.webPanel.webview.asWebviewUri(this.getUriForAsset('theme.css'));
+        let hljs = this.webPanel.webview.asWebviewUri(this.getUriForAsset('highlight.pack.js'));
+        let mdit = this.webPanel.webview.asWebviewUri(this.getUriForAsset('markdown-it.js'));
+        let shjs = this.webPanel.webview.asWebviewUri(this.getUriForAsset('syntaxhelper.js'));
+        let themecss = this.webPanel.webview.asWebviewUri(this.getUriForAsset('theme.css'));
 
         return `<head>
                 <link rel="stylesheet" type="text/css" href="${themecss}">
@@ -558,11 +540,24 @@ export default class SyntaxHelperProvider extends AbstractProvider
     }
 
     private getUriForAsset(asset: string): vscode.Uri {
-        var pathToAsset = path.join(
+        let pathToAsset = path.join(
             vscode.extensions.getExtension("1c-syntax.language-1c-bsl").extensionPath,
             "lib",
             asset
         );
         return vscode.Uri.file(pathToAsset)
+    }
+
+    private prepareJson(value: string): string {
+        return value
+        .replace(/[\\]/g, "\\\\")
+        .replace(/[\"]/g, '\\"')
+        .replace(/[\']/g, "\\'")
+        .replace(/[\/]/g, "\\/")
+        .replace(/[\b]/g, "\\b")
+        .replace(/[\f]/g, "\\f")
+        .replace(/[\n]/g, "\\n")
+        .replace(/[\r]/g, "\\r")
+        .replace(/[\t]/g, "\\t");
     }
 }
