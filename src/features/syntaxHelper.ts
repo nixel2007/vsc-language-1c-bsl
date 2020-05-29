@@ -363,175 +363,19 @@ export default class SyntaxHelperProvider extends AbstractProvider
         var hljs = this.webPanel.webview.asWebviewUri(this.getUriForAsset('highlight.pack.js'));
         var mdit = this.webPanel.webview.asWebviewUri(this.getUriForAsset('markdown-it.js'));
         var shjs = this.webPanel.webview.asWebviewUri(this.getUriForAsset('syntaxhelper.js'));
+        var themecss = this.webPanel.webview.asWebviewUri(this.getUriForAsset('theme.css'));
 
         return `<head>
-                    <style>
-                        /* Tomorrow Comment */
-                        .hljs-comment,
-                        .hljs-quote {
-                            color: #608B4E;/*#8e908c;*/
-                        }
-                        /* Tomorrow Red */
-                        .hljs-variable,
-                        .hljs-template-variable,
-                        .hljs-tag,
-                        .hljs-name,
-                        .hljs-selector-id,
-                        .hljs-selector-class,
-                        .hljs-regexp,
-                        .hljs-deletion {
-                            color: #c82829;
-                        }
-                        /* Tomorrow Orange */
-                        .hljs-number,
-                        .hljs-built_in,
-                        .hljs-builtin-name,
-                        .hljs-literal,
-                        .hljs-type,
-                        .hljs-params,
-                        .hljs-meta,
-                        .hljs-link {
-                            color: #DCDCAA; /*#f5871f;*/
-                        }
-                        /* Tomorrow Yellow */
-                        .hljs-attribute {
-                            color: #eab700;
-                        }
-                        /* Tomorrow Green */
-                        .hljs-string,
-                        .hljs-symbol,
-                        .hljs-bullet,
-                        .hljs-addition {
-                            color: #CE9178; /*#718c00;*/
-                        }
-                        /* Tomorrow Blue */
-                        .hljs-title,
-                        .hljs-section {
-                            color: #4271ae;
-                        }
-                        /* Tomorrow Purple */
-                        .hljs-keyword,
-                        .hljs-selector-tag {
-                            color: #C586C0;/*#8959a8;*/
-                        }
-                        .hljs {
-                            display: block;
-                            overflow-x: auto;
-                            padding: 0.5em;
-                            margin: 0px;
-                            font-family: Menlo, Monaco, Consolas,
-                            "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
-                            font-size: 14px;
-                            line-height: 19px;
-                        }
-                        pre {
-                            white-space: pre-wrap;
-                            padding: 0.5em;
-                        }
-                        code {
-                            border-radius: 3px;
-                            font-family: Menlo, Monaco, Consolas,
-                            "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
-                            font-size: 14px;
-                            line-height: 19px;
-                        }
-                        .vscode-light pre code {
-                            color: rgb(30, 30, 30);
-                        }
-                        .vscode-dark,
-                        .vscode-dark pre code {
-                            color: #DDD;
-                        }
-                        .vscode-light code {
-                            color: #A31515;
-                        }
-                        .vscode-dark code {
-                            color: #D7BA7D;
-                        }
-                        .vscode-light pre:not(.hljs),
-                        .vscode-light code > div {
-                            background-color: rgba(220, 220, 220, 0.4);
-                        }
-                        .vscode-dark pre:not(.hljs),
-                        .vscode-dark code > div {
-                            background-color: rgba(10, 10, 10, 0.4);
-                        }
-                        .vscode-high-contrast pre:not(.hljs),
-                        .vscode-high-contrast code > div {
-                            background-color: rgb(0, 0, 0);
-                        }
-                        .vscode-light .hljs {
-                            background-color: rgba(220, 220, 220, 0.4);
-                        }
-                        .vscode-dark .hljs {
-                            background-color: rgba(10, 10, 10, 0.4);
-                        }
-                        .hljs-emphasis {
-                            font-style: italic;
-                        }
-                        .hljs-strong {
-                            font-weight: bold;
-                        }
-                        .a {
-                            cursor: pointer;
-                            text-decoration: underline;
-                        }
-                        a.mod {
-                            color: white;
-                            text-decoration: underline;
-                        }
-                        a.mod:hover {
-                            color: white;
-                        }
-                        .button {
-                            border: 0px;
-                            background-color: inherit;
-                            color: inherit;
-                            font-weight: bold
-                        }
-                        .vscode-light .storage {
-                            color: #0000FF
-                        }
-                        .vscode-light .function_name {
-                            color: #795E26 /*#795E26*/
-                        }
-                        .vscode-light .parameter_variable {
-                            color: #267F99 /*#001080*/
-                        }
-                        .storage {
-                            color: #569CD6
-                        }
-                        .function_name {
-                            color: #DCDCAA
-                        }
-                        .parameter_variable {
-                            color: #4EC9B0 /*#9CDCFE*/
-                        }
-                        a {
-                            color: #4080D0;
-                            text-decoration: none;
-                        }
-                        a:hover {
-                            color: #4080D0;
-                            text-decoration: underline;
-                        }
-                        table {
-                            border-collapse: collapse;
-                        }
-                        table > thead > tr > th {
-                            text-align: left;
-                            border-bottom: 1px solid;
-                        }
-                        table > thead > tr > th,
-                        table > thead > tr > td,
-                        table > tbody > tr > th,
-                        table > tbody > tr > td {
-                            padding: 5px 10px;
-                        }
-                        table > tbody > tr + tr > td {
-                            border-top: 1px solid;
-                        }
-                    </style>
+                <link rel="stylesheet" type="text/css" href="${themecss}">
+                    <script>
+                        (function() {
+                            try {
+                                ${fillStructure.textSyntax}
+                            } catch (error) {
+                                console.error(error);
+                            }
+                        })();
+                    </script>
                     <script>
                         function fillDescription(elem) {
                             if (document.getElementById('cont').style.display === "none") {
@@ -624,186 +468,7 @@ export default class SyntaxHelperProvider extends AbstractProvider
                                 }
                             document.getElementById('elMethod').innerHTML = depp;
                         }
-
-                        function switchDescription(elem) {
-                            var charSegment = "";
-                            if (elem.id.slice(0,6)==="method"){
-                                charSegment = "methods";
-                            } else if (elem.id.slice(0,8)==="properti"){
-                                charSegment = "properties";
-                            } else if (elem.id.slice(0,11)==="constructor"){
-                                charSegment = "constructors";
-                            } else if (elem.id.slice(0,5)==="value"){
-                                charSegment = "values";
-                            }
-                            var strMethod =
-                            document.getElementById('headerMethod').innerHTML.replace("<br>", "").replace(
-                                new RegExp('\\n[ ]*','m'),'').split(" / ")[0];
-                            var strSegment =
-                            document.getElementById('header').innerHTML.replace(
-                                new RegExp('\\n[ ]*','m'),'').split(" / ")[0];
-                            let methodData =
-                            JSON.parse(window.bsl_language)[strSegment][charSegment][strMethod];
-                            if (charSegment === "constructors"){
-                                strMethod = strSegment;
-                            }
-                            let depp = "";
-                            if (document.getElementById('desc').innerHTML.slice(0,11)==="Описание 1С") {
-                                depp = fillDescriptionData(
-                                    methodData, depp, "description", "signature", "returns", strMethod, charSegment);
-                                document.getElementById('desc').innerHTML =
-                                "Описание OneScript<br/>(<span class='a' id = '" + charSegment
-                                + "' onclick='switchDescription(this)' style='font-size:1em'>переключить</span>)";
-                            } else {
-                                depp = fillDescriptionData(methodData, depp, "description1C",
-                                "signature1C", "returns1C", strMethod, charSegment);
-                                document.getElementById('desc').innerHTML =
-                                "Описание 1С<br/>(<span class='a' id = '" + charSegment
-                                + "' onclick='switchDescription(this)' style='font-size:1em'>переключить</span>)";
-                            }
-                            document.getElementById('elMethod').innerHTML = depp;
-                        }
-
-                        function fillDescriptionData(methodData, depp, descContext,
-                                                     paramContext, returns, strMethod, charSegment) {
-                            if (methodData[descContext]) {
-                                depp = methodData[descContext]
-                                .replace(new RegExp("\\\\^\\\\&\\\\*","g"),'\\/')
-                                .replace(new RegExp("\\\\^\\\\&%","g"),'\\\\')
-                                .replace(new RegExp("\\\\*\\\\&\\\\^","g"),'\\"') + "<br/>";
-                                    }
-                            if (methodData[returns]) {
-                                depp = depp + "<b><em>Возвращаемое значение: </em></b>"
-                                + methodData[returns].replace(new RegExp("\\\\*\\\\&\\\\^","g"),'\\"')
-                                .replace(new RegExp("\\\\^\\\\&\\\\*","g"),'\\/')
-                                .replace(new RegExp("\\\\^\\\\&%","g"),'\\\\') + "<br/>";
-                            }
-                            if (methodData["Доступ"]) {
-                                depp = depp + "<b><em>Доступ: </em></b>"
-                                + methodData["Доступ"].replace("^&*",'\\/') + "<br/>";}
-                            var constructor = (charSegment === "constructors")? "Новый " : "";
-                            if (charSegment === "methods" || charSegment === "constructors"
-                                ||charSegment === "object" || charSegment === "manager") {
-                                if (methodData[paramContext]) {
-                                    for (let element in methodData[paramContext]) {
-                                        var name_syntax = (element === "default") ? "" : " " + element;
-                                        depp = depp + "<p><b>Синтаксис" + name_syntax + ":</b></p><p class='hljs'>"
-                                        + constructor + "<span class='function_name'>" + strMethod
-                                        + "</span><span class='parameter_variable'>"
-                                        + methodData[paramContext][element]["СтрокаПараметров"] + "</span></p>";
-                                        if (typeof methodData[paramContext][element].Параметры !=="string"){
-                                            let header = false;
-                                            for (let param in methodData[paramContext][element].Параметры) {
-                                                if (header === false) {
-                                                    depp = depp + "<p><b>Параметры:</b></p><p>";
-                                                    header = true;
-                                                }
-                                                var paramDescription = "<b><em>" + param + ":</em></b> "
-                                                + methodData[paramContext][element].Параметры[param]
-                                                .replace(new RegExp("\\\\^\\\\&\\\\*","g"),'\\/')
-                                                .replace(new RegExp("\\\\^\\\\&%","g"),'\\\\')
-                                                .replace(new RegExp("\\\\*\\\\&\\\\^","g"),'\\"');
-                                                depp = depp + paramDescription + "<br/>";
-                                            }
-                                        } else if (methodData[paramContext][element].Параметры !== ""){
-                                            depp = depp + "<p><b>Параметры:</b></p><p>";
-                                            depp = depp + methodData[paramContext][element].Параметры
-                                            .replace(new RegExp("\\\\^\\\\&\\\\*","g"),'\\/')
-                                            .replace(new RegExp("\\\\^\\\\&%","g"),'\\\\')
-                                            .replace(new RegExp("\\\\*\\\\&\\\\^","g"),'\\"');
-                                        }
-                                        depp = depp + "</p>";
-                                    }
-                                } else {
-                                    var ret = new RegExp("Тип: ([^.]+)\\.", "");
-                                    var retValue = (!methodData[returns]) ? "" : ": "+ ret.exec(methodData[returns])[1];
-                                    depp = depp + "<p><b>Синтаксис:</b></p><p class='hljs'>"
-                                    + "<span class='function_name'>" + strMethod
-                                    + "</span><span class='parameter_variable'>()"
-                                    + retValue + "</span></p>";
-                                }
-                            }
-                            if (methodData["example"] && descContext === "description") {
-                                console.log()
-                                 depp = depp + "<p><b>Пример:</b></p><pre class='hljs'>"
-                                 + hljs.highlight("1c", methodData["example"]
-                                 .replace(new RegExp("\\\\^\\\\&\\\\*","g"),'\\/')
-                                 .replace("^&%",'\\\\')
-                                 .replace(new RegExp("\\\\*\\\\&\\\\^","g"),'\\"')
-                                 .replace(new RegExp("<br>","g"), String.fromCharCode(10)), true).value
-                                 + "</pre>";}
-                            return depp;
-                        }
-
-                        function readFile(file, sep) {
-                            if (document.getElementById('cont').style.display === "none") {
-                                document.getElementById('cont').style.display = "block";
-                                document.getElementById('splitter1').style.display = "block";
-                                document.getElementById('struct').style.height = "133px";
-                            }
-                            document.getElementById('header').innerHTML = file.split(sep).reverse()[1];
-                            var request = new XMLHttpRequest();
-                            request.open('GET', file);
-                            request.onload = function (e) {
-                                if (request.readyState == 4 && request.status == 200) {
-                                    var md = window.markdownit(defaults);
-                                    document.getElementById('el').innerHTML = md.render(request.responseText
-                                        .replace(new RegExp("\`\`\`bsl","g"), "\`\`\`1c"));
-                                }
-                            };
-                            request.send(null);
-                        }
-
-                        function drag(elementToDrag, event) {
-                            // Зарегистрировать обработчики событий mousemove и mouseup,
-                            // которые последуют за событием mousedown.
-                            if (document.addEventListener) {
-                                // Стандартная модель событий
-                                // Зарегистрировать перехватывающие обработчики в документе
-                                document.addEventListener("mousemove", moveHandler, true);
-                                document.addEventListener("mouseup", upHandler, true);
-                            }
-                            event.cancelBubble = true;
-                            event.returnValue = false;
-                            function moveHandler(e) {
-                                // Переместить элемент в позицию указателя мыши с учетом позиций
-                                // полос прокрутки и смещений относительно начального щелчка.
-                                if (elementToDrag.id==="splitter1"){
-                                    document.getElementById('struct').style.height =
-                                    (e.clientY - document.getElementById('struct').offsetTop)  + "px";
-                                } else {
-                                    document.getElementById('el').style.height =
-                                    (e.clientY - document.getElementById('el').offsetTop)  + "px";
-                                }
-                                // И прервать дальнейшее распространение события.
-                                e.cancelBubble = true;
-                            }
-                            function upHandler(e) {
-                                // Удалить перехватывающие обработчики событий.
-                                if (document.removeEventListener) {
-                                    document.removeEventListener("mouseup", upHandler, true);
-                                    document.removeEventListener("mousemove", moveHandler, true);
-                                }
-                                e.cancelBubble = true;
-                            }
-                        }
-                        function escapeHtml(str) {
-                            var HTML_ESCAPE_TEST_RE = /[&<>"]/;
-                            var HTML_ESCAPE_REPLACE_RE = /[&<>"]/g;
-                            var HTML_REPLACEMENTS = {
-                                '&': '&amp;',
-                                '<': '&lt;',
-                                '>': '&gt;',
-                                '"': '&quot;'
-                            };
-                            function replaceUnsafeChar(ch) {
-                                return HTML_REPLACEMENTS[ch];
-                            }
-                            if (HTML_ESCAPE_TEST_RE.test(str)) {
-                                return str.replace(HTML_ESCAPE_REPLACE_RE, replaceUnsafeChar);
-                            }
-                            return str;
-                        };
+                        
                     </script>
                     <script type="text/javascript" src="${hljs}"></script>
                     <script type="text/javascript" src="${mdit}"></script>
@@ -824,33 +489,19 @@ export default class SyntaxHelperProvider extends AbstractProvider
                           }
                       };</script>
                     </head>
-                    <body onload = "
-                    var md = window.markdownit(defaults);
-                    // document.getElementById('hjh').innerHTML =
-                    // md.render(textHL);
-                    //.replace(new RegExp('<', 'g'), '&lt;').replace(new RegExp('>', 'g'), '&gt;');
-                    ">
-                    <script>
-                        (function() {
-                            try {
-                                ${fillStructure.textSyntax}
-                            } catch (error) {
-                                console.error(error);
-                            }
-                        })();
-                    </script>
-                    <h1 id="hjh" style="font-size: 1em; margin-left:5px; margin-top: 20px; float:left;
-                    display: inline-block; width:calc(90% - 80px);">${
-                        fillStructure.globalHeader
-                    }</h1>
-                    <a href="command:language-1c-bsl.syntaxHelper" style = "margin: 20px 10px 10px 10px;
-                    padding: 5px 15px 5px 5px; float:right; width:55px; height:15px; white-space: nowrap;
-                    background: #007acc; text-decoration:none; color: white; "><svg xmlns="http://www.w3.org/2000/svg"
-                    width="14" height="14" viewBox="0 0 14 14"><path d="M15.7 13.3l-3.81-3.83A5.93 5.93 0 0 0 13
-                    6c0-3.31-2.69-6-6-6S1 2.69 1 6s2.69 6 6 6c1.3 0 2.48-.41 3.47-1.11l3.83 3.81c.19.2.45.3.7.3.25 0
-                    .52-.09.7-.3a.996.996 0 0 0 0-1.41v.01zM7 10.7c-2.59 0-4.7-2.11-4.7-4.7 0-2.59 2.11-4.7 4.7-4.7
-                    2.59 0 4.7 2.11 4.7 4.7 0 2.59-2.11 4.7-4.7 4.7z" fill="white"/></svg>
-                    &nbsp; Поиск</a>
+                    <body onload = "var md = window.markdownit(defaults);">
+                    <h1 id="hjh">${fillStructure.globalHeader}</h1>
+
+                    <a id="search" href="command:language-1c-bsl.syntaxHelper">
+                    
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14">
+                        <path d="M15.7 13.3l-3.81-3.83A5.93 5.93 0 0 0 13
+                        6c0-3.31-2.69-6-6-6S1 2.69 1 6s2.69 6 6 6c1.3 0 2.48-.41 3.47-1.11l3.83 3.81c.19.2.45.3.7.3.25 0
+                        .52-.09.7-.3a.996.996 0 0 0 0-1.41v.01zM7 10.7c-2.59 0-4.7-2.11-4.7-4.7 0-2.59 2.11-4.7 4.7-4.7
+                        2.59 0 4.7 2.11 4.7 4.7 0 2.59-2.11 4.7-4.7 4.7z" fill="white"/>
+                        </svg>
+                        Поиск
+                    </a>
                     <hr style = "clear:both">
                     <div id = "struct" style="overflow-y: scroll; margin-left:5px; height:
                     ${fillStructure.menuHeight};">
