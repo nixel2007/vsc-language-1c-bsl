@@ -738,7 +738,7 @@ export function activate(context: vscode.ExtensionContext) {
         if (syntaxPanel == null) {
             syntaxPanel = vscode.window.createWebviewPanel(
                 'syntax-bsl',
-                "Синтаксис-помощник 1С", // Синтаксис-помощник 1С
+                "Синтаксис-помощник", // Синтаксис-помощник 1С
                 vscode.ViewColumn.Two,
                 {
                     enableScripts: true, 
@@ -754,10 +754,6 @@ export function activate(context: vscode.ExtensionContext) {
     
     function openSyntaxHelperPanel(syntaxHelper) {
         checkSyntaxWebPanel();
-        syntaxPanel.title = global.methodForDescription.description;
-        if (syntaxPanel.title == '' || syntaxPanel.title == null) {
-            syntaxPanel.title = "Синтаксис-помощник 1С";   
-        }
         syntaxHelper.updateContentPanel(syntaxPanel);
         syntaxPanel.reveal(vscode.ViewColumn.Two);
     }
