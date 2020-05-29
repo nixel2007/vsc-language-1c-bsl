@@ -462,38 +462,26 @@ export default class SyntaxHelperProvider extends AbstractProvider {
                     </head>
                     <body onload = "var md = window.markdownit(defaults);">
                     <h1 id="hjh">${fillStructure.globalHeader}</h1>
-
-                    <a id="search" href="command:language-1c-bsl.syntaxHelper">
-                    
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14">
-                        <path d="M15.7 13.3l-3.81-3.83A5.93 5.93 0 0 0 13
-                        6c0-3.31-2.69-6-6-6S1 2.69 1 6s2.69 6 6 6c1.3 0 2.48-.41 3.47-1.11l3.83 3.81c.19.2.45.3.7.3.25 0
-                        .52-.09.7-.3a.996.996 0 0 0 0-1.41v.01zM7 10.7c-2.59 0-4.7-2.11-4.7-4.7 0-2.59 2.11-4.7 4.7-4.7
-                        2.59 0 4.7 2.11 4.7 4.7 0 2.59-2.11 4.7-4.7 4.7z" fill="white"/>
+                    <a id="search" href="command:language-1c-bsl.syntaxHelper">               
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14">
+                            <path d="M15.7 13.3l-3.81-3.83A5.93 5.93 0 0 0 13
+                            6c0-3.31-2.69-6-6-6S1 2.69 1 6s2.69 6 6 6c1.3 0 2.48-.41 3.47-1.11l3.83 3.81c.19.2.45.3.7.3.25 0
+                            .52-.09.7-.3a.996.996 0 0 0 0-1.41v.01zM7 10.7c-2.59 0-4.7-2.11-4.7-4.7 0-2.59 2.11-4.7 4.7-4.7
+                            2.59 0 4.7 2.11 4.7 4.7 0 2.59-2.11 4.7-4.7 4.7z" fill="white"/>
                         </svg>
                         Поиск
                     </a>
-                    <hr style = "clear:both">
-                    <div id = "struct" style="overflow-y: scroll; margin-left:5px; height:
-                    ${fillStructure.menuHeight};">
+                    <hr>
+                    <div id = "struct" style="height:${fillStructure.menuHeight};">
                         ${fillStructure.globCont}
                         ${fillStructure.classes}</ul>
                     </div>
-                    <div id = "splitter1" style = "background: #9A9A9A; display:${
-                        fillStructure.classVisible
-                    };
-                    cursor: n-resize; height:2px; margin-top:4px;" onmousedown="drag(this, event);"></div>
+                    <div id = "splitter1" style = "display:${fillStructure.classVisible};" onmousedown="drag(this, event);"></div>
                     <div id="cont" style = "display:${fillStructure.classVisible};">
-                        <h1 id="header" style="font-size: 1em; float:left; margin-left:5px; width:90%;
-                        margin-right:0px">${fillStructure.segmentHeader}</h1>
-                        <input type = "button" class = "button" value = "x"
-                        onclick = "document.getElementById('cont').style.display = 'none';
-                        document.getElementById('splitter1').style.display = 'none';
-                        document.getElementById('struct').style.height = '100%'" style="float: right; margin-top: 6px">
-                        <hr style = "clear:both">
-                        <div id="el" style = "overflow-y: scroll; margin-left:5px; height: ${
-                            fillStructure.elHeight
-                        }">
+                        <h1 id="header">${fillStructure.segmentHeader}</h1>
+                        <input type = "button" class = "button btn-close" value = "x" onclick = "closeCont();">
+                        <hr>
+                        <div id="el" style = "overflow-y: scroll; margin-left:5px; height: ${fillStructure.elHeight}">
                             ${fillStructure.segmentDescription}
                         </div>
                     <div id = "splitter2" style = "background: #9A9A9A; display:${
@@ -501,22 +489,13 @@ export default class SyntaxHelperProvider extends AbstractProvider {
                     };
                     cursor: n-resize; height:2px; margin-top:4px;" onmousedown="drag(this, event);"></div>
                     <div id="contMethod" style = "display:${fillStructure.methodVisible};">
-                        <div style="float:left; width:calc(100% - 30px); margin-right:0px; margin-left:5px">
-                        <h1 id="headerMethod" style="font-size: 1em; float:left; width:calc(100% - 110px);
-                        margin-right:0px;">
-                        ${fillStructure.methodHeader}</h1>
-                        <span id = "desc" style='margin-left:5px; text-align: right;
-                        margin-right:0px; padding-right:5px; font-size:0.8em; width:95px;
-                        float:right; margin-top:5px; padding-left:0px;
-                        display:${fillStructure.displaySwitch}'>${fillStructure.switch1C}<\span>
+                        <div class="div-desc">
+                        <h1 id="headerMethod">${fillStructure.methodHeader}</h1>
+                        <span id = "desc" style='display:${fillStructure.displaySwitch}'>${fillStructure.switch1C}<\span>
                         </div>
-                        <input type = "button" class = "button" value = "x"
-                        onclick = "document.getElementById('contMethod').style.display = 'none';
-                        document.getElementById('splitter2').style.display = 'none';
-                        document.getElementById('el').style.height = '60%'" style="float: right;
-                        margin-left:0px; margin-top:5px">
-                        <hr style = "clear:both">
-                        <div id="elMethod" style = "overflow-y: scroll; margin-left:5px">
+                        <input type = "button" class = "button btn-close" value = "x" onclick = "closeMethod();">
+                        <hr>
+                        <div id="elMethod">
                             ${fillStructure.methodDescription}
                         </div>
                     </div>

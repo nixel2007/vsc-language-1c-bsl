@@ -237,3 +237,64 @@ table>tbody>tr+tr>td {
     text-decoration: none;
     color: white;
 }
+
+.btn-close {
+    float: right;
+    margin-left: 0px;
+    margin-top: 5px;
+}
+
+#header {
+    font-size: 1em;
+    float: left;
+    margin-left: 5px;
+    width: 90%;
+    margin-right: 0px;
+}
+
+#elMethod {
+    overflow-y: scroll;
+    margin-left: 5px;
+}
+
+#struct {
+    overflow-y: scroll;
+    margin-left: 5px;
+}
+
+#splitter1 {
+    background: #9A9A9A;
+    cursor: n-resize;
+    height: 2px;
+    margin-top: 4px;
+}
+
+#desc {
+    margin-left: 5px;
+    text-align: right;
+    margin-right: 0px;
+    padding-right: 5px;
+    font-size: 0.8em;
+    width: 95px;
+    float: right;
+    margin-top: 5px;
+    padding-left: 0px;
+}
+
+.div-desc {
+    float: left;
+    width: calc(100% - 30px);
+    margin-right: 0px;
+    margin-left: 5px;
+}
+
+#headerMethod {
+    font-size: 1em;
+    float: left;
+    width: calc(100% - 110px);
+    margin-right: 0px;
+}
+
+hr {
+    clear: both;
+}
