@@ -50,9 +50,7 @@ export default class SyntaxHelperProvider extends AbstractProvider
     }
 
     public updateContentPanel(panel: vscode.WebviewPanel) {   
-        if (this.webPanel == null) {
-            this.webPanel = panel;
-        }
+        this.webPanel = panel;
         var result = this.provideTextDocumentContent();
         result.then(
             value => panel.webview.html = value
@@ -317,6 +315,19 @@ export default class SyntaxHelperProvider extends AbstractProvider
                 .replace(/[\t]/g, "\\t");
             textSyntax = ` window.bsl_language='${jsonString}';
             `;
+
+            let jsonLibData = JSON.stringify(this._global.libData)
+                .replace(/[\\]/g, "\\\\")
+                .replace(/[\"]/g, '\\"')
+                .replace(/[\']/g, "\\'")
+                .replace(/[\/]/g, "\\/")
+                .replace(/[\b]/g, "\\b")
+                .replace(/[\f]/g, "\\f")
+                .replace(/[\n]/g, "\\n")
+                .replace(/[\r]/g, "\\r")
+                .replace(/[\t]/g, "\\t");
+            textSyntax += ` window.os_library_data='${jsonLibData}';
+            `;
         }
 
         this.syntaxContent.syntaxFilled = this._global.syntaxFilled;
@@ -349,8 +360,9 @@ export default class SyntaxHelperProvider extends AbstractProvider
 
     private async getHTML(fillStructure): Promise<string> {
         
-        var hljs = this.getUriForAsset('highlight.pack.js');
-        var mdit = this.getUriForAsset('markdown-it.js');
+        var hljs = this.webPanel.webview.asWebviewUri(this.getUriForAsset('highlight.pack.js'));
+        var mdit = this.webPanel.webview.asWebviewUri(this.getUriForAsset('markdown-it.js'));
+        var shjs = this.webPanel.webview.asWebviewUri(this.getUriForAsset('syntaxhelper.js'));
 
         return `<head>
                     <style>
@@ -795,6 +807,7 @@ export default class SyntaxHelperProvider extends AbstractProvider
                     </script>
                     <script type="text/javascript" src="${hljs}"></script>
                     <script type="text/javascript" src="${mdit}"></script>
+                    <script type="text/javascript" src="${shjs}"></script>
                     <script>;
                     var defaults = {
                         highlight: function (str, lang) {

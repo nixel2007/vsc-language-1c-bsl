@@ -740,7 +740,10 @@ export function activate(context: vscode.ExtensionContext) {
                 'syntax-bsl',
                 "Синтаксис-помощник 1С", // Синтаксис-помощник 1С
                 vscode.ViewColumn.Two,
-                {enableScripts: true, enableCommandUris: true});    
+                {
+                    enableScripts: true, 
+                    enableCommandUris: true
+                });    
             syntaxPanel.onDidDispose(
                 () => {
                     syntaxPanel = null;    
