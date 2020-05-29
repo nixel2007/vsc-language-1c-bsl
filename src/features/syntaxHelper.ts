@@ -11,10 +11,9 @@ import SyntaxExternalHelper from "./SyntaxExternalHelper";
 
 import * as fastXmlParser from "fast-xml-parser";
 
-export default class SyntaxHelperProvider extends AbstractProvider
-    implements vscode.TextDocumentContentProvider {
-    private onDidChangeEvent = new vscode.EventEmitter<vscode.Uri>();
+export default class SyntaxHelperProvider extends AbstractProvider {
     private syntaxContent: AbstractSyntaxContent;
+    private webPanel: vscode.WebviewPanel;
     private syntax: string;
     private oscriptMethods: any;
     private metadata = [
@@ -38,16 +37,6 @@ export default class SyntaxHelperProvider extends AbstractProvider
         "BusinessProcesses",
         "Tasks"
     ];
-
-    private webPanel:vscode.WebviewPanel;
-
-    get onDidChange(): vscode.Event<vscode.Uri> {
-        return this.onDidChangeEvent.event;
-    }
-
-    public update(uri: vscode.Uri) {
-        this.onDidChangeEvent.fire(uri);
-    }
 
     public updateContentPanel(panel: vscode.WebviewPanel) {   
         this.webPanel = panel;
