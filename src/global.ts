@@ -1301,7 +1301,12 @@ export class Global {
                                 this.libData[lib].description =
                                     (process.platform === "win32" ? "" : "file://") + pathToReadme;
                                 
-                                this.libData[lib].content = fs.readFileSync(pathToReadme, 'utf-8');
+                                fs.readFile(pathToReadme, 'utf-8', (err, data) => {
+                                    if (err) {
+                                        return;    
+                                    } 
+                                    this.libData[lib].content = data;
+                                });
                             }
                         }
                         if (!this.libData[lib].modules[moduleDescr]) {
@@ -1359,7 +1364,12 @@ export class Global {
                                 this.libData[lib].description =
                                     (process.platform === "win32" ? "" : "file://") + pathToReadme;
 
-                                this.libData[lib].content = fs.readFileSync(pathToReadme, 'utf-8');
+                                fs.readFile(pathToReadme, 'utf-8', (err, data) => {
+                                    if (err) {
+                                        return;    
+                                    } 
+                                    this.libData[lib].content = data;
+                                });
                             }
                         }
                         if (!this.libData[lib].modules[moduleDescr]) {
