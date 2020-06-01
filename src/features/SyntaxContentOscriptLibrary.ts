@@ -1,4 +1,5 @@
 import * as path from "path";
+import * as vscode from "vscode";
 
 import AbstractSyntaxContent from "./AbstractSyntaxContent";
 
@@ -60,28 +61,20 @@ export default class SyntaxContentOscriptLibrary extends AbstractSyntaxContent {
             for (const lib in libData) {
                 const dataModul = libData[lib].modules;
                 if (libData[lib].description) {
-                    classes =
-                        classes +
-                        "<h2 class='a' style='font-size: 1em;' onclick=\"readFile('" +
-                        libData[lib].description.replace(/[\\]/g, "\\\\").replace(/[\/]/g, "\\/") +
-                        "', '" +
-                        path.sep.replace(/[\\]/g, "\\\\").replace(/[\/]/g, "\\/") +
-                        "');\"> <em>" +
-                        lib +
-                        " </em></h2 > <ul>";
+                    classes += `<h2 class='a' style='font-size: 1em;' onclick="readContent('${lib}');">`;
                 } else {
-                    classes =
-                        classes + "<h2 style='font-size: 1em;'> <em>" + lib + " </em></h2 > <ul>";
+                    classes += "<h2 style='font-size: 1em;'>";
                 }
+                classes += `<em>${lib}</em></h2> <ul>`;
                 for (const modul in dataModul) {
                     const onlyOs = "";
-
-                    classes =
-                        classes +
-                        `<li><span class="a" onclick="fillDescription(this)">
-                        ${modul}</span>${onlyOs}</li>`;
+                    classes += `
+                        <li>
+                        <span class="a" onclick="fillDescription(this)">${modul}</span>
+                        ${onlyOs}
+                        </li>`;
                 }
-                classes = classes + "</ul>";
+                classes += "</ul>";
             }
         }
         if (Object.keys(dllData).length > 0) {

@@ -12,7 +12,7 @@ export default class TaskProvider {
             return;
         }
         if (autoDetect === "on") {
-            vscode.workspace.registerTaskProvider("bsl", {
+            vscode.tasks.registerTaskProvider("bsl", {
                 provideTasks: () => {
                     return this.provideBslScripts();
                 },
@@ -213,12 +213,13 @@ export default class TaskProvider {
         command,
         args?: string[],
         problemMatcher?: string[],
-        isBuildCommand?: boolean,
-        isTestCommand?: boolean
+        isBuildCommand = false,
+        isTestCommand = false
     ): vscode.Task {
         const kind: vscode.TaskDefinition = {
             label,
-            type: "process",
+            type: "bsl",
+            args,
             problemMatcher
         };
 
@@ -240,17 +241,9 @@ export default class TaskProvider {
             };
         } else {
             kind.command = command;
-            kind.args = args;
         }
 
-        if (isBuildCommand) {
-            kind.group = "build";
-        }
-        if (isTestCommand) {
-            kind.group = "test";
-        }
-
-        return new vscode.Task(
+        const task = new vscode.Task(
             kind,
             vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri),
             label,
@@ -258,6 +251,17 @@ export default class TaskProvider {
             new vscode.ProcessExecution(command, args, { cwd: workspaceRoot }),
             problemMatcher
         );
+
+        if (isBuildCommand) {
+            task.group = vscode.TaskGroup.Build;
+        }
+        if (isTestCommand) {
+            task.group = vscode.TaskGroup.Test;
+        }
+
+        // task.detail = `${command} ${args.join(" ")}` ;
+
+        return task;
     }
 
     private provideBslScriptsForFolder(workspaceRoot: string): vscode.Task[] {

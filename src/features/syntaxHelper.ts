@@ -11,10 +11,9 @@ import SyntaxExternalHelper from "./SyntaxExternalHelper";
 
 import * as fastXmlParser from "fast-xml-parser";
 
-export default class SyntaxHelperProvider extends AbstractProvider
-    implements vscode.TextDocumentContentProvider {
-    private onDidChangeEvent = new vscode.EventEmitter<vscode.Uri>();
+export default class SyntaxHelperProvider extends AbstractProvider {
     private syntaxContent: AbstractSyntaxContent;
+    private webPanel: vscode.WebviewPanel;
     private syntax: string;
     private oscriptMethods: any;
     private metadata = [
@@ -39,12 +38,12 @@ export default class SyntaxHelperProvider extends AbstractProvider
         "Tasks"
     ];
 
-    get onDidChange(): vscode.Event<vscode.Uri> {
-        return this.onDidChangeEvent.event;
-    }
-
-    public update(uri: vscode.Uri) {
-        this.onDidChangeEvent.fire(uri);
+    public updateContentPanel(panel: vscode.WebviewPanel) {   
+        this.webPanel = panel;
+        var result = this.provideTextDocumentContent();
+        result.then(
+            value => panel.webview.html = value
+        );
     }
 
     public provideTextDocumentContent(): Promise<string> | undefined {
@@ -281,7 +280,8 @@ export default class SyntaxHelperProvider extends AbstractProvider
         if (
             this._global.syntaxFilled === "" ||
             this._global.syntaxFilled !== this.syntax ||
-            this.syntax === "BSL"
+            this.syntax === "BSL" ||
+            this.syntax === "1C"
         ) {
             this._global.syntaxFilled = this.syntax;
             this.oscriptMethods = this.syntaxContent.getSyntaxContentItems(
@@ -292,19 +292,13 @@ export default class SyntaxHelperProvider extends AbstractProvider
                     : this._global.dllData,
                 this.syntax === "BSL" ? metadata : this._global.libData
             );
-            let jsonString = JSON.stringify(this.oscriptMethods)
-                .replace(/[\\]/g, "\\\\")
-                .replace(/[\"]/g, '\\"')
-                .replace(/[\']/g, "\\'")
-                .replace(/[\/]/g, "\\/")
-                .replace(/[\b]/g, "\\b")
-                .replace(/[\f]/g, "\\f")
-                .replace(/[\n]/g, "\\n")
-                .replace(/[\r]/g, "\\r")
-                .replace(/[\t]/g, "\\t");
-            jsonString = `'${jsonString}'`;
-            textSyntax = ` window.localStorage.setItem("bsl-language", ${jsonString});
-                `;
+            let jsonString = this.prepareJson(JSON.stringify(this.oscriptMethods));
+            textSyntax = ` window.bsl_language='${jsonString}';
+            `;
+
+            let jsonLibData = this.prepareJson(JSON.stringify(this._global.libData));
+            textSyntax += ` window.os_library_data='${jsonLibData}';
+            `;
         }
 
         this.syntaxContent.syntaxFilled = this._global.syntaxFilled;
@@ -336,185 +330,23 @@ export default class SyntaxHelperProvider extends AbstractProvider
     }
 
     private async getHTML(fillStructure): Promise<string> {
-        const hljs = path.join(
-            vscode.extensions.getExtension("xDrivenDevelopment.language-1c-bsl").extensionPath,
-            "lib",
-            "highlight.pack.js"
-        );
-        const mdit = path.join(
-            vscode.extensions.getExtension("xDrivenDevelopment.language-1c-bsl").extensionPath,
-            "lib",
-            "markdown-it.js"
-        );
+        
+        let hljs = this.webPanel.webview.asWebviewUri(this.getUriForAsset('highlight.pack.js'));
+        let mdit = this.webPanel.webview.asWebviewUri(this.getUriForAsset('markdown-it.js'));
+        let shjs = this.webPanel.webview.asWebviewUri(this.getUriForAsset('syntaxhelper.js'));
+        let themecss = this.webPanel.webview.asWebviewUri(this.getUriForAsset('theme.css'));
 
         return `<head>
-                    <style>
-                        /* Tomorrow Comment */
-                        .hljs-comment,
-                        .hljs-quote {
-                            color: #608B4E;/*#8e908c;*/
-                        }
-                        /* Tomorrow Red */
-                        .hljs-variable,
-                        .hljs-template-variable,
-                        .hljs-tag,
-                        .hljs-name,
-                        .hljs-selector-id,
-                        .hljs-selector-class,
-                        .hljs-regexp,
-                        .hljs-deletion {
-                            color: #c82829;
-                        }
-                        /* Tomorrow Orange */
-                        .hljs-number,
-                        .hljs-built_in,
-                        .hljs-builtin-name,
-                        .hljs-literal,
-                        .hljs-type,
-                        .hljs-params,
-                        .hljs-meta,
-                        .hljs-link {
-                            color: #DCDCAA; /*#f5871f;*/
-                        }
-                        /* Tomorrow Yellow */
-                        .hljs-attribute {
-                            color: #eab700;
-                        }
-                        /* Tomorrow Green */
-                        .hljs-string,
-                        .hljs-symbol,
-                        .hljs-bullet,
-                        .hljs-addition {
-                            color: #CE9178; /*#718c00;*/
-                        }
-                        /* Tomorrow Blue */
-                        .hljs-title,
-                        .hljs-section {
-                            color: #4271ae;
-                        }
-                        /* Tomorrow Purple */
-                        .hljs-keyword,
-                        .hljs-selector-tag {
-                            color: #C586C0;/*#8959a8;*/
-                        }
-                        .hljs {
-                            display: block;
-                            overflow-x: auto;
-                            padding: 0.5em;
-                            margin: 0px;
-                            font-family: Menlo, Monaco, Consolas,
-                            "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
-                            font-size: 14px;
-                            line-height: 19px;
-                        }
-                        pre {
-                            white-space: pre-wrap;
-                            padding: 0.5em;
-                        }
-                        code {
-                            border-radius: 3px;
-                            font-family: Menlo, Monaco, Consolas,
-                            "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
-                            font-size: 14px;
-                            line-height: 19px;
-                        }
-                        .vscode-light pre code {
-                            color: rgb(30, 30, 30);
-                        }
-                        .vscode-dark,
-                        .vscode-dark pre code {
-                            color: #DDD;
-                        }
-                        .vscode-light code {
-                            color: #A31515;
-                        }
-                        .vscode-dark code {
-                            color: #D7BA7D;
-                        }
-                        .vscode-light pre:not(.hljs),
-                        .vscode-light code > div {
-                            background-color: rgba(220, 220, 220, 0.4);
-                        }
-                        .vscode-dark pre:not(.hljs),
-                        .vscode-dark code > div {
-                            background-color: rgba(10, 10, 10, 0.4);
-                        }
-                        .vscode-high-contrast pre:not(.hljs),
-                        .vscode-high-contrast code > div {
-                            background-color: rgb(0, 0, 0);
-                        }
-                        .vscode-light .hljs {
-                            background-color: rgba(220, 220, 220, 0.4);
-                        }
-                        .vscode-dark .hljs {
-                            background-color: rgba(10, 10, 10, 0.4);
-                        }
-                        .hljs-emphasis {
-                            font-style: italic;
-                        }
-                        .hljs-strong {
-                            font-weight: bold;
-                        }
-                        .a {
-                            cursor: pointer;
-                            text-decoration: underline;
-                        }
-                        a.mod {
-                            color: white;
-                            text-decoration: underline;
-                        }
-                        a.mod:hover {
-                            color: white;
-                        }
-                        .button {
-                            border: 0px;
-                            background-color: inherit;
-                            color: inherit;
-                            font-weight: bold
-                        }
-                        .vscode-light .storage {
-                            color: #0000FF
-                        }
-                        .vscode-light .function_name {
-                            color: #795E26 /*#795E26*/
-                        }
-                        .vscode-light .parameter_variable {
-                            color: #267F99 /*#001080*/
-                        }
-                        .storage {
-                            color: #569CD6
-                        }
-                        .function_name {
-                            color: #DCDCAA
-                        }
-                        .parameter_variable {
-                            color: #4EC9B0 /*#9CDCFE*/
-                        }
-                        a {
-                            color: #4080D0;
-                            text-decoration: none;
-                        }
-                        a:hover {
-                            color: #4080D0;
-                            text-decoration: underline;
-                        }
-                        table {
-                            border-collapse: collapse;
-                        }
-                        table > thead > tr > th {
-                            text-align: left;
-                            border-bottom: 1px solid;
-                        }
-                        table > thead > tr > th,
-                        table > thead > tr > td,
-                        table > tbody > tr > th,
-                        table > tbody > tr > td {
-                            padding: 5px 10px;
-                        }
-                        table > tbody > tr + tr > td {
-                            border-top: 1px solid;
-                        }
-                    </style>
+                <link rel="stylesheet" type="text/css" href="${themecss}">
+                    <script>
+                        (function() {
+                            try {
+                                ${fillStructure.textSyntax}
+                            } catch (error) {
+                                console.error(error);
+                            }
+                        })();
+                    </script>
                     <script>
                         function fillDescription(elem) {
                             if (document.getElementById('cont').style.display === "none") {
@@ -522,7 +354,7 @@ export default class SyntaxHelperProvider extends AbstractProvider
                                 document.getElementById('splitter1').style.display = "block";
                                 document.getElementById('struct').style.height = "133px";
                             }
-                            let contextData = JSON.parse(window.localStorage.getItem('bsl-language'));
+                            let contextData = JSON.parse(window.bsl_language);
                             var str = elem.innerHTML.replace(new RegExp('\\n[ ]*','gm'),'').split(" / ")[0];
                             var segment = contextData[str];
                             var segmentDescription = "";
@@ -590,7 +422,7 @@ export default class SyntaxHelperProvider extends AbstractProvider
                                 charSegment = "values";
                             }
                             let methodData =
-                            JSON.parse(window.localStorage.getItem('bsl-language'))[strSegment][charSegment][str];
+                            JSON.parse(window.bsl_language)[strSegment][charSegment][str];
                             var depp = "";
                             if (charSegment === "constructors") {
                                 str = strSegment.replace(', класс', '');
@@ -607,189 +439,11 @@ export default class SyntaxHelperProvider extends AbstractProvider
                                 }
                             document.getElementById('elMethod').innerHTML = depp;
                         }
-
-                        function switchDescription(elem) {
-                            var charSegment = "";
-                            if (elem.id.slice(0,6)==="method"){
-                                charSegment = "methods";
-                            } else if (elem.id.slice(0,8)==="properti"){
-                                charSegment = "properties";
-                            } else if (elem.id.slice(0,11)==="constructor"){
-                                charSegment = "constructors";
-                            } else if (elem.id.slice(0,5)==="value"){
-                                charSegment = "values";
-                            }
-                            var strMethod =
-                            document.getElementById('headerMethod').innerHTML.replace("<br>", "").replace(
-                                new RegExp('\\n[ ]*','m'),'').split(" / ")[0];
-                            var strSegment =
-                            document.getElementById('header').innerHTML.replace(
-                                new RegExp('\\n[ ]*','m'),'').split(" / ")[0];
-                            let methodData =
-                            JSON.parse(window.localStorage.getItem('bsl-language'))[strSegment][charSegment][strMethod];
-                            if (charSegment === "constructors"){
-                                strMethod = strSegment;
-                            }
-                            let depp = "";
-                            if (document.getElementById('desc').innerHTML.slice(0,11)==="Описание 1С") {
-                                depp = fillDescriptionData(
-                                    methodData, depp, "description", "signature", "returns", strMethod, charSegment);
-                                document.getElementById('desc').innerHTML =
-                                "Описание OneScript<br/>(<span class='a' id = '" + charSegment
-                                + "' onclick='switchDescription(this)' style='font-size:1em'>переключить</span>)";
-                            } else {
-                                depp = fillDescriptionData(methodData, depp, "description1C",
-                                "signature1C", "returns1C", strMethod, charSegment);
-                                document.getElementById('desc').innerHTML =
-                                "Описание 1С<br/>(<span class='a' id = '" + charSegment
-                                + "' onclick='switchDescription(this)' style='font-size:1em'>переключить</span>)";
-                            }
-                            document.getElementById('elMethod').innerHTML = depp;
-                        }
-
-                        function fillDescriptionData(methodData, depp, descContext,
-                                                     paramContext, returns, strMethod, charSegment) {
-                            if (methodData[descContext]) {
-                                depp = methodData[descContext]
-                                .replace(new RegExp("\\\\^\\\\&\\\\*","g"),'\\/')
-                                .replace(new RegExp("\\\\^\\\\&%","g"),'\\\\')
-                                .replace(new RegExp("\\\\*\\\\&\\\\^","g"),'\\"') + "<br/>";
-                                    }
-                            if (methodData[returns]) {
-                                depp = depp + "<b><em>Возвращаемое значение: </em></b>"
-                                + methodData[returns].replace(new RegExp("\\\\*\\\\&\\\\^","g"),'\\"')
-                                .replace(new RegExp("\\\\^\\\\&\\\\*","g"),'\\/')
-                                .replace(new RegExp("\\\\^\\\\&%","g"),'\\\\') + "<br/>";
-                            }
-                            if (methodData["Доступ"]) {
-                                depp = depp + "<b><em>Доступ: </em></b>"
-                                + methodData["Доступ"].replace("^&*",'\\/') + "<br/>";}
-                            var constructor = (charSegment === "constructors")? "Новый " : "";
-                            if (charSegment === "methods" || charSegment === "constructors"
-                                ||charSegment === "object" || charSegment === "manager") {
-                                if (methodData[paramContext]) {
-                                    for (let element in methodData[paramContext]) {
-                                        var name_syntax = (element === "default") ? "" : " " + element;
-                                        depp = depp + "<p><b>Синтаксис" + name_syntax + ":</b></p><p class='hljs'>"
-                                        + constructor + "<span class='function_name'>" + strMethod
-                                        + "</span><span class='parameter_variable'>"
-                                        + methodData[paramContext][element]["СтрокаПараметров"] + "</span></p>";
-                                        if (typeof methodData[paramContext][element].Параметры !=="string"){
-                                            let header = false;
-                                            for (let param in methodData[paramContext][element].Параметры) {
-                                                if (header === false) {
-                                                    depp = depp + "<p><b>Параметры:</b></p><p>";
-                                                    header = true;
-                                                }
-                                                var paramDescription = "<b><em>" + param + ":</em></b> "
-                                                + methodData[paramContext][element].Параметры[param]
-                                                .replace(new RegExp("\\\\^\\\\&\\\\*","g"),'\\/')
-                                                .replace(new RegExp("\\\\^\\\\&%","g"),'\\\\')
-                                                .replace(new RegExp("\\\\*\\\\&\\\\^","g"),'\\"');
-                                                depp = depp + paramDescription + "<br/>";
-                                            }
-                                        } else if (methodData[paramContext][element].Параметры !== ""){
-                                            depp = depp + "<p><b>Параметры:</b></p><p>";
-                                            depp = depp + methodData[paramContext][element].Параметры
-                                            .replace(new RegExp("\\\\^\\\\&\\\\*","g"),'\\/')
-                                            .replace(new RegExp("\\\\^\\\\&%","g"),'\\\\')
-                                            .replace(new RegExp("\\\\*\\\\&\\\\^","g"),'\\"');
-                                        }
-                                        depp = depp + "</p>";
-                                    }
-                                } else {
-                                    var ret = new RegExp("Тип: ([^.]+)\\.", "");
-                                    var retValue = (!methodData[returns]) ? "" : ": "+ ret.exec(methodData[returns])[1];
-                                    depp = depp + "<p><b>Синтаксис:</b></p><p class='hljs'>"
-                                    + "<span class='function_name'>" + strMethod
-                                    + "</span><span class='parameter_variable'>()"
-                                    + retValue + "</span></p>";
-                                }
-                            }
-                            if (methodData["example"] && descContext === "description") {
-                                console.log()
-                                 depp = depp + "<p><b>Пример:</b></p><pre class='hljs'>"
-                                 + hljs.highlight("1c", methodData["example"]
-                                 .replace(new RegExp("\\\\^\\\\&\\\\*","g"),'\\/')
-                                 .replace("^&%",'\\\\')
-                                 .replace(new RegExp("\\\\*\\\\&\\\\^","g"),'\\"')
-                                 .replace(new RegExp("<br>","g"), String.fromCharCode(10)), true).value
-                                 + "</pre>";}
-                            return depp;
-                        }
-
-                        function readFile(file, sep) {
-                            if (document.getElementById('cont').style.display === "none") {
-                                document.getElementById('cont').style.display = "block";
-                                document.getElementById('splitter1').style.display = "block";
-                                document.getElementById('struct').style.height = "133px";
-                            }
-                            document.getElementById('header').innerHTML = file.split(sep).reverse()[1];
-                            var request = new XMLHttpRequest();
-                            request.open('GET', file);
-                            request.onload = function (e) {
-                                if (request.readyState == 4 && request.status == 200) {
-                                    var md = window.markdownit(defaults);
-                                    document.getElementById('el').innerHTML = md.render(request.responseText
-                                        .replace(new RegExp("\`\`\`bsl","g"), "\`\`\`1c"));
-                                }
-                            };
-                            request.send(null);
-                        }
-
-                        function drag(elementToDrag, event) {
-                            // Зарегистрировать обработчики событий mousemove и mouseup,
-                            // которые последуют за событием mousedown.
-                            if (document.addEventListener) {
-                                // Стандартная модель событий
-                                // Зарегистрировать перехватывающие обработчики в документе
-                                document.addEventListener("mousemove", moveHandler, true);
-                                document.addEventListener("mouseup", upHandler, true);
-                            }
-                            event.cancelBubble = true;
-                            event.returnValue = false;
-                            function moveHandler(e) {
-                                // Переместить элемент в позицию указателя мыши с учетом позиций
-                                // полос прокрутки и смещений относительно начального щелчка.
-                                if (elementToDrag.id==="splitter1"){
-                                    document.getElementById('struct').style.height =
-                                    (e.clientY - document.getElementById('struct').offsetTop)  + "px";
-                                } else {
-                                    document.getElementById('el').style.height =
-                                    (e.clientY - document.getElementById('el').offsetTop)  + "px";
-                                }
-                                // И прервать дальнейшее распространение события.
-                                e.cancelBubble = true;
-                            }
-                            function upHandler(e) {
-                                // Удалить перехватывающие обработчики событий.
-                                if (document.removeEventListener) {
-                                    document.removeEventListener("mouseup", upHandler, true);
-                                    document.removeEventListener("mousemove", moveHandler, true);
-                                }
-                                e.cancelBubble = true;
-                            }
-                        }
-                        function escapeHtml(str) {
-                            var HTML_ESCAPE_TEST_RE = /[&<>"]/;
-                            var HTML_ESCAPE_REPLACE_RE = /[&<>"]/g;
-                            var HTML_REPLACEMENTS = {
-                                '&': '&amp;',
-                                '<': '&lt;',
-                                '>': '&gt;',
-                                '"': '&quot;'
-                            };
-                            function replaceUnsafeChar(ch) {
-                                return HTML_REPLACEMENTS[ch];
-                            }
-                            if (HTML_ESCAPE_TEST_RE.test(str)) {
-                                return str.replace(HTML_ESCAPE_REPLACE_RE, replaceUnsafeChar);
-                            }
-                            return str;
-                        };
+                        
                     </script>
                     <script type="text/javascript" src="${hljs}"></script>
                     <script type="text/javascript" src="${mdit}"></script>
+                    <script type="text/javascript" src="${shjs}"></script>
                     <script>;
                     var defaults = {
                         highlight: function (str, lang) {
@@ -806,59 +460,28 @@ export default class SyntaxHelperProvider extends AbstractProvider
                           }
                       };</script>
                     </head>
-                    <body onload = "
-                    var md = window.markdownit(defaults);
-                    // document.getElementById('hjh').innerHTML =
-                    // md.render(textHL);
-                    //.replace(new RegExp('<', 'g'), '&lt;').replace(new RegExp('>', 'g'), '&gt;');
-                    ">
-                    <script>
-                        (function() {
-                            try {
-                                ${fillStructure.textSyntax}
-                                var theme = window.localStorage.getItem('storage://global/workbench.theme');
-                                if (theme && theme.indexOf('vs-dark') < 0) {
-                                    window.document.body.className = 'monaco-shell';
-                                    // remove the dark theme class if we are on a light theme
-                                }
-                            } catch (error) {
-                                console.error(error);
-                            }
-                        })();
-                    </script>
-                    <h1 id="hjh" style="font-size: 1em; margin-left:5px; margin-top: 20px; float:left;
-                    display: inline-block; width:calc(90% - 80px);">${
-                        fillStructure.globalHeader
-                    }</h1>
-                    <a href="command:language-1c-bsl.syntaxHelper" style = "margin: 20px 10px 10px 10px;
-                    padding: 5px 15px 5px 5px; float:right; width:55px; height:15px; white-space: nowrap;
-                    background: #007acc; text-decoration:none; color: white; "><svg xmlns="http://www.w3.org/2000/svg"
-                    width="14" height="14" viewBox="0 0 14 14"><path d="M15.7 13.3l-3.81-3.83A5.93 5.93 0 0 0 13
-                    6c0-3.31-2.69-6-6-6S1 2.69 1 6s2.69 6 6 6c1.3 0 2.48-.41 3.47-1.11l3.83 3.81c.19.2.45.3.7.3.25 0
-                    .52-.09.7-.3a.996.996 0 0 0 0-1.41v.01zM7 10.7c-2.59 0-4.7-2.11-4.7-4.7 0-2.59 2.11-4.7 4.7-4.7
-                    2.59 0 4.7 2.11 4.7 4.7 0 2.59-2.11 4.7-4.7 4.7z" fill="white"/></svg>
-                    &nbsp; Поиск</a>
-                    <hr style = "clear:both">
-                    <div id = "struct" style="overflow-y: scroll; margin-left:5px; height:
-                    ${fillStructure.menuHeight};">
+                    <body onload = "var md = window.markdownit(defaults);">
+                    <h1 id="hjh">${fillStructure.globalHeader}</h1>
+                    <a id="search" href="command:language-1c-bsl.syntaxHelper">               
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14">
+                            <path d="M15.7 13.3l-3.81-3.83A5.93 5.93 0 0 0 13
+                            6c0-3.31-2.69-6-6-6S1 2.69 1 6s2.69 6 6 6c1.3 0 2.48-.41 3.47-1.11l3.83 3.81c.19.2.45.3.7.3.25 0
+                            .52-.09.7-.3a.996.996 0 0 0 0-1.41v.01zM7 10.7c-2.59 0-4.7-2.11-4.7-4.7 0-2.59 2.11-4.7 4.7-4.7
+                            2.59 0 4.7 2.11 4.7 4.7 0 2.59-2.11 4.7-4.7 4.7z" fill="white"/>
+                        </svg>
+                        Поиск
+                    </a>
+                    <hr>
+                    <div id = "struct" style="height:${fillStructure.menuHeight};">
                         ${fillStructure.globCont}
                         ${fillStructure.classes}</ul>
                     </div>
-                    <div id = "splitter1" style = "background: #9A9A9A; display:${
-                        fillStructure.classVisible
-                    };
-                    cursor: n-resize; height:2px; margin-top:4px;" onmousedown="drag(this, event);"></div>
+                    <div id = "splitter1" style = "display:${fillStructure.classVisible};" onmousedown="drag(this, event);"></div>
                     <div id="cont" style = "display:${fillStructure.classVisible};">
-                        <h1 id="header" style="font-size: 1em; float:left; margin-left:5px; width:90%;
-                        margin-right:0px">${fillStructure.segmentHeader}</h1>
-                        <input type = "button" class = "button" value = "x"
-                        onclick = "document.getElementById('cont').style.display = 'none';
-                        document.getElementById('splitter1').style.display = 'none';
-                        document.getElementById('struct').style.height = '100%'" style="float: right; margin-top: 6px">
-                        <hr style = "clear:both">
-                        <div id="el" style = "overflow-y: scroll; margin-left:5px; height: ${
-                            fillStructure.elHeight
-                        }">
+                        <h1 id="header">${fillStructure.segmentHeader}</h1>
+                        <input type = "button" class = "button btn-close" value = "x" onclick = "closeCont();">
+                        <hr>
+                        <div id="el" style = "overflow-y: scroll; margin-left:5px; height: ${fillStructure.elHeight}">
                             ${fillStructure.segmentDescription}
                         </div>
                     <div id = "splitter2" style = "background: #9A9A9A; display:${
@@ -866,26 +489,43 @@ export default class SyntaxHelperProvider extends AbstractProvider
                     };
                     cursor: n-resize; height:2px; margin-top:4px;" onmousedown="drag(this, event);"></div>
                     <div id="contMethod" style = "display:${fillStructure.methodVisible};">
-                        <div style="float:left; width:calc(100% - 30px); margin-right:0px; margin-left:5px">
-                        <h1 id="headerMethod" style="font-size: 1em; float:left; width:calc(100% - 110px);
-                        margin-right:0px;">
-                        ${fillStructure.methodHeader}</h1>
-                        <span id = "desc" style='margin-left:5px; text-align: right;
-                        margin-right:0px; padding-right:5px; font-size:0.8em; width:95px;
-                        float:right; margin-top:5px; padding-left:0px;
-                        display:${fillStructure.displaySwitch}'>${fillStructure.switch1C}<\span>
+                        <div class="div-desc">
+                        <h1 id="headerMethod">${fillStructure.methodHeader}</h1>
+                        <span id = "desc" style='display:${fillStructure.displaySwitch}'>${fillStructure.switch1C}<\span>
                         </div>
-                        <input type = "button" class = "button" value = "x"
-                        onclick = "document.getElementById('contMethod').style.display = 'none';
-                        document.getElementById('splitter2').style.display = 'none';
-                        document.getElementById('el').style.height = '60%'" style="float: right;
-                        margin-left:0px; margin-top:5px">
-                        <hr style = "clear:both">
-                        <div id="elMethod" style = "overflow-y: scroll; margin-left:5px">
+                        <input type = "button" class = "button btn-close" value = "x" onclick = "closeMethod();">
+                        <hr>
+                        <div id="elMethod">
                             ${fillStructure.methodDescription}
                         </div>
                     </div>
                     </div>
                 </body>`;
+    }
+
+    public getTilte(): string {
+        return this.syntax;
+    }
+
+    private getUriForAsset(asset: string): vscode.Uri {
+        let pathToAsset = path.join(
+            vscode.extensions.getExtension("1c-syntax.language-1c-bsl").extensionPath,
+            "lib",
+            asset
+        );
+        return vscode.Uri.file(pathToAsset)
+    }
+
+    private prepareJson(value: string): string {
+        return value
+        .replace(/[\\]/g, "\\\\")
+        .replace(/[\"]/g, '\\"')
+        .replace(/[\']/g, "\\'")
+        .replace(/[\/]/g, "\\/")
+        .replace(/[\b]/g, "\\b")
+        .replace(/[\f]/g, "\\f")
+        .replace(/[\n]/g, "\\n")
+        .replace(/[\r]/g, "\\r")
+        .replace(/[\t]/g, "\\t");
     }
 }

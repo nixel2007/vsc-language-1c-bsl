@@ -35,8 +35,18 @@ export default class LanguageClientProvider {
 
         status.update("Activating BSL Language Server...");
 
+        const baseInstallDir = String(configuration.get("languageServerBaseInstallDir")) || context.globalStoragePath;
+        if (isOSWindows() && baseInstallDir.search(/[а-яёА-ЯЁ]/gm) >= 0) {
+            const message = `BSL LS base install dir <${baseInstallDir}> contains cyrillic letters.
+                Please override ${LANGUAGE_1C_BSL_CONFIG}.languageServerBaseInstallDir setting and set directory without cyrillic like "c:\\tools\\BSL Language Server"`;
+
+            console.error(message);
+            vscode.window.showErrorMessage(message);
+            return;
+        }
+
         const langServerInstallDir = Paths.join(
-            context.globalStoragePath,
+            baseInstallDir,
             "bsl-language-server"
         );
 
@@ -229,6 +239,9 @@ export default class LanguageClientProvider {
             );
         }
 
+        if (configurationFile.includes(" ")) {
+            configurationFile = `"${configurationFile}"`;
+        }
         return configurationFile;
     }
 

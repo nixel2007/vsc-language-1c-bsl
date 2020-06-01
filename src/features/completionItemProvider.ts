@@ -46,27 +46,36 @@ export default class GlobalCompletionItemProvider extends AbstractProvider
                         ) {
                             bucket = this.getGlobals(word, true);
                             bucket = this.getAllWords(word, document.getText(), bucket);
-                            for (const key in this._global.systemEnum) {
-                                const full = this._global.systemEnum[key];
-                                if (
-                                    vscode.window.activeTextEditor.document.fileName
-                                        .toLowerCase()
-                                        .endsWith(".bsl") &&
-                                    !full.description
-                                ) {
-                                    continue;
-                                } else if (
-                                    vscode.window.activeTextEditor.document.fileName
-                                        .toLowerCase()
-                                        .endsWith(".os") &&
-                                    !full.oscript_description
-                                ) {
-                                    continue;
+                            const wordMatch = this.getRegExp(word);
+                            const completionDictSystemEnum = this._global.systemEnum;
+                            for (const name in completionDictSystemEnum) {
+                                if (wordMatch.exec(name)) {
+                                    const full = completionDictSystemEnum[name];
+                                    if (
+                                        vscode.window.activeTextEditor.document.fileName
+                                            .toLowerCase()
+                                            .endsWith(".bsl") &&
+                                        full.description === undefined
+                                    ) {
+                                        continue;
+                                    } else if (
+                                        vscode.window.activeTextEditor.document.fileName
+                                            .toLowerCase()
+                                            .endsWith(".os") &&
+                                        !full.oscript_description
+                                    ) {
+                                        continue;
+                                    }
+                                    const completion = new vscode.CompletionItem(full.name);
+                                    completion.kind = vscode.CompletionItemKind.Enum;
+                                    if (full.description) {
+                                        completion.documentation = full.description;
+                                    } else {
+                                        completion.documentation = full.oscript_description;
+                                    }
+                                    bucket.push(completion);
+                                    this.added[name.toLowerCase()] = true;
                                 }
-                                const item = new vscode.CompletionItem(full.name);
-                                item.documentation = full.description;
-                                item.kind = vscode.CompletionItemKind.Enum;
-                                bucket.push(item);
                             }
                             return resolve(bucket);
                         } else if (
@@ -327,19 +336,6 @@ export default class GlobalCompletionItemProvider extends AbstractProvider
                 const full = completionDictKeywords[name];
                 const completion = new vscode.CompletionItem(full);
                 completion.kind = vscode.CompletionItemKind.Keyword;
-                completions.push(completion);
-                this.added[name.toLowerCase()] = true;
-            }
-        }
-        const completionDictSystemEnum = this._global.systemEnum;
-        for (const name in completionDictSystemEnum) {
-            if (wordMatch.exec(name)) {
-                const full = completionDictSystemEnum[name];
-                const completion = new vscode.CompletionItem(full.name);
-                completion.kind = vscode.CompletionItemKind.Enum;
-                if (full.description) {
-                    completion.documentation = full.description;
-                }
                 completions.push(completion);
                 this.added[name.toLowerCase()] = true;
             }

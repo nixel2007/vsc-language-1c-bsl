@@ -3,7 +3,7 @@
   "displayName": "Language 1C (BSL)",
   "description": "Syntax highlighting for 1C:Enterprise 8.",
   "icon": "images/1c-syntax.png",
-  "version": "1.20.0",
+  "version": "1.21.0",
   "publisher": "1c-syntax",
   "galleryBanner": {
     "color": "#0000FF",
@@ -31,7 +31,9 @@
     "lint": "tslint --project tsconfig.json 'src/**/*.ts' -t verbose",
     "compile": "tsc -watch -p ./",
     "preLaunch": "tsc -p ./",
-    "postinstall": "node ./node_modules/vscode/bin/install"
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "activationEvents": [
     "onLanguage:bsl",
@@ -41,6 +43,12 @@
     "onCommand:language-1c-bsl.quickopen"
   ],
   "contributes": {
+    "jsonValidation": [
+      {
+        "fileMatch": ".bsl-language-server.json",
+        "url": "https://1c-syntax.github.io/bsl-language-server/configuration/schema.json"
+      }
+    ],
     "commands": [
       {
         "command": "language-1c-bsl.update",
@@ -181,6 +189,11 @@
           "type": "boolean",
           "default": true
         },
+        "language-1c-bsl.languageServerBaseInstallDir": {
+          "description": "BSL Language Server base install dir.",
+          "type": "string",
+          "default": ""
+        },
         "language-1c-bsl.languageServerConfiguration": {
           "description": "Path to BSL Language Server configuration file. Relative to workspace folder.",
           "type": "string",
@@ -216,7 +229,7 @@
           "default": "java"
         },
         "language-1c-bsl.languageServerExternalJarJavaOpts": {
-          "description": "Addititonal java options.",
+          "description": "Additional java options.",
           "type": "array",
           "default": [
             "-Xmx2g"
@@ -294,7 +307,7 @@
         "owner": "bsl",
         "fileLocation": "absolute",
         "pattern": {
-          "regexp": "Модуль\\s+(.*)\\s\\/\\s.*:\\s+(\\d+)\\s+\\/\\s+(.*)",
+          "regexp": "Модуль\\s+(.*)\\s\\/\\s.*:\\s+(\\d+)\\s+\\/\\s+([^}]*)",
           "file": 1,
           "line": 2,
           "message": 3
@@ -305,6 +318,21 @@
       {
         "language": "bsl",
         "path": "./snippets/snippets.json"
+      }
+    ],
+    "taskDefinitions": [
+      {
+        "type": "bsl",
+        "properties": {
+          "command": {
+            "type": "string",
+            "description": ""
+          },
+          "args": {
+            "type": "array",
+            "description": ""
+          }
+        }
       }
     ],
     "configurationDefaults": {
@@ -329,6 +357,7 @@
     "istanbul": "^0.4.5",
     "remap-istanbul": "^0.13.0",
     "should": "^13.2.3",
+    "snyk": "^1.321.0",
     "tslint": "^6.0.0",
     "tslint-sonarts": "^1.9.0",
     "typescript": "^3.7.5",
@@ -337,7 +366,7 @@
   "dependencies": {
     "alignment": "0.0.1",
     "cross-spawn": "^7.0.1",
-    "extract-zip": "^1.6.7",
+    "extract-zip": "^1.6.8",
     "fast-xml-parser": "3.15.1",
     "filequeue": "^0.5.0",
     "fs-extra": "^8.1.0",
@@ -350,9 +379,10 @@
     "request-progress": "^3.0.0",
     "request-promise-native": "^1.0.8",
     "semver": "^7.1.1",
-    "vsce": "^1.71.0",
+    "vsce": "^1.75.0",
     "vscode-languageclient": "^6.1.0",
     "which": "^2.0.2",
     "xml2js": "^0.4.23"
-  }
+  },
+  "snyk": true
 }

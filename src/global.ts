@@ -168,6 +168,7 @@ export class Global {
                     values: [],
                     oscript_values: []
                 };
+                this.systemEnum[newName.toLowerCase()] = findEnum;
             }
             findEnum.oscript_description = segment.description;
             const values = segment.values;
@@ -1294,11 +1295,18 @@ export class Global {
                                 .readdirSync(path.join(path.dirname(libConfig)))
                                 .join(";")
                                 .match(/readme\.md/i);
-                            this.libData[lib] = { modules: {} };
+                            this.libData[lib] = { modules: {}, content: '' };
                             if (readme) {
+                                var pathToReadme = path.join(path.dirname(libConfig), readme[0]);
                                 this.libData[lib].description =
-                                    (process.platform === "win32" ? "" : "file://") +
-                                    path.join(path.dirname(libConfig), readme[0]);
+                                    (process.platform === "win32" ? "" : "file://") + pathToReadme;
+                                
+                                fs.readFile(pathToReadme, 'utf-8', (err, data) => {
+                                    if (err) {
+                                        return;    
+                                    } 
+                                    this.libData[lib].content = data;
+                                });
                             }
                         }
                         if (!this.libData[lib].modules[moduleDescr]) {
@@ -1350,11 +1358,18 @@ export class Global {
                                 .readdirSync(path.join(path.dirname(libConfig)))
                                 .join(";")
                                 .match(/readme\.md/i);
-                            this.libData[lib] = { modules: {} };
+                                this.libData[lib] = { modules: {}, content: '' };
                             if (readme) {
+                                var pathToReadme = path.join(path.dirname(libConfig), readme[0]);
                                 this.libData[lib].description =
-                                    (process.platform === "win32" ? "" : "file://") +
-                                    path.join(path.dirname(libConfig), readme[0]);
+                                    (process.platform === "win32" ? "" : "file://") + pathToReadme;
+
+                                fs.readFile(pathToReadme, 'utf-8', (err, data) => {
+                                    if (err) {
+                                        return;    
+                                    } 
+                                    this.libData[lib].content = data;
+                                });
                             }
                         }
                         if (!this.libData[lib].modules[moduleDescr]) {
