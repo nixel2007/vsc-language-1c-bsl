@@ -229,6 +229,9 @@ export default class LanguageClientProvider {
             );
         }
 
+        if (configurationFile.includes(" ")) {
+            configurationFile = `"${configurationFile}"`;
+        }
         return configurationFile;
     }
 
