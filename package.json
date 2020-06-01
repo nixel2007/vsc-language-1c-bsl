@@ -189,6 +189,11 @@
           "type": "boolean",
           "default": true
         },
+        "language-1c-bsl.languageServerBaseInstallDir": {
+          "description": "BSL Language Server base install dir.",
+          "type": "string",
+          "default": ""
+        },
         "language-1c-bsl.languageServerConfiguration": {
           "description": "Path to BSL Language Server configuration file. Relative to workspace folder.",
           "type": "string",
@@ -224,7 +229,7 @@
           "default": "java"
         },
         "language-1c-bsl.languageServerExternalJarJavaOpts": {
-          "description": "Addititonal java options.",
+          "description": "Additional java options.",
           "type": "array",
           "default": [
             "-Xmx2g"
@@ -319,7 +324,7 @@
       {
         "type": "bsl",
         "properties": {
-          "command":{
+          "command": {
             "type": "string",
             "description": ""
           },
