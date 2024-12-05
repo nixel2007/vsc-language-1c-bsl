@@ -49,6 +49,11 @@ export class Global {
     public subsystems: object = {};
     public oscriptCacheUpdated: boolean;
     public bslCacheUpdated: boolean;
+    public contentData: object = {};
+    /**
+     * Признак использования language server (из настроек плагина)
+     */
+    public languageServerEnabled: boolean
 
     constructor(adapter?: any) {
         if (adapter) {
@@ -949,9 +954,16 @@ export class Global {
                     .match(/readme\.md/i);
                 dataDll[pathDll] = dllDesc;
                 if (readme) {
-                    dataDll[pathDll].description =
-                        (process.platform === "win32" ? "" : "file://") +
-                        path.join(path.dirname(path.dirname(syntaxHelp)), readme[0]);
+                        const pathToReadme = path.join(path.dirname(path.dirname(syntaxHelp)), readme[0]);
+                        dataDll[pathDll].description =
+                            (process.platform === "win32" ? "" : "file://") + pathToReadme;
+                        
+                        fs.readFile(pathToReadme, 'utf-8', (err, data) => {
+                            if (err) {
+                                return;    
+                            } 
+                            dataDll[pathDll].content = data;
+                        });
                 }
                 const classesOscript: Object = dllDesc["classes"];
                 const postfix = this.autocompleteLanguage === "en" ? "_en" : "";
@@ -1251,7 +1263,7 @@ export class Global {
 
             const modules = [];
             const classes = [];
-            if (packageDef.hasOwnProperty("module")) {
+            if (Object.hasOwnProperty.bind(packageDef)("module")) {
                 if (packageDef.module instanceof Array) {
                     for (const module of packageDef.module) {
                         modules.push(module);
@@ -1260,7 +1272,7 @@ export class Global {
                     modules.push(packageDef.module);
                 }
             }
-            if (packageDef.hasOwnProperty("class")) {
+            if (Object.hasOwnProperty.bind(packageDef)("class")) {
                 if (packageDef.class instanceof Array) {
                     for (const clazz of packageDef.class) {
                         classes.push(clazz);
@@ -1297,7 +1309,7 @@ export class Global {
                                 .match(/readme\.md/i);
                             this.libData[lib] = { modules: {}, content: '' };
                             if (readme) {
-                                var pathToReadme = path.join(path.dirname(libConfig), readme[0]);
+                                const pathToReadme = path.join(path.dirname(libConfig), readme[0]);
                                 this.libData[lib].description =
                                     (process.platform === "win32" ? "" : "file://") + pathToReadme;
                                 
@@ -1360,7 +1372,7 @@ export class Global {
                                 .match(/readme\.md/i);
                                 this.libData[lib] = { modules: {}, content: '' };
                             if (readme) {
-                                var pathToReadme = path.join(path.dirname(libConfig), readme[0]);
+                                const pathToReadme = path.join(path.dirname(libConfig), readme[0]);
                                 this.libData[lib].description =
                                     (process.platform === "win32" ? "" : "file://") + pathToReadme;
 

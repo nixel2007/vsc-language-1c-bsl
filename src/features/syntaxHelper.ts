@@ -9,7 +9,7 @@ import SyntaxContentOscript from "./SyntaxContentOscript";
 import SyntaxContentOscriptLibrary from "./SyntaxContentOscriptLibrary";
 import SyntaxExternalHelper from "./SyntaxExternalHelper";
 
-import * as fastXmlParser from "fast-xml-parser";
+import { XMLParser } from "fast-xml-parser";
 
 export default class SyntaxHelperProvider extends AbstractProvider {
     private syntaxContent: AbstractSyntaxContent;
@@ -38,20 +38,20 @@ export default class SyntaxHelperProvider extends AbstractProvider {
         "Tasks"
     ];
 
-    public updateContentPanel(panel: vscode.WebviewPanel) {   
+    public updateContentPanel(panel: vscode.WebviewPanel, updateContent: boolean) {
         this.webPanel = panel;
-        var result = this.provideTextDocumentContent();
+        var result = this.provideTextDocumentContent(updateContent);
         result.then(
             value => panel.webview.html = value
         );
     }
 
-    public provideTextDocumentContent(): Promise<string> | undefined {
+    public provideTextDocumentContent(updateContent): Promise<string> | undefined {
         if (!this._global.methodForDescription) {
             return;
         }
         this.setupSyntaxContent();
-        return this.buildHTMLDocument();
+        return this.buildHTMLDocument(updateContent);
     }
 
     private setupSyntaxContent() {
@@ -243,7 +243,8 @@ export default class SyntaxHelperProvider extends AbstractProvider {
             const data = this._global.readFileSync(files[i].toString(), substrIndex);
             let result;
             try {
-                result = fastXmlParser.parse(data);
+                const xmlPaser = new XMLParser();
+                result = xmlPaser.parse(data);
             } catch (err) {
                 if (err) {
                     console.log(err);
@@ -267,7 +268,7 @@ export default class SyntaxHelperProvider extends AbstractProvider {
         return subsystems;
     }
 
-    private buildHTMLDocument(): Promise<string> {
+    private buildHTMLDocument(updateContent): Promise<string> {
         let textSyntax = "";
         const metadata =
             this.syntax === "BSL"
@@ -280,8 +281,7 @@ export default class SyntaxHelperProvider extends AbstractProvider {
         if (
             this._global.syntaxFilled === "" ||
             this._global.syntaxFilled !== this.syntax ||
-            this.syntax === "BSL" ||
-            this.syntax === "1C"
+            updateContent
         ) {
             this._global.syntaxFilled = this.syntax;
             this.oscriptMethods = this.syntaxContent.getSyntaxContentItems(
@@ -292,11 +292,11 @@ export default class SyntaxHelperProvider extends AbstractProvider {
                     : this._global.dllData,
                 this.syntax === "BSL" ? metadata : this._global.libData
             );
-            let jsonString = this.prepareJson(JSON.stringify(this.oscriptMethods));
+            const jsonString = this.prepareJson(JSON.stringify(this.oscriptMethods));
             textSyntax = ` window.bsl_language='${jsonString}';
             `;
 
-            let jsonLibData = this.prepareJson(JSON.stringify(this._global.libData));
+            const jsonLibData = this.prepareJson(JSON.stringify(this._global.contentData));
             textSyntax += ` window.os_library_data='${jsonLibData}';
             `;
         }
@@ -330,7 +330,7 @@ export default class SyntaxHelperProvider extends AbstractProvider {
     }
 
     private async getHTML(fillStructure): Promise<string> {
-        
+
         let hljs = this.webPanel.webview.asWebviewUri(this.getUriForAsset('highlight.pack.js'));
         let mdit = this.webPanel.webview.asWebviewUri(this.getUriForAsset('markdown-it.js'));
         let shjs = this.webPanel.webview.asWebviewUri(this.getUriForAsset('syntaxhelper.js'));

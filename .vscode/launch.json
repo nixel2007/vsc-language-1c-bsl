@@ -1,16 +1,14 @@
 // A launch configuration that compiles the extension and then opens it inside a new window
 {
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"configurations": [
 		{
 			"name": "Launch Extension",
 			"type": "extensionHost",
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
-			"args": ["--extensionDevelopmentPath=${workspaceRoot}" ],
-			"stopOnEntry": false,
-			"sourceMaps": true,
-			"outDir": "${workspaceRoot}/out/src",
+			"args": ["--extensionDevelopmentPath=${workspaceRoot}"],
+			"outFiles": ["${workspaceFolder}/out/src/**/*.js"],
 			"preLaunchTask": "npm"
 		},
 		{
@@ -18,11 +16,8 @@
 			"type": "extensionHost",
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
-			"args": ["${workspaceRoot}/test/fixtures", "--extensionDevelopmentPath=${workspaceRoot}", "--extensionTestsPath=${workspaceRoot}/out/test" ],
-			"stopOnEntry": false,
-			"sourceMaps": true,
-			"outDir": "${workspaceRoot}/out/test",
-			"preLaunchTask": "npm"
+			"args": ["${workspaceFolder}/test/fixtures", "--extensionDevelopmentPath=${workspaceFolder}", "--extensionTestsPath=${workspaceFolder}/out/test" ],
+			"outFiles": ["${workspaceFolder}/out/test/**/*.js"]
 		}
 	]
 }

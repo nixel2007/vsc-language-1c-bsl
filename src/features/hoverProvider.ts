@@ -7,6 +7,7 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
             this._global.hoverTrue = true;
             return undefined;
         }
+
         const wordRange = document.getWordRangeAtPosition(position);
         let word = document.getText(wordRange);
         if (word.split(" ").length > 1) {
@@ -50,6 +51,12 @@ export default class GlobalHoverProvider extends AbstractProvider implements vsc
         }
         let entries;
         if (!entry) {
+
+            // Отключаем ховер методов при включенном BSL LS
+            if (this._global.languageServerEnabled) {
+                return undefined;
+            }
+
             let module = "";
             if (word.indexOf(".") > 0) {
                 const dotArray: string[] = word.split(".");

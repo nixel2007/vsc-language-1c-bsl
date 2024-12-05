@@ -7,7 +7,7 @@ import {
     LanguageClient,
     LanguageClientOptions,
     ServerOptions
-} from "vscode-languageclient";
+} from "vscode-languageclient/node";
 import * as which from "which";
 import { LANGUAGE_1C_BSL_CONFIG } from "../const";
 import BSLLanguageServerDownloadChannel from "../util/bsllsDownloadChannel";
@@ -16,9 +16,12 @@ import { ServerDownloader } from "../util/serverDownloader";
 import { IStatus } from "../util/status";
 
 const RESTART_COMMAND = `${LANGUAGE_1C_BSL_CONFIG}.languageServer.restart`;
+const RUN_ALL_TESTS_COMMAND = `${LANGUAGE_1C_BSL_CONFIG}.languageServer.runAllTests`;
+const RUN_TEST_COMMAND = `${LANGUAGE_1C_BSL_CONFIG}.languageServer.runTest`;
 
 export default class LanguageClientProvider {
     private bslLsReady = false;
+    private languageClient: LanguageClient;
 
     public async registerLanguageClient(context: vscode.ExtensionContext, status: IStatus) {
         const configuration = vscode.workspace.getConfiguration(LANGUAGE_1C_BSL_CONFIG);
@@ -63,8 +66,6 @@ export default class LanguageClientProvider {
             return;
         }
 
-        const downloadChannel = configuration.get<BSLLanguageServerDownloadChannel>("languageServerReleaseChannel");
-
         const langServerDownloader = new ServerDownloader(
             "BSL Language Server",
             "1c-syntax",
@@ -75,56 +76,88 @@ export default class LanguageClientProvider {
         );
 
         let installedVersion: string;
-        try {
-            installedVersion = await langServerDownloader.downloadServerIfNeeded(status, downloadChannel);
-        } catch (error) {
-            console.error(error);
-            vscode.window.showWarningMessage(
-                `Could not update/download BSL Language Server: ${error}`
-            );
-            return;
+            
+        const needDownload = Boolean(configuration.get<BSLLanguageServerDownloadChannel>("downloadLanguageServer"));
+        if (needDownload) {
+            const downloadChannel = configuration.get<BSLLanguageServerDownloadChannel>("languageServerReleaseChannel");
+
+            try {
+                installedVersion = await langServerDownloader.downloadServerIfNeeded(status, downloadChannel);
+            } catch (error) {
+                console.error(error);
+                vscode.window.showWarningMessage(
+                    `Could not update/download BSL Language Server: ${error}`
+                );
+                return;
+            }
+
+            const files = await fs.promises.readdir(langServerInstallDir, { encoding: "utf8" });
+            files
+                .filter(file => file !== "SERVER-INFO")    // todo: протекло
+                .filter(file => file !== installedVersion)
+                .map(file => Paths.join(langServerInstallDir, file))
+                .forEach(async file => {
+                    try {
+                        await fs.remove(file);
+                    } catch (err) {
+                        vscode.window.showWarningMessage(`Can't clean up old BSL LS file ${file}:\n${err}`);
+                    }
+                });
+        } else {
+            installedVersion = await langServerDownloader.installedVersionBSLLS();
         }
-
-        const files = await fs.promises.readdir(langServerInstallDir, {encoding: "utf8"});
-        files
-            .filter(file => file !== "SERVER-INFO")    // todo: протекло
-            .filter(file => file !== installedVersion)
-            .map(file => Paths.join(langServerInstallDir, file))
-            .forEach(async file => {
-                try {
-                    await fs.remove(file);
-                } catch (err) {
-                    vscode.window.showWarningMessage(`Can't clean up old BSL LS file ${file}:\n${err}`);
-                }
-            });
-
         const languageServerDir = Paths.join(langServerInstallDir, installedVersion);
 
         status.update("Initializing BSL Language Server...");
 
         const binaryName = this.getBinaryName(languageServerDir);
 
-        const languageClient = await this.createLanguageClient(context, binaryName);
-        let languageClientDisposable = languageClient.start();
+        this.languageClient = await this.createLanguageClient(context, binaryName);
+        this.languageClient.start();
+
+        let terminal = vscode.window.terminals.find(terminal => terminal.name === "BSL Language Server tests");
+        if (terminal === undefined) {
+            terminal = vscode.window.createTerminal({
+                name: "BSL Language Server tests",
+                hideFromUser: true
+            });
+        } 
+
+        type RunTestArgs = {
+            text: string;
+        }
 
         context.subscriptions.push(
             vscode.commands.registerCommand(RESTART_COMMAND, async () => {
                 this.bslLsReady = false;
-                await languageClient.stop();
-                languageClientDisposable.dispose();
+                await this.languageClient.stop();
 
-                languageClientDisposable = languageClient.start();
-                context.subscriptions.push(languageClientDisposable);
+                this.languageClient.start();
 
-                await languageClient.onReady();
+                // await this.languageClient.onReady();
                 this.bslLsReady = true;
+            }),
+            vscode.commands.registerCommand(RUN_ALL_TESTS_COMMAND, async (args: RunTestArgs) => {
+                terminal.show();    
+                terminal.sendText(args.text);
+            }),
+            vscode.commands.registerCommand(RUN_TEST_COMMAND, async (args: RunTestArgs) => {
+                terminal.show();
+                terminal.sendText(args.text);
             })
         );
 
-        context.subscriptions.push(languageClientDisposable);
-
-        await languageClient.onReady();
+        // await this.languageClient.onReady();
         this.bslLsReady = true;
+    }
+
+    public async stop() {
+
+        if (!this.languageClient) {
+            return undefined;
+        }
+        
+        return this.languageClient.stop();
     }
 
     public isBslLsReady() {
@@ -154,7 +187,10 @@ export default class LanguageClientProvider {
             ],
             synchronize: {
                 fileEvents: vscode.workspace.createFileSystemWatcher("**/*.{os,bsl}")
-            }
+            },
+            traceOutputChannel: vscode.window.createOutputChannel(
+                "BSL Language Server Trace Log"
+            )
         };
 
         return new LanguageClient("bsl", "BSL Language Server", serverOptions, clientOptions);
@@ -191,7 +227,7 @@ export default class LanguageClientProvider {
             languageServerPath = `"${languageServerPath}"`;
         }
 
-        const javaOpts = Array(configuration.get("languageServerExternalJarJavaOpts"));
+        const javaOpts: string[] = configuration.get("languageServerExternalJarJavaOpts");
 
         const args: string[] = [];
         args.push(...javaOpts);

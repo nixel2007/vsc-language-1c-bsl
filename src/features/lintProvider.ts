@@ -119,6 +119,7 @@ export default class LintProvider {
                             errorMessage,
                             vscode.DiagnosticSeverity.Error
                         );
+                        vscodeDiagnostic.code = "oscript-check";
                         if (!errorFiles[fileName]) {
                             errorFiles[fileName] = new Array<vscode.Diagnostic>();
                         }
@@ -143,7 +144,7 @@ export default class LintProvider {
     }
 
     public async getDiagnosticData(uri: vscode.Uri) {
-        while (this.diagnosticCollection.get(uri) === undefined) {
+        while (!this.diagnosticCollection.get(uri) || this.diagnosticCollection.get(uri).length === 0) {
             await this.delay(100);
         }
         return this.diagnosticCollection.get(uri);

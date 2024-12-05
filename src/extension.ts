@@ -85,9 +85,9 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     const configuration = vscode.workspace.getConfiguration(LANGUAGE_1C_BSL_CONFIG);
-    const languageServerEnabled = Boolean(configuration.get("languageServerEnabled"));
+    global.languageServerEnabled = Boolean(configuration.get("languageServerEnabled"))
 
-    if (!languageServerEnabled) {
+    if (!global.languageServerEnabled) {
         context.subscriptions.push(
             vscode.languages.registerDocumentFormattingEditProvider(
                 BSL_MODE,
@@ -753,11 +753,36 @@ export function activate(context: vscode.ExtensionContext) {
     }
     
     function openSyntaxHelperPanel(syntaxHelper) {
+        const updateContent: boolean = !syntaxPanel;
+        if (Object.keys(global.contentData).length == 0) {
+            for (const dll in global.dllData) {
+                global.contentData[dll] = {};
+                global.contentData[dll].description = global.dllData[dll].description;
+                global.contentData[dll].content = global.dllData[dll].content;
+            }
+            for(const lib in global.libData) {
+                global.contentData[lib] = {};
+                global.contentData[lib].description = global.libData[lib].description;
+                global.contentData[lib].content = global.libData[lib].content;
+            }
+            for(const sp in global.syntaxHelpersData) {
+                global.contentData[sp] = {};
+                global.contentData[sp].description = global.syntaxHelpersData[sp].description;
+                global.contentData[sp].content = global.syntaxHelpersData[sp].content;
+            }
+        }
         checkSyntaxWebPanel();
-        syntaxHelper.updateContentPanel(syntaxPanel);
+        syntaxHelper.updateContentPanel(syntaxPanel, updateContent);
         syntaxPanel.reveal(vscode.ViewColumn.Two);
     }
 
+}
+
+export function deactivate(): Thenable<void> | undefined {
+	if (!languageClientProvider) {
+		return undefined;
+	}
+	return languageClientProvider.stop();
 }
 
 export async function waitForBSLLSActivation() {

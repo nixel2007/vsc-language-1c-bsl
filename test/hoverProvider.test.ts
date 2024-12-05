@@ -19,6 +19,7 @@ describe("Hover", () => {
             path.join(fixturePath, "CommonModules", "CommonModule", "Ext", "Module.bsl")
         );
         textDocument = await newTextDocument(uriFile);
+        globals.languageServerEnabled = false;
         const extension = vscode.extensions.getExtension("1c-syntax.language-1c-bsl");
         await extension.activate();
 
@@ -29,21 +30,23 @@ describe("Hover", () => {
         globals.hoverTrue = true; // TODO: разобраться, зачем это было нужно
     });
 
-    it("should be showed on local methods", async () => {
+    after(async () => {
+        globals.languageServerEnabled = true;
+    });
 
-        const position = new vscode.Position(1, 15); // НеЭкспортнаяПроцедура
+    it("should be showed on local methods", async () => {
+        const position = new vscode.Position(4, 15); // НеЭкспортнаяПроцедура
 
         const hovers = await vscode.commands.executeCommand<vscode.Hover[]>(
             "vscode.executeHoverProvider",
             textDocument.uri,
             position
         );
-
         hovers.should.has.length(1);
 
         const hover = hovers[0];
-        hover.contents[0].should.has.a.key("_value").which.is.equal("Метод текущего модуля");
-        hover.contents[2].should.has.a.key("_value").which.is.equal("```bsl\nПроцедура НеЭкспортнаяПроцедура()\n```\n");
+        hover.contents[0].should.has.a.property("value").which.is.equal("Метод текущего модуля");
+        hover.contents[2].should.has.a.property("value").which.is.equal("```bsl\nПроцедура НеЭкспортнаяПроцедура()\n```\n");
 
     });
 
@@ -60,9 +63,9 @@ describe("Hover", () => {
         hovers.should.has.length(1);
 
         const hover = hovers[0];
-        hover.contents[0].should.has.a.key("_value").which.startWith("Метод из")
+        hover.contents[0].should.has.a.property("value").which.startWith("Метод из")
             .and.endWith("Document/Ext/ManagerModule.bsl");
-        hover.contents[2].should.has.a.key("_value").which.is
+        hover.contents[2].should.has.a.property("value").which.is
             .equal("```bsl\nПроцедура ПроцедураМодуляМенеджера()\n```\n");
 
     });
@@ -80,9 +83,9 @@ describe("Hover", () => {
         hovers.should.has.length(1);
 
         const hover = hovers[0];
-        hover.contents[0].should.has.a.key("_value").which.startWith("Метод глобального контекста");
-        hover.contents[2].should.has.a.key("_value").which.startWith("```bsl\nПроцедура Сообщить(");
-        hover.contents[3].should.has.a.key("_value").which.startWith("***ТекстСообщения***");
+        hover.contents[0].should.has.a.property("value").which.startWith("Метод глобального контекста");
+        hover.contents[2].should.has.a.property("value").which.startWith("```bsl\nПроцедура Сообщить(");
+        hover.contents[3].should.has.a.property("value").which.startWith("***ТекстСообщения***");
 
     });
 

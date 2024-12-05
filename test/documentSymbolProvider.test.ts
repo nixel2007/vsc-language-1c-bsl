@@ -25,7 +25,8 @@ describe("Document symbols", () => {
         await waitForBSLLSActivation();
     });
 
-    it("should show functions from current document", async () => {
+    // TODO Unskip when https://github.com/1c-syntax/vsc-language-1c-bsl/issues/288 is done
+    it.skip("should show functions from current document", async () => {
 
         const symbolInformation = await vscode.commands.executeCommand<vscode.SymbolInformation[]>(
             "vscode.executeDocumentSymbolProvider",

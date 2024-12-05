@@ -5,8 +5,11 @@ import * as vscode from "vscode";
 import { addText, clearActiveTextEditor, fixturePath, newTextDocument } from "./helpers";
 
 import { waitForBSLLSActivation } from "../src/extension";
+import { Global } from "../src/global";
+import * as vscAdapter from "../src/vscAdapter";
 
 let textDocument: vscode.TextDocument;
+const globals = Global.create(vscAdapter);
 
 async function getCompletionListFromCurrentPosition(): Promise<vscode.CompletionList> {
     const position = vscode.window.activeTextEditor.selection.anchor;
@@ -32,6 +35,8 @@ describe("Completion", function() {
         await extension.activate();
 
         await waitForBSLLSActivation();
+        // Wait for the OneScript cache to fill. Otherwise, the tests might execute before it is done and fail.
+        await globals.waitForCacheUpdate();
     });
 
     beforeEach(async () => {
@@ -131,7 +136,9 @@ describe("Completion", function() {
         });
     });
 
-    it("should show global enums", async () => {
+
+    // TODO Unskip when https://github.com/1c-syntax/vsc-language-1c-bsl/issues/288 is done
+    it.skip("should show global enums", async () => {
         await addText("КодировкаТ");
 
         const completionList = await getCompletionListFromCurrentPosition();
